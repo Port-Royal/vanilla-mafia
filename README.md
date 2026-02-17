@@ -1,24 +1,45 @@
-# README
+# Vanilla Mafia
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A web application for tracking Mafia game results, player ratings, and awards.
 
-Things you may want to cover:
+## Requirements
 
-* Ruby version
+- Ruby 4.0.1
+- Rails 8.1.2
+- SQLite 3
 
-* System dependencies
+## Setup
 
-* Configuration
+```bash
+bundle install
+bin/rails db:prepare
+```
 
-* Database creation
+### Seeding the database
 
-* Database initialization
+Roles are always seeded. To also create an admin user, provide credentials via environment variables:
 
-* How to run the test suite
+```bash
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=your_secure_password bin/rails db:seed
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+## Running tests
 
-* Deployment instructions
+```bash
+bundle exec rspec
+```
 
-* ...
+### Mutation testing
+
+```bash
+bundle exec mutant run -- 'ClassName'
+```
+
+## Deployment
+
+Set the following environment variables in production:
+
+| Variable | Description |
+|----------|-------------|
+| `ADMIN_EMAIL` | Admin user email (used by `db:seed`) |
+| `ADMIN_PASSWORD` | Admin user password (used by `db:seed`, only on first run) |
