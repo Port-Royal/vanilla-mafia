@@ -1,0 +1,50 @@
+ru:
+  activerecord:
+    models:
+      player: "Игрок"
+      game: "Игра"
+      rating: "Рейтинг"
+      award: "Награда"
+      role: "Роль"
+    attributes:
+      player:
+        name: "Имя"
+        comment: "Комментарий"
+        photo: "Фото"
+      game:
+        played_on: "Дата"
+        season: "Сезон"
+        series: "Серия"
+        game_number: "Номер игры"
+        name: "Название"
+        result: "Результат"
+      rating:
+        role_code: "Роль"
+        win: "Победа"
+        plus: "Плюс"
+        minus: "Минус"
+        best_move: "Лучший ход"
+        first_shoot: "Первый выстрел"
+        total: "Итого"
+      award:
+        title: "Название"
+        description: "Описание"
+        staff: "Организаторская"
+  seasons:
+    show:
+      by_series: "По сериям и играм"
+      by_players: "По игрокам"
+      rank: "Место"
+      player: "Игрок"
+      rating: "Рейтинг"
+      games: "Игры"
+      win_rate: "Процент побед"
+  hall_of_fame:
+    title: "Зал Славы"
+    organizers: "Организаторы"
+    all_awards: "Все награды"
+  common:
+    season: "Сезон"
+    series: "Серия"
+    game: "Игра"
+    coming_soon: "Скоро! Следите за обновлениями"
