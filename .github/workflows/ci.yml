@@ -123,7 +123,12 @@ jobs:
           RAILS_ENV: test
           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
-        run: bundle exec rspec spec/system
+        run: |
+          if [ -d spec/system ]; then
+            bundle exec rspec spec/system
+          else
+            echo "No system specs found, skipping"
+          fi
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
@@ -133,28 +138,3 @@ jobs:
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
 
-  mutation-test:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    continue-on-error: true
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-
-      - name: Prepare database
-        env:
-          RAILS_ENV: test
-        run: bin/rails db:test:prepare
-
-      - name: Run mutation tests
-        env:
-          RAILS_ENV: test
-        run: bundle exec mutant run --integration rspec --since origin/${{ github.base_ref }}

@@ -35,7 +35,8 @@ When receiving a request:
 2. Identify which layers of the Rails stack are involved
 3. Plan the implementation order (typically: acceptance test → models → services → controllers → views)
 4. Delegate to appropriate specialists with clear instructions
-5. Synthesize their work into a cohesive solution
+5. Ensure the Tests specialist runs mutant against all changed classes before considering work complete
+6. Synthesize their work into a cohesive solution
 
 ## Key Architectural Principles
 

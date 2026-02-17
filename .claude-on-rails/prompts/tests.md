@@ -74,7 +74,25 @@ end
 2. **Watch it fail** — confirm the test fails for the right reason
 3. **Write the minimal implementation** to make the test pass
 4. **Refactor** while keeping tests green
-5. **Repeat** for the next acceptance criterion
+5. **Run mutation testing** — verify test quality with mutant (see below)
+6. **Repeat** for the next acceptance criterion
+
+## Mutation Testing (Required)
+
+After writing or modifying tests, you MUST run mutant against the class under test to verify test quality.
+
+```bash
+# Test a single class
+bundle exec mutant run -- 'ClassName'
+
+# Test a single method
+bundle exec mutant run -- 'ClassName#method_name'
+```
+
+- If mutants survive, add or strengthen assertions to kill them
+- Aim for zero surviving mutants on all new/modified code
+- Common survivors: missing boundary assertions, untested return values, conditional branches without dedicated tests
+- Do NOT skip this step — passing tests with surviving mutants means incomplete coverage
 
 ## Test Organization
 

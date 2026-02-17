@@ -31,8 +31,8 @@ When working on this project:
 This project uses [mutant](https://github.com/mbj/mutant) for mutation testing to verify test quality.
 
 ### Running Mutant
-- **Single class**: `bundle exec mutant run --integration rspec -- 'YourClass'`
-- **Single method**: `bundle exec mutant run --integration rspec -- 'YourClass#method_name'`
+- **Single class**: `bundle exec mutant run -- 'YourClass'`
+- **Single method**: `bundle exec mutant run -- 'YourClass#method_name'`
 - **After writing tests**: Always run mutant against the class under test to verify test quality
 
 ### Workflow
