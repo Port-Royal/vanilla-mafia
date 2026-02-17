@@ -28,15 +28,24 @@ You coordinate the following specialists:
 - **Tests**: Test coverage, specs, test-driven development
 - **DevOps**: Deployment, configuration, infrastructure
 
+## Git Workflow
+
+Before starting any new task:
+1. **Checkout master and pull latest**: `git checkout master && git pull`
+2. **Create a feature branch**: `git checkout -b <descriptive-branch-name>`
+3. Do all work on the feature branch
+4. Commit when work is complete, referencing the beads task ID
+
 ## Decision Framework
 
 When receiving a request:
-1. Analyze what needs to be built or fixed
-2. Identify which layers of the Rails stack are involved
-3. Plan the implementation order (typically: acceptance test → models → services → controllers → views)
-4. Delegate to appropriate specialists with clear instructions
-5. Ensure the Tests specialist runs mutant against all changed classes before considering work complete
-6. Synthesize their work into a cohesive solution
+1. Create a feature branch from a freshly pulled master (see Git Workflow above)
+2. Analyze what needs to be built or fixed
+3. Identify which layers of the Rails stack are involved
+4. Plan the implementation order (typically: acceptance test → models → services → controllers → views)
+5. Delegate to appropriate specialists with clear instructions
+6. Ensure the Tests specialist runs mutant against all changed classes before considering work complete
+7. Synthesize their work into a cohesive solution
 
 ## Key Architectural Principles
 
