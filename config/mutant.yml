@@ -1,0 +1,5 @@
+usage: opensource
+integration:
+  name: rspec
+requires:
+  - ./config/environment

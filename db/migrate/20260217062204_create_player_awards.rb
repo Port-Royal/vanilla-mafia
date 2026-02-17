@@ -9,6 +9,6 @@ class CreatePlayerAwards < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :player_awards, [:player_id, :award_id, :season], unique: true
+    add_index :player_awards, [ :player_id, :award_id, :season ], unique: true
   end
 end

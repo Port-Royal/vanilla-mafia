@@ -13,7 +13,7 @@ class CreateRatings < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :ratings, [:game_id, :player_id], unique: true
+    add_index :ratings, [ :game_id, :player_id ], unique: true
     add_foreign_key :ratings, :roles, column: :role_code, primary_key: :code
   end
 end
