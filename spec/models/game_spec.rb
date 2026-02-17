@@ -34,7 +34,7 @@ RSpec.describe Game, type: :model do
       first = create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 1, game_number: 2)
       second = create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 2, game_number: 1)
 
-      expect(described_class.ordered).to eq([first, second, third])
+      expect(described_class.ordered).to eq([ first, second, third ])
     end
   end
 

@@ -36,7 +36,7 @@ RSpec.describe Award, type: :model do
       first = create(:award, position: 1)
       second = create(:award, position: 2)
 
-      expect(described_class.ordered).to eq([first, second, third])
+      expect(described_class.ordered).to eq([ first, second, third ])
     end
   end
 end

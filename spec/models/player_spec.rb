@@ -18,7 +18,7 @@ RSpec.describe Player, type: :model do
       alice = create(:player, name: 'Alice', position: 1)
       bob = create(:player, name: 'Bob', position: 1)
 
-      expect(described_class.ordered).to eq([alice, bob, charlie])
+      expect(described_class.ordered).to eq([ alice, bob, charlie ])
     end
   end
 
