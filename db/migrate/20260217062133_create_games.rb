@@ -11,8 +11,8 @@ class CreateGames < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :games, [:season, :series, :game_number], unique: true
+    add_index :games, [ :season, :series, :game_number ], unique: true
     add_index :games, :season
-    add_index :games, [:season, :series]
+    add_index :games, [ :season, :series ]
   end
 end

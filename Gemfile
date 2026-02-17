@@ -62,7 +62,7 @@ group :development, :test do
 end
 
 group :development do
-  gem 'claude-on-rails'
+  gem "claude-on-rails"
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end
@@ -74,4 +74,5 @@ group :test do
   gem "shoulda-matchers"
   gem "simplecov", require: false
   gem "database_cleaner-active_record"
+  gem "mutant-rspec"
 end

@@ -3,13 +3,13 @@ class Game < ApplicationRecord
   has_many :players, through: :ratings
 
   validates :season, :series, :game_number, presence: true, numericality: { only_integer: true }
-  validates :game_number, uniqueness: { scope: [:season, :series] }
+  validates :game_number, uniqueness: { scope: [ :season, :series ] }
 
   scope :for_season, ->(season) { where(season: season) }
   scope :ordered, -> { order(played_on: :asc, series: :asc, game_number: :asc) }
 
   def full_name
-    parts = [played_on&.to_s, "Сезон #{season}", "Серия #{series}", "Игра #{game_number}", name].compact
+    parts = [ played_on&.to_s, "Сезон #{season}", "Серия #{series}", "Игра #{game_number}", name ].compact
     parts.join(" ")
   end
 

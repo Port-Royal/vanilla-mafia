@@ -17,6 +17,6 @@ module VanillaMafia
     config.autoload_lib(ignore: %w[assets tasks])
 
     config.i18n.default_locale = :ru
-    config.i18n.available_locales = [:ru, :en]
+    config.i18n.available_locales = [ :ru, :en ]
   end
 end

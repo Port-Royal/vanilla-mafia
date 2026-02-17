@@ -25,3 +25,25 @@ When working on this project:
 - Keep models focused with single responsibilities
 - Extract complex business logic to service objects
 - Ensure proper database indexing for foreign keys and queries
+
+## Mutation Testing
+
+This project uses [mutant](https://github.com/mbj/mutant) for mutation testing to verify test quality.
+
+### Running Mutant
+- **Single class**: `bundle exec mutant run --integration rspec -- 'YourClass'`
+- **Single method**: `bundle exec mutant run --integration rspec -- 'YourClass#method_name'`
+- **After writing tests**: Always run mutant against the class under test to verify test quality
+
+### Workflow
+1. Write or modify code
+2. Write RSpec tests that pass
+3. Run mutant against the changed class(es) to check for surviving mutants
+4. If mutants survive, add or strengthen assertions to kill them
+5. Aim for zero surviving mutants on all new/modified code
+
+### Common Surviving Mutants to Watch For
+- Missing boundary/edge case assertions (e.g., `>` vs `>=`)
+- Untested return values
+- Conditional branches without dedicated test cases
+- Method calls whose removal doesn't break any test

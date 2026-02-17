@@ -10,7 +10,7 @@ class Player < ApplicationRecord
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
   scope :with_stats_for_season, ->(season) {
-    joins(:ratings => :game)
+    joins(ratings: :game)
       .where(games: { season: season })
       .group(:id)
       .select(
