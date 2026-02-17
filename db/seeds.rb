@@ -7,15 +7,15 @@ roles = {
 }
 
 roles.each do |code, name|
-  Role.find_or_create_by!(code: code) do |role|
-    role.name = name
-  end
+  role = Role.find_or_initialize_by(code: code)
+  role.name = name
+  role.save!
 end
 
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
 if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
-  User.find_or_create_by!(email: ENV["ADMIN_EMAIL"]) do |user|
-    user.password = ENV["ADMIN_PASSWORD"]
-    user.admin = true
-  end
+  user = User.find_or_initialize_by(email: ENV["ADMIN_EMAIL"])
+  user.admin = true
+  user.password = ENV["ADMIN_PASSWORD"] if user.new_record?
+  user.save!
 end
