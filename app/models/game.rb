@@ -9,7 +9,7 @@ class Game < ApplicationRecord
   scope :ordered, -> { order(played_on: :asc, series: :asc, game_number: :asc) }
 
   def full_name
-    parts = [ played_on&.to_s, "Сезон #{season}", "Серия #{series}", "Игра #{game_number}", name ].compact
+    parts = [ played_on, "Сезон #{season}", "Серия #{series}", "Игра #{game_number}", name ].compact
     parts.join(" ")
   end
 

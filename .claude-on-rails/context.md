@@ -42,6 +42,10 @@ This project uses [mutant](https://github.com/mbj/mutant) for mutation testing t
 4. If mutants survive, add or strengthen assertions to kill them
 5. Aim for zero surviving mutants on all new/modified code
 
+### Limitations
+- Mutant only mutates `def` method bodies — Rails DSL (scopes, validations, associations) are not mutated
+- For scopes and validations, rely on RSpec + Shoulda Matchers for coverage
+
 ### Common Surviving Mutants to Watch For
 - Missing boundary/edge case assertions (e.g., `>` vs `>=`)
 - Untested return values

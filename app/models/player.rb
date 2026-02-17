@@ -17,7 +17,7 @@ class Player < ApplicationRecord
         "players.*",
         "COUNT(ratings.id) AS games_count",
         "SUM(CASE WHEN ratings.win THEN 1 ELSE 0 END) AS wins_count",
-        "SUM(ratings.plus - ratings.minus) AS total_rating"
+        "SUM(COALESCE(ratings.plus, 0) - COALESCE(ratings.minus, 0)) AS total_rating"
       )
   }
 end
