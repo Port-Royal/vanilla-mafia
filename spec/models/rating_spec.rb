@@ -1,6 +1,21 @@
 require 'rails_helper'
 
 RSpec.describe Rating, type: :model do
+  describe 'associations' do
+    it { is_expected.to belong_to(:game) }
+    it { is_expected.to belong_to(:player) }
+    it { is_expected.to belong_to(:role).with_foreign_key(:role_code).with_primary_key(:code).optional }
+  end
+
+  describe 'validations' do
+    subject { build(:rating) }
+
+    it { is_expected.to validate_uniqueness_of(:player_id).scoped_to(:game_id) }
+    it { is_expected.to validate_numericality_of(:plus).allow_nil }
+    it { is_expected.to validate_numericality_of(:minus).allow_nil }
+    it { is_expected.to validate_numericality_of(:best_move).allow_nil }
+  end
+
   describe '#total' do
     it 'returns plus minus minus' do
       rating = build(:rating, plus: 3, minus: 1)

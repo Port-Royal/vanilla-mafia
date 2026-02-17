@@ -1,6 +1,27 @@
 require 'rails_helper'
 
 RSpec.describe Player, type: :model do
+  describe 'associations' do
+    it { is_expected.to have_many(:ratings).dependent(:restrict_with_error) }
+    it { is_expected.to have_many(:games).through(:ratings) }
+    it { is_expected.to have_many(:player_awards).dependent(:destroy) }
+    it { is_expected.to have_many(:awards).through(:player_awards) }
+  end
+
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:name) }
+  end
+
+  describe '.ordered' do
+    it 'orders by position ascending then name ascending' do
+      charlie = create(:player, name: 'Charlie', position: 2)
+      alice = create(:player, name: 'Alice', position: 1)
+      bob = create(:player, name: 'Bob', position: 1)
+
+      expect(described_class.ordered).to eq([alice, bob, charlie])
+    end
+  end
+
   describe '.with_stats_for_season' do
     it 'returns games_count, wins_count, and total_rating for the given season' do
       player = create(:player)
