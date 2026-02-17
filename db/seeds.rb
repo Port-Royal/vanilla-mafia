@@ -12,8 +12,10 @@ roles.each do |code, name|
   end
 end
 
-# Admin user
-User.find_or_create_by!(email: "admin@vanilla-mafia.ru") do |user|
-  user.password = "password"
-  user.admin = true
+# Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
+if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
+  User.find_or_create_by!(email: ENV["ADMIN_EMAIL"]) do |user|
+    user.password = ENV["ADMIN_PASSWORD"]
+    user.admin = true
+  end
 end
