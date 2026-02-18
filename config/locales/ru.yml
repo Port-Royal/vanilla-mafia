@@ -47,6 +47,9 @@ ru:
       minus: "Минус"
       best_move: "Лучший ход"
       total: "Итого"
+  players:
+    show:
+      awards: "Награды"
   hall_of_fame:
     title: "Зал Славы"
     organizers: "Организаторы"
