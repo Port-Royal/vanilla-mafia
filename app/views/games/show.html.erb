@@ -1,0 +1,25 @@
+<h1><%= @game.full_name %></h1>
+
+<table>
+  <thead>
+    <tr>
+      <th><%= t(".role") %></th>
+      <th><%= t(".plus") %></th>
+      <th><%= t(".minus") %></th>
+      <th><%= t(".best_move") %></th>
+      <th><%= t(".total") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @ratings.each do |rating| %>
+      <tr>
+        <td><%= rating.player.name %></td>
+        <td><%= rating.role&.name %></td>
+        <td><%= rating.plus %></td>
+        <td><%= rating.minus %></td>
+        <td><%= rating.best_move %></td>
+        <td><%= rating.total %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
