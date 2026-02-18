@@ -1,11 +1,11 @@
-<h1>Сезон <%= @season %> Серия <%= @series %></h1>
+<h1><%= t("common.season") %> <%= @season %> <%= t("common.series") %> <%= @series %></h1>
 
 <table>
   <thead>
     <tr>
       <th><%= t(".player") %></th>
       <% @games.each do |game| %>
-        <th>Игра <%= game.game_number %></th>
+        <th><%= t("common.game") %> <%= game.game_number %></th>
       <% end %>
       <th><%= t(".total") %></th>
     </tr>
