@@ -39,6 +39,14 @@ ru:
       rating: "Рейтинг"
       games: "Игры"
       win_rate: "Процент побед"
+  games:
+    show:
+      player: "Игрок"
+      role: "Роль"
+      plus: "Плюс"
+      minus: "Минус"
+      best_move: "Лучший ход"
+      total: "Итого"
   hall_of_fame:
     title: "Зал Славы"
     organizers: "Организаторы"
