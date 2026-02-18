@@ -9,6 +9,13 @@ class Player < ApplicationRecord
 
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
+  scope :ranked, -> {
+    order(
+      Arel.sql("total_rating DESC, wins_count DESC, games_count DESC"),
+      name: :asc
+    )
+  }
+
   scope :with_stats_for_season, ->(season) {
     joins(ratings: :game)
       .where(games: { season: season })
