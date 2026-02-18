@@ -1,0 +1,39 @@
+<section>
+  <h2><%= t(".by_series") %></h2>
+
+  <% @games_by_series.each do |series, games| %>
+    <h3><%= link_to "Серия #{series}", season_series_path(season_number: @season, number: series) %></h3>
+    <ul>
+      <% games.each do |game| %>
+        <li><%= link_to game.in_season_name, game_path(game) %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<section>
+  <h2><%= t(".by_players") %></h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th><%= t(".rank") %></th>
+        <th><%= t(".player") %></th>
+        <th><%= t(".rating") %></th>
+        <th><%= t(".games") %></th>
+        <th><%= t(".win_rate") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @players.each_with_index do |player, index| %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td><%= link_to player.name, player_path(player) %></td>
+          <td><%= player.total_rating %></td>
+          <td><%= player.games_count %></td>
+          <td><%= win_percentage(player) %>%</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>
