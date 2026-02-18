@@ -41,6 +41,7 @@ ru:
       win_rate: "Процент побед"
   games:
     show:
+      player: "Игрок"
       role: "Роль"
       plus: "Плюс"
       minus: "Минус"
