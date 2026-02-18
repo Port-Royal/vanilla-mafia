@@ -22,6 +22,42 @@ RSpec.describe Player, type: :model do
     end
   end
 
+  describe '.ranked' do
+    it 'orders by total_rating DESC, wins_count DESC, games_count DESC, name ASC' do
+      alice = create(:player, name: 'Alice')
+      bob = create(:player, name: 'Bob')
+      charlie = create(:player, name: 'Charlie')
+
+      game1 = create(:game, season: 1, series: 1, game_number: 1)
+      game2 = create(:game, season: 1, series: 1, game_number: 2)
+
+      # Alice: total_rating=2, wins=1, games=1
+      create(:rating, player: alice, game: game1, plus: 3, minus: 1, win: true)
+      # Bob: total_rating=2, wins=1, games=2
+      create(:rating, player: bob, game: game1, plus: 1, minus: 0, win: true)
+      create(:rating, player: bob, game: game2, plus: 1, minus: 0, win: false)
+      # Charlie: total_rating=5, wins=1, games=1
+      create(:rating, player: charlie, game: game2, plus: 5, minus: 0, win: true)
+
+      result = Player.with_stats_for_season(1).ranked
+
+      expect(result.map(&:name)).to eq(%w[Charlie Bob Alice])
+    end
+
+    it 'breaks ties on name ascending' do
+      alice = create(:player, name: 'Alice')
+      bob = create(:player, name: 'Bob')
+
+      game = create(:game, season: 1, series: 1, game_number: 1)
+      create(:rating, player: alice, game: game, plus: 2, minus: 0, win: true)
+      create(:rating, player: bob, game: game, plus: 2, minus: 0, win: true)
+
+      result = Player.with_stats_for_season(1).ranked
+
+      expect(result.map(&:name)).to eq(%w[Alice Bob])
+    end
+  end
+
   describe '.with_stats_for_season' do
     it 'returns games_count, wins_count, and total_rating for the given season' do
       player = create(:player)
