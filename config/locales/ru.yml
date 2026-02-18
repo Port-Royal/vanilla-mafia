@@ -50,6 +50,10 @@ ru:
   players:
     show:
       awards: "Награды"
+  series:
+    show:
+      player: "Игрок"
+      total: "Итого"
   hall_of_fame:
     title: "Зал Славы"
     organizers: "Организаторы"
