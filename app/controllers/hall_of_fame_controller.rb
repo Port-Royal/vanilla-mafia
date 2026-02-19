@@ -1,6 +1,7 @@
 class HallOfFameController < ApplicationController
   def show
-    @player_awards = PlayerAward.includes(:player, :award).where(award: Award.for_players).ordered.load
-    @staff_awards = PlayerAward.includes(:player, :award).where(award: Award.for_staff).ordered.load
+    result = HallOfFameService.call
+    @player_awards = result.player_awards
+    @staff_awards = result.staff_awards
   end
 end
