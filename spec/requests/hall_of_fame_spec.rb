@@ -38,6 +38,14 @@ RSpec.describe HallOfFameController do
       it "returns success" do
         expect(response).to have_http_status(:ok)
       end
+
+      it "renders coming soon message" do
+        expect(response.body).to include("Скоро! Следите за обновлениями")
+      end
+
+      it "does not render organizers heading" do
+        expect(response.body).not_to include("Организаторы")
+      end
     end
   end
 end

@@ -1,17 +1,23 @@
 <h1><%= t("hall_of_fame.title") %></h1>
 
-<% @player_awards.each do |pa| %>
-  <div>
-    <p><%= pa.player.name %></p>
-    <p><%= pa.award.title %></p>
-  </div>
-<% end %>
+<% if @player_awards.empty? && @staff_awards.empty? %>
+  <p><%= t("common.coming_soon") %></p>
+<% else %>
+  <% @player_awards.each do |pa| %>
+    <div>
+      <p><%= pa.player.name %></p>
+      <p><%= pa.award.title %></p>
+    </div>
+  <% end %>
 
-<h2><%= t("hall_of_fame.organizers") %></h2>
+  <% if @staff_awards.any? %>
+    <h2><%= t("hall_of_fame.organizers") %></h2>
 
-<% @staff_awards.each do |pa| %>
-  <div>
-    <p><%= pa.player.name %></p>
-    <p><%= pa.award.title %></p>
-  </div>
+    <% @staff_awards.each do |pa| %>
+      <div>
+        <p><%= pa.player.name %></p>
+        <p><%= pa.award.title %></p>
+      </div>
+    <% end %>
+  <% end %>
 <% end %>
