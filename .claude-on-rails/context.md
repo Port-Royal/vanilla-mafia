@@ -26,6 +26,14 @@ When working on this project:
 - Extract complex business logic to service objects
 - Ensure proper database indexing for foreign keys and queries
 
+### RSpec Style
+
+Write specs using `let`/`let!` declarations and nested `context` blocks:
+- Declare all test data with `let`/`let!` at the top of the describe/context block
+- Use `context` blocks to group scenarios (e.g., `context "when games_count is zero"`)
+- Do **not** declare variables inside `it` blocks — use `let` instead
+- Keep `it` blocks focused on expectations only
+
 ## Mutation Testing
 
 This project uses [mutant](https://github.com/mbj/mutant) for mutation testing to verify test quality.
