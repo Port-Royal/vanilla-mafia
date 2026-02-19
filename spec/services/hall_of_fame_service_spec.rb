@@ -2,16 +2,16 @@ require "rails_helper"
 
 RSpec.describe HallOfFameService do
   describe ".call" do
-    let!(:player1) { create(:player, name: "Алексей") }
-    let!(:player2) { create(:player, name: "Борис") }
-    let!(:organizer1) { create(:player, name: "Ведущий") }
-    let!(:organizer2) { create(:player, name: "Главный") }
-    let!(:player_award_type) { create(:award, title: "Лучший игрок", staff: false) }
-    let!(:staff_award_type) { create(:award, title: "Лучший ведущий", staff: true) }
-    let!(:player_award2) { create(:player_award, player: player2, award: player_award_type, season: 5, position: 2) }
-    let!(:player_award1) { create(:player_award, player: player1, award: player_award_type, season: 4, position: 1) }
-    let!(:staff_award2) { create(:player_award, player: organizer2, award: staff_award_type, season: 5, position: 2) }
-    let!(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, season: 4, position: 1) }
+    let_it_be(:player1) { create(:player, name: "Алексей") }
+    let_it_be(:player2) { create(:player, name: "Борис") }
+    let_it_be(:organizer1) { create(:player, name: "Ведущий") }
+    let_it_be(:organizer2) { create(:player, name: "Главный") }
+    let_it_be(:player_award_type) { create(:award, title: "Лучший игрок", staff: false) }
+    let_it_be(:staff_award_type) { create(:award, title: "Лучший ведущий", staff: true) }
+    let_it_be(:player_award2) { create(:player_award, player: player2, award: player_award_type, season: 5, position: 2) }
+    let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, season: 4, position: 1) }
+    let_it_be(:staff_award2) { create(:player_award, player: organizer2, award: staff_award_type, season: 5, position: 2) }
+    let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, season: 4, position: 1) }
     let(:result) { described_class.call }
 
     it "returns a Result" do

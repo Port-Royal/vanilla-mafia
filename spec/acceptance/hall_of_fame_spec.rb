@@ -1,10 +1,10 @@
 require "rails_helper"
 
 RSpec.describe "Hall of Fame" do
-  let!(:player) { create(:player, name: "Алексей") }
-  let!(:organizer) { create(:player, name: "Ведущий") }
-  let!(:award) { create(:award, title: "Лучший игрок", staff: false) }
-  let!(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
+  let_it_be(:player) { create(:player, name: "Алексей") }
+  let_it_be(:organizer) { create(:player, name: "Ведущий") }
+  let_it_be(:award) { create(:award, title: "Лучший игрок", staff: false) }
+  let_it_be(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
 
   before do
     create(:player_award, player: player, award: award, season: 5)

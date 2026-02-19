@@ -1,18 +1,18 @@
 require "rails_helper"
 
 RSpec.describe "Game details" do
-  let!(:role) { create(:role, code: "peace", name: "Мирный") }
-  let!(:game) do
+  let_it_be(:role) { create(:role, code: "peace", name: "Мирный") }
+  let_it_be(:game) do
     create(:game, season: 5, series: 1, game_number: 1,
            played_on: Date.new(2025, 1, 10), name: "Финал")
   end
-  let!(:player1) { create(:player, name: "Алексей") }
-  let!(:player2) { create(:player, name: "Борис") }
-  let!(:rating1) do
+  let_it_be(:player1) { create(:player, name: "Алексей") }
+  let_it_be(:player2) { create(:player, name: "Борис") }
+  let_it_be(:rating1) do
     create(:rating, game: game, player: player1, role_code: "peace",
            plus: 3.0, minus: 0.5, best_move: 0.5, win: true)
   end
-  let!(:rating2) do
+  let_it_be(:rating2) do
     create(:rating, game: game, player: player2, role_code: "peace",
            plus: 1.0, minus: 1.5, best_move: nil, win: false)
   end

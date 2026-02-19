@@ -2,14 +2,14 @@ require "rails_helper"
 
 RSpec.describe SeasonOverviewService do
   describe ".call" do
-    let!(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
-    let!(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
-    let!(:game3) { create(:game, season: 5, series: 2, game_number: 1) }
-    let!(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
-    let!(:player2) { create(:player, name: "Борис") }
-    let!(:player1) { create(:player, name: "Алексей") }
-    let!(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
-    let!(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
+    let_it_be(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
+    let_it_be(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
+    let_it_be(:game3) { create(:game, season: 5, series: 2, game_number: 1) }
+    let_it_be(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
+    let_it_be(:player2) { create(:player, name: "Борис") }
+    let_it_be(:player1) { create(:player, name: "Алексей") }
+    let_it_be(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
+    let_it_be(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
     let(:result) { described_class.call(season: 5) }
 
     it "returns a Result" do

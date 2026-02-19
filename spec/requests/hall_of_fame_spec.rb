@@ -3,12 +3,12 @@ require "rails_helper"
 RSpec.describe HallOfFameController do
   describe "GET /hall" do
     context "when awards exist" do
-      let!(:player) { create(:player, name: "Алексей") }
-      let!(:organizer) { create(:player, name: "Ведущий") }
-      let!(:award) { create(:award, title: "Лучший игрок", staff: false) }
-      let!(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
-      let!(:player_award) { create(:player_award, player: player, award: award, season: 5) }
-      let!(:staff_player_award) { create(:player_award, player: organizer, award: staff_award, season: 5) }
+      let_it_be(:player) { create(:player, name: "Алексей") }
+      let_it_be(:organizer) { create(:player, name: "Ведущий") }
+      let_it_be(:award) { create(:award, title: "Лучший игрок", staff: false) }
+      let_it_be(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
+      let_it_be(:player_award) { create(:player_award, player: player, award: award, season: 5) }
+      let_it_be(:staff_player_award) { create(:player_award, player: organizer, award: staff_award, season: 5) }
 
       before { get hall_path }
 
