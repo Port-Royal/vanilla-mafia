@@ -2,17 +2,17 @@ require "rails_helper"
 
 RSpec.describe PlayerProfileService do
   describe ".call" do
-    let!(:player) { create(:player, name: "Алексей") }
-    let!(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
-    let!(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
-    let!(:game3) { create(:game, season: 6, series: 1, game_number: 1) }
-    let!(:rating2) { create(:rating, game: game2, player: player) }
-    let!(:rating1) { create(:rating, game: game1, player: player) }
-    let!(:rating3) { create(:rating, game: game3, player: player) }
-    let!(:award1) { create(:award, title: "Лучший игрок") }
-    let!(:award2) { create(:award, title: "Лучший стратег") }
-    let!(:player_award1) { create(:player_award, player: player, award: award1, season: 5, position: 2) }
-    let!(:player_award2) { create(:player_award, player: player, award: award2, season: 5, position: 1) }
+    let_it_be(:player) { create(:player, name: "Алексей") }
+    let_it_be(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
+    let_it_be(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
+    let_it_be(:game3) { create(:game, season: 6, series: 1, game_number: 1) }
+    let_it_be(:rating2) { create(:rating, game: game2, player: player) }
+    let_it_be(:rating1) { create(:rating, game: game1, player: player) }
+    let_it_be(:rating3) { create(:rating, game: game3, player: player) }
+    let_it_be(:award1) { create(:award, title: "Лучший игрок") }
+    let_it_be(:award2) { create(:award, title: "Лучший стратег") }
+    let_it_be(:player_award1) { create(:player_award, player: player, award: award1, season: 5, position: 2) }
+    let_it_be(:player_award2) { create(:player_award, player: player, award: award2, season: 5, position: 1) }
     let(:result) { described_class.call(player_id: player.id) }
 
     it "returns a Result" do
@@ -44,7 +44,7 @@ RSpec.describe PlayerProfileService do
     end
 
     context "when player has no games or awards" do
-      let!(:lonely_player) { create(:player, name: "Одинокий") }
+      let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
       let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
 
       it "returns empty games_by_season" do

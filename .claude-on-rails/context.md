@@ -28,8 +28,9 @@ When working on this project:
 
 ### RSpec Style
 
-Write specs using `let`/`let!` declarations and nested `context` blocks:
-- Declare all test data with `let`/`let!` at the top of the describe/context block
+Write specs using `let_it_be`/`let`/`let!` declarations and nested `context` blocks:
+- Prefer `let_it_be` (from test-prof) over `let!` for test data that does not need to be recreated per example — this creates records once per describe/context group
+- Use `let!` only when records are redefined in nested contexts or mutated by examples
 - Use `context` blocks to group scenarios (e.g., `context "when games_count is zero"`)
 - Do **not** declare variables inside `it` blocks — use `let` instead
 - Keep `it` blocks focused on expectations only

@@ -3,11 +3,11 @@ require "rails_helper"
 RSpec.describe PlayersController do
   describe "GET /players/:id" do
     context "when player exists" do
-      let!(:player) { create(:player, name: "Алексей") }
-      let!(:game) { create(:game, season: 5, series: 1, game_number: 1) }
-      let!(:rating) { create(:rating, game: game, player: player) }
-      let!(:award) { create(:award, title: "Лучший игрок") }
-      let!(:player_award) { create(:player_award, player: player, award: award, season: 5) }
+      let_it_be(:player) { create(:player, name: "Алексей") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 1) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:award) { create(:award, title: "Лучший игрок") }
+      let_it_be(:player_award) { create(:player_award, player: player, award: award, season: 5) }
 
       before { get player_path(player) }
 

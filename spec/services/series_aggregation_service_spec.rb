@@ -2,12 +2,12 @@ require "rails_helper"
 
 RSpec.describe SeriesAggregationService do
   describe ".call" do
-    let!(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
-    let!(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
-    let!(:other_series_game) { create(:game, season: 5, series: 2, game_number: 1) }
-    let!(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
-    let!(:player1) { create(:player, name: "Алексей") }
-    let!(:player2) { create(:player, name: "Борис") }
+    let_it_be(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
+    let_it_be(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
+    let_it_be(:other_series_game) { create(:game, season: 5, series: 2, game_number: 1) }
+    let_it_be(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
+    let_it_be(:player1) { create(:player, name: "Алексей") }
+    let_it_be(:player2) { create(:player, name: "Борис") }
     let!(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5) }
     let!(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5) }
     let!(:rating3) { create(:rating, game: game2, player: player1, plus: 2.0, minus: 1.0) }

@@ -1,12 +1,12 @@
 require "rails_helper"
 
 RSpec.describe "Season overview" do
-  let!(:game1) { create(:game, season: 5, series: 1, game_number: 1, played_on: Date.new(2025, 1, 10)) }
-  let!(:game2) { create(:game, season: 5, series: 1, game_number: 2, played_on: Date.new(2025, 1, 17)) }
-  let!(:game3) { create(:game, season: 5, series: 2, game_number: 1, played_on: Date.new(2025, 2, 7)) }
+  let_it_be(:game1) { create(:game, season: 5, series: 1, game_number: 1, played_on: Date.new(2025, 1, 10)) }
+  let_it_be(:game2) { create(:game, season: 5, series: 1, game_number: 2, played_on: Date.new(2025, 1, 17)) }
+  let_it_be(:game3) { create(:game, season: 5, series: 2, game_number: 1, played_on: Date.new(2025, 2, 7)) }
 
-  let!(:player1) { create(:player, name: "Алексей") }
-  let!(:player2) { create(:player, name: "Борис") }
+  let_it_be(:player1) { create(:player, name: "Алексей") }
+  let_it_be(:player2) { create(:player, name: "Борис") }
 
   before do
     create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true)
