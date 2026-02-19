@@ -1,17 +1,17 @@
-<h1><%= @player.name %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= @player.name %></h1>
 
 <% @games_by_season.each do |season, games| %>
-  <h2>Сезон <%= season %></h2>
-  <ul>
+  <h2 class="text-xl font-bold text-maroon mt-6 mb-3">Сезон <%= season %></h2>
+  <ul class="list-disc list-inside space-y-1 ml-2">
     <% games.each do |game| %>
-      <li><%= link_to game.in_season_name, game_path(game) %></li>
+      <li><%= link_to game.in_season_name, game_path(game), class: "text-maroon hover:underline" %></li>
     <% end %>
   </ul>
 <% end %>
 
 <% if @player_awards.any? %>
-  <h2><%= t(".awards") %></h2>
-  <ul>
+  <h2 class="text-xl font-bold text-maroon mt-8 mb-3"><%= t(".awards") %></h2>
+  <ul class="list-disc list-inside space-y-1 ml-2">
     <% @player_awards.each do |player_award| %>
       <li><%= player_award.award.title %></li>
     <% end %>

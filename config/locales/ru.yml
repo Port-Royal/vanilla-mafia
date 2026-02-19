@@ -58,6 +58,8 @@ ru:
     title: "Зал Славы"
     organizers: "Организаторы"
     all_awards: "Все награды"
+  nav:
+    hall_of_fame: "Зал славы"
   common:
     season: "Сезон"
     series: "Серия"

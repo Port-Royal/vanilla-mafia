@@ -1,1 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
 @import "tailwindcss";
+
+@theme {
+  --color-maroon: #75000A;
+  --color-row-alt: #eeeeee;
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer components {
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .data-table thead th {
+    @apply bg-maroon text-white text-left px-3 py-2 font-medium;
+  }
+
+  .data-table tbody td {
+    @apply px-3 py-2 border-b border-maroon/20;
+  }
+
+  .data-table tbody tr:nth-child(even) {
+    @apply bg-row-alt;
+  }
+
+  .data-table tbody tr:hover {
+    @apply bg-maroon/5;
+  }
+
+  .data-table a {
+    @apply text-maroon hover:underline;
+  }
+
+  .scroll-wrapper {
+    @apply overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0;
+  }
+}

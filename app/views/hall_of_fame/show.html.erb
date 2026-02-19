@@ -1,23 +1,27 @@
-<h1><%= t("hall_of_fame.title") %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= t("hall_of_fame.title") %></h1>
 
 <% if @player_awards.empty? && @staff_awards.empty? %>
-  <p><%= t("common.coming_soon") %></p>
+  <p class="text-gray-500"><%= t("common.coming_soon") %></p>
 <% else %>
-  <% @player_awards.each do |pa| %>
-    <div>
-      <p><%= pa.player.name %></p>
-      <p><%= pa.award.title %></p>
-    </div>
-  <% end %>
-
-  <% if @staff_awards.any? %>
-    <h2><%= t("hall_of_fame.organizers") %></h2>
-
-    <% @staff_awards.each do |pa| %>
-      <div>
-        <p><%= pa.player.name %></p>
-        <p><%= pa.award.title %></p>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+    <% @player_awards.each do |pa| %>
+      <div class="rounded border border-maroon/20 p-4">
+        <p class="font-medium"><%= pa.player.name %></p>
+        <p class="text-sm text-gray-600"><%= pa.award.title %></p>
       </div>
     <% end %>
+  </div>
+
+  <% if @staff_awards.any? %>
+    <h2 class="text-2xl font-bold text-maroon mb-4"><%= t("hall_of_fame.organizers") %></h2>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <% @staff_awards.each do |pa| %>
+        <div class="rounded border border-maroon/20 p-4">
+          <p class="font-medium"><%= pa.player.name %></p>
+          <p class="text-sm text-gray-600"><%= pa.award.title %></p>
+        </div>
+      <% end %>
+    </div>
   <% end %>
 <% end %>
