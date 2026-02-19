@@ -23,9 +23,66 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+  <body class="min-h-screen bg-white font-sans" data-controller="menu">
+    <%# Mobile top bar %>
+    <header class="lg:hidden flex items-center justify-between bg-neutral-900 px-4 py-3">
+      <%= link_to root_path do %>
+        <img src="/img/chi_light.png" alt="Vanilla Mafia" class="h-10">
+      <% end %>
+      <button data-action="menu#toggle" data-menu-target="button"
+              class="text-white p-2" aria-label="Menu" aria-expanded="false" aria-controls="mobile-nav">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </header>
+
+    <%# Mobile nav (hidden by default) %>
+    <nav id="mobile-nav" data-menu-target="nav" class="hidden lg:hidden bg-neutral-900 px-4 pb-4">
+      <ul class="space-y-2">
+        <% (1..5).each do |n| %>
+          <li>
+            <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
+                  class: "block text-gray-300 hover:text-white transition-colors" %>
+          </li>
+        <% end %>
+        <li class="border-t border-neutral-700 pt-2">
+          <%= link_to t("nav.hall_of_fame"), hall_path,
+                class: "block text-gray-300 hover:text-white transition-colors" %>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="lg:flex lg:min-h-screen">
+      <%# Desktop sidebar %>
+      <aside class="hidden lg:flex lg:flex-col lg:w-56 lg:flex-shrink-0 bg-neutral-900 bg-cover bg-center text-gray-300"
+             style="background-image: url('/img/back.jpg')">
+        <div class="flex flex-col items-center px-4 py-8 bg-neutral-900/80 min-h-screen">
+          <%= link_to root_path, class: "mb-8" do %>
+            <img src="/img/chi_light.png" alt="Vanilla Mafia" class="w-40">
+          <% end %>
+
+          <nav>
+            <ul class="space-y-3 text-sm">
+              <% (1..5).each do |n| %>
+                <li>
+                  <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
+                        class: "block hover:text-white transition-colors" %>
+                </li>
+              <% end %>
+              <li class="border-t border-neutral-700 pt-3">
+                <%= link_to t("nav.hall_of_fame"), hall_path,
+                      class: "block hover:text-white transition-colors" %>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <%# Main content %>
+      <main class="flex-1 px-4 py-8 lg:px-12 lg:py-10 max-w-5xl">
+        <%= yield %>
+      </main>
+    </div>
   </body>
 </html>

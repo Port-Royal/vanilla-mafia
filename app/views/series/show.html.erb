@@ -1,26 +1,28 @@
-<h1><%= t("common.season") %> <%= @season %> <%= t("common.series") %> <%= @series %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= t("common.season") %> <%= @season %> <%= t("common.series") %> <%= @series %></h1>
 
-<table>
-  <thead>
-    <tr>
-      <th><%= t(".player") %></th>
-      <% @games.each do |game| %>
-        <th><%= t("common.game") %> <%= game.game_number %></th>
-      <% end %>
-      <th><%= t(".total") %></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @players_sorted.each do |player| %>
-      <% ratings = @ratings_by_player[player] %>
-      <% ratings_by_game = ratings.index_by(&:game_id) %>
+<div class="scroll-wrapper">
+  <table class="data-table">
+    <thead>
       <tr>
-        <td><%= player.name %></td>
+        <th><%= t(".player") %></th>
         <% @games.each do |game| %>
-          <td><%= ratings_by_game[game.id]&.total %></td>
+          <th><%= t("common.game") %> <%= game.game_number %></th>
         <% end %>
-        <td><%= ratings.sum(&:total) %></td>
+        <th><%= t(".total") %></th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @players_sorted.each do |player| %>
+        <% ratings = @ratings_by_player[player] %>
+        <% ratings_by_game = ratings.index_by(&:game_id) %>
+        <tr>
+          <td><%= player.name %></td>
+          <% @games.each do |game| %>
+            <td><%= ratings_by_game[game.id]&.total %></td>
+          <% end %>
+          <td><%= ratings.sum(&:total) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
