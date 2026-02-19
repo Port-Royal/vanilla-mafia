@@ -1,7 +1,8 @@
 class PlayersController < ApplicationController
   def show
-    @player = Player.find(params[:id])
-    @games_by_season = @player.games.ordered.group_by(&:season)
-    @player_awards = @player.player_awards.ordered.includes(:award).load
+    result = PlayerProfileService.call(player_id: params[:id])
+    @player = result.player
+    @games_by_season = result.games_by_season
+    @player_awards = result.player_awards
   end
 end
