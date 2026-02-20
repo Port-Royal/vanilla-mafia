@@ -39,7 +39,7 @@ Avo.configure do |config|
   # }
   # config.raise_error_on_missing_policy = false
   config.authorization_client = :pundit
-  config.explicit_authorization = false
+  config.explicit_authorization = true
 
   ## == Localization ==
   # config.locale = 'en-US'
