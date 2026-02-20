@@ -10,16 +10,20 @@ RSpec.describe User, type: :model do
   end
 
   describe '#admin?' do
-    it 'returns true when admin is true' do
-      user = build(:user, admin: true)
+    context 'when admin is true' do
+      let(:user) { build(:user, admin: true) }
 
-      expect(user.admin?).to be true
+      it 'returns true' do
+        expect(user.admin?).to be true
+      end
     end
 
-    it 'returns false when admin is false' do
-      user = build(:user, admin: false)
+    context 'when admin is false' do
+      let(:user) { build(:user, admin: false) }
 
-      expect(user.admin?).to be false
+      it 'returns false' do
+        expect(user.admin?).to be false
+      end
     end
   end
 end

@@ -13,12 +13,12 @@ RSpec.describe PlayerAward, type: :model do
   end
 
   describe '.ordered' do
-    it 'orders by position ascending' do
-      player = create(:player)
-      third = create(:player_award, player: player, position: 3)
-      first = create(:player_award, player: player, position: 1)
-      second = create(:player_award, player: player, position: 2)
+    let_it_be(:player) { create(:player) }
+    let_it_be(:third) { create(:player_award, player: player, position: 3) }
+    let_it_be(:first) { create(:player_award, player: player, position: 1) }
+    let_it_be(:second) { create(:player_award, player: player, position: 2) }
 
+    it 'orders by position ascending' do
       expect(described_class.ordered).to eq([ first, second, third ])
     end
   end

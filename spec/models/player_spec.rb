@@ -13,87 +13,109 @@ RSpec.describe Player, type: :model do
   end
 
   describe '.ordered' do
-    it 'orders by position ascending then name ascending' do
-      charlie = create(:player, name: 'Charlie', position: 2)
-      alice = create(:player, name: 'Alice', position: 1)
-      bob = create(:player, name: 'Bob', position: 1)
+    let_it_be(:charlie) { create(:player, name: 'Charlie', position: 2) }
+    let_it_be(:alice) { create(:player, name: 'Alice', position: 1) }
+    let_it_be(:bob) { create(:player, name: 'Bob', position: 1) }
 
+    it 'orders by position ascending then name ascending' do
       expect(described_class.ordered).to eq([ alice, bob, charlie ])
     end
   end
 
   describe '.ranked' do
-    it 'orders by total_rating DESC, wins_count DESC, games_count DESC, name ASC' do
-      alice = create(:player, name: 'Alice')
-      bob = create(:player, name: 'Bob')
-      charlie = create(:player, name: 'Charlie')
+    context 'when players have different stats' do
+      let_it_be(:alice) { create(:player, name: 'Alice') }
+      let_it_be(:bob) { create(:player, name: 'Bob') }
+      let_it_be(:charlie) { create(:player, name: 'Charlie') }
+      let_it_be(:game1) { create(:game, season: 1, series: 1, game_number: 1) }
+      let_it_be(:game2) { create(:game, season: 1, series: 1, game_number: 2) }
 
-      game1 = create(:game, season: 1, series: 1, game_number: 1)
-      game2 = create(:game, season: 1, series: 1, game_number: 2)
+      before do
+        # Alice: total_rating=2, wins=1, games=1
+        create(:rating, player: alice, game: game1, plus: 3, minus: 1, win: true)
+        # Bob: total_rating=2, wins=1, games=2
+        create(:rating, player: bob, game: game1, plus: 1, minus: 0, win: true)
+        create(:rating, player: bob, game: game2, plus: 1, minus: 0, win: false)
+        # Charlie: total_rating=5, wins=1, games=1
+        create(:rating, player: charlie, game: game2, plus: 5, minus: 0, win: true)
+      end
 
-      # Alice: total_rating=2, wins=1, games=1
-      create(:rating, player: alice, game: game1, plus: 3, minus: 1, win: true)
-      # Bob: total_rating=2, wins=1, games=2
-      create(:rating, player: bob, game: game1, plus: 1, minus: 0, win: true)
-      create(:rating, player: bob, game: game2, plus: 1, minus: 0, win: false)
-      # Charlie: total_rating=5, wins=1, games=1
-      create(:rating, player: charlie, game: game2, plus: 5, minus: 0, win: true)
+      it 'orders by total_rating DESC, wins_count DESC, games_count DESC, name ASC' do
+        result = Player.with_stats_for_season(1).ranked
 
-      result = Player.with_stats_for_season(1).ranked
-
-      expect(result.map(&:name)).to eq(%w[Charlie Bob Alice])
+        expect(result.map(&:name)).to eq(%w[Charlie Bob Alice])
+      end
     end
 
-    it 'breaks ties on name ascending' do
-      alice = create(:player, name: 'Alice')
-      bob = create(:player, name: 'Bob')
+    context 'when players have equal totals' do
+      let_it_be(:alice) { create(:player, name: 'Alice') }
+      let_it_be(:bob) { create(:player, name: 'Bob') }
+      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
 
-      game = create(:game, season: 1, series: 1, game_number: 1)
-      create(:rating, player: alice, game: game, plus: 2, minus: 0, win: true)
-      create(:rating, player: bob, game: game, plus: 2, minus: 0, win: true)
+      before do
+        create(:rating, player: alice, game: game, plus: 2, minus: 0, win: true)
+        create(:rating, player: bob, game: game, plus: 2, minus: 0, win: true)
+      end
 
-      result = Player.with_stats_for_season(1).ranked
+      it 'breaks ties on name ascending' do
+        result = Player.with_stats_for_season(1).ranked
 
-      expect(result.map(&:name)).to eq(%w[Alice Bob])
+        expect(result.map(&:name)).to eq(%w[Alice Bob])
+      end
     end
   end
 
   describe '.with_stats_for_season' do
-    it 'returns games_count, wins_count, and total_rating for the given season' do
-      player = create(:player)
-      game1 = create(:game, season: 1, series: 1, game_number: 1)
-      game2 = create(:game, season: 1, series: 1, game_number: 2)
-      create(:rating, player: player, game: game1, plus: 3, minus: 1, win: true)
-      create(:rating, player: player, game: game2, plus: 2, minus: 0, win: false)
+    context 'when player has games in the season' do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game1) { create(:game, season: 1, series: 1, game_number: 1) }
+      let_it_be(:game2) { create(:game, season: 1, series: 1, game_number: 2) }
 
-      result = Player.with_stats_for_season(1).find(player.id)
+      before do
+        create(:rating, player: player, game: game1, plus: 3, minus: 1, win: true)
+        create(:rating, player: player, game: game2, plus: 2, minus: 0, win: false)
+      end
 
-      expect(result.games_count).to eq(2)
-      expect(result.wins_count).to eq(1)
-      expect(result.total_rating).to eq(4)
+      it 'returns games_count, wins_count, and total_rating for the given season' do
+        result = Player.with_stats_for_season(1).find(player.id)
+
+        expect(result.games_count).to eq(2)
+        expect(result.wins_count).to eq(1)
+        expect(result.total_rating).to eq(4)
+      end
     end
 
-    it 'excludes games from other seasons' do
-      player = create(:player)
-      game_s1 = create(:game, season: 1, series: 1, game_number: 1)
-      game_s2 = create(:game, season: 2, series: 1, game_number: 1)
-      create(:rating, player: player, game: game_s1, plus: 5, minus: 0, win: true)
-      create(:rating, player: player, game: game_s2, plus: 10, minus: 0, win: true)
+    context 'when player has games in multiple seasons' do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game_s1) { create(:game, season: 1, series: 1, game_number: 1) }
+      let_it_be(:game_s2) { create(:game, season: 2, series: 1, game_number: 1) }
 
-      result = Player.with_stats_for_season(1).find(player.id)
+      before do
+        create(:rating, player: player, game: game_s1, plus: 5, minus: 0, win: true)
+        create(:rating, player: player, game: game_s2, plus: 10, minus: 0, win: true)
+      end
 
-      expect(result.games_count).to eq(1)
-      expect(result.total_rating).to eq(5)
+      it 'excludes games from other seasons' do
+        result = Player.with_stats_for_season(1).find(player.id)
+
+        expect(result.games_count).to eq(1)
+        expect(result.total_rating).to eq(5)
+      end
     end
 
-    it 'handles nil plus/minus with COALESCE' do
-      player = create(:player)
-      game = create(:game, season: 1, series: 1, game_number: 1)
-      create(:rating, player: player, game: game, plus: nil, minus: nil, win: false)
+    context 'when plus and minus are nil' do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
 
-      result = Player.with_stats_for_season(1).find(player.id)
+      before do
+        create(:rating, player: player, game: game, plus: nil, minus: nil, win: false)
+      end
 
-      expect(result.total_rating).to eq(0)
+      it 'handles nil with COALESCE' do
+        result = Player.with_stats_for_season(1).find(player.id)
+
+        expect(result.total_rating).to eq(0)
+      end
     end
   end
 end

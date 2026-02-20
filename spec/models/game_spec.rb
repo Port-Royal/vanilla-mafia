@@ -19,49 +19,55 @@ RSpec.describe Game, type: :model do
   end
 
   describe '.for_season' do
-    it 'returns games for the given season' do
-      game_s1 = create(:game, season: 1)
-      game_s2 = create(:game, season: 2)
+    let_it_be(:game_s1) { create(:game, season: 1) }
+    let_it_be(:game_s2) { create(:game, season: 2) }
 
+    it 'returns games for the given season' do
       expect(described_class.for_season(1)).to include(game_s1)
       expect(described_class.for_season(1)).not_to include(game_s2)
     end
   end
 
   describe '.ordered' do
-    it 'orders by played_on, series, game_number ascending' do
-      third = create(:game, played_on: Date.new(2026, 1, 2), season: 1, series: 1, game_number: 1)
-      first = create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 1, game_number: 2)
-      second = create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 2, game_number: 1)
+    let_it_be(:third) { create(:game, played_on: Date.new(2026, 1, 2), season: 1, series: 1, game_number: 1) }
+    let_it_be(:first) { create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 1, game_number: 2) }
+    let_it_be(:second) { create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 2, game_number: 1) }
 
+    it 'orders by played_on, series, game_number ascending' do
       expect(described_class.ordered).to eq([ first, second, third ])
     end
   end
 
   describe '#full_name' do
-    it 'includes all parts when all fields are present' do
-      game = build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: "Финал")
+    context 'when all fields are present' do
+      let(:game) { build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: "Финал") }
 
-      expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3 Финал")
+      it 'includes all parts' do
+        expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3 Финал")
+      end
     end
 
-    it 'omits played_on when nil' do
-      game = build(:game, played_on: nil, season: 1, series: 2, game_number: 3, name: "Финал")
+    context 'when played_on is nil' do
+      let(:game) { build(:game, played_on: nil, season: 1, series: 2, game_number: 3, name: "Финал") }
 
-      expect(game.full_name).to eq("Сезон 1 Серия 2 Игра 3 Финал")
+      it 'omits played_on' do
+        expect(game.full_name).to eq("Сезон 1 Серия 2 Игра 3 Финал")
+      end
     end
 
-    it 'omits name when nil' do
-      game = build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: nil)
+    context 'when name is nil' do
+      let(:game) { build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: nil) }
 
-      expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3")
+      it 'omits name' do
+        expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3")
+      end
     end
   end
 
   describe '#in_season_name' do
-    it 'returns series and game number' do
-      game = build(:game, series: 3, game_number: 5)
+    let(:game) { build(:game, series: 3, game_number: 5) }
 
+    it 'returns series and game number' do
       expect(game.in_season_name).to eq("Серия 3 Игра 5")
     end
   end
