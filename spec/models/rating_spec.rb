@@ -17,42 +17,53 @@ RSpec.describe Rating, type: :model do
   end
 
   describe '#total' do
-    it 'returns plus minus minus' do
-      rating = build(:rating, plus: 3, minus: 1)
+    context 'when plus and minus are present' do
+      let(:rating) { build(:rating, plus: 3, minus: 1) }
 
-      expect(rating.total).to eq(2)
+      it 'returns plus minus minus' do
+        expect(rating.total).to eq(2)
+      end
     end
 
-    it 'treats nil plus as zero' do
-      rating = build(:rating, plus: nil, minus: 2)
+    context 'when plus is nil' do
+      let(:rating) { build(:rating, plus: nil, minus: 2) }
 
-      expect(rating.total).to eq(-2)
+      it 'treats nil plus as zero' do
+        expect(rating.total).to eq(-2)
+      end
     end
 
-    it 'treats nil minus as zero' do
-      rating = build(:rating, plus: 5, minus: nil)
+    context 'when minus is nil' do
+      let(:rating) { build(:rating, plus: 5, minus: nil) }
 
-      expect(rating.total).to eq(5)
+      it 'treats nil minus as zero' do
+        expect(rating.total).to eq(5)
+      end
     end
 
-    it 'returns zero when both are nil' do
-      rating = build(:rating, plus: nil, minus: nil)
+    context 'when both are nil' do
+      let(:rating) { build(:rating, plus: nil, minus: nil) }
 
-      expect(rating.total).to eq(0)
+      it 'returns zero' do
+        expect(rating.total).to eq(0)
+      end
     end
 
-    it 'includes extra_points in the total' do
-      rating = build(:rating, plus: 3, minus: 1)
-      allow(rating).to receive(:extra_points).and_return(2)
+    context 'when extra_points is non-zero' do
+      let(:rating) { build(:rating, plus: 3, minus: 1) }
 
-      expect(rating.total).to eq(4)
+      before { allow(rating).to receive(:extra_points).and_return(2) }
+
+      it 'includes extra_points in the total' do
+        expect(rating.total).to eq(4)
+      end
     end
   end
 
   describe '#extra_points' do
-    it 'returns zero' do
-      rating = build(:rating)
+    let(:rating) { build(:rating) }
 
+    it 'returns zero' do
       expect(rating.extra_points).to eq(0)
     end
   end

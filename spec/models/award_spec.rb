@@ -11,31 +11,31 @@ RSpec.describe Award, type: :model do
   end
 
   describe '.for_players' do
-    it 'returns awards where staff is false' do
-      player_award = create(:award, staff: false)
-      staff_award = create(:award, staff: true)
+    let_it_be(:player_award) { create(:award, staff: false) }
+    let_it_be(:staff_award) { create(:award, staff: true) }
 
+    it 'returns awards where staff is false' do
       expect(described_class.for_players).to include(player_award)
       expect(described_class.for_players).not_to include(staff_award)
     end
   end
 
   describe '.for_staff' do
-    it 'returns awards where staff is true' do
-      player_award = create(:award, staff: false)
-      staff_award = create(:award, staff: true)
+    let_it_be(:player_award) { create(:award, staff: false) }
+    let_it_be(:staff_award) { create(:award, staff: true) }
 
+    it 'returns awards where staff is true' do
       expect(described_class.for_staff).to include(staff_award)
       expect(described_class.for_staff).not_to include(player_award)
     end
   end
 
   describe '.ordered' do
-    it 'orders by position ascending' do
-      third = create(:award, position: 3)
-      first = create(:award, position: 1)
-      second = create(:award, position: 2)
+    let_it_be(:third) { create(:award, position: 3) }
+    let_it_be(:first) { create(:award, position: 1) }
+    let_it_be(:second) { create(:award, position: 2) }
 
+    it 'orders by position ascending' do
       expect(described_class.ordered).to eq([ first, second, third ])
     end
   end
