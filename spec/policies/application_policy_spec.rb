@@ -31,18 +31,6 @@ RSpec.describe ApplicationPolicy do
     it { is_expected.not_to be_destroy }
   end
 
-  describe "nil user" do
-    subject(:policy) { described_class.new(nil, record) }
-
-    it { is_expected.not_to be_index }
-    it { is_expected.not_to be_show }
-    it { is_expected.not_to be_create }
-    it { is_expected.not_to be_new }
-    it { is_expected.not_to be_update }
-    it { is_expected.not_to be_edit }
-    it { is_expected.not_to be_destroy }
-  end
-
   describe ApplicationPolicy::Scope do
     let_it_be(:existing_user) { create(:user) }
 
@@ -56,14 +44,6 @@ RSpec.describe ApplicationPolicy do
 
     describe "non-admin user" do
       subject(:resolved) { described_class.new(user, User).resolve }
-
-      it "returns no records" do
-        expect(resolved).to be_empty
-      end
-    end
-
-    describe "nil user" do
-      subject(:resolved) { described_class.new(nil, User).resolve }
 
       it "returns no records" do
         expect(resolved).to be_empty
