@@ -1,5 +1,5 @@
 # For more information regarding these settings check out our docs https://docs.avohq.io
-# The values disaplayed here are the default ones. Uncomment and change them to fit your needs.
+# The values displayed here are the default ones. Uncomment and change them to fit your needs.
 Avo.configure do |config|
   ## == Routing ==
   config.root_path = "/avo"
@@ -20,7 +20,8 @@ Avo.configure do |config|
   ## == Authentication ==
   config.current_user_method = :current_user
   config.authenticate_with do
-    redirect_to main_app.root_path unless current_user&.admin?
+    authenticate_user!
+    redirect_to main_app.root_path unless current_user.admin?
   end
 
   ## == Authorization ==

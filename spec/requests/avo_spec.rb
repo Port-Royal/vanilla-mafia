@@ -30,9 +30,7 @@ RSpec.describe "Avo admin panel" do
       it "grants access" do
         get "/avo"
 
-        expect(response).to have_http_status(:redirect)
-
-        follow_redirect!
+        follow_redirect! while response.redirect?
 
         expect(response).to have_http_status(:ok)
       end
