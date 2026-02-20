@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   devise_for :users
 
+  authenticate :user, ->(u) { u.admin? } do
+    mount Avo::Engine => "/avo"
+  end
+
   root "seasons#show", defaults: { number: 5 }
 
   resources :seasons, only: [ :show ], param: :number do
