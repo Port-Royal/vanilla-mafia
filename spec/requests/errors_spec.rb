@@ -61,6 +61,18 @@ RSpec.describe ErrorsController do
     end
   end
 
+  describe "GET /404?code=200" do
+    before { get "/404", params: { code: "200" } }
+
+    it "ignores the query param and returns 404" do
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "renders the 404 error page" do
+      expect(response.body).to include("Страница не найдена")
+    end
+  end
+
   describe "GET /nonexistent-path" do
     before { get "/nonexistent-path" }
 
