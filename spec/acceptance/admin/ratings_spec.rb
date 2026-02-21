@@ -4,7 +4,6 @@ RSpec.describe "Admin Ratings CRUD" do
   let_it_be(:admin) { create(:user, admin: true) }
   let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 1, name: "Тестовая") }
   let_it_be(:player) { create(:player, name: "Тестовый Игрок") }
-  let_it_be(:role) { create(:role, code: "maf", name: "Мафия") }
 
   before { sign_in_as_admin(admin) }
 
