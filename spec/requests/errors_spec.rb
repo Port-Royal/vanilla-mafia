@@ -27,6 +27,10 @@ RSpec.describe ErrorsController do
     it "renders a link to the home page" do
       expect(response.body).to include("На главную")
     end
+
+    it "includes noindex, nofollow robots meta tag" do
+      expect(response.body).to include('<meta name="robots" content="noindex, nofollow">')
+    end
   end
 
   describe "GET /422" do
