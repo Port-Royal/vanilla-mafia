@@ -16,5 +16,9 @@ Rails.application.routes.draw do
 
   get "hall", to: "hall_of_fame#show"
 
+  match "/404", to: "errors#show", via: :all, defaults: { code: 404 }
+  match "/422", to: "errors#show", via: :all, defaults: { code: 422 }
+  match "/500", to: "errors#show", via: :all, defaults: { code: 500 }
+
   get "up" => "rails/health#show", as: :rails_health_check
 end
