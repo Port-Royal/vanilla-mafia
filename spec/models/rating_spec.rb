@@ -49,22 +49,20 @@ RSpec.describe Rating, type: :model do
       end
     end
 
-    context 'when extra_points is non-zero' do
-      let(:rating) { build(:rating, plus: 3, minus: 1) }
+    context 'when best_move is present' do
+      let(:rating) { build(:rating, plus: 3, minus: 1, best_move: 0.5) }
 
-      before { allow(rating).to receive(:extra_points).and_return(2) }
-
-      it 'includes extra_points in the total' do
-        expect(rating.total).to eq(4)
+      it 'includes best_move in the total' do
+        expect(rating.total).to eq(2.5)
       end
     end
-  end
 
-  describe '#extra_points' do
-    let(:rating) { build(:rating) }
+    context 'when best_move is nil' do
+      let(:rating) { build(:rating, plus: 3, minus: 1, best_move: nil) }
 
-    it 'returns zero' do
-      expect(rating.extra_points).to eq(0)
+      it 'treats nil best_move as zero' do
+        expect(rating.total).to eq(2)
+      end
     end
   end
 end

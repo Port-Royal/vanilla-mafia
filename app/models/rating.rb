@@ -11,10 +11,6 @@ class Rating < ApplicationRecord
   validates :best_move, numericality: true, allow_nil: true
 
   def total
-    (plus || 0) - (minus || 0) + extra_points
-  end
-
-  def extra_points
-    0
+    (plus || 0) - (minus || 0) + (best_move || 0)
   end
 end
