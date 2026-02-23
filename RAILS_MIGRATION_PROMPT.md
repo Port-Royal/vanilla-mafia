@@ -21,7 +21,7 @@ The application tracks mafia game sessions organized into **seasons** and **seri
 | **Webix extension** | `../chimafia/webix/` |
 | **Base library** | `../chimafia/library/` |
 
-When you need to reference the original implementation (e.g., to extract the extra points formula from a database view, or to understand a specific behavior), read files from the old project paths above. Do NOT modify the old project.
+When you need to reference the original implementation for understanding a specific behavior, read files from the old project paths above. Do NOT modify the old project.
 
 ---
 
@@ -97,7 +97,7 @@ After generation, edit `.claude-on-rails/prompts/` to encode project-specific ru
 - All foreign keys must have database-level constraints and indexes
 - Use Active Storage for images (player photos, award icons)
 - Use decimal(5,2) for rating points, not float
-- Implement extra_points calculation as a model method, not a DB view
+- Rating total = plus - minus + best_move (win bonus and season bonuses are folded into `plus` during import)
 ```
 
 **`.claude-on-rails/prompts/tests.md`** — add:
@@ -238,8 +238,7 @@ The application models a **mafia game club** with the following entities:
 - Plus points, minus points (decimal)
 - Best move indicator (decimal)
 - First shoot indicator (boolean)
-- Computed: `total = plus - minus + extra_points`
-- Extra points are calculated at the database view level
+- Computed: `total = plus - minus + best_move`
 
 #### Roles (dictionary)
 - Code (primary key) and display name
@@ -267,7 +266,7 @@ The original uses PostgreSQL views for computed data. In Rails, implement these 
 
 #### Rating with Totals (replaces `v_rating`)
 - Per-rating record with computed total
-- Fields: total = plus - minus + extra_points
+- Fields: total = plus - minus + best_move
 - **Implementation**: Virtual attribute on the Rating model or database-level computed column
 
 ### Public Pages
@@ -590,13 +589,7 @@ class Rating < ApplicationRecord
   validates :best_move, numericality: true, allow_nil: true
 
   def total
-    (plus || 0) - (minus || 0) + extra_points
-  end
-
-  def extra_points
-    # Implement the extra points calculation logic here
-    # (extracted from the original v_rating database view)
-    0
+    (plus || 0) - (minus || 0) + (best_move || 0)
   end
 end
 
@@ -759,7 +752,7 @@ end
 4. Docker configuration (Dockerfile + docker-compose.yml)
 5. GitHub Actions CI pipeline (lint + test + security)
 6. Production configuration (credentials, logging, caching)
-7. Data migration script (rake task) to import data from the old PostgreSQL database (see `../chimafia/chimafia/config/db.php` for connection details)
+7. Data import from chimafia.org via `rake import:scrape` (web scraping — see `lib/scraper/` and `lib/tasks/import.rake`)
 
 ---
 
@@ -858,15 +851,29 @@ ru:
 
 ---
 
-## Extra Points Calculation
+## Data Import
 
-The original application computes "extra points" at the database view level. You need to reverse-engineer the exact formula from the old project's database views. The general pattern is:
+Data is imported from chimafia.org via web scraping (`rake import:scrape`). The scraper classes live in `lib/scraper/`:
 
-- Extra points are a bonus applied to ratings based on game-specific conditions
-- The `total` field = `plus - minus + extra_points`
-- This calculation should be encapsulated in the `Rating` model or a dedicated calculator service, not spread across views or controllers
+| Class | Source | Data |
+|-------|--------|------|
+| `Scraper::SeasonScraper` | `/season/1`–`/season/5` | Game IDs, dates, series structure |
+| `Scraper::GameScraper` | `/game/:id` | Games, ratings, players (discovered from game rosters) |
+| `Scraper::HallScraper` | `/hall` | Award definitions, player awards, staff awards |
+| `Scraper::PlayerScraper` | `/player/:id` | Player photos (Active Storage) |
 
-**To find the formula**: Read the migration file that creates the views at `../chimafia/chimafia/migrations/` (look for `create_views` in the filename, e.g., `m251121_075524_create_views.php`). Also check the view models at `../chimafia/chimafia/models/view/Rating.php` and `../chimafia/chimafia/models/view/Players.php`. Do not guess — extract the exact SQL from these files.
+### Rating formula
+
+The old site displayed: `total = win_bonus(1.0) + plus - minus + best_move`. During import, the win bonus is folded into `plus`, so the stored formula is simply `total = plus - minus + best_move`. Some games (114–165, seasons 3–4) also had a +0.3 season participation bonus per player, which is likewise folded into `plus`.
+
+The `Rating#total` method: `(plus || 0) - (minus || 0) + (best_move || 0)`
+
+### Import characteristics
+
+- ~320 HTTP requests at 0.5s delay ≈ 3 minutes
+- Idempotent via `find_or_initialize_by` — safe to re-run
+- Resets SQLite autoincrement sequences after import to avoid ID collisions
+- Preserves original game and player IDs from chimafia.org URLs
 
 ---
 

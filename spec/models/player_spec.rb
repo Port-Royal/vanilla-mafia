@@ -117,5 +117,20 @@ RSpec.describe Player, type: :model do
         expect(result.total_rating).to eq(0)
       end
     end
+
+    context 'when best_move is present' do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
+
+      before do
+        create(:rating, player: player, game: game, plus: 2, minus: 1, best_move: 0.5, win: true)
+      end
+
+      it 'includes best_move in total_rating' do
+        result = Player.with_stats_for_season(1).find(player.id)
+
+        expect(result.total_rating).to eq(1.5)
+      end
+    end
   end
 end

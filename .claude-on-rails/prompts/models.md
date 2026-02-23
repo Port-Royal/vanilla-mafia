@@ -23,7 +23,7 @@ Before starting any new task, always create a feature branch from a freshly pull
 - All foreign keys must have database-level constraints and indexes
 - Use Active Storage for images (player photos, award icons)
 - Use decimal(5,2) for rating points, not float
-- Implement extra_points calculation as a model method, not a DB view
+- Rating total = plus - minus + best_move (win bonus and season bonuses are folded into `plus` during import)
 - Follow Rails conventions strictly: singular model names (Game, Player, Rating, Award, Role)
 - Use ActiveRecord::Enum for role codes and similar dictionaries
 - Encapsulate aggregation logic in scopes (e.g., with_stats_for_season)
