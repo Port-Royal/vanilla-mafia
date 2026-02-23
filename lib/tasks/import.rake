@@ -153,10 +153,12 @@ end
 
 def phase5_reset_sequences
   puts "--- Phase 5: Resetting SQLite sequences ---"
-  %w[games players].each do |table|
-    max_id = ActiveRecord::Base.connection.select_value("SELECT MAX(id) FROM #{table}") || 0
-    ActiveRecord::Base.connection.execute(
-      "UPDATE sqlite_sequence SET seq = #{max_id} WHERE name = '#{table}'"
+  conn = ActiveRecord::Base.connection
+  [ Game, Player ].each do |model|
+    table = model.table_name
+    max_id = model.maximum(:id) || 0
+    conn.execute(
+      "UPDATE sqlite_sequence SET seq = #{conn.quote(max_id)} WHERE name = #{conn.quote(table)}"
     )
     puts "Reset #{table} sequence to #{max_id}"
   end
