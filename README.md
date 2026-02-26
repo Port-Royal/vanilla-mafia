@@ -37,7 +37,30 @@ bundle exec mutant run -- 'ClassName'
 
 ## Deployment
 
-Set the following environment variables in production:
+The app is deployed with [Kamal](https://kamal-deploy.org/) using [ghcr.io](https://ghcr.io) as the container registry.
+
+### Prerequisites
+
+- [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login`)
+- SSH access to the production server
+- `config/master.key` present locally (not checked into git)
+
+### Deploying
+
+```bash
+bin/kamal deploy
+```
+
+### Environment variables
+
+Kamal injects these into the production container (configured in `config/deploy.yml` and `.kamal/secrets`):
+
+| Variable | Description |
+|----------|-------------|
+| `RAILS_MASTER_KEY` | Encryption key for credentials (read from `config/master.key`) |
+| `KAMAL_REGISTRY_PASSWORD` | ghcr.io auth token (read from GitHub CLI) |
+
+Set the following environment variables when seeding the database for the first time:
 
 | Variable | Description |
 |----------|-------------|
