@@ -12,12 +12,9 @@ jobs:
   deploy:
     needs: ci
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     env:
       DOCKER_BUILDKIT: 1
-      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
