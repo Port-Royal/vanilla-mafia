@@ -28,7 +28,7 @@ proxy:
 
 registry:
   server: ghcr.io
-  username: port-royal
+  username: marinazzio
   password:
     - KAMAL_REGISTRY_PASSWORD
 
