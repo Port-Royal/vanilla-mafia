@@ -20,6 +20,8 @@ jobs:
       KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
 
     steps:
       - name: Checkout code
