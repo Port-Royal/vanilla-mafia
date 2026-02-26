@@ -21,11 +21,11 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# proxy:
-#   ssl: true
-#   host: app.example.com
+# TODO: Replace with your actual domain name once chosen
+proxy:
+  ssl: true
+  host: app.example.com
 
-# Where you keep your container images.
 registry:
   server: ghcr.io
   username: port-royal
