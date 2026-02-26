@@ -37,7 +37,37 @@ bundle exec mutant run -- 'ClassName'
 
 ## Deployment
 
-Set the following environment variables in production:
+Deploys are automated via GitHub Actions + [Kamal](https://kamal-deploy.org/).
+
+**Triggering a deploy:**
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Pushing a `v*` tag runs CI first; if all checks pass, Kamal deploys to the production VPS.
+
+**Required GitHub Secrets:**
+
+| Secret | Description |
+|--------|-------------|
+| `SSH_PRIVATE_KEY` | Private key with access to the production VPS |
+| `DEPLOY_SERVER` | Production server IP address |
+| `RAILS_MASTER_KEY` | Contents of `config/master.key` |
+
+Registry auth uses `GITHUB_TOKEN` automatically (no secret needed).
+
+**Manual deploy** (from a local machine):
+
+```bash
+export DEPLOY_SERVER=<server-ip>
+bin/kamal deploy
+```
+
+Requires `gh` CLI authenticated and `config/master.key` present locally.
+
+**Production environment variables:**
 
 | Variable | Description |
 |----------|-------------|
