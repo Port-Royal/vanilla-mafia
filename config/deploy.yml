@@ -7,10 +7,11 @@ image: vanilla_mafia
 # Deploy to these servers.
 servers:
   web:
-    - 46.62.146.40
+    hosts:
+      - "%{DEPLOY_SERVER}"
   # job:
   #   hosts:
-  #     - 46.62.146.40
+  #     - "%{DEPLOY_SERVER}"
   #   cmd: bin/jobs
 
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
