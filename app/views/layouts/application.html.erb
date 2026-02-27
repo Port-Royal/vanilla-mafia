@@ -50,6 +50,24 @@
           <%= link_to t("nav.hall_of_fame"), hall_path,
                 class: "block text-gray-300 hover:text-white transition-colors" %>
         </li>
+        <% if user_signed_in? %>
+          <% if current_user.admin? %>
+            <li>
+              <%= link_to t("nav.admin"), avo.root_path,
+                    class: "block text-gray-300 hover:text-white transition-colors" %>
+            </li>
+          <% end %>
+          <li class="border-t border-neutral-700 pt-2">
+            <%= button_to t("nav.sign_out"), destroy_user_session_path,
+                  method: :delete,
+                  class: "block text-gray-300 hover:text-white transition-colors" %>
+          </li>
+        <% else %>
+          <li class="border-t border-neutral-700 pt-2">
+            <%= link_to t("nav.sign_in"), new_user_session_path,
+                  class: "block text-gray-300 hover:text-white transition-colors" %>
+          </li>
+        <% end %>
       </ul>
     </nav>
 
@@ -74,6 +92,24 @@
                 <%= link_to t("nav.hall_of_fame"), hall_path,
                       class: "block hover:text-white transition-colors" %>
               </li>
+              <% if user_signed_in? %>
+                <% if current_user.admin? %>
+                  <li>
+                    <%= link_to t("nav.admin"), avo.root_path,
+                          class: "block hover:text-white transition-colors" %>
+                  </li>
+                <% end %>
+                <li class="border-t border-neutral-700 pt-3">
+                  <%= button_to t("nav.sign_out"), destroy_user_session_path,
+                        method: :delete,
+                        class: "block hover:text-white transition-colors text-left" %>
+                </li>
+              <% else %>
+                <li class="border-t border-neutral-700 pt-3">
+                  <%= link_to t("nav.sign_in"), new_user_session_path,
+                        class: "block hover:text-white transition-colors" %>
+                </li>
+              <% end %>
             </ul>
           </nav>
         </div>
@@ -81,6 +117,12 @@
 
       <%# Main content %>
       <main class="flex-1 px-4 py-8 lg:px-12 lg:py-10 max-w-5xl">
+        <% flash.each do |type, message| %>
+          <% next if message.blank? %>
+          <div class="mb-4 rounded-md px-4 py-3 text-sm <%= type.to_s == 'alert' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' %>">
+            <%= message %>
+          </div>
+        <% end %>
         <%= yield %>
       </main>
     </div>
