@@ -1,0 +1,80 @@
+ru:
+  activerecord:
+    attributes:
+      user:
+        email: "Email"
+        password: "Пароль"
+        password_confirmation: "Подтверждение пароля"
+        current_password: "Текущий пароль"
+        remember_me: "Запомнить меня"
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              taken: "уже занят"
+              blank: "не может быть пустым"
+              invalid: "имеет неверный формат"
+            password:
+              too_short: "слишком короткий (минимум %{count} символов)"
+              blank: "не может быть пустым"
+            password_confirmation:
+              confirmation: "не совпадает с паролем"
+            current_password:
+              invalid: "неверный"
+  devise:
+    sessions:
+      new:
+        title: "Вход"
+        sign_in: "Войти"
+      signed_in: "Вы вошли в систему."
+      signed_out: "Вы вышли из системы."
+      already_signed_out: "Вы вышли из системы."
+    registrations:
+      new:
+        title: "Регистрация"
+        sign_up: "Зарегистрироваться"
+      edit:
+        title: "Настройки аккаунта"
+        update: "Сохранить"
+        leave_blank: "оставьте пустым, если не хотите менять"
+        current_password_hint: "для подтверждения изменений"
+        cancel_account: "Удалить аккаунт"
+        cancel_confirm: "Вы уверены?"
+      signed_up: "Вы успешно зарегистрировались."
+      updated: "Аккаунт успешно обновлён."
+      destroyed: "Аккаунт удалён. Надеемся увидеть вас снова."
+      update_needs_confirmation: "Аккаунт обновлён, но необходимо подтвердить новый email."
+    passwords:
+      new:
+        title: "Забыли пароль?"
+        send_instructions: "Отправить инструкции"
+      edit:
+        title: "Изменить пароль"
+        change_password: "Изменить пароль"
+      send_instructions: "Вы получите письмо с инструкциями по сбросу пароля."
+      send_paranoid_instructions: "Если ваш email есть в базе, вы получите письмо с инструкциями."
+      updated: "Пароль успешно изменён. Вы вошли в систему."
+      updated_not_active: "Пароль успешно изменён."
+      no_token: "Эта страница доступна только по ссылке из письма для сброса пароля."
+    failure:
+      already_authenticated: "Вы уже вошли в систему."
+      inactive: "Ваш аккаунт ещё не активирован."
+      invalid: "Неверный %{authentication_keys} или пароль."
+      not_found_in_database: "Неверный %{authentication_keys} или пароль."
+      timeout: "Сессия истекла. Войдите снова."
+      unauthenticated: "Необходимо войти в систему."
+    shared:
+      links:
+        sign_in: "Войти"
+        sign_up: "Зарегистрироваться"
+        forgot_password: "Забыли пароль?"
+        back: "Назад"
+    mailer:
+      reset_password_instructions:
+        subject: "Инструкции по сбросу пароля"
+  errors:
+    messages:
+      not_saved:
+        one: "Ошибка не позволила сохранить %{resource}:"
+        other: "%{count} ошибок не позволили сохранить %{resource}:"
