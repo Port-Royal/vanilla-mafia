@@ -29,15 +29,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Configure Kamal secrets
-        run: |
-          cat > .kamal/secrets <<'EOF'
-          KAMAL_REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD }}
-          RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }}
-          DEPLOY_SERVER=${{ secrets.DEPLOY_SERVER }}
-          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
-          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-          EOF
-
       - name: Deploy with Kamal
+        env:
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: bin/kamal deploy
