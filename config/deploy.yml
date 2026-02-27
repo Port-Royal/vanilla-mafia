@@ -8,10 +8,10 @@ image: port-royal/vanilla_mafia
 servers:
   web:
     hosts:
-      - "%{DEPLOY_SERVER}"
+      - <%= ENV['DEPLOY_SERVER'] %>
   # job:
   #   hosts:
-  #     - "%{DEPLOY_SERVER}"
+  #     - <%= ENV['DEPLOY_SERVER'] %>
   #   cmd: bin/jobs
 
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
