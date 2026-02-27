@@ -34,5 +34,8 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Test registry login
+        run: echo "$KAMAL_REGISTRY_PASSWORD" | docker login ghcr.io -u marinazzio --password-stdin
+
       - name: Deploy with Kamal
         run: bin/kamal deploy
