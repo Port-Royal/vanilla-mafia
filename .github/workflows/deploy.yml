@@ -14,11 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
-      KAMAL_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-      DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -35,4 +30,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy with Kamal
+        env:
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: bin/kamal deploy
