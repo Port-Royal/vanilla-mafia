@@ -77,4 +77,6 @@ ru:
     messages:
       not_saved:
         one: "Ошибка не позволила сохранить %{resource}:"
+        few: "%{count} ошибки не позволили сохранить %{resource}:"
+        many: "%{count} ошибок не позволили сохранить %{resource}:"
         other: "%{count} ошибок не позволили сохранить %{resource}:"
