@@ -33,3 +33,26 @@ en:
     sign_in: "Sign in"
     sign_out: "Sign out"
     admin: "Admin"
+  player_claims:
+    create:
+      pending: "Claim submitted and awaiting approval."
+      approved: "Claim approved."
+      errors:
+        already_claimed: "This player is already linked to another account."
+        already_pending: "You already have a pending claim."
+  players:
+    show:
+      claim_player: "This is me"
+      claim_confirm: "Confirm this is your profile?"
+      claim_pending: "Claim pending"
+      edit_profile: "Edit profile"
+  profiles:
+    edit:
+      title: "Edit profile"
+      save: "Save"
+      name_label: "Name"
+      name_hint: "Player display name"
+    update:
+      success: "Profile updated successfully."
+    errors:
+      no_claimed_player: "You have no claimed player."
