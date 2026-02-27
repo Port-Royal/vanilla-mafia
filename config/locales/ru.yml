@@ -47,9 +47,30 @@ ru:
       minus: "Минус"
       best_move: "Лучший ход"
       total: "Итого"
+  player_claims:
+    create:
+      pending: "Заявка отправлена и ожидает подтверждения."
+      approved: "Заявка подтверждена."
+      errors:
+        already_claimed: "Этот игрок уже привязан к другому аккаунту."
+        already_pending: "У вас уже есть заявка на рассмотрении."
   players:
     show:
       awards: "Награды"
+      claim_player: "Это я"
+      claim_confirm: "Подтвердить, что это ваш профиль?"
+      claim_pending: "Заявка на рассмотрении"
+      edit_profile: "Редактировать профиль"
+  profiles:
+    edit:
+      title: "Редактирование профиля"
+      save: "Сохранить"
+      name_label: "Имя"
+      name_hint: "Отображаемое имя игрока"
+    update:
+      success: "Профиль успешно обновлён."
+    errors:
+      no_claimed_player: "У вас нет привязанного игрока."
   series:
     show:
       player: "Игрок"
