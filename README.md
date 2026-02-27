@@ -55,21 +55,17 @@ Pushing a `v*` tag runs CI first; if all checks pass, Kamal deploys to the produ
 | `SSH_PRIVATE_KEY` | Private key with access to the production VPS |
 | `DEPLOY_SERVER` | Production server IP address |
 | `RAILS_MASTER_KEY` | Contents of `config/master.key` |
-
-Registry auth uses `GITHUB_TOKEN` automatically (no secret needed).
+| `REGISTRY_PASSWORD` | Classic PAT with `write:packages` scope for ghcr.io |
+| `ADMIN_EMAIL` | Admin user email (used by `db:seed`) |
+| `ADMIN_PASSWORD` | Admin user password (used by `db:seed`, only on first run) |
 
 **Manual deploy** (from a local machine):
 
 ```bash
 export DEPLOY_SERVER=<server-ip>
+export ADMIN_EMAIL=admin@example.com
+export ADMIN_PASSWORD=<password>
 bin/kamal deploy
 ```
 
-Requires `gh` CLI authenticated and `config/master.key` present locally.
-
-**Production environment variables:**
-
-| Variable | Description |
-|----------|-------------|
-| `ADMIN_EMAIL` | Admin user email (used by `db:seed`) |
-| `ADMIN_PASSWORD` | Admin user password (used by `db:seed`, only on first run) |
+Requires `gh` CLI authenticated (with `write:packages` scope) and `config/master.key` present locally.
