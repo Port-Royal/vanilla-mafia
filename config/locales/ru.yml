@@ -60,6 +60,9 @@ ru:
     all_awards: "Все награды"
   nav:
     hall_of_fame: "Зал славы"
+    sign_in: "Войти"
+    sign_out: "Выйти"
+    admin: "Админка"
   errors:
     "404":
       title: "Страница не найдена"

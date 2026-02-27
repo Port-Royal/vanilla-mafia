@@ -5,7 +5,7 @@ module AdminSignInHelper
     visit "/users/sign_in"
     fill_in I18n.t("activerecord.attributes.user.email"), with: user.email
     fill_in I18n.t("activerecord.attributes.user.password"), with: "password123"
-    click_on I18n.t("devise.sessions.new.sign_in")
+    find("input[type='submit']").click
   end
 end
 
