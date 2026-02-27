@@ -3,9 +3,9 @@ require "capybara/rspec"
 module AdminSignInHelper
   def sign_in_as_admin(user)
     visit "/users/sign_in"
-    fill_in "Email", with: user.email
-    fill_in "Password", with: "password123"
-    click_on "Log in"
+    fill_in I18n.t("activerecord.attributes.user.email"), with: user.email
+    fill_in I18n.t("activerecord.attributes.user.password"), with: "password123"
+    click_on I18n.t("devise.sessions.new.sign_in")
   end
 end
 
