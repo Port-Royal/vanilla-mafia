@@ -29,6 +29,9 @@
 
 en:
   hello: "Hello world"
+  errors:
+    messages:
+      already_claimed: "is already claimed"
   nav:
     sign_in: "Sign in"
     sign_out: "Sign out"
