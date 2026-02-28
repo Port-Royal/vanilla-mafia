@@ -13,6 +13,7 @@ Rails.application.routes.draw do
 
   resources :games, only: [ :show ]
   resources :players, only: [ :show ]
+  resource :profile, only: [ :edit, :update ]
 
   get "hall", to: "hall_of_fame#show"
 

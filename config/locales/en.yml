@@ -52,6 +52,8 @@ en:
       save: "Save"
       name_label: "Name"
       name_hint: "Player display name"
+      comment_label: "Comment"
+      photo_label: "Photo"
     update:
       success: "Profile updated successfully."
     errors:
