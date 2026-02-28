@@ -31,7 +31,7 @@ def phase1_scrape_seasons
   puts "--- Phase 1: Scraping seasons ---"
   scraper = Scraper::SeasonScraper.new
   seasons = parse_seasons(ENV["SEASONS"])
-  games = scraper.scrape_all(seasons: seasons)
+  games = scraper.scrape_all(seasons:)
   puts "Total games discovered: #{games.size}"
   puts
   games
