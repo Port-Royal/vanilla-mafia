@@ -43,6 +43,9 @@ en:
       errors:
         already_claimed: "This player is already linked to another account."
         already_pending: "You already have a pending claim."
+        already_has_player: "You already have a claimed player."
+        player_already_claimed: "This player is already linked to another account."
+        claim_already_exists: "A claim for this player already exists."
   players:
     show:
       claim_player: "This is me"
