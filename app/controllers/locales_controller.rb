@@ -12,6 +12,6 @@ class LocalesController < ApplicationController
   private
 
   def valid_locale?(locale)
-    I18n.available_locales.include?(locale.to_sym)
+    locale.present? && I18n.available_locales.map(&:to_s).include?(locale.to_s)
   end
 end

@@ -18,7 +18,14 @@ module SetLocale
     I18n.default_locale
   end
 
+  def self.valid_locale?(locale)
+    locale_str = locale.to_s
+    return false if locale_str.blank?
+
+    I18n.available_locales.map(&:to_s).include?(locale_str)
+  end
+
   def valid_locale?(locale)
-    I18n.available_locales.include?(locale.to_sym)
+    SetLocale.valid_locale?(locale)
   end
 end
