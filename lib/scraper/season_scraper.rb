@@ -27,6 +27,8 @@ module Scraper
         date = cells[0].text.strip
         series = cells[2].text.strip.to_i
 
+        played_on = Date.strptime(date, "%d.%m.%Y")
+
         cells[3].css("a").each do |link|
           href = link["href"]
           next unless href&.start_with?("/game/")
@@ -36,12 +38,15 @@ module Scraper
 
           games << {
             id: game_id,
-            played_on: date,
+            played_on: played_on,
             season: season,
             series: series,
             game_number: game_number
           }
         end
+      rescue Date::Error => e
+        log "WARNING: Invalid date '#{date}' in season #{season}: #{e.message}"
+        next
       end
 
       log "Season #{season}: found #{games.size} games"

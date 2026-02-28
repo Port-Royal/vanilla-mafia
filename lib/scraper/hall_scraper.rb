@@ -101,12 +101,22 @@ module Scraper
       awards
     end
 
+    def find_staff_div(doc)
+      doc.css("td.content *").each do |node|
+        next unless node.name.match?(/\Ah[1-4]\z/)
+        next unless normalize(node.text).include?("Команда организаторов")
+
+        sibling = node.next_element
+        sibling = sibling.next_element while sibling && !sibling.matches?("div.hall")
+        return sibling
+      end
+      nil
+    end
+
     def parse_staff_awards(doc)
       awards = []
-      # Staff section is the div.hall after "Команда организаторов"
-      hall_divs = doc.css("td.content div.hall")
-      staff_div = hall_divs.last
-      return awards if hall_divs.size < 3 || staff_div == hall_divs.first
+      staff_div = find_staff_div(doc)
+      return awards unless staff_div
 
       staff_div.css("a").each do |link|
         href = link["href"]

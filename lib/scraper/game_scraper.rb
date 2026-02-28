@@ -57,6 +57,10 @@ module Scraper
         player_name = normalize(player_link.text)
         role_name = normalize(cells[2].text)
         role_code = ROLE_MAP[role_name]
+        unless role_code
+          log "WARNING: Unknown role '#{role_name}' in game #{game_id}"
+          next
+        end
         win = normalize(cells[3].text) == "Да"
         plus = parse_decimal(cells[4].text)
         minus = parse_decimal(cells[5].text)

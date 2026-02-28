@@ -205,17 +205,23 @@ def create_player_and_rating(game_id, rating_data)
   rating.save!
 end
 
+ALLOWED_ICON_CONTENT_TYPES = %w[image/jpeg image/png image/gif image/webp].freeze
+
 def attach_icon(award, icon_data_uri)
   match = icon_data_uri.match(/\Adata:image\/([^;]+);base64,(.+)\z/m)
   return unless match
 
   content_type = "image/#{match[1]}"
-  binary = Base64.decode64(match[2])
+  return unless ALLOWED_ICON_CONTENT_TYPES.include?(content_type)
+
+  binary = Base64.strict_decode64(match[2])
 
   award.save! if award.new_record? # need persisted record for attach
   award.icon.attach(
     io: StringIO.new(binary),
-    filename: "award_#{award.title.parameterize}.png",
+    filename: "award_#{award.title.parameterize}.#{match[1].sub('jpeg', 'jpg')}",
     content_type: content_type
   )
+rescue ArgumentError => e
+  puts "ERROR: Invalid base64 for icon #{award.title}: #{e.message}"
 end
