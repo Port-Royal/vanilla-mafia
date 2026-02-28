@@ -5,8 +5,10 @@
     <div class="mb-6">
       <%= link_to t(".edit_profile"), edit_profile_path, class: "text-maroon hover:underline font-medium" %>
     </div>
-  <% elsif current_user.pending_claim_for(@player) %>
-    <p class="text-gray-600 italic mb-6"><%= t(".claim_pending") %></p>
+  <% elsif (existing_claim = current_user.player_claims.find_by(player: @player)) %>
+    <% if existing_claim.pending? %>
+      <p class="text-gray-600 italic mb-6"><%= t(".claim_pending") %></p>
+    <% end %>
   <% elsif !@player.claimed? && !current_user.claimed_player? && !current_user.pending_claim? %>
     <div class="mb-6">
       <%= button_to t(".claim_player"), player_claim_path(@player),

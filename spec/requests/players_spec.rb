@@ -105,6 +105,70 @@ RSpec.describe PlayersController do
       end
     end
 
+    context "when user already owns a different player" do
+      let_it_be(:player) { create(:player, name: "Недоступный") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 7) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:owned_player) { create(:player, name: "Мой игрок") }
+      let(:user) { create(:user, player: owned_player) }
+
+      before do
+        sign_in user
+        get player_path(player)
+      end
+
+      it "does not render the claim button" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_player"))
+      end
+
+      it "does not render the edit profile link" do
+        expect(response.body).not_to include(edit_profile_path)
+      end
+    end
+
+    context "when user has a pending claim for a different player" do
+      let_it_be(:player) { create(:player, name: "Недоступный по заявке") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 8) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:other_player) { create(:player, name: "Другой игрок") }
+      let(:user) { create(:user) }
+
+      before do
+        create(:player_claim, user: user, player: other_player, status: "pending")
+        sign_in user
+        get player_path(player)
+      end
+
+      it "does not render the claim button" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_player"))
+      end
+
+      it "does not render the edit profile link" do
+        expect(response.body).not_to include(edit_profile_path)
+      end
+    end
+
+    context "when user has a rejected claim for this player" do
+      let_it_be(:player) { create(:player, name: "Отклонённый") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 9) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let(:user) { create(:user) }
+
+      before do
+        create(:player_claim, user: user, player: player, status: "rejected")
+        sign_in user
+        get player_path(player)
+      end
+
+      it "does not render the claim button" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_player"))
+      end
+
+      it "does not render the pending claim message" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_pending"))
+      end
+    end
+
     context "when player is claimed by another user" do
       let_it_be(:player) { create(:player, name: "Чужой") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 5) }
