@@ -58,6 +58,9 @@ ru:
       errors:
         already_claimed: "Этот игрок уже привязан к другому аккаунту."
         already_pending: "У вас уже есть заявка на рассмотрении."
+        already_has_player: "У вас уже есть привязанный игрок."
+        player_already_claimed: "Этот игрок уже привязан к другому аккаунту."
+        claim_already_exists: "Заявка на этого игрока уже существует."
   players:
     show:
       awards: "Награды"

@@ -56,6 +56,45 @@ RSpec.describe Player, type: :model do
     end
   end
 
+  describe '#claimed?' do
+    context 'when player has a user' do
+      let(:player) { create(:player) }
+
+      before { create(:user, player: player) }
+
+      it 'returns true' do
+        expect(player.claimed?).to be true
+      end
+    end
+
+    context 'when player has no user' do
+      let(:player) { build(:player) }
+
+      it 'returns false' do
+        expect(player.claimed?).to be false
+      end
+    end
+  end
+
+  describe '#claimed_by?' do
+    let(:player) { create(:player) }
+    let(:user) { create(:user, player: player) }
+
+    context 'when the given user is the claiming user' do
+      it 'returns true' do
+        expect(player.claimed_by?(user)).to be true
+      end
+    end
+
+    context 'when the given user is a different user' do
+      let(:other_user) { create(:user) }
+
+      it 'returns false' do
+        expect(player.claimed_by?(other_user)).to be false
+      end
+    end
+  end
+
   describe '.ordered' do
     let_it_be(:charlie) { create(:player, name: 'Charlie', position: 2) }
     let_it_be(:alice) { create(:player, name: 'Alice', position: 1) }

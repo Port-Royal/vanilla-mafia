@@ -19,6 +19,6 @@ class User < ApplicationRecord
   end
 
   def pending_claim_for(player)
-    player_claims.pending.find_by(player: player)
+    player_claims.pending.find_by(player:)
   end
 end
