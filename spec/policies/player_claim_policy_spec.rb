@@ -32,6 +32,12 @@ RSpec.describe PlayerClaimPolicy do
       it { is_expected.not_to be_create }
     end
 
+    context "with a real user record" do
+      let(:user) { create(:user) }
+
+      it { is_expected.to be_create }
+    end
+
     context "when user is nil" do
       let(:user) { nil }
 
