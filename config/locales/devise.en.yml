@@ -1,6 +1,29 @@
 # Additional translations at https://github.com/heartcombo/devise/wiki/I18n
 
 en:
+  activerecord:
+    attributes:
+      user:
+        email: "Email"
+        password: "Password"
+        password_confirmation: "Password confirmation"
+        current_password: "Current password"
+        remember_me: "Remember me"
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              taken: "has already been taken"
+              blank: "can't be blank"
+              invalid: "is not valid"
+            password:
+              too_short: "is too short (minimum is %{count} characters)"
+              blank: "can't be blank"
+            password_confirmation:
+              confirmation: "doesn't match password"
+            current_password:
+              invalid: "is invalid"
   devise:
     confirmations:
       confirmed: "Your email address has been successfully confirmed."
@@ -31,12 +54,28 @@ en:
       failure: "Could not authenticate you from %{kind} because \"%{reason}\"."
       success: "Successfully authenticated from %{kind} account."
     passwords:
+      new:
+        title: "Forgot your password?"
+        send_instructions: "Send reset instructions"
+      edit:
+        title: "Change password"
+        change_password: "Change password"
       no_token: "You can't access this page without coming from a password reset email. If you do come from a password reset email, please make sure you used the full URL provided."
       send_instructions: "You will receive an email with instructions on how to reset your password in a few minutes."
       send_paranoid_instructions: "If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes."
       updated: "Your password has been changed successfully. You are now signed in."
       updated_not_active: "Your password has been changed successfully."
     registrations:
+      new:
+        title: "Sign up"
+        sign_up: "Sign up"
+      edit:
+        title: "Account settings"
+        update: "Save"
+        leave_blank: "leave blank if you don't want to change it"
+        current_password_hint: "we need your current password to confirm changes"
+        cancel_account: "Cancel account"
+        cancel_confirm: "Are you sure?"
       destroyed: "Bye! Your account has been successfully cancelled. We hope to see you again soon."
       signed_up: "Welcome! You have signed up successfully."
       signed_up_but_inactive: "You have signed up successfully. However, we could not sign you in because your account is not yet activated."
@@ -46,9 +85,18 @@ en:
       updated: "Your account has been updated successfully."
       updated_but_not_signed_in: "Your account has been updated successfully, but since your password was changed, you need to sign in again."
     sessions:
+      new:
+        title: "Sign in"
+        sign_in: "Sign in"
       signed_in: "Signed in successfully."
       signed_out: "Signed out successfully."
       already_signed_out: "Signed out successfully."
+    shared:
+      links:
+        sign_in: "Sign in"
+        sign_up: "Sign up"
+        forgot_password: "Forgot your password?"
+        back: "Back"
     unlocks:
       send_instructions: "You will receive an email with instructions for how to unlock your account in a few minutes."
       send_paranoid_instructions: "If your account exists, you will receive an email with instructions for how to unlock it in a few minutes."
