@@ -11,7 +11,10 @@ RSpec.describe Player, type: :model do
   end
 
   describe 'validations' do
+    subject { build(:player) }
+
     it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:name) }
   end
 
   describe '#claimed?' do

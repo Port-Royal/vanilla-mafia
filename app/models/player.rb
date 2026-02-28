@@ -7,7 +7,7 @@ class Player < ApplicationRecord
   has_one :user, dependent: :nullify
   has_one_attached :photo
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
 
   def claimed?
     user.present?
