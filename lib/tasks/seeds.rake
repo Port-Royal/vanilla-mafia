@@ -5,10 +5,19 @@ namespace :seeds do
     seeds_content = File.read(File.join(root, "db/seeds.rb"))
     model_content = File.read(File.join(root, "app/models/feature_toggle.rb"))
 
-    match = model_content.match(/KEYS\s*=\s*%w\[([^\]]*)\]/)
+    match =
+      model_content.match(/KEYS\s*=\s*%w\[(.*?)\]/m) || # KEYS = %w[foo bar]
+      model_content.match(/KEYS\s*=\s*%w\((.*?)\)/m) || # KEYS = %w(foo bar)
+      model_content.match(/KEYS\s*=\s*\[(.*?)\]/m)      # KEYS = ["foo", "bar"]
     abort "Could not find FeatureToggle::KEYS in app/models/feature_toggle.rb" unless match
 
-    keys = match[1].split
+    keys_source = match[1]
+    keys =
+      if match[0].include?("%w")
+        keys_source.split
+      else
+        keys_source.scan(/["']([^"']+)["']/).flatten
+      end
     missing_keys = keys.reject { |key| seeds_content.include?(key) }
 
     abort "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
