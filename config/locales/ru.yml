@@ -42,6 +42,7 @@ ru:
       rating: "Рейтинг"
       games: "Игры"
       win_rate: "Процент побед"
+      view: "Итог"
   games:
     show:
       player: "Игрок"
