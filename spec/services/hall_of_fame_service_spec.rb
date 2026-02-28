@@ -35,19 +35,19 @@ RSpec.describe HallOfFameService do
     end
 
     it "eager loads player association on player awards" do
-      expect(result.player_awards.values.first.first.association(:player)).to be_loaded
+      expect(result.player_awards.fetch(player1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on player awards" do
-      expect(result.player_awards.values.first.first.association(:award)).to be_loaded
+      expect(result.player_awards.fetch(player1).first.association(:award)).to be_loaded
     end
 
     it "eager loads player association on staff awards" do
-      expect(result.staff_awards.values.first.first.association(:player)).to be_loaded
+      expect(result.staff_awards.fetch(organizer1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on staff awards" do
-      expect(result.staff_awards.values.first.first.association(:award)).to be_loaded
+      expect(result.staff_awards.fetch(organizer1).first.association(:award)).to be_loaded
     end
 
     context "when no awards exist" do
