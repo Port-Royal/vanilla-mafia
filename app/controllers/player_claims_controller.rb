@@ -5,7 +5,7 @@ class PlayerClaimsController < ApplicationController
 
   def create
     player = Player.find(params[:player_id])
-    result = ClaimPlayerService.call(user: current_user, player: player)
+    result = ClaimPlayerService.call(user: current_user, player:)
 
     if result.success
       redirect_back fallback_location: player_path(player),
@@ -19,10 +19,6 @@ class PlayerClaimsController < ApplicationController
   private
 
   def notice_message(claim)
-    if claim.approved?
-      t("player_claims.create.approved")
-    else
-      t("player_claims.create.pending")
-    end
+    claim.approved? ? t("player_claims.create.approved") : t("player_claims.create.pending")
   end
 end
