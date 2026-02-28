@@ -18,7 +18,9 @@ namespace :seeds do
       else
         keys_source.scan(/["']([^"']+)["']/).flatten
       end
-    missing_keys = keys.reject { |key| seeds_content.include?(key) }
+    missing_keys = keys.reject do |key|
+      seeds_content.match?(/key:\s*["']#{Regexp.escape(key)}["']/)
+    end
 
     abort "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
 
