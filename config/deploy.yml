@@ -21,10 +21,9 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# TODO: Replace with your actual domain name once chosen
-# proxy:
-#   ssl: true
-#   host: app.example.com
+proxy:
+  ssl: true
+  host: cnxmafia.org
 
 registry:
   server: ghcr.io
