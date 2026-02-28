@@ -2,7 +2,7 @@ module Scraper
   class HallScraper < Base
     def scrape
       doc = fetch("/hall")
-      return { awards: [], player_awards: [] } unless doc
+      return { awards: [], player_awards: [], staff_awards: [] } unless doc
 
       awards = parse_award_definitions(doc)
       player_awards = parse_player_awards(doc)

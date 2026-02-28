@@ -5,8 +5,6 @@ RSpec.describe Scraper::Base do
   subject(:scraper) { described_class.new }
 
   describe "#fetch" do
-
-
     context "when request succeeds" do
       before do
         response = instance_double(Net::HTTPSuccess, body: "<html><body>OK</body></html>")
