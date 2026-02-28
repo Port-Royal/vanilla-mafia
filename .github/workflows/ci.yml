@@ -66,6 +66,9 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+      - name: Validate seeds completeness
+        run: bin/rails seeds:validate
+
   test:
     runs-on: ubuntu-latest
 
