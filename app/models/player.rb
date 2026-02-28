@@ -4,7 +4,7 @@ class Player < ApplicationRecord
   has_many :player_awards, dependent: :destroy
   has_many :awards, through: :player_awards
   has_many :player_claims, dependent: :destroy
-  has_one :user
+  has_one :user, dependent: :nullify
   has_one_attached :photo
 
   validates :name, presence: true
