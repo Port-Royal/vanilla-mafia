@@ -33,7 +33,7 @@ module Scraper
       text = normalize(h1.text)
       # Header format: "YYYY-MM-DD Сезон N Серия M Игра K [optional name]"
       # Extract optional name after the standard prefix
-      match = text.match(/Игра\s+\d+\s+(.+)/i)
+      match = text.match(/Игра\s+\d+\s+(.+)/)
       match ? match[1].strip : nil
     end
 
@@ -69,15 +69,16 @@ module Scraper
         scraped_total = parse_decimal(cells[9].text)
 
         # Fold win bonus into plus so that total = plus - minus + best_move
-        stored_plus = (plus || 0) + (win ? 1.0 : 0)
-        stored_minus = minus || 0
+        zero = BigDecimal("0")
+        stored_plus = (plus || zero) + (win ? BigDecimal("1") : zero)
+        stored_minus = minus || zero
         stored_best_move = best_move
 
         # Fold any remaining gap (e.g. season participation bonus) into plus
         if scraped_total
-          computed = stored_plus - stored_minus + (stored_best_move || 0)
+          computed = stored_plus - stored_minus + (stored_best_move || zero)
           gap = scraped_total - computed
-          if gap.abs > 0.001
+          if gap.abs > BigDecimal("0.001")
             stored_plus += gap
             log "Game #{game_id}, #{player_name}: folded #{gap.round(2)} extra into plus"
           end
