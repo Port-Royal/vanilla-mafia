@@ -18,44 +18,36 @@ RSpec.describe HallOfFameService do
       expect(result).to be_a(described_class::Result)
     end
 
-    it "returns player awards ordered by position" do
-      expect(result.player_awards).to eq([ player_award1, player_award2 ])
+    it "returns player awards grouped by player" do
+      expect(result.player_awards).to eq(player1 => [ player_award1 ], player2 => [ player_award2 ])
     end
 
-    it "returns staff awards ordered by position" do
-      expect(result.staff_awards).to eq([ staff_award1, staff_award2 ])
+    it "returns staff awards grouped by player" do
+      expect(result.staff_awards).to eq(organizer1 => [ staff_award1 ], organizer2 => [ staff_award2 ])
     end
 
     it "does not include staff awards in player awards" do
-      expect(result.player_awards).not_to include(staff_award1)
+      expect(result.player_awards.keys).not_to include(organizer1)
     end
 
     it "does not include player awards in staff awards" do
-      expect(result.staff_awards).not_to include(player_award1)
+      expect(result.staff_awards.keys).not_to include(player1)
     end
 
     it "eager loads player association on player awards" do
-      expect(result.player_awards.first.association(:player)).to be_loaded
+      expect(result.player_awards.fetch(player1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on player awards" do
-      expect(result.player_awards.first.association(:award)).to be_loaded
+      expect(result.player_awards.fetch(player1).first.association(:award)).to be_loaded
     end
 
     it "eager loads player association on staff awards" do
-      expect(result.staff_awards.first.association(:player)).to be_loaded
+      expect(result.staff_awards.fetch(organizer1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on staff awards" do
-      expect(result.staff_awards.first.association(:award)).to be_loaded
-    end
-
-    it "returns a loaded relation for player_awards" do
-      expect(result.player_awards).to be_loaded
-    end
-
-    it "returns a loaded relation for staff_awards" do
-      expect(result.staff_awards).to be_loaded
+      expect(result.staff_awards.fetch(organizer1).first.association(:award)).to be_loaded
     end
 
     context "when no awards exist" do

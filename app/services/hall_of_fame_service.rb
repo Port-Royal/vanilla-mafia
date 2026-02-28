@@ -7,8 +7,19 @@ class HallOfFameService
 
   def call
     Result.new(
-      player_awards: PlayerAward.includes(:player, :award).where(award: Award.for_players).ordered.load,
-      staff_awards: PlayerAward.includes(:player, :award).where(award: Award.for_staff).ordered.load
+      player_awards: grouped_awards(Award.for_players),
+      staff_awards: grouped_awards(Award.for_staff)
     )
+  end
+
+  private
+
+  def grouped_awards(scope)
+    PlayerAward
+      .includes(player: { photo_attachment: :blob }, award: { icon_attachment: :blob })
+      .where(award: scope)
+      .ordered
+      .load
+      .group_by(&:player)
   end
 end
