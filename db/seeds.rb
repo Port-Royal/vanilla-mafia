@@ -20,6 +20,10 @@ if toggle.new_record?
 end
 toggle.save!
 
+# Validate all feature toggles are seeded
+missing_keys = FeatureToggle::KEYS.reject { |key| FeatureToggle.exists?(key: key) }
+raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
+
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
 if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
   user = User.find_or_initialize_by(email: ENV["ADMIN_EMAIL"])

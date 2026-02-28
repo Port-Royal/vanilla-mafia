@@ -7,6 +7,9 @@
 # Ignore bundler config.
 /.bundle
 
+# Ignore vendor bundle (installed gems).
+/vendor/bundle
+
 # Ignore all environment files.
 /.env*
 

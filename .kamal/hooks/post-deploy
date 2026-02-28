@@ -1,0 +1,3 @@
+#!/bin/sh
+
+kamal app exec --reuse "bin/rails db:seed"
