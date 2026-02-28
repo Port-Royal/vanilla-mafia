@@ -29,25 +29,50 @@
 
 en:
   hello: "Hello world"
-  errors:
-    messages:
-      already_claimed: "is already claimed"
+  common:
+    season: "Season"
+    series: "Series"
+    game: "Game"
+    coming_soon: "Coming soon! Stay tuned"
   nav:
+    hall_of_fame: "Hall of Fame"
     sign_in: "Sign in"
     sign_out: "Sign out"
     admin: "Admin"
-  player_claims:
-    create:
-      pending: "Claim submitted and awaiting approval."
-      approved: "Claim approved."
-      errors:
-        already_claimed: "This player is already linked to another account."
-        already_pending: "You already have a pending claim."
-        already_has_player: "You already have a claimed player."
-        player_already_claimed: "This player is already linked to another account."
-        claim_already_exists: "A claim for this player already exists."
+  seasons:
+    show:
+      date: "Date"
+      season: "Season"
+      series: "Series"
+      by_series: "By series and games"
+      by_players: "By players"
+      rank: "Rank"
+      player: "Player"
+      rating: "Rating"
+      games: "Games"
+      win_rate: "Win rate"
+      view: "Result"
+  games:
+    show:
+      player: "Player"
+      role: "Role"
+      plus: "Plus"
+      minus: "Minus"
+      best_move: "Best move"
+      total: "Total"
+  series:
+    show:
+      player: "Player"
+      total: "Total"
+  hall_of_fame:
+    title: "Hall of Fame"
+    organizers: "Organizers"
+    all_awards: "All awards"
+    award:
+      of_season: "of season %{season}"
   players:
     show:
+      awards: "Awards"
       claim_player: "This is me"
       claim_confirm: "Confirm this is your profile?"
       claim_pending: "Claim pending"
@@ -64,6 +89,26 @@ en:
       success: "Profile updated successfully."
     errors:
       no_claimed_player: "You have no claimed player."
-  hall_of_fame:
-    award:
-      of_season: "of season %{season}"
+  player_claims:
+    create:
+      pending: "Claim submitted and awaiting approval."
+      approved: "Claim approved."
+      errors:
+        already_claimed: "This player is already linked to another account."
+        already_pending: "You already have a pending claim."
+        already_has_player: "You already have a claimed player."
+        player_already_claimed: "This player is already linked to another account."
+        claim_already_exists: "A claim for this player already exists."
+  errors:
+    messages:
+      already_claimed: "is already claimed"
+    "404":
+      title: "Page not found"
+      message: "The page you requested does not exist or has been moved."
+    "422":
+      title: "Action not possible"
+      message: "The request could not be processed."
+    "500":
+      title: "Server error"
+      message: "An internal error occurred. Please try again later."
+    back_home: "Back to home"

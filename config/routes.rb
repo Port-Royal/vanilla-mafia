@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :players, only: [ :show ] do
     resource :claim, only: [ :create ], controller: "player_claims"
   end
+  resource :locale, only: [ :update ]
   resource :profile, only: [ :edit, :update ]
 
   get "hall", to: "hall_of_fame#show"

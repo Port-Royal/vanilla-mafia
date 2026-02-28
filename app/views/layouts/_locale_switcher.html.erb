@@ -1,0 +1,11 @@
+<% I18n.available_locales.each_with_index do |loc, i| %>
+  <% if i > 0 %><span class="text-neutral-500">|</span><% end %>
+  <% if loc == I18n.locale %>
+    <span class="text-white font-bold"><%= loc.to_s.upcase %></span>
+  <% else %>
+    <%= button_to loc.to_s.upcase, locale_path(locale: loc),
+          method: :patch,
+          class: "text-gray-400 hover:text-white transition-colors",
+          form: { class: "inline" } %>
+  <% end %>
+<% end %>
