@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Backup vanilla_mafia storage (SQLite DB + Active Storage files) to OneDrive via rclone.
+#
+# Prerequisites:
+#   1. Install rclone: https://rclone.org/install/
+#   2. Configure OneDrive remote: rclone config (name it "onedrive")
+#   3. Schedule via cron: 0 3 * * 0 /path/to/bin/backup
+#
+# Environment variables (optional):
+#   VOLUME_PATH  - Docker volume path (default: /var/lib/docker/volumes/vanilla_mafia_storage/_data)
+#   RCLONE_REMOTE - rclone remote name (default: onedrive)
+#   REMOTE_DIR   - remote directory (default: vanilla_mafia_backups)
+#   KEEP_BACKUPS - number of backups to retain (default: 4)
+
+VOLUME_PATH="${VOLUME_PATH:-/var/lib/docker/volumes/vanilla_mafia_storage/_data}"
+RCLONE_REMOTE="${RCLONE_REMOTE:-onedrive}"
+REMOTE_DIR="${REMOTE_DIR:-vanilla_mafia_backups}"
+KEEP_BACKUPS="${KEEP_BACKUPS:-4}"
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR=$(mktemp -d)
+BACKUP_NAME="vanilla_mafia_${TIMESTAMP}"
+BACKUP_FILE="${BACKUP_DIR}/${BACKUP_NAME}.tar.gz"
+
+cleanup() {
+  rm -rf "$BACKUP_DIR"
+}
+trap cleanup EXIT
+
+echo "[$(date)] Starting backup..."
+
+# 1. Safe SQLite backup using .backup command (handles WAL correctly)
+DB_FILE="${VOLUME_PATH}/production.sqlite3"
+DB_BACKUP="${BACKUP_DIR}/production.sqlite3"
+
+if [ ! -f "$DB_FILE" ]; then
+  echo "ERROR: Database file not found at ${DB_FILE}"
+  exit 1
+fi
+
+echo "[$(date)] Backing up SQLite database..."
+sqlite3 "$DB_FILE" ".backup '${DB_BACKUP}'"
+
+# 2. Create tarball with DB backup + Active Storage files
+echo "[$(date)] Creating archive..."
+tar -czf "$BACKUP_FILE" \
+  -C "$BACKUP_DIR" production.sqlite3 \
+  -C "$VOLUME_PATH" --exclude="*.sqlite3" --exclude="*.sqlite3-*" .
+
+echo "[$(date)] Archive size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+# 3. Upload to OneDrive
+echo "[$(date)] Uploading to ${RCLONE_REMOTE}:${REMOTE_DIR}/..."
+rclone copy "$BACKUP_FILE" "${RCLONE_REMOTE}:${REMOTE_DIR}/"
+
+# 4. Prune old backups (keep KEEP_BACKUPS most recent)
+echo "[$(date)] Pruning old backups (keeping ${KEEP_BACKUPS})..."
+rclone lsf "${RCLONE_REMOTE}:${REMOTE_DIR}/" --files-only \
+  | sort -r \
+  | tail -n +$((KEEP_BACKUPS + 1)) \
+  | while read -r old_file; do
+      echo "  Deleting ${old_file}"
+      rclone delete "${RCLONE_REMOTE}:${REMOTE_DIR}/${old_file}"
+    done
+
+echo "[$(date)] Backup complete: ${BACKUP_NAME}.tar.gz"
