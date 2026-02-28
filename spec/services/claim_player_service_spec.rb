@@ -30,15 +30,29 @@ RSpec.describe ClaimPlayerService do
       end
     end
 
-    context "when user already has a pending claim for the player" do
-      before { create(:player_claim, user: user, player: player, status: "pending") }
+    context "when user has a pending claim for a different player" do
+      let(:other_player) { create(:player) }
 
-      it "returns failure with :claim_already_exists error" do
+      before { create(:player_claim, user: user, player: other_player, status: "pending") }
+
+      it "returns failure with :already_pending error" do
         result = described_class.call(user: user, player: player)
 
         expect(result.success).to be false
         expect(result.claim).to be_nil
-        expect(result.error).to eq(:claim_already_exists)
+        expect(result.error).to eq(:already_pending)
+      end
+    end
+
+    context "when user already has a pending claim for the player" do
+      before { create(:player_claim, user: user, player: player, status: "pending") }
+
+      it "returns failure with :already_pending error" do
+        result = described_class.call(user: user, player: player)
+
+        expect(result.success).to be false
+        expect(result.claim).to be_nil
+        expect(result.error).to eq(:already_pending)
       end
     end
 
