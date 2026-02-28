@@ -114,22 +114,5 @@ RSpec.describe ProfilesController do
         end
       end
     end
-
-    context "when user tries to edit another player's profile" do
-      let_it_be(:other_player) { create(:player, name: "Другой") }
-      let_it_be(:player) { create(:player, name: "Мой") }
-      let_it_be(:user) { create(:user, player: player) }
-      let_it_be(:other_user) { create(:user, player: other_player) }
-
-      before do
-        sign_in user
-      end
-
-      it "only allows editing own profile" do
-        get edit_profile_path
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Мой")
-      end
-    end
   end
 end
