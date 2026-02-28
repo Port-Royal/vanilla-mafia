@@ -59,3 +59,6 @@ en:
       success: "Profile updated successfully."
     errors:
       no_claimed_player: "You have no claimed player."
+  hall_of_fame:
+    award:
+      of_season: "of season %{season}"

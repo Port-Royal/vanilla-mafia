@@ -1,0 +1,8 @@
+<% award = player_award.award %>
+<span>
+  <% if award.icon.attached? %>
+    <%= image_tag award.icon, size: "32x32", alt: award.title, title: "#{award.title} #{t('hall_of_fame.award.of_season', season: player_award.season)}" %>
+  <% else %>
+    <p><%= award.title %></p>  
+  <% end %>
+</span>

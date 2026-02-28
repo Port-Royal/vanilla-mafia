@@ -1,0 +1,9 @@
+<div class="rounded border border-maroon/20 p-4">
+  <div><%= image_tag player.photo if player.photo.attached? %></div>
+  <p class="font-medium"><%= player.name %></p>
+  <div class="flex flex-wrap gap-2">
+    <% awards.each do |pa| %>
+      <%= render partial: "hall_of_fame/award", locals: { player_award: pa } %>
+    <% end %>
+  </div>
+</div>
