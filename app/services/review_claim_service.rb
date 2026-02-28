@@ -4,8 +4,13 @@ class ReviewClaimService
       claim.lock!
       raise ArgumentError, "claim must be pending" unless claim.pending?
 
+      user = claim.user
+      user.lock!
+
+      raise ArgumentError, "user already linked to a different player" if user.player_id.present? && user.player_id != claim.player_id
+
       claim.update!(status: "approved", reviewed_by: admin, reviewed_at: Time.current, rejection_reason: nil)
-      claim.user.update!(player: claim.player)
+      user.update!(player: claim.player)
     end
   end
 

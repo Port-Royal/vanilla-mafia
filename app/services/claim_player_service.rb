@@ -41,6 +41,7 @@ class ClaimPlayerService
       :claim_already_exists
     end
   end
+
   def claim_exists?
     PlayerClaim.exists?(user: @user, player: @player)
   end
