@@ -133,8 +133,26 @@ RSpec.describe PlayerClaimsController do
         end
       end
 
+      context "when user has a pending claim for a different player" do
+        let(:other_player) { create(:player) }
+
+        before { create(:player_claim, user: user, player: other_player, status: "pending") }
+
+        it "does not create a claim" do
+          expect { post player_claim_path(player) }
+            .not_to change(PlayerClaim, :count)
+        end
+
+        it "redirects with alert" do
+          post player_claim_path(player)
+
+          expect(response).to redirect_to(player_path(player))
+          expect(flash[:alert]).to eq(I18n.t("player_claims.create.errors.already_pending"))
+        end
+      end
+
       context "when a claim already exists for this user and player" do
-        before { create(:player_claim, user: user, player: player) }
+        before { create(:player_claim, user: user, player: player, status: "rejected") }
 
         it "does not create another claim" do
           expect { post player_claim_path(player) }

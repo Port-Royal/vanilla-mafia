@@ -13,6 +13,7 @@ class ClaimPlayerService
   def call
     return Result.new(success: false, claim: nil, error: :already_has_player) if @user.claimed_player?
     return Result.new(success: false, claim: nil, error: :player_already_claimed) if @player.claimed?
+    return Result.new(success: false, claim: nil, error: :already_pending) if @user.pending_claim?
     return Result.new(success: false, claim: nil, error: :claim_already_exists) if claim_exists?
 
     if approve_immediately?
