@@ -5,7 +5,7 @@ RSpec.describe Scraper::Base do
   subject(:scraper) { described_class.new }
 
   describe "#fetch" do
-    let(:uri) { URI("#{Scraper::BASE_URL}/test") }
+
 
     context "when request succeeds" do
       before do

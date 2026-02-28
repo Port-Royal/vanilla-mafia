@@ -59,6 +59,7 @@ RSpec.describe Scraper::HallScraper do
         result = scraper.scrape
         expect(result[:awards]).to eq([])
         expect(result[:player_awards]).to eq([])
+        expect(result[:staff_awards]).to eq([])
       end
     end
   end
