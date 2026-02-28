@@ -1,3 +1,5 @@
+require "base64"
+require "stringio"
 require_relative "../scraper/base"
 require_relative "../scraper/season_scraper"
 require_relative "../scraper/game_scraper"
@@ -77,7 +79,6 @@ def phase3_scrape_hall
       award = Award.find_or_initialize_by(title: award_data[:title], staff: false)
       award.description = award_data[:description]
       award.position = award_data[:position]
-      attach_icon(award, award_data[:icon_data]) if award_data[:icon_data] && !award.icon.attached?
       award.save!
     end
 
@@ -116,6 +117,14 @@ def phase3_scrape_hall
         season: pa[:season]
       ).save!
     end
+  end
+
+  # Attach icons outside the transaction to avoid holding DB locks during file I/O
+  hall_data[:awards].each do |award_data|
+    next unless award_data[:icon_data]
+
+    award = Award.find_by(title: award_data[:title], staff: false)
+    attach_icon(award, award_data[:icon_data]) if award && !award.icon.attached?
   end
 
   puts "Awards created: #{Award.count}"

@@ -1,3 +1,4 @@
+require "bigdecimal"
 require "net/http"
 require "nokogiri"
 
@@ -39,7 +40,7 @@ module Scraper
       text = text.to_s.strip
       return nil if text.empty?
 
-      text.to_f
+      BigDecimal(text)
     end
 
     # Normalize NFD → NFC to handle decomposed Cyrillic (й = и+̆, ё = е+̈)

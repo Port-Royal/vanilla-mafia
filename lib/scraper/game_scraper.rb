@@ -33,7 +33,7 @@ module Scraper
       text = normalize(h1.text)
       # Header format: "YYYY-MM-DD Сезон N Серия M Игра K [optional name]"
       # Extract optional name after the standard prefix
-      match = text.match(/Игра\s+\d+\s+(.+)/i)
+      match = text.match(/Игра\s+\d+\s+(.+)/)
       match ? match[1].strip : nil
     end
 
