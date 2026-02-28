@@ -20,12 +20,27 @@ class ClaimPlayerService
     else
       create_pending_claim
     end
-  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+  rescue ActiveRecord::RecordNotUnique
     Result.new(success: false, claim: nil, error: :claim_already_exists)
+  rescue ActiveRecord::RecordInvalid
+    error = error_from_current_state
+    Result.new(success: false, claim: nil, error: error)
   end
 
   private
 
+  def error_from_current_state
+    ActiveRecord::Base.transaction do
+      @user.lock!
+      @player.lock!
+
+      return :already_has_player if @user.claimed_player?
+      return :player_already_claimed if @player.claimed?
+      return :claim_already_exists if claim_exists?
+
+      :claim_already_exists
+    end
+  end
   def claim_exists?
     PlayerClaim.exists?(user: @user, player: @player)
   end
