@@ -219,7 +219,7 @@ def attach_icon(award, icon_data_uri)
   award.save! if award.new_record? # need persisted record for attach
   award.icon.attach(
     io: StringIO.new(binary),
-    filename: "award_#{award.title.parameterize}.png",
+    filename: "award_#{award.title.parameterize}.#{match[1].sub('jpeg', 'jpg')}",
     content_type: content_type
   )
 rescue ArgumentError => e
