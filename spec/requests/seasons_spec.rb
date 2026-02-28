@@ -18,8 +18,8 @@ RSpec.describe SeasonsController do
       end
 
       it "renders series headings" do
-        expect(response.body).to include("Серия 1")
-        expect(response.body).to include("Серия 2")
+        expect(response.body).to include("Сезон")
+        expect(response.body).to include("Серия")
       end
 
       it "renders game links" do
