@@ -3,9 +3,19 @@ class Player < ApplicationRecord
   has_many :games, through: :ratings
   has_many :player_awards, dependent: :destroy
   has_many :awards, through: :player_awards
+  has_many :player_claims, dependent: :destroy
+  has_one :user
   has_one_attached :photo
 
   validates :name, presence: true
+
+  def claimed?
+    user.present?
+  end
+
+  def claimed_by?(check_user)
+    user == check_user
+  end
 
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
