@@ -1,9 +1,9 @@
 module Scraper
   class SeasonScraper < Base
-    def scrape_all
+    def scrape_all(seasons: 1..5)
       games = []
 
-      (1..5).each do |season|
+      seasons.each do |season|
         doc = fetch("/season/#{season}")
         next unless doc
 

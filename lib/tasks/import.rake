@@ -30,7 +30,8 @@ end
 def phase1_scrape_seasons
   puts "--- Phase 1: Scraping seasons ---"
   scraper = Scraper::SeasonScraper.new
-  games = scraper.scrape_all
+  seasons = parse_seasons(ENV["SEASONS"])
+  games = scraper.scrape_all(seasons:)
   puts "Total games discovered: #{games.size}"
   puts
   games
@@ -233,4 +234,26 @@ def attach_icon(award, icon_data_uri)
   )
 rescue ArgumentError => e
   puts "ERROR: Invalid base64 for icon #{award.title}: #{e.message}"
+end
+
+def parse_seasons(value)
+  return (1..5).to_a if value.blank?
+
+  str = value.to_s.strip
+
+  range_match = /\A(\d+)-(\d+)\z/.match(str)
+  if range_match
+    first = Integer(range_match[1])
+    last = Integer(range_match[2])
+    raise ArgumentError, "Invalid SEASONS range: #{first} must be <= #{last}" if first > last
+
+    return (first..last).to_a
+  end
+
+  str.split(",").map do |segment|
+    seg = segment.strip
+    raise ArgumentError, "Invalid SEASONS segment: #{seg.inspect}" unless /\A\d+\z/.match?(seg)
+
+    Integer(seg)
+  end
 end
