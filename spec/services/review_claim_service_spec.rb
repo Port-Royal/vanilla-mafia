@@ -24,10 +24,26 @@ RSpec.describe ReviewClaimService do
       expect(claim.reload.reviewed_at).to be_present
     end
 
+    it "clears the rejection_reason" do
+      claim.update!(rejection_reason: "old reason")
+      described_class.approve(claim: claim, admin: admin)
+
+      expect(claim.reload.rejection_reason).to be_nil
+    end
+
     it "assigns the player to the claiming user" do
       described_class.approve(claim: claim, admin: admin)
 
       expect(claim.user.reload.player_id).to eq(claim.player_id)
+    end
+
+    context "when claim is not pending" do
+      let(:claim) { create(:player_claim, status: "rejected") }
+
+      it "raises ArgumentError" do
+        expect { described_class.approve(claim: claim, admin: admin) }
+          .to raise_error(ArgumentError, "claim must be pending")
+      end
     end
   end
 
@@ -63,6 +79,15 @@ RSpec.describe ReviewClaimService do
       described_class.reject(claim: claim, admin: admin, reason: reason)
 
       expect(claim.user.reload.player_id).to be_nil
+    end
+
+    context "when claim is not pending" do
+      let(:claim) { create(:player_claim, status: "approved") }
+
+      it "raises ArgumentError" do
+        expect { described_class.reject(claim: claim, admin: admin, reason: reason) }
+          .to raise_error(ArgumentError, "claim must be pending")
+      end
     end
   end
 end

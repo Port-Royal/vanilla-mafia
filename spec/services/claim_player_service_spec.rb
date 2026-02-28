@@ -30,6 +30,18 @@ RSpec.describe ClaimPlayerService do
       end
     end
 
+    context "when user already has a pending claim for the player" do
+      before { create(:player_claim, user: user, player: player, status: "pending") }
+
+      it "returns failure with :claim_already_exists error" do
+        result = described_class.call(user: user, player: player)
+
+        expect(result.success).to be false
+        expect(result.claim).to be_nil
+        expect(result.error).to eq(:claim_already_exists)
+      end
+    end
+
     context "when approval is required" do
       let(:original_value) { Rails.application.config.player_claims.require_approval }
 
