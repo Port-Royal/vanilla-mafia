@@ -15,6 +15,11 @@ class HallOfFameService
   private
 
   def grouped_awards(scope)
-    PlayerAward.includes(:player, :award).where(award: scope).ordered.load.group_by(&:player)
+    PlayerAward
+      .includes(player: { photo_attachment: :blob }, award: { icon_attachment: :blob })
+      .where(award: scope)
+      .ordered
+      .load
+      .group_by(&:player)
   end
 end
