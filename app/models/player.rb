@@ -17,6 +17,14 @@ class Player < ApplicationRecord
     user == check_user
   end
 
+  def claimed?
+    user.present?
+  end
+
+  def claimed_by?(check_user)
+    user == check_user
+  end
+
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
   scope :ranked, -> {

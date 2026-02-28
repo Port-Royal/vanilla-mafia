@@ -12,7 +12,9 @@ Rails.application.routes.draw do
   end
 
   resources :games, only: [ :show ]
-  resources :players, only: [ :show ]
+  resources :players, only: [ :show ] do
+    resource :claim, only: [ :create ], controller: "player_claims"
+  end
   resource :profile, only: [ :edit, :update ]
 
   get "hall", to: "hall_of_fame#show"
