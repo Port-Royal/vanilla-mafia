@@ -74,6 +74,8 @@ ru:
       save: "Сохранить"
       name_label: "Имя"
       name_hint: "Отображаемое имя игрока"
+      comment_label: "Комментарий"
+      photo_label: "Фото"
     update:
       success: "Профиль успешно обновлён."
     errors:

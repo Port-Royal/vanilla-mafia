@@ -30,6 +30,12 @@ RSpec.describe ProfilePolicy do
 
       it { is_expected.not_to be_edit }
     end
+
+    context "when user is nil" do
+      subject(:policy) { described_class.new(nil, player) }
+
+      it { is_expected.not_to be_edit }
+    end
   end
 
   describe "#update?" do
