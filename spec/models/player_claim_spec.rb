@@ -10,7 +10,7 @@ RSpec.describe PlayerClaim, type: :model do
   describe 'validations' do
     subject { build(:player_claim) }
 
-    it { is_expected.to validate_inclusion_of(:status).in_array(%w[pending approved rejected]) }
+    it { is_expected.to validate_inclusion_of(:status).in_array(described_class::STATUSES) }
 
     it {
       is_expected.to validate_uniqueness_of(:user_id).scoped_to(:player_id)
@@ -133,6 +133,12 @@ RSpec.describe PlayerClaim, type: :model do
   end
 
   describe '.require_approval?' do
+    let(:original_value) { Rails.application.config.player_claims.require_approval }
+
+    after do
+      Rails.application.config.player_claims.require_approval = original_value
+    end
+
     context 'when config is true' do
       before do
         Rails.application.config.player_claims.require_approval = true
@@ -146,10 +152,6 @@ RSpec.describe PlayerClaim, type: :model do
     context 'when config is false' do
       before do
         Rails.application.config.player_claims.require_approval = false
-      end
-
-      after do
-        Rails.application.config.player_claims.require_approval = true
       end
 
       it 'returns false' do

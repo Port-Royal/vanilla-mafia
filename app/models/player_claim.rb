@@ -25,6 +25,7 @@ class PlayerClaim < ApplicationRecord
     status == "rejected"
   end
 
+  # TODO: Replace with feature toggle mechanism (vanilla-mafia-63)
   def self.require_approval?
     Rails.application.config.player_claims.require_approval
   end
