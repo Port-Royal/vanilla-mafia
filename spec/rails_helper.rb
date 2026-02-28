@@ -27,6 +27,10 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :system
+
+  config.around do |example|
+    I18n.with_locale(I18n.default_locale) { example.run }
+  end
 end
 
 Shoulda::Matchers.configure do |config|

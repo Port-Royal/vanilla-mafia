@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
   <head>
     <title><%= content_for(:title) || "Vanilla Mafia" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -68,6 +68,9 @@
                   class: "block text-gray-300 hover:text-white transition-colors" %>
           </li>
         <% end %>
+        <li class="border-t border-neutral-700 pt-2">
+          <%= render "layouts/locale_switcher" %>
+        </li>
       </ul>
     </nav>
 
@@ -110,6 +113,9 @@
                         class: "block hover:text-white transition-colors" %>
                 </li>
               <% end %>
+              <li class="border-t border-neutral-700 pt-3">
+                <%= render "layouts/locale_switcher" %>
+              </li>
             </ul>
           </nav>
         </div>
