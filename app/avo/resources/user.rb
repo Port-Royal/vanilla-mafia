@@ -9,5 +9,6 @@ class Avo::Resources::User < Avo::BaseResource
     field :id, as: :id
     field :email, as: :text
     field :admin, as: :boolean
+    field :player, as: :belongs_to
   end
 end
