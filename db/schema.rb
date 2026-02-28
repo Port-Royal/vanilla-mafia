@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_28_044851) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_073900) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -46,6 +46,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_044851) do
     t.boolean "staff", default: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "feature_toggles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.boolean "enabled", default: false, null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_feature_toggles_on_key", unique: true
   end
 
   create_table "games", force: :cascade do |t|

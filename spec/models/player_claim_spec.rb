@@ -133,27 +133,23 @@ RSpec.describe PlayerClaim, type: :model do
   end
 
   describe '.require_approval?' do
-    let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-    after do
-      Rails.application.config.player_claims.require_approval = original_value
-    end
-
-    context 'when config is true' do
-      before do
-        Rails.application.config.player_claims.require_approval = true
-      end
+    context 'when toggle is enabled' do
+      let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
       it 'returns true' do
         expect(described_class.require_approval?).to be true
       end
     end
 
-    context 'when config is false' do
-      before do
-        Rails.application.config.player_claims.require_approval = false
-      end
+    context 'when toggle is disabled' do
+      let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: false) }
 
+      it 'returns false' do
+        expect(described_class.require_approval?).to be false
+      end
+    end
+
+    context 'when toggle does not exist' do
       it 'returns false' do
         expect(described_class.require_approval?).to be false
       end

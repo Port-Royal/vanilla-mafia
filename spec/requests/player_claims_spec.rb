@@ -20,10 +20,7 @@ RSpec.describe PlayerClaimsController do
       before { sign_in user }
 
       context "when claim requires approval" do
-        let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-        before { Rails.application.config.player_claims.require_approval = true }
-        after { Rails.application.config.player_claims.require_approval = original_value }
+        let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
         it "creates a pending claim" do
           expect { post player_claim_path(player) }
@@ -45,10 +42,7 @@ RSpec.describe PlayerClaimsController do
       end
 
       context "when claim does not require approval" do
-        let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-        before { Rails.application.config.player_claims.require_approval = false }
-        after { Rails.application.config.player_claims.require_approval = original_value }
+        let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: false) }
 
         it "creates an approved claim" do
           expect { post player_claim_path(player) }
@@ -77,10 +71,7 @@ RSpec.describe PlayerClaimsController do
 
       context "when user is admin" do
         let(:user) { create(:user, admin: true) }
-        let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-        before { Rails.application.config.player_claims.require_approval = true }
-        after { Rails.application.config.player_claims.require_approval = original_value }
+        let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
         it "creates an approved claim" do
           post player_claim_path(player)

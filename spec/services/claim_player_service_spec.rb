@@ -55,10 +55,7 @@ RSpec.describe ClaimPlayerService do
     end
 
     context "when approval is required" do
-      let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-      before { Rails.application.config.player_claims.require_approval = true }
-      after { Rails.application.config.player_claims.require_approval = original_value }
+      let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
       context "when user is not an admin" do
         it "creates a pending claim" do
@@ -97,10 +94,7 @@ RSpec.describe ClaimPlayerService do
     end
 
     context "when approval is not required" do
-      let(:original_value) { Rails.application.config.player_claims.require_approval }
-
-      before { Rails.application.config.player_claims.require_approval = false }
-      after { Rails.application.config.player_claims.require_approval = original_value }
+      let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: false) }
 
       it "creates an approved claim" do
         result = described_class.call(user: user, player: player)
