@@ -3,21 +3,73 @@ set -euo pipefail
 
 # Backup vanilla_mafia storage (SQLite DB + Active Storage files) to OneDrive via rclone.
 #
-# Prerequisites:
-#   1. Install rclone: https://rclone.org/install/
-#   2. Configure OneDrive remote: rclone config (name it "onedrive")
-#   3. Schedule via cron: 0 3 * * 0 /path/to/bin/backup
+# ── Setup ────────────────────────────────────────────────────────────────
 #
-# Environment variables (optional):
-#   VOLUME_PATH  - Docker volume path (default: /var/lib/docker/volumes/vanilla_mafia_storage/_data)
+# 1. Install rclone:
+#      curl https://rclone.org/install.sh | sudo bash
+#
+# 2. Configure OneDrive remote (interactive, requires browser):
+#      rclone config
+#      → New remote → name: onedrive → Storage: Microsoft OneDrive
+#      → Follow the OAuth prompts in your browser
+#      → Choose "OneDrive Personal" or "OneDrive Business" as appropriate
+#
+# 3. Verify the remote works:
+#      rclone lsd onedrive:          # should list your OneDrive root folders
+#      rclone mkdir onedrive:vanilla_mafia_backups   # create the backup dir
+#
+# 4. Test the backup script (dry run — creates archive locally, skips upload):
+#      sudo bin/backup --dry-run
+#
+# 5. Run a real backup to verify end-to-end:
+#      sudo bin/backup
+#      rclone ls onedrive:vanilla_mafia_backups/     # confirm file appeared
+#
+# 6. Schedule weekly via cron (Sundays at 3 AM):
+#      sudo crontab -e
+#      0 3 * * 0 /home/deploy/vanilla-mafia/bin/backup >> /var/log/vanilla_mafia_backup.log 2>&1
+#
+# ── Restore ──────────────────────────────────────────────────────────────
+#
+# 1. Download the backup:
+#      rclone copy onedrive:vanilla_mafia_backups/vanilla_mafia_YYYYMMDD_HHMMSS.tar.gz /tmp/restore/
+#
+# 2. Extract:
+#      cd /tmp/restore && tar -xzf vanilla_mafia_*.tar.gz
+#
+# 3. Stop the app:
+#      kamal app stop
+#
+# 4. Restore files to the Docker volume:
+#      VOLUME=/var/lib/docker/volumes/vanilla_mafia_storage/_data
+#      cp /tmp/restore/production.sqlite3 "$VOLUME/production.sqlite3"
+#      rsync -a --exclude="*.sqlite3" /tmp/restore/ "$VOLUME/"
+#
+# 5. Restart the app:
+#      kamal app boot
+#
+# ── Environment variables (optional) ────────────────────────────────────
+#
+#   VOLUME_PATH   - Docker volume path (default: /var/lib/docker/volumes/vanilla_mafia_storage/_data)
 #   RCLONE_REMOTE - rclone remote name (default: onedrive)
-#   REMOTE_DIR   - remote directory (default: vanilla_mafia_backups)
-#   KEEP_BACKUPS - number of backups to retain (default: 4)
+#   REMOTE_DIR    - remote directory (default: vanilla_mafia_backups)
+#   KEEP_BACKUPS  - number of backups to retain (default: 4)
+#
+# ── Usage ────────────────────────────────────────────────────────────────
+#
+#   bin/backup              # full backup + upload
+#   bin/backup --dry-run    # create archive locally, skip upload and pruning
 
 VOLUME_PATH="${VOLUME_PATH:-/var/lib/docker/volumes/vanilla_mafia_storage/_data}"
 RCLONE_REMOTE="${RCLONE_REMOTE:-onedrive}"
 REMOTE_DIR="${REMOTE_DIR:-vanilla_mafia_backups}"
 KEEP_BACKUPS="${KEEP_BACKUPS:-4}"
+DRY_RUN=false
+
+if [ "${1:-}" = "--dry-run" ]; then
+  DRY_RUN=true
+  echo "[$(date)] DRY RUN — archive will be created but not uploaded"
+fi
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR=$(mktemp -d)
@@ -50,6 +102,14 @@ tar -czf "$BACKUP_FILE" \
   -C "$VOLUME_PATH" --exclude="*.sqlite3" --exclude="*.sqlite3-*" .
 
 echo "[$(date)] Archive size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+if [ "$DRY_RUN" = true ]; then
+  echo "[$(date)] DRY RUN complete. Archive: ${BACKUP_FILE}"
+  echo "[$(date)] To inspect: tar -tzf ${BACKUP_FILE} | head -20"
+  # Prevent cleanup so user can inspect the archive
+  trap - EXIT
+  exit 0
+fi
 
 # 3. Upload to OneDrive
 echo "[$(date)] Uploading to ${RCLONE_REMOTE}:${REMOTE_DIR}/..."
