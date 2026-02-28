@@ -14,8 +14,10 @@ end
 
 # Feature toggles
 toggle = FeatureToggle.find_or_initialize_by(key: "require_approval")
-toggle.enabled = true
-toggle.description = "Require admin approval for player claims"
+if toggle.new_record?
+  toggle.enabled = true
+  toggle.description = "Require admin approval for player claims"
+end
 toggle.save!
 
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
