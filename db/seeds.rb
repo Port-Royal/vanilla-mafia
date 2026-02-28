@@ -21,7 +21,7 @@ end
 toggle.save!
 
 # Validate all feature toggles are seeded
-missing_keys = FeatureToggle::KEYS.reject { |key| FeatureToggle.exists?(key: key) }
+missing_keys = FeatureToggle::KEYS - FeatureToggle.pluck(:key)
 raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
 
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
