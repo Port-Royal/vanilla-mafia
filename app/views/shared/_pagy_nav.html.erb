@@ -1,0 +1,39 @@
+<%# Tailwind-styled pagination nav for pagy.
+     Usage: render "shared/pagy_nav", pagy: @pagy %>
+<% if pagy.pages > 1 %>
+  <%
+    link_classes      = "px-3 py-1.5 text-sm rounded border border-neutral-300 " \
+                        "text-neutral-700 hover:bg-neutral-100 transition-colors"
+    current_classes    = "px-3 py-1.5 text-sm rounded border border-maroon " \
+                        "bg-maroon text-white"
+    disabled_classes   = "px-3 py-1.5 text-sm rounded border border-neutral-200 " \
+                        "text-neutral-400 cursor-default"
+    gap_classes        = "px-2 py-1.5 text-sm text-neutral-400"
+  %>
+  <nav class="flex items-center justify-center gap-1 mt-8" aria-label="<%= pagy_t("pagy.aria_label.nav", count: pagy.pages) %>">
+    <% if pagy.prev %>
+      <%= link_to pagy_t("pagy.prev"), pagy_url_for(pagy, pagy.prev), class: link_classes,
+            aria: { label: pagy_t("pagy.aria_label.prev") } %>
+    <% else %>
+      <span class="<%= disabled_classes %>" aria-disabled="true"><%= pagy_t("pagy.prev") %></span>
+    <% end %>
+
+    <% pagy.series.each do |item| %>
+      <% case item
+         when Integer %>
+        <%= link_to item, pagy_url_for(pagy, item), class: link_classes %>
+      <% when String %>
+        <span class="<%= current_classes %>" aria-current="page"><%= item %></span>
+      <% when :gap %>
+        <span class="<%= gap_classes %>">&hellip;</span>
+      <% end %>
+    <% end %>
+
+    <% if pagy.next %>
+      <%= link_to pagy_t("pagy.next"), pagy_url_for(pagy, pagy.next), class: link_classes,
+            aria: { label: pagy_t("pagy.aria_label.next") } %>
+    <% else %>
+      <span class="<%= disabled_classes %>" aria-disabled="true"><%= pagy_t("pagy.next") %></span>
+    <% end %>
+  </nav>
+<% end %>
