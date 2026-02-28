@@ -32,6 +32,9 @@ ru:
         staff: "Организаторская"
   seasons:
     show:
+      date: "Дата"
+      season: "Сезон"
+      series: "Серия"
       by_series: "По сериям и играм"
       by_players: "По игрокам"
       rank: "Место"

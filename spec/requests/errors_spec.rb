@@ -37,7 +37,7 @@ RSpec.describe ErrorsController do
     before { get "/422" }
 
     it "returns 422 status" do
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "renders the error title" do

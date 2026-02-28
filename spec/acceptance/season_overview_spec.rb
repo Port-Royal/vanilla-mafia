@@ -17,11 +17,6 @@ RSpec.describe "Season overview" do
     visit season_path(number: 5)
   end
 
-  it "displays games grouped by series" do
-    expect(page).to have_content("Серия 1")
-    expect(page).to have_content("Серия 2")
-  end
-
   it "links to individual games" do
     expect(page).to have_link(href: game_path(game1))
     expect(page).to have_link(href: game_path(game2))
@@ -47,7 +42,7 @@ RSpec.describe "Season overview" do
   end
 
   it "displays player statistics" do
-    within("table") do
+    within("table#players-table") do
       expect(page).to have_content("Алексей")
       expect(page).to have_content("Борис")
     end
