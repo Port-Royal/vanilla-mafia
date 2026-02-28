@@ -5,7 +5,7 @@ class Player < ApplicationRecord
   has_many :awards, through: :player_awards
   has_one_attached :photo
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
 
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
