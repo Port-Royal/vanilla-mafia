@@ -1,5 +1,21 @@
 <h1 class="text-3xl font-bold text-maroon mb-6"><%= @player.name %></h1>
 
+<% if user_signed_in? %>
+  <% if @player.claimed_by?(current_user) %>
+    <div class="mb-6">
+      <%= link_to t(".edit_profile"), edit_profile_path, class: "text-maroon hover:underline font-medium" %>
+    </div>
+  <% elsif current_user.pending_claim_for(@player) %>
+    <p class="text-gray-600 italic mb-6"><%= t(".claim_pending") %></p>
+  <% elsif !@player.claimed? && !current_user.claimed_player? && !current_user.pending_claim? %>
+    <div class="mb-6">
+      <%= button_to t(".claim_player"), player_claim_path(@player),
+            data: { turbo_confirm: t(".claim_confirm") },
+            class: "bg-maroon text-white px-4 py-2 rounded hover:bg-maroon/90 font-medium" %>
+    </div>
+  <% end %>
+<% end %>
+
 <% @games_by_season.each do |season, games| %>
   <h2 class="text-xl font-bold text-maroon mt-6 mb-3">Сезон <%= season %></h2>
   <ul class="list-disc list-inside space-y-1 ml-2">
