@@ -6,6 +6,8 @@ class ProfilePolicy < ApplicationPolicy
   end
 
   def update?
+    return false if user.nil?
+
     user.player_id == record.id
   end
 end

@@ -29,6 +29,9 @@
 
 en:
   hello: "Hello world"
+  errors:
+    messages:
+      already_claimed: "is already claimed"
   nav:
     sign_in: "Sign in"
     sign_out: "Sign out"
@@ -58,3 +61,6 @@ en:
       success: "Profile updated successfully."
     errors:
       no_claimed_player: "You have no claimed player."
+  hall_of_fame:
+    award:
+      of_season: "of season %{season}"

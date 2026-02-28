@@ -6,10 +6,54 @@ RSpec.describe Player, type: :model do
     it { is_expected.to have_many(:games).through(:ratings) }
     it { is_expected.to have_many(:player_awards).dependent(:destroy) }
     it { is_expected.to have_many(:awards).through(:player_awards) }
+    it { is_expected.to have_many(:player_claims).dependent(:destroy) }
+    it { is_expected.to have_one(:user) }
   end
 
   describe 'validations' do
+    subject { build(:player) }
+
     it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:name) }
+  end
+
+  describe '#claimed?' do
+    context 'when player has a user' do
+      let(:player) { create(:player) }
+
+      before { create(:user, player: player) }
+
+      it 'returns true' do
+        expect(player.claimed?).to be true
+      end
+    end
+
+    context 'when player has no user' do
+      let(:player) { build(:player) }
+
+      it 'returns false' do
+        expect(player.claimed?).to be false
+      end
+    end
+  end
+
+  describe '#claimed_by?' do
+    let(:player) { create(:player) }
+    let(:user) { create(:user, player: player) }
+
+    context 'when the given user is the claiming user' do
+      it 'returns true' do
+        expect(player.claimed_by?(user)).to be true
+      end
+    end
+
+    context 'when the given user is a different user' do
+      let(:other_user) { create(:user) }
+
+      it 'returns false' do
+        expect(player.claimed_by?(other_user)).to be false
+      end
+    end
   end
 
   describe '.ordered' do

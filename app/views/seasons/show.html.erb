@@ -1,24 +1,42 @@
 <section class="mb-10">
   <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".by_series") %></h2>
 
-  <% @games_by_series.each do |series, games| %>
-    <h3 class="text-lg font-medium text-maroon mt-4 mb-2">
-      <%= link_to "Серия #{series}", season_series_path(season_number: @season, number: series),
-            class: "hover:underline" %>
-    </h3>
-    <ul class="list-disc list-inside space-y-1 ml-2">
-      <% games.each do |game| %>
-        <li><%= link_to game.in_season_name, game_path(game), class: "text-maroon hover:underline" %></li>
-      <% end %>
-    </ul>
-  <% end %>
+  <div class="scroll-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th><%= t(".date") %></th>
+          <th><%= t(".season") %></th>
+          <th><%= t(".series") %></th>
+          <th><%= t(".games") %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @games_by_series.each do |series, games| %>
+          <tr>
+            <td><%= games.first.played_on %></td>
+            <td><%= @season %></td>
+            <td><%= series %></td>
+            <td>
+              <% games.each do |game| %>
+                <span><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></span>
+              <% end %>
+            </td>
+            <td><%= link_to t(".view"), season_series_path(season_number: @season, number: series),
+                  class: "text-maroon hover:underline" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section>
   <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".by_players") %></h2>
 
   <div class="scroll-wrapper">
-    <table class="data-table">
+    <table id="players-table" class="data-table">
       <thead>
         <tr>
           <th><%= t(".rank") %></th>
