@@ -2,6 +2,8 @@ require "base64"
 
 module Scraper
   class PlayerScraper < Base
+    ALLOWED_CONTENT_TYPES = %w[image/jpeg image/png image/gif image/webp].freeze
+
     def scrape(player_id)
       doc = fetch("/player/#{player_id}")
       return nil unless doc
@@ -25,10 +27,15 @@ module Scraper
       return nil unless match
 
       content_type = "image/#{match[1]}"
+      return nil unless ALLOWED_CONTENT_TYPES.include?(content_type)
+
       base64_data = match[2].sub(/['");]+\z/, "") # strip any trailing quotes/parens
-      binary_data = Base64.decode64(base64_data)
+      binary_data = Base64.strict_decode64(base64_data)
 
       { content_type: content_type, data: binary_data }
+    rescue ArgumentError => e
+      log "ERROR: Invalid base64 for photo: #{e.message}"
+      nil
     end
   end
 end

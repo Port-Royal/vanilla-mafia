@@ -9,7 +9,13 @@ module Scraper
     def fetch(path)
       uri = URI("#{BASE_URL}#{path}")
       log "Fetching #{uri}"
-      response = Net::HTTP.get_response(uri)
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == "https"
+      http.open_timeout = 10
+      http.read_timeout = 30
+
+      response = http.get(uri.request_uri)
 
       unless response.is_a?(Net::HTTPSuccess)
         log "ERROR: #{response.code} for #{uri}"
@@ -18,6 +24,9 @@ module Scraper
 
       sleep DELAY
       Nokogiri::HTML(response.body)
+    rescue SocketError, Timeout::Error, Errno::ECONNREFUSED, Net::OpenTimeout, Net::ReadTimeout => e
+      log "ERROR: #{e.class} for #{uri}: #{e.message}"
+      nil
     end
 
     def log(msg)
