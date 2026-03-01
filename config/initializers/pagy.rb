@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Pagy initializer (9.4.0)
+
 
 # Items per page
 Pagy::DEFAULT[:limit] = 25
