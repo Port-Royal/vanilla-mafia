@@ -9,7 +9,7 @@ class Game < ApplicationRecord
   scope :ordered, -> { order(played_on: :asc, series: :asc, game_number: :asc) }
 
   def self.available_seasons
-    distinct.pluck(:season).sort
+    distinct.order(:season).pluck(:season)
   end
 
   def full_name
