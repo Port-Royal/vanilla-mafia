@@ -1,5 +1,5 @@
 <% max_award_updated_at = awards.map { |pa| [pa.updated_at, pa.award.updated_at].max }.max %>
-<% cache [I18n.locale, player, max_award_updated_at] do %>
+<% cache [I18n.locale, player, player.photo.blob, max_award_updated_at] do %>
   <div class="rounded border border-maroon/20 p-4">
     <div>
       <% if player.photo.attached? %>
