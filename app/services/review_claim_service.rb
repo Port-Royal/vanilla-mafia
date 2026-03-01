@@ -24,6 +24,8 @@ class ReviewClaimService
       player = claim.player
       player.lock!
 
+      raise ArgumentError, "user already linked to a different player" if user.player_id.present? && user.player_id != claim.player_id
+
       current_owner = User.find_by(player_id: player.id)
       if current_owner
         current_owner.update!(player: nil)

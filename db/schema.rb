@@ -46,7 +46,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_052510) do
     t.boolean "staff", default: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["staff"], name: "index_awards_on_staff"
   end
 
   create_table "feature_toggles", force: :cascade do |t|

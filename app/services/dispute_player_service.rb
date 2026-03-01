@@ -37,6 +37,11 @@ class DisputePlayerService
     ActiveRecord::Base.transaction do
       @user.lock!
       @player.lock!
+
+      return Result.new(success: false, claim: nil, error: :already_has_player) if @user.claimed_player?
+      return Result.new(success: false, claim: nil, error: :player_not_claimed) unless @player.claimed?
+      return Result.new(success: false, claim: nil, error: :already_pending) if @user.pending_dispute?
+
       claim = PlayerClaim.create!(
         user: @user,
         player: @player,

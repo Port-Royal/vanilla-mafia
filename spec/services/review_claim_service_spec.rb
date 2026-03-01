@@ -117,6 +117,20 @@ RSpec.describe ReviewClaimService do
       )
     end
 
+    context "when disputant is already linked to a different player" do
+      let(:other_player) { create(:player) }
+
+      before do
+        claim # force claim creation before linking disputant
+        disputant.update!(player: other_player)
+      end
+
+      it "raises ArgumentError" do
+        expect { described_class.approve_dispute(claim: claim, admin: admin) }
+          .to raise_error(ArgumentError, "user already linked to a different player")
+      end
+    end
+
     context "when claim is not pending" do
       let(:claim) { create(:player_claim, :dispute, user: disputant, player: player, status: "rejected") }
 
