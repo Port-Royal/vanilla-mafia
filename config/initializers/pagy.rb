@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-
-
 # Items per page
 Pagy::DEFAULT[:limit] = 25
 

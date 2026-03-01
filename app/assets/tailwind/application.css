@@ -35,4 +35,5 @@
   .scroll-wrapper {
     @apply overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0;
   }
+
 }
