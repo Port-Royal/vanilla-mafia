@@ -47,6 +47,10 @@ RSpec.describe ProfilesController do
       it "renders the player name in the form" do
         expect(response.body).to include("Алексей")
       end
+
+      it "renders default photo for player without uploaded picture" do
+        expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
+      end
     end
   end
 
