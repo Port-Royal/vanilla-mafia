@@ -25,7 +25,7 @@ class Player < ApplicationRecord
     user == check_user
   end
 
-  DEFAULT_PHOTO_PATH = "/img/nophoto.jpg"
+  DEFAULT_PHOTO_PATH = "/img/nophoto.jpg".freeze
 
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
