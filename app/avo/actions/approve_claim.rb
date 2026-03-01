@@ -1,6 +1,6 @@
 class Avo::Actions::ApproveClaim < Avo::BaseAction
   self.name = "Approve Claim"
-  self.visible = ->(resource:, view:, **) { view == :show && resource.record.pending? }
+  self.visible = -> { view.show? && resource.record.pending? }
 
   def handle(records:, **_args)
     errored = false

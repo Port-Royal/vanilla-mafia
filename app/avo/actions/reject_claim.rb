@@ -1,6 +1,6 @@
 class Avo::Actions::RejectClaim < Avo::BaseAction
   self.name = "Reject Claim"
-  self.visible = ->(resource:, view:, **) { view == :show && resource.record.pending? }
+  self.visible = -> { view.show? && resource.record.pending? }
 
   def fields
     field :rejection_reason, as: :text
