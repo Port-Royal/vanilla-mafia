@@ -6,7 +6,11 @@ class Avo::Actions::ApproveClaim < Avo::BaseAction
     errored = false
 
     records.each do |claim|
-      ReviewClaimService.approve(claim: claim, admin: current_user)
+      if claim.dispute?
+        ReviewClaimService.approve_dispute(claim: claim, admin: current_user)
+      else
+        ReviewClaimService.approve(claim: claim, admin: current_user)
+      end
     rescue ArgumentError => e
       errored = true
       error(e.message)

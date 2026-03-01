@@ -3,5 +3,10 @@ FactoryBot.define do
     user
     player
     status { "pending" }
+
+    trait :dispute do
+      dispute { true }
+      evidence { "This is my profile." }
+    end
   end
 end

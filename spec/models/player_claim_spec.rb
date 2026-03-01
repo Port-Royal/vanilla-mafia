@@ -58,6 +58,63 @@ RSpec.describe PlayerClaim, type: :model do
         expect(claim).to be_valid
       end
     end
+
+    context 'when dispute' do
+      context 'when evidence is blank' do
+        let(:player) { create(:player) }
+        let(:claim) { build(:player_claim, :dispute, player: player, evidence: nil) }
+
+        before { create(:user, player_id: player.id) }
+
+        it 'is invalid' do
+          expect(claim).not_to be_valid
+          expect(claim.errors[:evidence]).to include(I18n.t("errors.messages.blank"))
+        end
+      end
+
+      context 'when evidence is present' do
+        let(:player) { create(:player) }
+        let(:claim) { build(:player_claim, :dispute, player: player) }
+
+        before { create(:user, player_id: player.id) }
+
+        it 'is valid' do
+          expect(claim).to be_valid
+        end
+      end
+
+      context 'when player is already claimed by another user' do
+        let(:player) { create(:player) }
+        let(:claim) { build(:player_claim, :dispute, player: player) }
+
+        before { create(:user, player_id: player.id) }
+
+        it 'is valid (skips player_not_already_claimed)' do
+          expect(claim).to be_valid
+        end
+      end
+
+      context 'when player is not claimed by anyone' do
+        let(:player) { create(:player) }
+        let(:claim) { build(:player_claim, :dispute, player: player) }
+
+        it 'is invalid' do
+          expect(claim).not_to be_valid
+          expect(claim.errors[:player]).to include(I18n.t("errors.messages.not_claimed"))
+        end
+      end
+
+      context 'when player is claimed' do
+        let(:player) { create(:player) }
+        let(:claim) { build(:player_claim, :dispute, player: player) }
+
+        before { create(:user, player_id: player.id) }
+
+        it 'is valid' do
+          expect(claim).to be_valid
+        end
+      end
+    end
   end
 
   describe 'scopes' do
@@ -74,6 +131,22 @@ RSpec.describe PlayerClaim, type: :model do
     describe '.approved' do
       it 'returns only approved claims' do
         expect(described_class.approved).to eq([ approved_claim ])
+      end
+    end
+
+    describe '.disputes' do
+      let_it_be(:claimed_player) { create(:player) }
+      let_it_be(:claimer) { create(:user, player_id: claimed_player.id) }
+      let_it_be(:dispute_claim) { create(:player_claim, :dispute, player: claimed_player) }
+
+      it 'returns only disputes' do
+        expect(described_class.disputes).to eq([ dispute_claim ])
+      end
+    end
+
+    describe '.claims' do
+      it 'returns only non-dispute claims' do
+        expect(described_class.claims).to contain_exactly(pending_claim, approved_claim, rejected_claim)
       end
     end
   end
