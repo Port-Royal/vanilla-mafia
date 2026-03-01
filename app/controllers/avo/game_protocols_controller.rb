@@ -63,15 +63,24 @@ class Avo::GameProtocolsController < Avo::ApplicationController
   end
 
   def participations_params
-    params.require(:participations).permit!
+    permitted_keys = (1..10).map { |i| [ i.to_s, [ :player_name, :role_code, :plus, :minus, :best_move, :win, :first_shoot, :notes ] ] }
+    params.require(:participations).permit(permitted_keys.to_h)
   end
 
   def load_participations
-    existing = @game.game_participations.includes(:player, :role).index_by(&:seat)
-    10.times.map do |i|
-      seat = i + 1
-      existing[seat] || GameParticipation.new(seat: seat)
+    all = @game.game_participations.includes(:player, :role).order(:seat, :id)
+    seated = all.select(&:seat).index_by(&:seat)
+
+    unseated = all.reject(&:seat)
+    free_seats = (1..10).to_a - seated.keys
+    unseated.each_with_index do |gp, idx|
+      break unless free_seats[idx]
+
+      gp.seat = free_seats[idx]
+      seated[gp.seat] = gp
     end
+
+    (1..10).map { |seat| seated[seat] || GameParticipation.new(seat: seat) }
   end
 
   def build_participations_from_params

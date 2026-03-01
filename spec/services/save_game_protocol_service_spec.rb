@@ -151,5 +151,28 @@ RSpec.describe SaveGameProtocolService do
         }.to change(GameParticipation, :count).by(-1)
       end
     end
+
+    context "when game has legacy participations without seats" do
+      let_it_be(:other_player) { create(:player, name: "Борис") }
+      let!(:game_to_update) { create(:game, season: 5, series: 1, game_number: 4) }
+      let!(:legacy_participation) { create(:game_participation, game: game_to_update, player: existing_player, seat: nil) }
+      let(:participations_params) do
+        params = {}
+        params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "", win: "0", first_shoot: "0", notes: "" }
+        (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
+        ActionController::Parameters.new(params).permit!
+      end
+
+      it "assigns a seat to the legacy participation" do
+        described_class.call(game: game_to_update, game_params: { season: 5, series: 1, game_number: 4 }, participations_params: participations_params)
+        expect(legacy_participation.reload.seat).to eq(1)
+      end
+
+      it "does not create a duplicate participation" do
+        expect {
+          described_class.call(game: game_to_update, game_params: { season: 5, series: 1, game_number: 4 }, participations_params: participations_params)
+        }.not_to change(GameParticipation, :count)
+      end
+    end
   end
 end

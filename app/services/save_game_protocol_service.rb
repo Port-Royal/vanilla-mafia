@@ -25,6 +25,8 @@ class SaveGameProtocolService
   private
 
   def save_participations!
+    assign_seats_to_legacy_participations!
+
     @participations_params.each do |seat_str, attrs|
       seat = seat_str.to_i
       player_name = attrs[:player_name].to_s.strip
@@ -44,6 +46,19 @@ class SaveGameProtocolService
     end
 
     remove_cleared_seats!
+  end
+
+  def assign_seats_to_legacy_participations!
+    unseated = @game.game_participations.where(seat: nil).order(:id)
+    return if unseated.empty?
+
+    taken = @game.game_participations.where.not(seat: nil).pluck(:seat)
+    free = (1..10).to_a - taken
+    unseated.each_with_index do |gp, idx|
+      break unless free[idx]
+
+      gp.update!(seat: free[idx])
+    end
   end
 
   def remove_cleared_seats!

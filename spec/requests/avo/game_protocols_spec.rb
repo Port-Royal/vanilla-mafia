@@ -109,6 +109,24 @@ RSpec.describe "Avo::GameProtocols" do
         expect(response.body).to include("Тестовый")
       end
     end
+
+    context "when game has legacy participations without seats" do
+      let!(:legacy_game) { create(:game, season: 5, series: 2, game_number: 50) }
+      let!(:legacy_participation) { create(:game_participation, game: legacy_game, player: player, seat: nil) }
+
+      before do
+        sign_in admin
+        get edit_avo_game_protocol_path(legacy_game)
+      end
+
+      it "returns success" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "shows the legacy player in the form" do
+        expect(response.body).to include("Тестовый")
+      end
+    end
   end
 
   describe "PATCH /avo/game_protocols/:id" do
