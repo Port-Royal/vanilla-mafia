@@ -22,4 +22,8 @@ class User < ApplicationRecord
   def pending_claim_for(player)
     player_claims.pending.find_by(player:)
   end
+
+  def pending_dispute?
+    player_claims.disputes.pending.exists?
+  end
 end

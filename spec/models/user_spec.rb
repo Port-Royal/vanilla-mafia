@@ -98,6 +98,34 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#pending_dispute?' do
+    let(:player) { create(:player) }
+    let!(:owner) { create(:user, player: player) }
+    let(:user) { create(:user) }
+
+    context 'when user has a pending dispute claim' do
+      before { create(:player_claim, :dispute, user: user, player: player) }
+
+      it 'returns true' do
+        expect(user.pending_dispute?).to be true
+      end
+    end
+
+    context 'when user has no pending dispute' do
+      it 'returns false' do
+        expect(user.pending_dispute?).to be false
+      end
+    end
+
+    context 'when user has only non-pending dispute claims' do
+      before { create(:player_claim, :dispute, user: user, player: player, status: "rejected") }
+
+      it 'returns false' do
+        expect(user.pending_dispute?).to be false
+      end
+    end
+  end
+
   describe '#pending_claim_for' do
     let(:user) { create(:user) }
     let(:player) { create(:player) }

@@ -194,6 +194,53 @@ RSpec.describe PlayersController do
       end
     end
 
+    context "when player is claimed by another user and user can dispute" do
+      let_it_be(:player) { create(:player, name: "Оспариваемый") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 10) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:other_user) { create(:user, player: player) }
+      let(:user) { create(:user) }
+
+      before do
+        sign_in user
+        get player_path(player)
+      end
+
+      it "renders the dispute button" do
+        expect(response.body).to include(I18n.t("players.show.dispute_player"))
+      end
+
+      it "does not render the claim button" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_player"))
+      end
+    end
+
+    context "when user has a pending dispute for this player" do
+      let_it_be(:player) { create(:player, name: "Спорный") }
+      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 11) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:other_user) { create(:user, player: player) }
+      let(:user) { create(:user) }
+
+      before do
+        create(:player_claim, :dispute, user: user, player: player, status: "pending")
+        sign_in user
+        get player_path(player)
+      end
+
+      it "renders the dispute pending message" do
+        expect(response.body).to include(I18n.t("players.show.dispute_pending"))
+      end
+
+      it "does not render the claim button" do
+        expect(response.body).not_to include(I18n.t("players.show.claim_player"))
+      end
+
+      it "does not render the dispute button" do
+        expect(response.body).not_to include(I18n.t("players.show.dispute_player"))
+      end
+    end
+
     context "when user is not signed in" do
       let_it_be(:player) { create(:player, name: "Аноним") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 6) }

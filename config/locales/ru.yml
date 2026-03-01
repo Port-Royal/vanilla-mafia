@@ -61,12 +61,28 @@ ru:
         already_has_player: "У вас уже есть привязанный игрок."
         player_already_claimed: "Этот игрок уже привязан к другому аккаунту."
         claim_already_exists: "Заявка на этого игрока уже существует."
+  player_disputes:
+    new:
+      title: "Оспаривание профиля %{player_name}"
+      evidence_label: "Обоснование"
+      evidence_placeholder: "Опишите, почему этот профиль принадлежит вам"
+      submit: "Отправить"
+    create:
+      pending: "Запрос на оспаривание отправлен и ожидает рассмотрения."
+      errors:
+        evidence_blank: "Необходимо предоставить обоснование для оспаривания."
+        already_has_player: "У вас уже есть привязанный игрок."
+        player_not_claimed: "Этот профиль не привязан ни к кому."
+        already_pending: "У вас уже есть запрос на оспаривание на рассмотрении."
+        dispute_already_exists: "Запрос на оспаривание этого игрока уже существует."
   players:
     show:
       awards: "Награды"
       claim_player: "Это я"
       claim_confirm: "Подтвердить, что это ваш профиль?"
       claim_pending: "Заявка на рассмотрении"
+      dispute_player: "Оспорить профиль"
+      dispute_pending: "Запрос на оспаривание на рассмотрении"
       edit_profile: "Редактировать профиль"
   profiles:
     edit:
@@ -95,9 +111,16 @@ ru:
     sign_in: "Войти"
     sign_out: "Выйти"
     admin: "Админка"
+  dispute_mailer:
+    dispute_filed:
+      subject: "Оспаривание профиля %{player_name}"
+      greeting: "Пользователь %{email} оспаривает ваш профиль."
+      body: "Профиль игрока %{player_name} был оспорен. Администратор рассмотрит запрос."
+      footer: "Если у вас есть вопросы, свяжитесь с администрацией."
   errors:
     messages:
       already_claimed: "уже привязан"
+      not_claimed: "не привязан ни к кому"
     "404":
       title: "Страница не найдена"
       message: "Запрашиваемая страница не существует или была перемещена."

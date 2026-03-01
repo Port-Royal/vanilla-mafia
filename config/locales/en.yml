@@ -70,12 +70,28 @@ en:
     all_awards: "All awards"
     award:
       of_season: "of season %{season}"
+  player_disputes:
+    new:
+      title: "Dispute profile %{player_name}"
+      evidence_label: "Evidence"
+      evidence_placeholder: "Describe why this profile belongs to you"
+      submit: "Submit"
+    create:
+      pending: "Dispute submitted and awaiting review."
+      errors:
+        evidence_blank: "Evidence is required to file a dispute."
+        already_has_player: "You already have a claimed player."
+        player_not_claimed: "This profile is not claimed by anyone."
+        already_pending: "You already have a pending dispute."
+        dispute_already_exists: "A dispute for this player already exists."
   players:
     show:
       awards: "Awards"
       claim_player: "This is me"
       claim_confirm: "Confirm this is your profile?"
       claim_pending: "Claim pending"
+      dispute_player: "Dispute profile"
+      dispute_pending: "Dispute pending"
       edit_profile: "Edit profile"
   profiles:
     edit:
@@ -99,9 +115,16 @@ en:
         already_has_player: "You already have a claimed player."
         player_already_claimed: "This player is already linked to another account."
         claim_already_exists: "A claim for this player already exists."
+  dispute_mailer:
+    dispute_filed:
+      subject: "Dispute filed for profile %{player_name}"
+      greeting: "User %{email} has disputed your profile."
+      body: "The profile of player %{player_name} has been disputed. An administrator will review the request."
+      footer: "If you have any questions, please contact the administration."
   errors:
     messages:
       already_claimed: "is already claimed"
+      not_claimed: "is not claimed by anyone"
     "404":
       title: "Page not found"
       message: "The page you requested does not exist or has been moved."
