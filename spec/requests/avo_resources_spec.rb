@@ -11,6 +11,7 @@ RSpec.describe "Avo admin resources" do
   let_it_be(:award) { create(:award) }
   let_it_be(:rating) { create(:rating, game: game, player: player) }
   let_it_be(:player_award) { create(:player_award, player: player, award: award) }
+  let_it_be(:feature_toggle) { create(:feature_toggle) }
 
   shared_examples "admin-only endpoint" do
     context "when not signed in" do
@@ -47,7 +48,8 @@ RSpec.describe "Avo admin resources" do
     "awards" => :award,
     "ratings" => :rating,
     "player_awards" => :player_award,
-    "users" => :admin
+    "users" => :admin,
+    "feature_toggles" => :feature_toggle
   }.each do |resource_name, record_method|
     describe resource_name do
       describe "GET /avo/resources/#{resource_name}" do
