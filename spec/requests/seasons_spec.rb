@@ -63,13 +63,17 @@ RSpec.describe SeasonsController do
         end
 
         it "renders pagination nav" do
-          expect(response.body).to include("pagy")
+          expect(response.body).to include("<nav")
         end
 
-        it "does not render players from the second page" do
+        it "renders the 25th player" do
           ranked_players = Player.with_stats_for_season(7).ranked.to_a
-          last_player = ranked_players.last
-          expect(response.body).not_to include(">#{last_player.name}</a>")
+          expect(response.body).to include(ranked_players[24].name)
+        end
+
+        it "does not render the 26th player" do
+          ranked_players = Player.with_stats_for_season(7).ranked.to_a
+          expect(response.body).not_to include(ranked_players[25].name)
         end
       end
 
