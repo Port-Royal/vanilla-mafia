@@ -48,6 +48,10 @@ RSpec.describe SeasonOverviewService do
       expect(player.total_rating).to eq(2.5)
     end
 
+    it "returns the player count for the season" do
+      expect(result.player_count).to eq(2)
+    end
+
     context "when season has no games" do
       let(:empty_result) { described_class.call(season: 99) }
 
@@ -57,6 +61,10 @@ RSpec.describe SeasonOverviewService do
 
       it "returns empty players" do
         expect(empty_result.players).to be_empty
+      end
+
+      it "returns zero player count" do
+        expect(empty_result.player_count).to eq(0)
       end
     end
   end
