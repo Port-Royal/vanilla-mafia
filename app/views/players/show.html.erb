@@ -19,13 +19,15 @@
 <% end %>
 
 <% @games_by_season.each do |season, games| %>
-  <h2 class="text-xl font-bold text-maroon mt-6 mb-3">Сезон <%= season %></h2>
+  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= t("common.season") %> <%= season %></h2>
   <ul class="list-disc list-inside space-y-1 ml-2">
     <% games.each do |game| %>
       <li><%= link_to game.in_season_name, game_path(game), class: "text-maroon hover:underline" %></li>
     <% end %>
   </ul>
 <% end %>
+
+<%= render "shared/pagy_nav", pagy: @pagy %>
 
 <% if @player_awards.any? %>
   <h2 class="text-xl font-bold text-maroon mt-8 mb-3"><%= t(".awards") %></h2>

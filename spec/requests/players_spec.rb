@@ -20,7 +20,7 @@ RSpec.describe PlayersController do
       end
 
       it "renders season heading" do
-        expect(response.body).to include("Сезон 5")
+        expect(response.body).to include("#{I18n.t('common.season')} 5")
       end
 
       it "renders game link" do
@@ -215,6 +215,72 @@ RSpec.describe PlayersController do
 
       it "returns not found" do
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when player has more games than one page" do
+      let_it_be(:player) { create(:player, name: "Многоигровой") }
+      let_it_be(:games) do
+        (1..26).map do |n|
+          game = create(:game, season: 1, series: 1, game_number: n)
+          create(:rating, game: game, player: player)
+          game
+        end
+      end
+
+      context "when requesting the first page" do
+        before { get player_path(player) }
+
+        it "returns success" do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "renders the first 25 games" do
+          (1..25).each do |n|
+            expect(response.body).to include(game_path(games[n - 1]))
+          end
+        end
+
+        it "does not render the 26th game" do
+          expect(response.body).not_to include(game_path(games[25]))
+        end
+
+        it "renders pagination nav" do
+          expect(response.body).to include("&raquo;")
+        end
+      end
+
+      context "when requesting the second page" do
+        before { get player_path(player, page: 2) }
+
+        it "returns success" do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "renders the 26th game" do
+          expect(response.body).to include(game_path(games[25]))
+        end
+
+        it "does not render the first game" do
+          expect(response.body).not_to include(game_path(games[0]))
+        end
+
+        it "renders pagination nav" do
+          expect(response.body).to include("&laquo;")
+        end
+      end
+    end
+
+    context "when player has fewer games than one page" do
+      let_it_be(:player) { create(:player, name: "Малоигровой") }
+      let_it_be(:game) { create(:game, season: 1, series: 2, game_number: 1) }
+      let_it_be(:rating) { create(:rating, game: game, player: player) }
+
+      before { get player_path(player) }
+
+      it "does not render pagination nav" do
+        expect(response.body).not_to include("&raquo;")
+        expect(response.body).not_to include("&laquo;")
       end
     end
   end

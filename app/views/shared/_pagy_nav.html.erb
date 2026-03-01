@@ -1,0 +1,36 @@
+<% if pagy.pages > 1 %>
+  <nav class="flex justify-center mt-8 mb-4">
+    <ul class="flex items-center gap-1">
+      <% if pagy.prev %>
+        <li>
+          <%= link_to raw("&laquo;"), url_for(page: pagy.prev),
+                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10" %>
+        </li>
+      <% end %>
+
+      <% pagy.series.each do |item| %>
+        <% if item.is_a?(Integer) %>
+          <li>
+            <%= link_to item, url_for(page: item),
+                  class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10" %>
+          </li>
+        <% elsif item.is_a?(String) %>
+          <li>
+            <span class="px-3 py-1 rounded bg-maroon text-white font-bold"><%= item %></span>
+          </li>
+        <% elsif item == :gap %>
+          <li>
+            <span class="px-3 py-1 text-gray-400">&hellip;</span>
+          </li>
+        <% end %>
+      <% end %>
+
+      <% if pagy.next %>
+        <li>
+          <%= link_to raw("&raquo;"), url_for(page: pagy.next),
+                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10" %>
+        </li>
+      <% end %>
+    </ul>
+  </nav>
+<% end %>

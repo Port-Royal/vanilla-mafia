@@ -23,12 +23,16 @@ RSpec.describe PlayerProfileService do
       expect(result.player).to eq(player)
     end
 
-    it "groups games by season" do
-      expect(result.games_by_season.keys).to contain_exactly(5, 6)
+    it "returns all player games" do
+      expect(result.games).to match_array([ game1, game2, game3 ])
     end
 
-    it "orders games within each season" do
-      expect(result.games_by_season[5]).to eq([ game1, game2 ])
+    it "orders games by played_on, series, and game_number" do
+      expect(result.games.last).to eq(game2)
+    end
+
+    it "returns an Array of games" do
+      expect(result.games).to be_an(Array)
     end
 
     it "returns player awards ordered by position" do
@@ -47,8 +51,8 @@ RSpec.describe PlayerProfileService do
       let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
       let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
 
-      it "returns empty games_by_season" do
-        expect(lonely_result.games_by_season).to be_empty
+      it "returns empty games" do
+        expect(lonely_result.games).to be_empty
       end
 
       it "returns empty player_awards" do
