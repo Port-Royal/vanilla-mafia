@@ -22,6 +22,7 @@ gem "bcrypt", "~> 3.1.7"
 
 gem "avo"
 gem "devise"
+gem "pagy"
 gem "pundit"
 gem "pagy"
 gem "rails-i18n"
