@@ -8,6 +8,10 @@ class Game < ApplicationRecord
   scope :for_season, ->(season) { where(season: season) }
   scope :ordered, -> { order(played_on: :asc, series: :asc, game_number: :asc) }
 
+  def self.available_seasons
+    distinct.order(:season).pluck(:season)
+  end
+
   def full_name
     parts = [ played_on, "Сезон #{season}", "Серия #{series}", "Игра #{game_number}", name ].compact
     parts.join(" ")
