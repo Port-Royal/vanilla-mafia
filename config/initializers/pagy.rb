@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "pagy/extras/array"
 
 # Items per page

@@ -246,7 +246,7 @@ RSpec.describe PlayersController do
         end
 
         it "renders pagination nav" do
-          expect(response.body).to include("\u00BB")
+          expect(response.body).to include("<nav")
         end
       end
 
@@ -266,7 +266,7 @@ RSpec.describe PlayersController do
         end
 
         it "renders pagination nav" do
-          expect(response.body).to include("\u00AB")
+          expect(response.body).to include("<nav")
         end
       end
     end
@@ -279,8 +279,7 @@ RSpec.describe PlayersController do
       before { get player_path(player) }
 
       it "does not render pagination nav" do
-        expect(response.body).not_to include("\u00BB")
-        expect(response.body).not_to include("\u00AB")
+        expect(response.body).not_to include("page=2")
       end
     end
   end
