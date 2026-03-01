@@ -12,6 +12,7 @@ class DisputePlayerService
   end
 
   def call
+    return Result.new(success: false, claim: nil, error: :evidence_blank) if @evidence.blank?
     return Result.new(success: false, claim: nil, error: :already_has_player) if @user.claimed_player?
     return Result.new(success: false, claim: nil, error: :player_not_claimed) unless @player.claimed?
     return Result.new(success: false, claim: nil, error: :already_pending) if @user.pending_dispute?

@@ -6,6 +6,20 @@ RSpec.describe DisputePlayerService do
     let(:player) { create(:player) }
     let(:evidence) { "This is my profile, here is proof." }
 
+    context "when evidence is blank" do
+      let(:owner) { create(:user, player: player) }
+
+      before { owner }
+
+      it "returns failure with :evidence_blank error" do
+        result = described_class.call(user: user, player: player, evidence: "")
+
+        expect(result.success).to be false
+        expect(result.claim).to be_nil
+        expect(result.error).to eq(:evidence_blank)
+      end
+    end
+
     context "when user already has a claimed player" do
       let(:existing_player) { create(:player) }
       let(:user) { create(:user, player: existing_player) }
