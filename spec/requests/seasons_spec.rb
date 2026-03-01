@@ -63,7 +63,7 @@ RSpec.describe SeasonsController do
         end
 
         it "renders pagination nav" do
-          expect(response.body).to include("<nav")
+          expect(response.body).to include("page=2")
         end
 
         it "renders the 25th player" do
