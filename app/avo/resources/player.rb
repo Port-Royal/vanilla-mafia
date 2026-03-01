@@ -13,7 +13,7 @@ class Avo::Resources::Player < Avo::BaseResource
     field :comment, as: :textarea
     field :photo, as: :file, is_image: true
     field :user, as: :has_one
-    field :ratings, as: :has_many
+    field :game_participations, as: :has_many
     field :player_awards, as: :has_many
   end
 end

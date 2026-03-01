@@ -13,14 +13,14 @@
     </thead>
     <tbody>
       <% @players_sorted.each do |player| %>
-        <% ratings = @ratings_by_player[player] %>
-        <% ratings_by_game = ratings.index_by(&:game_id) %>
+        <% participations = @participations_by_player[player] %>
+        <% participations_by_game = participations.index_by(&:game_id) %>
         <tr>
           <td><%= player.name %></td>
           <% @games.each do |game| %>
-            <td><%= ratings_by_game[game.id]&.total %></td>
+            <td><%= participations_by_game[game.id]&.total %></td>
           <% end %>
-          <td><%= ratings.sum(&:total) %></td>
+          <td><%= participations.sum(&:total) %></td>
         </tr>
       <% end %>
     </tbody>

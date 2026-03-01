@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   resources :games, only: [ :show ]
   resources :players, only: [ :show ] do
     resource :claim, only: [ :create ], controller: "player_claims"
+    resource :dispute, only: [ :new, :create ], controller: "player_disputes"
   end
   resource :locale, only: [ :update ]
   resource :profile, only: [ :edit, :update ]

@@ -6,9 +6,9 @@ RSpec.describe PlayerProfileService do
     let_it_be(:game2) { create(:game, season: 5, series: 1, game_number: 2) }
     let_it_be(:game1) { create(:game, season: 5, series: 1, game_number: 1) }
     let_it_be(:game3) { create(:game, season: 6, series: 1, game_number: 1) }
-    let_it_be(:rating2) { create(:rating, game: game2, player: player) }
-    let_it_be(:rating1) { create(:rating, game: game1, player: player) }
-    let_it_be(:rating3) { create(:rating, game: game3, player: player) }
+    let_it_be(:participation2) { create(:game_participation, game: game2, player: player) }
+    let_it_be(:participation1) { create(:game_participation, game: game1, player: player) }
+    let_it_be(:participation3) { create(:game_participation, game: game3, player: player) }
     let_it_be(:award1) { create(:award, title: "Лучший игрок") }
     let_it_be(:award2) { create(:award, title: "Лучший стратег") }
     let_it_be(:player_award1) { create(:player_award, player: player, award: award1, season: 5, position: 2) }

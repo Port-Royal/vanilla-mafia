@@ -6,7 +6,7 @@ RSpec.describe "Player profile" do
     create(:game, season: 5, series: 1, game_number: 1,
            played_on: Date.new(2025, 1, 10))
   end
-  let_it_be(:rating) { create(:rating, game: game, player: player, plus: 3.0, minus: 0.5, win: true) }
+  let_it_be(:participation) { create(:game_participation, game: game, player: player, plus: 3.0, minus: 0.5, win: true) }
   let_it_be(:award) { create(:award, title: "Лучший игрок", staff: false) }
   let_it_be(:player_award) { create(:player_award, player: player, award: award, season: 5) }
 

@@ -8,12 +8,12 @@ RSpec.describe "Game details" do
   end
   let_it_be(:player1) { create(:player, name: "Алексей") }
   let_it_be(:player2) { create(:player, name: "Борис") }
-  let_it_be(:rating1) do
-    create(:rating, game: game, player: player1, role_code: "peace",
+  let_it_be(:participation1) do
+    create(:game_participation, game: game, player: player1, role_code: "peace",
            plus: 3.0, minus: 0.5, best_move: 0.5, win: true)
   end
-  let_it_be(:rating2) do
-    create(:rating, game: game, player: player2, role_code: "peace",
+  let_it_be(:participation2) do
+    create(:game_participation, game: game, player: player2, role_code: "peace",
            plus: 1.0, minus: 1.5, best_move: nil, win: false)
   end
 
@@ -23,7 +23,7 @@ RSpec.describe "Game details" do
     expect(page).to have_content(game.full_name)
   end
 
-  it "displays player names in the rating table" do
+  it "displays player names in the participation table" do
     expect(page).to have_content("Алексей")
     expect(page).to have_content("Борис")
   end
@@ -32,12 +32,12 @@ RSpec.describe "Game details" do
     expect(page).to have_content("Мирный")
   end
 
-  it "displays rating values" do
+  it "displays participation values" do
     expect(page).to have_content("3.0")
     expect(page).to have_content("0.5")
   end
 
-  it "displays rating table headers" do
+  it "displays participation table headers" do
     expect(page).to have_content("Роль")
     expect(page).to have_content("Плюс")
     expect(page).to have_content("Минус")

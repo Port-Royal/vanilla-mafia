@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :rating do
+  factory :game_participation do
     game
     player
     plus { 0 }

@@ -7,8 +7,15 @@
     </div>
   <% elsif (existing_claim = current_user.player_claims.find_by(player: @player)) %>
     <% if existing_claim.pending? %>
-      <p class="text-gray-600 italic mb-6"><%= t(".claim_pending") %></p>
+      <p class="text-gray-600 italic mb-6">
+        <%= existing_claim.dispute? ? t(".dispute_pending") : t(".claim_pending") %>
+      </p>
     <% end %>
+  <% elsif @player.claimed? && !current_user.admin? && !current_user.claimed_player? && !current_user.pending_dispute? %>
+    <div class="mb-6">
+      <%= link_to t(".dispute_player"), new_player_dispute_path(@player),
+            class: "bg-maroon text-white px-4 py-2 rounded hover:bg-maroon/90 font-medium" %>
+    </div>
   <% elsif !@player.claimed? && !current_user.claimed_player? && !current_user.pending_claim? %>
     <div class="mb-6">
       <%= button_to t(".claim_player"), player_claim_path(@player),

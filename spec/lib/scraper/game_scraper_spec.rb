@@ -21,14 +21,14 @@ RSpec.describe Scraper::GameScraper do
       expect(result[:game][:id]).to eq(101)
     end
 
-    it "parses all player ratings" do
+    it "parses all player participations" do
       result = scraper.scrape(game_info)
-      expect(result[:ratings].size).to eq(3)
+      expect(result[:game_participations].size).to eq(3)
     end
 
     it "parses peace role correctly" do
       result = scraper.scrape(game_info)
-      ivan = result[:ratings].find { |r| r[:player_name] == "Иван" }
+      ivan = result[:game_participations].find { |r| r[:player_name] == "Иван" }
 
       expect(ivan[:player_id]).to eq(1)
       expect(ivan[:role_code]).to eq("peace")
@@ -38,7 +38,7 @@ RSpec.describe Scraper::GameScraper do
 
     it "parses mafia role correctly" do
       result = scraper.scrape(game_info)
-      maria = result[:ratings].find { |r| r[:player_name] == "Мария" }
+      maria = result[:game_participations].find { |r| r[:player_name] == "Мария" }
 
       expect(maria[:player_id]).to eq(2)
       expect(maria[:role_code]).to eq("mafia")
@@ -47,7 +47,7 @@ RSpec.describe Scraper::GameScraper do
 
     it "parses sheriff role correctly" do
       result = scraper.scrape(game_info)
-      alexey = result[:ratings].find { |r| r[:player_name] == "Алексей" }
+      alexey = result[:game_participations].find { |r| r[:player_name] == "Алексей" }
 
       expect(alexey[:role_code]).to eq("sheriff")
       expect(alexey[:win]).to be true
@@ -56,7 +56,7 @@ RSpec.describe Scraper::GameScraper do
 
     it "folds win bonus into plus" do
       result = scraper.scrape(game_info)
-      ivan = result[:ratings].find { |r| r[:player_name] == "Иван" }
+      ivan = result[:game_participations].find { |r| r[:player_name] == "Иван" }
 
       # plus=0.5 + win_bonus=1.0 = 1.5
       expect(ivan[:plus]).to eq(BigDecimal("1.5"))
@@ -64,7 +64,7 @@ RSpec.describe Scraper::GameScraper do
 
     it "returns nil best_move when cell is empty" do
       result = scraper.scrape(game_info)
-      maria = result[:ratings].find { |r| r[:player_name] == "Мария" }
+      maria = result[:game_participations].find { |r| r[:player_name] == "Мария" }
 
       expect(maria[:best_move]).to be_nil
     end
@@ -87,12 +87,12 @@ RSpec.describe Scraper::GameScraper do
       end
     end
 
-    context "when page has no ratings table" do
+    context "when page has no participations table" do
       let(:doc) { Nokogiri::HTML("<html><body><td class='content'><h1>Игра 1</h1></td></body></html>") }
 
-      it "returns nil result for empty ratings" do
+      it "returns nil result for empty participations" do
         result = scraper.scrape(game_info)
-        expect(result[:ratings]).to be_empty
+        expect(result[:game_participations]).to be_empty
         expect(result[:game][:result]).to be_nil
       end
     end

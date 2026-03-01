@@ -8,8 +8,8 @@ RSpec.describe SeasonOverviewService do
     let_it_be(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
     let_it_be(:player2) { create(:player, name: "Борис") }
     let_it_be(:player1) { create(:player, name: "Алексей") }
-    let_it_be(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
-    let_it_be(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
+    let_it_be(:participation1) { create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
+    let_it_be(:participation2) { create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
     let(:result) { described_class.call(season: 5) }
 
     it "returns a Result" do
@@ -48,6 +48,10 @@ RSpec.describe SeasonOverviewService do
       expect(player.total_rating).to eq(2.5)
     end
 
+    it "returns the player count for the season" do
+      expect(result.player_count).to eq(2)
+    end
+
     context "when season has no games" do
       let(:empty_result) { described_class.call(season: 99) }
 
@@ -57,6 +61,10 @@ RSpec.describe SeasonOverviewService do
 
       it "returns empty players" do
         expect(empty_result.players).to be_empty
+      end
+
+      it "returns zero player count" do
+        expect(empty_result.player_count).to eq(0)
       end
     end
   end

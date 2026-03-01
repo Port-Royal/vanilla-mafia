@@ -28,11 +28,13 @@
 
       <div>
         <%= f.label :photo, t(".photo_label"), class: "block text-sm font-medium text-neutral-700 mb-1" %>
-        <% if @player.photo.attached? %>
-          <div class="mb-2">
-            <%= image_tag url_for(@player.photo), class: "w-24 h-24 rounded-full object-cover" %>
-          </div>
-        <% end %>
+        <div class="mb-2">
+          <% if @player.photo.attached? %>
+            <%= image_tag url_for(@player.photo.variant(resize_to_fill: [96, 96])), alt: @player.name, class: "w-24 h-24 rounded-full object-cover" %>
+          <% else %>
+            <%= image_tag Player::DEFAULT_PHOTO_PATH, alt: @player.name, class: "w-24 h-24 rounded-full object-cover" %>
+          <% end %>
+        </div>
         <%= f.file_field :photo,
               accept: "image/*",
               class: "block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-neutral-100 file:text-neutral-700 hover:file:bg-neutral-200" %>
