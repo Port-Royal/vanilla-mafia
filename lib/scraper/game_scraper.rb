@@ -14,13 +14,13 @@ module Scraper
       return nil unless doc
 
       name = parse_game_name(doc)
-      ratings = parse_ratings(doc, game_info[:id])
+      participations = parse_participations(doc, game_info[:id])
 
-      result = compute_result(ratings)
+      result = compute_result(participations)
 
       {
         game: game_info.merge(name: name, result: result),
-        ratings: ratings
+        game_participations: participations
       }
     end
 
@@ -37,10 +37,10 @@ module Scraper
       match ? match[1].strip : nil
     end
 
-    def parse_ratings(doc, game_id)
-      ratings = []
+    def parse_participations(doc, game_id)
+      participations = []
       table = doc.at_css("td.content .table.big")
-      return ratings unless table
+      return participations unless table
 
       table.css(".row:not(.header)").each do |row|
         cells = row.css(".cell")
@@ -84,7 +84,7 @@ module Scraper
           end
         end
 
-        ratings << {
+        participations << {
           player_id: player_id,
           player_name: player_name,
           role_code: role_code,
@@ -96,14 +96,14 @@ module Scraper
         }
       end
 
-      ratings
+      participations
     end
 
-    def compute_result(ratings)
-      return nil if ratings.empty?
+    def compute_result(participations)
+      return nil if participations.empty?
 
       # Check if any peace-side player won
-      peace_won = ratings.any? { |r| PEACE_ROLES.include?(r[:role_code]) && r[:win] }
+      peace_won = participations.any? { |r| PEACE_ROLES.include?(r[:role_code]) && r[:win] }
       peace_won ? "Победа мирных" : "Победа мафии"
     end
   end

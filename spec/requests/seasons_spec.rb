@@ -7,9 +7,9 @@ RSpec.describe SeasonsController do
       let_it_be(:game2) { create(:game, season: 5, series: 2, game_number: 1) }
       let_it_be(:player1) { create(:player, name: "Алексей") }
       let_it_be(:player2) { create(:player, name: "Борис") }
-      let_it_be(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
-      let_it_be(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
-      let_it_be(:rating3) { create(:rating, game: game2, player: player2, plus: 4.0, minus: 0.0, win: true) }
+      let_it_be(:participation1) { create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
+      let_it_be(:participation2) { create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
+      let_it_be(:participation3) { create(:game_participation, game: game2, player: player2, plus: 4.0, minus: 0.0, win: true) }
 
       before { get season_path(number: 5) }
 
@@ -51,8 +51,8 @@ RSpec.describe SeasonsController do
     context "when players exceed one page" do
       let_it_be(:game) { create(:game, season: 7, series: 1, game_number: 1) }
       let_it_be(:players) { create_list(:player, 26) }
-      let_it_be(:ratings) do
-        players.map { |p| create(:rating, game: game, player: p, plus: 1.0, minus: 0.0) }
+      let_it_be(:participations) do
+        players.map { |p| create(:game_participation, game: game, player: p, plus: 1.0, minus: 0.0) }
       end
 
       context "when on the first page" do

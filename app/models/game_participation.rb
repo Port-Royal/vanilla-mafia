@@ -1,4 +1,4 @@
-class Rating < ApplicationRecord
+class GameParticipation < ApplicationRecord
   belongs_to :game
   belongs_to :player
   belongs_to :role, foreign_key: :role_code, primary_key: :code, optional: true

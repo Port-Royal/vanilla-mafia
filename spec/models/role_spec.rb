@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Role, type: :model do
   describe 'associations' do
-    it { is_expected.to have_many(:ratings).with_foreign_key(:role_code).with_primary_key(:code) }
+    it { is_expected.to have_many(:game_participations).with_foreign_key(:role_code).with_primary_key(:code) }
   end
 
   describe 'validations' do

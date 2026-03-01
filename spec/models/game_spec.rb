@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe Game, type: :model do
   describe 'associations' do
-    it { is_expected.to have_many(:ratings).dependent(:destroy) }
-    it { is_expected.to have_many(:players).through(:ratings) }
+    it { is_expected.to have_many(:game_participations).dependent(:destroy) }
+    it { is_expected.to have_many(:players).through(:game_participations) }
   end
 
   describe 'validations' do

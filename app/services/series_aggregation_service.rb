@@ -1,5 +1,5 @@
 class SeriesAggregationService
-  Result = Data.define(:games, :ratings_by_player, :players_sorted)
+  Result = Data.define(:games, :participations_by_player, :players_sorted)
 
   def self.call(season:, series:)
     new(season, series).call
@@ -12,9 +12,9 @@ class SeriesAggregationService
 
   def call
     games = Game.for_season(@season).where(series: @series).ordered
-    ratings_by_player = Rating.where(game: games).includes(:player).group_by(&:player)
-    players_sorted = ratings_by_player.keys.sort_by { |p| [ -ratings_by_player[p].sum(&:total), p.id ] }
+    participations_by_player = GameParticipation.where(game: games).includes(:player).group_by(&:player)
+    players_sorted = participations_by_player.keys.sort_by { |p| [ -participations_by_player[p].sum(&:total), p.id ] }
 
-    Result.new(games:, ratings_by_player:, players_sorted:)
+    Result.new(games:, participations_by_player:, players_sorted:)
   end
 end

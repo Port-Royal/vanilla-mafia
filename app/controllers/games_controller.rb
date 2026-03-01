@@ -1,6 +1,6 @@
 class GamesController < ApplicationController
   def show
     @game = Game.find(params[:id])
-    @ratings = @game.ratings.includes(:player, :role)
+    @participations = @game.game_participations.includes(:player, :role)
   end
 end

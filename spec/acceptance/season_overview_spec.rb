@@ -9,10 +9,10 @@ RSpec.describe "Season overview" do
   let_it_be(:player2) { create(:player, name: "Борис") }
 
   before do
-    create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true)
-    create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false)
-    create(:rating, game: game2, player: player1, plus: 2.0, minus: 1.0, win: true)
-    create(:rating, game: game3, player: player2, plus: 4.0, minus: 0.0, win: true)
+    create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true)
+    create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false)
+    create(:game_participation, game: game2, player: player1, plus: 2.0, minus: 1.0, win: true)
+    create(:game_participation, game: game3, player: player2, plus: 4.0, minus: 0.0, win: true)
 
     visit season_path(number: 5)
   end

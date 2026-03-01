@@ -1,6 +1,6 @@
 class Game < ApplicationRecord
-  has_many :ratings, dependent: :destroy
-  has_many :players, through: :ratings
+  has_many :game_participations, dependent: :destroy
+  has_many :players, through: :game_participations
 
   validates :season, :series, :game_number, presence: true, numericality: { only_integer: true }
   validates :game_number, uniqueness: { scope: [ :season, :series ] }

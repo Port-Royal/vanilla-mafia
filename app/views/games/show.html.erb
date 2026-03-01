@@ -13,14 +13,14 @@
       </tr>
     </thead>
     <tbody>
-      <% @ratings.each do |rating| %>
+      <% @participations.each do |participation| %>
         <tr>
-          <td><%= rating.player.name %></td>
-          <td><%= rating.role&.name %></td>
-          <td><%= rating.plus %></td>
-          <td><%= rating.minus %></td>
-          <td><%= rating.best_move %></td>
-          <td><%= rating.total %></td>
+          <td><%= participation.player.name %></td>
+          <td><%= participation.role&.name %></td>
+          <td><%= participation.plus %></td>
+          <td><%= participation.minus %></td>
+          <td><%= participation.best_move %></td>
+          <td><%= participation.total %></td>
         </tr>
       <% end %>
     </tbody>

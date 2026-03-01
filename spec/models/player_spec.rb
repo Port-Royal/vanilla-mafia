@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe Player, type: :model do
   describe 'associations' do
-    it { is_expected.to have_many(:ratings).dependent(:restrict_with_error) }
-    it { is_expected.to have_many(:games).through(:ratings) }
+    it { is_expected.to have_many(:game_participations).dependent(:restrict_with_error) }
+    it { is_expected.to have_many(:games).through(:game_participations) }
     it { is_expected.to have_many(:player_awards).dependent(:destroy) }
     it { is_expected.to have_many(:awards).through(:player_awards) }
     it { is_expected.to have_many(:player_claims).dependent(:destroy) }
@@ -115,12 +115,12 @@ RSpec.describe Player, type: :model do
 
       before do
         # Alice: total_rating=2, wins=1, games=1
-        create(:rating, player: alice, game: game1, plus: 3, minus: 1, win: true)
+        create(:game_participation, player: alice, game: game1, plus: 3, minus: 1, win: true)
         # Bob: total_rating=2, wins=1, games=2
-        create(:rating, player: bob, game: game1, plus: 1, minus: 0, win: true)
-        create(:rating, player: bob, game: game2, plus: 1, minus: 0, win: false)
+        create(:game_participation, player: bob, game: game1, plus: 1, minus: 0, win: true)
+        create(:game_participation, player: bob, game: game2, plus: 1, minus: 0, win: false)
         # Charlie: total_rating=5, wins=1, games=1
-        create(:rating, player: charlie, game: game2, plus: 5, minus: 0, win: true)
+        create(:game_participation, player: charlie, game: game2, plus: 5, minus: 0, win: true)
       end
 
       it 'orders by total_rating DESC, wins_count DESC, games_count DESC, name ASC' do
@@ -136,8 +136,8 @@ RSpec.describe Player, type: :model do
       let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
 
       before do
-        create(:rating, player: alice, game: game, plus: 2, minus: 0, win: true)
-        create(:rating, player: bob, game: game, plus: 2, minus: 0, win: true)
+        create(:game_participation, player: alice, game: game, plus: 2, minus: 0, win: true)
+        create(:game_participation, player: bob, game: game, plus: 2, minus: 0, win: true)
       end
 
       it 'breaks ties on name ascending' do
@@ -155,8 +155,8 @@ RSpec.describe Player, type: :model do
       let_it_be(:game2) { create(:game, season: 1, series: 1, game_number: 2) }
 
       before do
-        create(:rating, player: player, game: game1, plus: 3, minus: 1, win: true)
-        create(:rating, player: player, game: game2, plus: 2, minus: 0, win: false)
+        create(:game_participation, player: player, game: game1, plus: 3, minus: 1, win: true)
+        create(:game_participation, player: player, game: game2, plus: 2, minus: 0, win: false)
       end
 
       it 'returns games_count, wins_count, and total_rating for the given season' do
@@ -174,8 +174,8 @@ RSpec.describe Player, type: :model do
       let_it_be(:game_s2) { create(:game, season: 2, series: 1, game_number: 1) }
 
       before do
-        create(:rating, player: player, game: game_s1, plus: 5, minus: 0, win: true)
-        create(:rating, player: player, game: game_s2, plus: 10, minus: 0, win: true)
+        create(:game_participation, player: player, game: game_s1, plus: 5, minus: 0, win: true)
+        create(:game_participation, player: player, game: game_s2, plus: 10, minus: 0, win: true)
       end
 
       it 'excludes games from other seasons' do
@@ -191,7 +191,7 @@ RSpec.describe Player, type: :model do
       let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
 
       before do
-        create(:rating, player: player, game: game, plus: nil, minus: nil, win: false)
+        create(:game_participation, player: player, game: game, plus: nil, minus: nil, win: false)
       end
 
       it 'handles nil with COALESCE' do
@@ -206,7 +206,7 @@ RSpec.describe Player, type: :model do
       let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
 
       before do
-        create(:rating, player: player, game: game, plus: 2, minus: 1, best_move: 0.5, win: true)
+        create(:game_participation, player: player, game: game, plus: 2, minus: 1, best_move: 0.5, win: true)
       end
 
       it 'includes best_move in total_rating' do
