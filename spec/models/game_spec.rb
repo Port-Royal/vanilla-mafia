@@ -38,6 +38,25 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '.available_seasons' do
+    context 'when games exist in multiple seasons' do
+      let_it_be(:game_s3) { create(:game, season: 3) }
+      let_it_be(:game_s1) { create(:game, season: 1) }
+      let_it_be(:game_s5) { create(:game, season: 5) }
+      let_it_be(:game_s1_dup) { create(:game, season: 1, series: 2) }
+
+      it 'returns distinct seasons sorted ascending' do
+        expect(described_class.available_seasons).to eq([ 1, 3, 5 ])
+      end
+    end
+
+    context 'when no games exist' do
+      it 'returns an empty array' do
+        expect(described_class.available_seasons).to eq([])
+      end
+    end
+  end
+
   describe '#full_name' do
     context 'when all fields are present' do
       let(:game) { build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: "Финал") }
