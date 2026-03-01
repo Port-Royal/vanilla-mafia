@@ -29,6 +29,24 @@
 
 en:
   hello: "Hello world"
+  game_protocols:
+    new:
+      title: "New Protocol"
+    edit:
+      title: "Edit Protocol"
+    form:
+      game_panel: "Game"
+      protocol_panel: "Protocol"
+      seat: "Seat"
+      player: "Player"
+      notes: "Notes"
+      judge: "Judge"
+      submit_create: "Create"
+      submit_update: "Save"
+    create:
+      success: "Protocol created successfully."
+    update:
+      success: "Protocol updated successfully."
   common:
     season: "Season"
     series: "Series"

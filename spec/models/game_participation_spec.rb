@@ -14,6 +14,36 @@ RSpec.describe GameParticipation, type: :model do
     it { is_expected.to validate_numericality_of(:plus).allow_nil }
     it { is_expected.to validate_numericality_of(:minus).allow_nil }
     it { is_expected.to validate_numericality_of(:best_move).allow_nil }
+    it { is_expected.to validate_numericality_of(:seat).only_integer.allow_nil }
+    it { is_expected.to validate_uniqueness_of(:seat).scoped_to(:game_id).allow_nil }
+
+    context "when seat is within valid range" do
+      it "is valid with seat 1" do
+        subject.seat = 1
+        subject.validate
+        expect(subject.errors[:seat]).to be_empty
+      end
+
+      it "is valid with seat 10" do
+        subject.seat = 10
+        subject.validate
+        expect(subject.errors[:seat]).to be_empty
+      end
+    end
+
+    context "when seat is out of range" do
+      it "is invalid with seat 0" do
+        subject.seat = 0
+        subject.validate
+        expect(subject.errors[:seat]).to be_present
+      end
+
+      it "is invalid with seat 11" do
+        subject.seat = 11
+        subject.validate
+        expect(subject.errors[:seat]).to be_present
+      end
+    end
   end
 
   describe '#total' do
