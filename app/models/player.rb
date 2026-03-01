@@ -25,6 +25,8 @@ class Player < ApplicationRecord
     user == check_user
   end
 
+  DEFAULT_PHOTO_PATH = "/img/nophoto.jpg"
+
   scope :ordered, -> { order(position: :asc, name: :asc) }
 
   scope :ranked, -> {
