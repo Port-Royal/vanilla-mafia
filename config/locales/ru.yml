@@ -18,6 +18,7 @@ ru:
         game_number: "Номер игры"
         name: "Название"
         result: "Результат"
+        judge: "Ведущий"
       game_participation:
         role_code: "Роль"
         win: "Победа"
@@ -26,6 +27,8 @@ ru:
         best_move: "Лучший ход"
         first_shoot: "Первый выстрел"
         total: "Итого"
+        seat: "Место"
+        notes: "Примечания"
       award:
         title: "Название"
         description: "Описание"
@@ -134,6 +137,24 @@ ru:
   pagy:
     prev: "Предыдущая страница"
     next: "Следующая страница"
+  game_protocols:
+    new:
+      title: "Новый протокол"
+    edit:
+      title: "Редактирование протокола"
+    form:
+      game_panel: "Игра"
+      protocol_panel: "Протокол"
+      seat: "Место"
+      player: "Игрок"
+      notes: "Примечания"
+      judge: "Ведущий"
+      submit_create: "Создать"
+      submit_update: "Сохранить"
+    create:
+      success: "Протокол успешно создан."
+    update:
+      success: "Протокол успешно обновлён."
   common:
     season: "Сезон"
     series: "Серия"

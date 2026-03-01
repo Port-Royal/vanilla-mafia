@@ -1,0 +1,5 @@
+<h1 class="text-2xl font-bold mb-6"><%= t("game_protocols.new.title") %></h1>
+
+<%= form_with url: main_app.avo_game_protocols_path, method: :post, local: true do %>
+  <%= render "form", submit_label: t("game_protocols.form.submit_create") %>
+<% end %>
