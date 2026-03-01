@@ -8,11 +8,11 @@ RSpec.describe SeriesAggregationService do
     let_it_be(:other_season_game) { create(:game, season: 6, series: 1, game_number: 1) }
     let_it_be(:player1) { create(:player, name: "Алексей") }
     let_it_be(:player2) { create(:player, name: "Борис") }
-    let!(:rating1) { create(:rating, game: game1, player: player1, plus: 3.0, minus: 0.5) }
-    let!(:rating2) { create(:rating, game: game1, player: player2, plus: 1.0, minus: 1.5) }
-    let!(:rating3) { create(:rating, game: game2, player: player1, plus: 2.0, minus: 1.0) }
-    let!(:rating4) { create(:rating, game: game2, player: player2, plus: 5.0, minus: 0.0) }
-    let!(:other_season_rating) { create(:rating, game: other_season_game, player: player1, plus: 10.0, minus: 0.0) }
+    let!(:participation1) { create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5) }
+    let!(:participation2) { create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5) }
+    let!(:participation3) { create(:game_participation, game: game2, player: player1, plus: 2.0, minus: 1.0) }
+    let!(:participation4) { create(:game_participation, game: game2, player: player2, plus: 5.0, minus: 0.0) }
+    let!(:other_season_participation) { create(:game_participation, game: other_season_game, player: player1, plus: 10.0, minus: 0.0) }
     let(:result) { described_class.call(season: 5, series: 1) }
 
     it "returns a Result" do
@@ -31,18 +31,18 @@ RSpec.describe SeriesAggregationService do
       expect(result.games).not_to include(other_season_game)
     end
 
-    it "groups ratings by player" do
-      expect(result.ratings_by_player.keys).to contain_exactly(player1, player2)
+    it "groups participations by player" do
+      expect(result.participations_by_player.keys).to contain_exactly(player1, player2)
     end
 
-    it "includes all ratings for each player" do
-      expect(result.ratings_by_player[player1]).to contain_exactly(rating1, rating3)
-      expect(result.ratings_by_player[player2]).to contain_exactly(rating2, rating4)
+    it "includes all participations for each player" do
+      expect(result.participations_by_player[player1]).to contain_exactly(participation1, participation3)
+      expect(result.participations_by_player[player2]).to contain_exactly(participation2, participation4)
     end
 
-    it "eager loads player association on ratings" do
-      first_rating = result.ratings_by_player.values.first.first
-      expect(first_rating.association(:player)).to be_loaded
+    it "eager loads player association on participations" do
+      first_participation = result.participations_by_player.values.first.first
+      expect(first_participation.association(:player)).to be_loaded
     end
 
     it "sorts players by total rating descending" do
@@ -52,11 +52,11 @@ RSpec.describe SeriesAggregationService do
     end
 
     context "when players have equal totals" do
-      let!(:rating1) { create(:rating, game: game1, player: player2, plus: 2.0, minus: 0.0) }
-      let!(:rating2) { create(:rating, game: game1, player: player1, plus: 0.0, minus: 0.0) }
-      let!(:rating3) { create(:rating, game: game2, player: player2, plus: 0.0, minus: 0.0) }
-      let!(:rating4) { create(:rating, game: game2, player: player1, plus: 2.0, minus: 0.0) }
-      let!(:other_season_rating) { create(:rating, game: other_season_game, player: player1) }
+      let!(:participation1) { create(:game_participation, game: game1, player: player2, plus: 2.0, minus: 0.0) }
+      let!(:participation2) { create(:game_participation, game: game1, player: player1, plus: 0.0, minus: 0.0) }
+      let!(:participation3) { create(:game_participation, game: game2, player: player2, plus: 0.0, minus: 0.0) }
+      let!(:participation4) { create(:game_participation, game: game2, player: player1, plus: 2.0, minus: 0.0) }
+      let!(:other_season_participation) { create(:game_participation, game: other_season_game, player: player1) }
 
       it "breaks ties by player id ascending" do
         expect(result.players_sorted).to eq([ player1, player2 ])
@@ -70,8 +70,8 @@ RSpec.describe SeriesAggregationService do
         expect(empty_result.games).to be_empty
       end
 
-      it "returns empty ratings_by_player" do
-        expect(empty_result.ratings_by_player).to be_empty
+      it "returns empty participations_by_player" do
+        expect(empty_result.participations_by_player).to be_empty
       end
 
       it "returns empty players_sorted" do

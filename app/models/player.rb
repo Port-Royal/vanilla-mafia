@@ -1,6 +1,6 @@
 class Player < ApplicationRecord
-  has_many :ratings, dependent: :restrict_with_error
-  has_many :games, through: :ratings
+  has_many :game_participations, dependent: :restrict_with_error
+  has_many :games, through: :game_participations
   has_many :player_awards, dependent: :destroy
   has_many :awards, through: :player_awards
   has_many :player_claims, dependent: :destroy
@@ -29,14 +29,14 @@ class Player < ApplicationRecord
   }
 
   scope :with_stats_for_season, ->(season) {
-    joins(ratings: :game)
+    joins(game_participations: :game)
       .where(games: { season: season })
       .group(:id)
       .select(
         "players.*",
-        "COUNT(ratings.id) AS games_count",
-        "SUM(CASE WHEN ratings.win THEN 1 ELSE 0 END) AS wins_count",
-        "SUM(COALESCE(ratings.plus, 0) - COALESCE(ratings.minus, 0) + COALESCE(ratings.best_move, 0)) AS total_rating"
+        "COUNT(game_participations.id) AS games_count",
+        "SUM(CASE WHEN game_participations.win THEN 1 ELSE 0 END) AS wins_count",
+        "SUM(COALESCE(game_participations.plus, 0) - COALESCE(game_participations.minus, 0) + COALESCE(game_participations.best_move, 0)) AS total_rating"
       )
   }
 end

@@ -9,7 +9,7 @@ RSpec.describe "Avo admin resources" do
   let_it_be(:game) { create(:game) }
   let_it_be(:role) { create(:role) }
   let_it_be(:award) { create(:award) }
-  let_it_be(:rating) { create(:rating, game: game, player: player) }
+  let_it_be(:game_participation) { create(:game_participation, game: game, player: player) }
   let_it_be(:player_award) { create(:player_award, player: player, award: award) }
   let_it_be(:feature_toggle) { create(:feature_toggle) }
 
@@ -46,7 +46,7 @@ RSpec.describe "Avo admin resources" do
     "games" => :game,
     "roles" => :role,
     "awards" => :award,
-    "ratings" => :rating,
+    "game_participations" => :game_participation,
     "player_awards" => :player_award,
     "users" => :admin,
     "feature_toggles" => :feature_toggle

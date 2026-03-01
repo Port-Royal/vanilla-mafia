@@ -1,4 +1,4 @@
-class Avo::Resources::Rating < Avo::BaseResource
+class Avo::Resources::GameParticipation < Avo::BaseResource
   self.title = :id
   self.default_view_type = :table
 

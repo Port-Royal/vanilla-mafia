@@ -14,6 +14,6 @@ class Avo::Resources::Game < Avo::BaseResource
     field :played_on, as: :date, sortable: true
     field :name, as: :text
     field :result, as: :text
-    field :ratings, as: :has_many
+    field :game_participations, as: :has_many
   end
 end

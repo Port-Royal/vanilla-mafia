@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_052510) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_152522) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -56,6 +56,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_052510) do
     t.string "key", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_feature_toggles_on_key", unique: true
+  end
+
+  create_table "game_participations", force: :cascade do |t|
+    t.decimal "best_move", precision: 5, scale: 2
+    t.datetime "created_at", null: false
+    t.boolean "first_shoot", default: false
+    t.integer "game_id", null: false
+    t.decimal "minus", precision: 5, scale: 2, default: "0.0"
+    t.integer "player_id", null: false
+    t.decimal "plus", precision: 5, scale: 2, default: "0.0"
+    t.string "role_code"
+    t.datetime "updated_at", null: false
+    t.boolean "win", default: false
+    t.index ["game_id", "player_id"], name: "index_game_participations_on_game_id_and_player_id", unique: true
+    t.index ["game_id"], name: "index_game_participations_on_game_id"
+    t.index ["player_id"], name: "index_game_participations_on_player_id"
   end
 
   create_table "games", force: :cascade do |t|
@@ -111,22 +127,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_052510) do
     t.index ["name"], name: "index_players_on_name", unique: true
   end
 
-  create_table "ratings", force: :cascade do |t|
-    t.decimal "best_move", precision: 5, scale: 2
-    t.datetime "created_at", null: false
-    t.boolean "first_shoot", default: false
-    t.integer "game_id", null: false
-    t.decimal "minus", precision: 5, scale: 2, default: "0.0"
-    t.integer "player_id", null: false
-    t.decimal "plus", precision: 5, scale: 2, default: "0.0"
-    t.string "role_code"
-    t.datetime "updated_at", null: false
-    t.boolean "win", default: false
-    t.index ["game_id", "player_id"], name: "index_ratings_on_game_id_and_player_id", unique: true
-    t.index ["game_id"], name: "index_ratings_on_game_id"
-    t.index ["player_id"], name: "index_ratings_on_player_id"
-  end
-
   create_table "roles", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
@@ -151,13 +151,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_052510) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "game_participations", "games"
+  add_foreign_key "game_participations", "players"
+  add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"
   add_foreign_key "player_awards", "awards"
   add_foreign_key "player_awards", "players"
   add_foreign_key "player_claims", "players"
   add_foreign_key "player_claims", "users"
   add_foreign_key "player_claims", "users", column: "reviewed_by_id"
-  add_foreign_key "ratings", "games"
-  add_foreign_key "ratings", "players"
-  add_foreign_key "ratings", "roles", column: "role_code", primary_key: "code"
   add_foreign_key "users", "players"
 end

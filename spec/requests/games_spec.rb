@@ -6,7 +6,7 @@ RSpec.describe GamesController do
 
     context "when game exists" do
       let_it_be(:role) { create(:role, code: "peace", name: "Мирный") }
-      let_it_be(:rating) { create(:rating, game: game, role_code: "peace", plus: 2.0, minus: 0.5) }
+      let_it_be(:participation) { create(:game_participation, game: game, role_code: "peace", plus: 2.0, minus: 0.5) }
 
       before { get game_path(game) }
 
@@ -19,7 +19,7 @@ RSpec.describe GamesController do
       end
 
       it "renders player name" do
-        expect(response.body).to include(rating.player.name)
+        expect(response.body).to include(participation.player.name)
       end
 
       it "renders role name" do

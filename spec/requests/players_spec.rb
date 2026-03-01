@@ -5,7 +5,7 @@ RSpec.describe PlayersController do
     context "when player exists" do
       let_it_be(:player) { create(:player, name: "Алексей") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 1) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:award) { create(:award, title: "Лучший игрок") }
       let_it_be(:player_award) { create(:player_award, player: player, award: award, season: 5) }
 
@@ -35,7 +35,7 @@ RSpec.describe PlayersController do
     context "when user owns the player" do
       let_it_be(:player) { create(:player, name: "Владелец") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 2) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let(:user) { create(:user, player: player) }
 
       before do
@@ -59,7 +59,7 @@ RSpec.describe PlayersController do
     context "when player is unclaimed and user can claim" do
       let_it_be(:player) { create(:player, name: "Свободный") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 3) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let(:user) { create(:user) }
 
       before do
@@ -83,7 +83,7 @@ RSpec.describe PlayersController do
     context "when user has a pending claim for this player" do
       let_it_be(:player) { create(:player, name: "Ожидание") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 4) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let(:user) { create(:user) }
 
       before do
@@ -108,7 +108,7 @@ RSpec.describe PlayersController do
     context "when user already owns a different player" do
       let_it_be(:player) { create(:player, name: "Недоступный") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 7) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:owned_player) { create(:player, name: "Мой игрок") }
       let(:user) { create(:user, player: owned_player) }
 
@@ -129,7 +129,7 @@ RSpec.describe PlayersController do
     context "when user has a pending claim for a different player" do
       let_it_be(:player) { create(:player, name: "Недоступный по заявке") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 8) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:other_player) { create(:player, name: "Другой игрок") }
       let(:user) { create(:user) }
 
@@ -151,7 +151,7 @@ RSpec.describe PlayersController do
     context "when user has a rejected claim for this player" do
       let_it_be(:player) { create(:player, name: "Отклонённый") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 9) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let(:user) { create(:user) }
 
       before do
@@ -172,7 +172,7 @@ RSpec.describe PlayersController do
     context "when player is claimed by another user" do
       let_it_be(:player) { create(:player, name: "Чужой") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 5) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:other_user) { create(:user, player: player) }
       let(:user) { create(:user) }
 
@@ -197,7 +197,7 @@ RSpec.describe PlayersController do
     context "when player is claimed by another user and user can dispute" do
       let_it_be(:player) { create(:player, name: "Оспариваемый") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 10) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:other_user) { create(:user, player: player) }
       let(:user) { create(:user) }
 
@@ -218,7 +218,7 @@ RSpec.describe PlayersController do
     context "when user has a pending dispute for this player" do
       let_it_be(:player) { create(:player, name: "Спорный") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 11) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:other_user) { create(:user, player: player) }
       let(:user) { create(:user) }
 
@@ -244,7 +244,7 @@ RSpec.describe PlayersController do
     context "when user is not signed in" do
       let_it_be(:player) { create(:player, name: "Аноним") }
       let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 6) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
 
       before { get player_path(player) }
 
@@ -270,7 +270,7 @@ RSpec.describe PlayersController do
       let_it_be(:games) do
         (1..26).map do |n|
           game = create(:game, season: 1, series: 1, game_number: n)
-          create(:rating, game: game, player: player)
+          create(:game_participation, game: game, player: player)
           game
         end
       end
@@ -321,7 +321,7 @@ RSpec.describe PlayersController do
     context "when player has fewer games than one page" do
       let_it_be(:player) { create(:player, name: "Малоигровой") }
       let_it_be(:game) { create(:game, season: 1, series: 2, game_number: 1) }
-      let_it_be(:rating) { create(:rating, game: game, player: player) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
 
       before { get player_path(player) }
 

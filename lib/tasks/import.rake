@@ -54,9 +54,9 @@ def phase2_scrape_games(game_index)
 
     ActiveRecord::Base.transaction do
       create_game(result[:game])
-      result[:ratings].each do |rating_data|
-        player_ids << rating_data[:player_id]
-        create_player_and_rating(result[:game][:id], rating_data)
+      result[:game_participations].each do |participation_data|
+        player_ids << participation_data[:player_id]
+        create_player_and_participation(result[:game][:id], participation_data)
       end
     end
   end
@@ -179,7 +179,7 @@ def phase6_verify
   puts "--- Phase 6: Verification ---"
   puts "Games:        #{Game.count}"
   puts "Players:      #{Player.count}"
-  puts "Ratings:      #{Rating.count}"
+  puts "Participations: #{GameParticipation.count}"
   puts "Awards:       #{Award.count}"
   puts "PlayerAwards: #{PlayerAward.count}"
   puts "Photos:       #{ActiveStorage::Attachment.where(name: 'photo').count}"
@@ -198,21 +198,21 @@ def create_game(game_data)
   game.save!
 end
 
-def create_player_and_rating(game_id, rating_data)
-  player = Player.find_or_initialize_by(id: rating_data[:player_id])
-  player.name = rating_data[:player_name] if player.new_record? || player.name != rating_data[:player_name]
+def create_player_and_participation(game_id, participation_data)
+  player = Player.find_or_initialize_by(id: participation_data[:player_id])
+  player.name = participation_data[:player_name] if player.new_record? || player.name != participation_data[:player_name]
   player.save!
 
-  rating = Rating.find_or_initialize_by(game_id: game_id, player_id: player.id)
-  rating.assign_attributes(
-    role_code: rating_data[:role_code],
-    win: rating_data[:win],
-    plus: rating_data[:plus],
-    minus: rating_data[:minus],
-    best_move: rating_data[:best_move],
-    first_shoot: rating_data[:first_shoot]
+  participation = GameParticipation.find_or_initialize_by(game_id: game_id, player_id: player.id)
+  participation.assign_attributes(
+    role_code: participation_data[:role_code],
+    win: participation_data[:win],
+    plus: participation_data[:plus],
+    minus: participation_data[:minus],
+    best_move: participation_data[:best_move],
+    first_shoot: participation_data[:first_shoot]
   )
-  rating.save!
+  participation.save!
 end
 
 ALLOWED_ICON_CONTENT_TYPES = %w[image/jpeg image/png image/gif image/webp].freeze

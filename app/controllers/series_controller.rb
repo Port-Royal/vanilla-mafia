@@ -4,7 +4,7 @@ class SeriesController < ApplicationController
     @series = params[:number].to_i
     result = SeriesAggregationService.call(season: @season, series: @series)
     @games = result.games
-    @ratings_by_player = result.ratings_by_player
+    @participations_by_player = result.participations_by_player
     @players_sorted = result.players_sorted
   end
 end
