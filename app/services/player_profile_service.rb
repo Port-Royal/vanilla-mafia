@@ -1,5 +1,5 @@
 class PlayerProfileService
-  Result = Data.define(:player, :games_by_season, :player_awards)
+  Result = Data.define(:player, :games, :player_awards)
 
   def self.call(player_id:)
     new(player_id).call
@@ -13,7 +13,7 @@ class PlayerProfileService
     player = Player.find(@player_id)
     Result.new(
       player: player,
-      games_by_season: player.games.ordered.group_by(&:season),
+      games: player.games.ordered,
       player_awards: player.player_awards.ordered.includes(:award).load
     )
   end
