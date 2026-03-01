@@ -40,7 +40,7 @@
     <%# Mobile nav (hidden by default) %>
     <nav id="mobile-nav" data-menu-target="nav" class="hidden lg:hidden bg-neutral-900 px-4 pb-4">
       <ul class="space-y-2">
-        <% (1..5).each do |n| %>
+        <% available_seasons.each do |n| %>
           <li>
             <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
                   class: "block text-gray-300 hover:text-white transition-colors" %>
@@ -85,7 +85,7 @@
 
           <nav>
             <ul class="space-y-3 text-sm">
-              <% (1..5).each do |n| %>
+              <% available_seasons.each do |n| %>
                 <li>
                   <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
                         class: "block hover:text-white transition-colors" %>
