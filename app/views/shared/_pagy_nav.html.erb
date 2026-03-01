@@ -3,8 +3,9 @@
     <ul class="flex items-center gap-1">
       <% if pagy.prev %>
         <li>
-          <%= link_to raw("&laquo;"), url_for(page: pagy.prev),
-                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10" %>
+          <%= link_to "\u00AB", url_for(page: pagy.prev),
+                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10",
+                aria: { label: t("pagy.prev") } %>
         </li>
       <% end %>
 
@@ -27,8 +28,9 @@
 
       <% if pagy.next %>
         <li>
-          <%= link_to raw("&raquo;"), url_for(page: pagy.next),
-                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10" %>
+          <%= link_to "\u00BB", url_for(page: pagy.next),
+                class: "px-3 py-1 rounded border border-maroon/30 text-maroon hover:bg-maroon/10",
+                aria: { label: t("pagy.next") } %>
         </li>
       <% end %>
     </ul>

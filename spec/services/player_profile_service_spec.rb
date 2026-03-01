@@ -31,8 +31,8 @@ RSpec.describe PlayerProfileService do
       expect(result.games.last).to eq(game2)
     end
 
-    it "returns an Array of games" do
-      expect(result.games).to be_an(Array)
+    it "returns an ActiveRecord relation of games" do
+      expect(result.games).to be_an(ActiveRecord::Relation)
     end
 
     it "returns player awards ordered by position" do
