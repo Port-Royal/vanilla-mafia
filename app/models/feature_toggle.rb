@@ -21,6 +21,12 @@ class FeatureToggle < ApplicationRecord
   private
 
   def clear_cache
-    Rails.cache.delete(self.class.cache_key_for(key))
+    if respond_to?(:saved_change_to_key?) && saved_change_to_key?
+      old_key, new_key = saved_change_to_key
+      Rails.cache.delete(self.class.cache_key_for(old_key)) if old_key.present?
+      Rails.cache.delete(self.class.cache_key_for(new_key)) if new_key.present?
+    else
+      Rails.cache.delete(self.class.cache_key_for(key))
+    end
   end
 end
