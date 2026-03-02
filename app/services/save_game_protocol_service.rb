@@ -18,7 +18,7 @@ class SaveGameProtocolService
       save_participations!
       Result.new(success: true, game: @game, errors: [])
     end
-  rescue ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
     Result.new(success: false, game: @game, errors: [ e.message ])
   end
 
