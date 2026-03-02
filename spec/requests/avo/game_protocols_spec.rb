@@ -84,6 +84,19 @@ RSpec.describe "Avo::GameProtocols" do
           post avo_game_protocols_path, params: { game: invalid_game_params, participations: valid_participations_params }
         }.not_to change(Game, :count)
       end
+
+      it "preserves submitted player name in the re-rendered form" do
+        post avo_game_protocols_path, params: { game: invalid_game_params, participations: valid_participations_params }
+        expect(response.body).to include("Тестовый")
+      end
+
+      it "preserves submitted player name for new players" do
+        params_with_new_player = valid_participations_params.merge(
+          "2" => { player_name: "Совсем Новый", role_code: "don", plus: "1", minus: "0", best_move: "", win: "0", first_shoot: "0", notes: "" }
+        )
+        post avo_game_protocols_path, params: { game: invalid_game_params, participations: params_with_new_player }
+        expect(response.body).to include("Совсем Новый")
+      end
     end
   end
 

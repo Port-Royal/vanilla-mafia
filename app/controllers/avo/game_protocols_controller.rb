@@ -89,7 +89,19 @@ class Avo::GameProtocolsController < Avo::ApplicationController
       seat = i + 1
       attrs = pp[seat.to_s] || {}
       gp = GameParticipation.new(seat: seat)
-      gp.player = Player.find_by(name: attrs[:player_name]) if attrs[:player_name].present?
+
+      player_name = attrs[:player_name].presence
+      if player_name
+        gp.player = Player.find_by(name: player_name) || Player.new(name: player_name)
+      end
+
+      gp.role_code = attrs[:role_code].presence
+      gp.plus = attrs[:plus].presence
+      gp.minus = attrs[:minus].presence
+      gp.best_move = attrs[:best_move].presence
+      gp.win = attrs[:win] == "1"
+      gp.first_shoot = attrs[:first_shoot] == "1"
+      gp.notes = attrs[:notes].presence
       gp
     end
   end
