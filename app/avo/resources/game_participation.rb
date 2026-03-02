@@ -10,7 +10,9 @@ class Avo::Resources::GameParticipation < Avo::BaseResource
     field :plus, as: :number
     field :minus, as: :number
     field :best_move, as: :number
+    field :seat, as: :number
     field :win, as: :boolean
     field :first_shoot, as: :boolean
+    field :notes, as: :textarea
   end
 end

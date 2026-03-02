@@ -1,0 +1,116 @@
+<%= render Avo::PanelComponent.new(name: t("game_protocols.form.game_panel")) do |panel| %>
+  <% panel.with_bare_content do %>
+    <div class="divide-y">
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_season"><%= Game.human_attribute_name(:season) %></label>
+        <input type="number" name="game[season]" id="game_season" value="<%= @game.season %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_series"><%= Game.human_attribute_name(:series) %></label>
+        <input type="number" name="game[series]" id="game_series" value="<%= @game.series %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
+        <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_played_on"><%= Game.human_attribute_name(:played_on) %></label>
+        <input type="date" name="game[played_on]" id="game_played_on" value="<%= @game.played_on %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>
+        <input type="text" name="game[name]" id="game_name" value="<%= @game.name %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_result"><%= Game.human_attribute_name(:result) %></label>
+        <input type="text" name="game[result]" id="game_result" value="<%= @game.result %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      </div>
+      <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+        <label class="w-40 font-semibold text-sm text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
+        <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render Avo::PanelComponent.new(name: t("game_protocols.form.protocol_panel")) do |panel| %>
+  <% panel.with_bare_content do %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 text-left">
+            <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.seat") %></th>
+            <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.player") %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:role_code) %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:plus) %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:minus) %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move) %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:first_shoot) %></th>
+            <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:win) %></th>
+            <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.notes") %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <% @participations.each_with_index do |participation, index| %>
+            <% seat = index + 1 %>
+            <tr>
+              <td class="px-3 py-2 text-center font-medium">
+                <%= seat %>
+              </td>
+              <td class="px-3 py-2">
+                <input
+                  type="text"
+                  name="participations[<%= seat %>][player_name]"
+                  value="<%= participation.player&.name %>"
+                  list="players_list"
+                  class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                  autocomplete="off"
+                />
+              </td>
+              <td class="px-3 py-2">
+                <select name="participations[<%= seat %>][role_code]" class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
+                  <option value=""></option>
+                  <% @roles.each do |role| %>
+                    <option value="<%= role.code %>" <%= "selected" if participation.role_code == role.code %>><%= role.name %></option>
+                  <% end %>
+                </select>
+              </td>
+              <td class="px-3 py-2">
+                <input type="number" step="0.01" name="participations[<%= seat %>][plus]" value="<%= participation.plus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              </td>
+              <td class="px-3 py-2">
+                <input type="number" step="0.01" name="participations[<%= seat %>][minus]" value="<%= participation.minus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              </td>
+              <td class="px-3 py-2">
+                <input type="number" step="0.01" name="participations[<%= seat %>][best_move]" value="<%= participation.best_move %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              </td>
+              <td class="px-3 py-2 text-center">
+                <input type="hidden" name="participations[<%= seat %>][first_shoot]" value="0" />
+                <input type="checkbox" name="participations[<%= seat %>][first_shoot]" value="1" <%= "checked" if participation.first_shoot %> class="rounded" />
+              </td>
+              <td class="px-3 py-2 text-center">
+                <input type="hidden" name="participations[<%= seat %>][win]" value="0" />
+                <input type="checkbox" name="participations[<%= seat %>][win]" value="1" <%= "checked" if participation.win %> class="rounded" />
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" name="participations[<%= seat %>][notes]" value="<%= participation.notes %>" class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <datalist id="players_list">
+      <% @players.each do |player| %>
+        <option value="<%= player.name %>" />
+      <% end %>
+    </datalist>
+  <% end %>
+<% end %>
+
+<div class="flex justify-end mt-4">
+  <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+    <%= local_assigns[:submit_label] %>
+  </button>
+</div>

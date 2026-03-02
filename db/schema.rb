@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_152522) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_164922) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -64,12 +64,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_152522) do
     t.boolean "first_shoot", default: false
     t.integer "game_id", null: false
     t.decimal "minus", precision: 5, scale: 2, default: "0.0"
+    t.text "notes"
     t.integer "player_id", null: false
     t.decimal "plus", precision: 5, scale: 2, default: "0.0"
     t.string "role_code"
+    t.integer "seat"
     t.datetime "updated_at", null: false
     t.boolean "win", default: false
     t.index ["game_id", "player_id"], name: "index_game_participations_on_game_id_and_player_id", unique: true
+    t.index ["game_id", "seat"], name: "index_game_participations_on_game_id_and_seat", unique: true
     t.index ["game_id"], name: "index_game_participations_on_game_id"
     t.index ["player_id"], name: "index_game_participations_on_player_id"
   end
@@ -77,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_152522) do
   create_table "games", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "game_number", null: false
+    t.string "judge"
     t.string "name"
     t.date "played_on"
     t.string "result"
