@@ -1,4 +1,6 @@
-class Avo::GameProtocolsController < Avo::ApplicationController
+class Judge::ProtocolsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :require_protocol_access!
   before_action :set_game, only: [ :edit, :update ]
 
   def new
@@ -16,7 +18,7 @@ class Avo::GameProtocolsController < Avo::ApplicationController
     )
 
     if result.success
-      redirect_to avo.resources_game_path(@game), notice: t("game_protocols.create.success")
+      redirect_to game_path(@game), notice: t("game_protocols.create.success")
     else
       @participations = build_participations_from_params
       load_form_data
@@ -38,7 +40,7 @@ class Avo::GameProtocolsController < Avo::ApplicationController
     )
 
     if result.success
-      redirect_to avo.resources_game_path(@game), notice: t("game_protocols.update.success")
+      redirect_to game_path(@game), notice: t("game_protocols.update.success")
     else
       @participations = build_participations_from_params
       load_form_data
@@ -48,6 +50,10 @@ class Avo::GameProtocolsController < Avo::ApplicationController
   end
 
   private
+
+  def require_protocol_access!
+    head :not_found unless current_user.can_manage_protocols?
+  end
 
   def set_game
     @game = Game.find(params[:id])

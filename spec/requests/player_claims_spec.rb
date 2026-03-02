@@ -70,7 +70,7 @@ RSpec.describe PlayerClaimsController do
       end
 
       context "when user is admin" do
-        let(:user) { create(:user, admin: true) }
+        let(:user) { create(:user, :admin) }
         let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
         it "creates an approved claim" do

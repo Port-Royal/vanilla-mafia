@@ -29,6 +29,12 @@ ru:
         total: "Итого"
         seat: "Место"
         notes: "Примечания"
+      user:
+        role: "Роль"
+        roles:
+          user: "Пользователь"
+          judge: "Ведущий"
+          admin: "Администратор"
       award:
         title: "Название"
         description: "Описание"
@@ -111,6 +117,7 @@ ru:
       of_season: "%{season} сезона"
   nav:
     hall_of_fame: "Зал славы"
+    protocols: "Протоколы"
     sign_in: "Войти"
     sign_out: "Выйти"
     admin: "Админка"

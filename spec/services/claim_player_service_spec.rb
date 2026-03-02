@@ -89,7 +89,7 @@ RSpec.describe ClaimPlayerService do
       end
 
       context "when user is an admin" do
-        let(:user) { create(:user, admin: true) }
+        let(:user) { create(:user, :admin) }
 
         it "creates an approved claim" do
           result = described_class.call(user: user, player: player)

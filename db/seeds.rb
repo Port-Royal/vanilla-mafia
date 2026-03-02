@@ -27,7 +27,7 @@ raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
 if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
   user = User.find_or_initialize_by(email: ENV["ADMIN_EMAIL"])
-  user.admin = true
+  user.role = "admin"
   user.password = ENV["ADMIN_PASSWORD"] if user.new_record?
   user.save!
 end

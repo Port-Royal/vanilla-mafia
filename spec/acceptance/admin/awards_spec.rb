@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Admin Awards CRUD" do
-  let_it_be(:admin) { create(:user, admin: true) }
+  let_it_be(:admin) { create(:user, :admin) }
 
   before { sign_in_as_admin(admin) }
 

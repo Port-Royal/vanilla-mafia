@@ -8,7 +8,7 @@ class Avo::Resources::User < Avo::BaseResource
   def fields
     field :id, as: :id
     field :email, as: :text
-    field :admin, as: :boolean
+    field :role, as: :select, enum: ::User.roles
     field :player, as: :belongs_to
   end
 end

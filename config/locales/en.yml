@@ -28,6 +28,14 @@
 #       enabled: "ON"
 
 en:
+  activerecord:
+    attributes:
+      user:
+        role: "Role"
+        roles:
+          user: "User"
+          judge: "Judge"
+          admin: "Admin"
   hello: "Hello world"
   game_protocols:
     new:
@@ -54,6 +62,7 @@ en:
     coming_soon: "Coming soon! Stay tuned"
   nav:
     hall_of_fame: "Hall of Fame"
+    protocols: "Protocols"
     sign_in: "Sign in"
     sign_out: "Sign out"
     admin: "Admin"

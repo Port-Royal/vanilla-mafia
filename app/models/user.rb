@@ -4,11 +4,14 @@ class User < ApplicationRecord
   belongs_to :player, optional: true
   has_many :player_claims, dependent: :destroy
 
+  enum :role, { user: "user", judge: "judge", admin: "admin" }
+
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :player_id, uniqueness: true, allow_nil: true
+  validates :role, presence: true
 
-  def admin?
-    admin
+  def can_manage_protocols?
+    admin? || judge?
   end
 
   def claimed_player?

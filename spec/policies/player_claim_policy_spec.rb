@@ -49,7 +49,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is admin" do
       subject(:policy) { described_class.new(admin, record) }
 
-      let_it_be(:admin) { create(:user, admin: true) }
+      let_it_be(:admin) { create(:user, :admin) }
 
       it { is_expected.to be_index }
     end
@@ -57,7 +57,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is not admin" do
       subject(:policy) { described_class.new(user, record) }
 
-      let_it_be(:user) { create(:user, admin: false) }
+      let_it_be(:user) { create(:user) }
 
       it { is_expected.not_to be_index }
     end
@@ -67,7 +67,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is admin" do
       subject(:policy) { described_class.new(admin, record) }
 
-      let_it_be(:admin) { create(:user, admin: true) }
+      let_it_be(:admin) { create(:user, :admin) }
 
       it { is_expected.to be_show }
     end
@@ -75,7 +75,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is not admin" do
       subject(:policy) { described_class.new(user, record) }
 
-      let_it_be(:user) { create(:user, admin: false) }
+      let_it_be(:user) { create(:user) }
 
       it { is_expected.not_to be_show }
     end
@@ -85,7 +85,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is admin" do
       subject(:policy) { described_class.new(admin, record) }
 
-      let_it_be(:admin) { create(:user, admin: true) }
+      let_it_be(:admin) { create(:user, :admin) }
 
       it { is_expected.to be_update }
     end
@@ -93,7 +93,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is not admin" do
       subject(:policy) { described_class.new(user, record) }
 
-      let_it_be(:user) { create(:user, admin: false) }
+      let_it_be(:user) { create(:user) }
 
       it { is_expected.not_to be_update }
     end
@@ -103,7 +103,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is admin" do
       subject(:policy) { described_class.new(admin, record) }
 
-      let_it_be(:admin) { create(:user, admin: true) }
+      let_it_be(:admin) { create(:user, :admin) }
 
       it { is_expected.to be_destroy }
     end
@@ -111,7 +111,7 @@ RSpec.describe PlayerClaimPolicy do
     context "when user is not admin" do
       subject(:policy) { described_class.new(user, record) }
 
-      let_it_be(:user) { create(:user, admin: false) }
+      let_it_be(:user) { create(:user) }
 
       it { is_expected.not_to be_destroy }
     end

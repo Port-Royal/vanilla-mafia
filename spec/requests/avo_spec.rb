@@ -11,7 +11,7 @@ RSpec.describe "Avo admin panel" do
     end
 
     context "when signed in as a non-admin user" do
-      let_it_be(:user) { create(:user, admin: false) }
+      let_it_be(:user) { create(:user) }
 
       before { sign_in user }
 
@@ -23,7 +23,7 @@ RSpec.describe "Avo admin panel" do
     end
 
     context "when signed in as an admin user" do
-      let_it_be(:admin) { create(:user, admin: true) }
+      let_it_be(:admin) { create(:user, :admin) }
 
       before { sign_in admin }
 
