@@ -3,8 +3,8 @@
 require "rails_helper"
 
 RSpec.describe "Avo admin resources" do
-  let_it_be(:admin) { create(:user, admin: true) }
-  let_it_be(:non_admin) { create(:user, admin: false) }
+  let_it_be(:admin) { create(:user, :admin) }
+  let_it_be(:non_admin) { create(:user) }
   let_it_be(:player) { create(:player) }
   let_it_be(:game) { create(:game) }
   let_it_be(:role) { create(:role) }

@@ -144,15 +144,6 @@ Avo.configure do |config|
   # end
 
   ## == Menus ==
-  config.main_menu = -> {
-    section "Resources", icon: "avo/resources" do
-      all_resources
-    end
-
-    section "Tools", icon: "avo/tools" do
-      link "Новый протокол", path: "/avo/game_protocols/new", icon: "heroicons/outline/document-plus"
-    end
-  }
   # config.profile_menu = -> {
   #   link "Profile", path: "/avo/profile", icon: "heroicons/outline/user-circle"
   # }

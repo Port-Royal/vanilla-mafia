@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe ReviewClaimService do
-  let(:admin) { create(:user, admin: true) }
+  let(:admin) { create(:user, :admin) }
 
   describe ".approve" do
     let(:claim) { create(:player_claim, status: "pending") }

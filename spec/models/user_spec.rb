@@ -13,6 +13,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
     it { is_expected.to validate_presence_of(:password) }
     it { is_expected.to validate_inclusion_of(:locale).in_array(%w[ru en]) }
+    it { is_expected.to validate_presence_of(:role) }
 
     describe 'player_id uniqueness' do
       let(:player) { create(:player) }
@@ -31,20 +32,91 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe 'role enum' do
+    it 'defines user, judge, and admin roles' do
+      expect(described_class.roles).to eq("user" => "user", "judge" => "judge", "admin" => "admin")
+    end
+
+    it 'defaults to user role' do
+      user = build(:user)
+      expect(user.role).to eq("user")
+    end
+  end
+
   describe '#admin?' do
-    context 'when admin is true' do
-      let(:user) { build(:user, admin: true) }
+    context 'when role is admin' do
+      let(:user) { build(:user, :admin) }
 
       it 'returns true' do
         expect(user.admin?).to be true
       end
     end
 
-    context 'when admin is false' do
-      let(:user) { build(:user, admin: false) }
+    context 'when role is user' do
+      let(:user) { build(:user) }
 
       it 'returns false' do
         expect(user.admin?).to be false
+      end
+    end
+
+    context 'when role is judge' do
+      let(:user) { build(:user, :judge) }
+
+      it 'returns false' do
+        expect(user.admin?).to be false
+      end
+    end
+  end
+
+  describe '#judge?' do
+    context 'when role is judge' do
+      let(:user) { build(:user, :judge) }
+
+      it 'returns true' do
+        expect(user.judge?).to be true
+      end
+    end
+
+    context 'when role is user' do
+      let(:user) { build(:user) }
+
+      it 'returns false' do
+        expect(user.judge?).to be false
+      end
+    end
+
+    context 'when role is admin' do
+      let(:user) { build(:user, :admin) }
+
+      it 'returns false' do
+        expect(user.judge?).to be false
+      end
+    end
+  end
+
+  describe '#can_manage_protocols?' do
+    context 'when role is admin' do
+      let(:user) { build(:user, :admin) }
+
+      it 'returns true' do
+        expect(user.can_manage_protocols?).to be true
+      end
+    end
+
+    context 'when role is judge' do
+      let(:user) { build(:user, :judge) }
+
+      it 'returns true' do
+        expect(user.can_manage_protocols?).to be true
+      end
+    end
+
+    context 'when role is user' do
+      let(:user) { build(:user) }
+
+      it 'returns false' do
+        expect(user.can_manage_protocols?).to be false
       end
     end
   end

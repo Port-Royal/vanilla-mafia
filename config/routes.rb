@@ -1,10 +1,13 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  authenticate :user, ->(u) { u.admin? } do
-    namespace :avo do
-      resources :game_protocols, only: [ :new, :create, :edit, :update ]
+  authenticate :user, ->(u) { u.can_manage_protocols? } do
+    namespace :judge do
+      resources :protocols, only: [ :new, :create, :edit, :update ]
     end
+  end
+
+  authenticate :user, ->(u) { u.admin? } do
     mount Avo::Engine => "/avo"
   end
 

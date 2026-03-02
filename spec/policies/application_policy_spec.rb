@@ -3,8 +3,8 @@
 require "rails_helper"
 
 RSpec.describe ApplicationPolicy do
-  let_it_be(:admin) { create(:user, admin: true) }
-  let_it_be(:user) { create(:user, admin: false) }
+  let_it_be(:admin) { create(:user, :admin) }
+  let_it_be(:user) { create(:user) }
   let(:record) { User }
 
   describe "admin user" do

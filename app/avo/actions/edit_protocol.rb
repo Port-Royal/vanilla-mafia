@@ -5,6 +5,6 @@ class Avo::Actions::EditProtocol < Avo::BaseAction
 
   def handle(records:, **_args)
     game = records.first
-    redirect_to "/avo/game_protocols/#{game.id}/edit", status: :see_other
+    redirect_to main_app.edit_judge_protocol_path(game), status: :see_other
   end
 end
