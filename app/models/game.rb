@@ -1,5 +1,6 @@
 class Game < ApplicationRecord
   has_many :game_participations, dependent: :destroy
+  has_many :news, dependent: :nullify
   has_many :players, through: :game_participations
 
   validates :season, :series, :game_number, presence: true, numericality: { only_integer: true }

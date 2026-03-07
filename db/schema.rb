@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_02_054339) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_07_080606) do
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -92,6 +102,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_054339) do
     t.index ["season"], name: "index_games_on_season"
   end
 
+  create_table "news", force: :cascade do |t|
+    t.integer "author_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "game_id"
+    t.datetime "published_at"
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_news_on_author_id"
+    t.index ["game_id"], name: "index_news_on_game_id"
+    t.index ["published_at"], name: "index_news_on_published_at"
+  end
+
   create_table "player_awards", force: :cascade do |t|
     t.integer "award_id", null: false
     t.datetime "created_at", null: false
@@ -158,6 +181,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_054339) do
   add_foreign_key "game_participations", "games"
   add_foreign_key "game_participations", "players"
   add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"
+  add_foreign_key "news", "games"
+  add_foreign_key "news", "users", column: "author_id"
   add_foreign_key "player_awards", "awards"
   add_foreign_key "player_awards", "players"
   add_foreign_key "player_claims", "players"
