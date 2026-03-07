@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   belongs_to :player, optional: true
   has_many :player_claims, dependent: :destroy
+  has_many :news, foreign_key: :author_id, inverse_of: :author, dependent: :destroy
 
   enum :role, { user: "user", judge: "judge", admin: "admin" }
 
