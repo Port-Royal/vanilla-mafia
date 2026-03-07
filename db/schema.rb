@@ -113,7 +113,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_080606) do
     t.index ["author_id"], name: "index_news_on_author_id"
     t.index ["game_id"], name: "index_news_on_game_id"
     t.index ["published_at"], name: "index_news_on_published_at"
-    t.index ["status"], name: "index_news_on_status"
   end
 
   create_table "player_awards", force: :cascade do |t|

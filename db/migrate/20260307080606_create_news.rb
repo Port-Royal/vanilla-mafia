@@ -10,7 +10,6 @@ class CreateNews < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :news, :status
     add_index :news, :published_at
   end
 end
