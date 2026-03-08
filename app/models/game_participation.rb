@@ -15,4 +15,14 @@ class GameParticipation < ApplicationRecord
   def total
     (plus || 0) - (minus || 0) + (best_move || 0)
   end
+
+  def result
+    if game.result == "Победа мирных" && ["peace", "sheriff"].include?(role_code)
+      "win"
+    elsif game.result == "Победа мафии" && ["mafia", "don"].include?(role_code)
+      "win"
+    else
+      "lose"
+    end
+  end
 end
