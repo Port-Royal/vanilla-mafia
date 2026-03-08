@@ -19,17 +19,15 @@ RSpec.describe GamesController do
       end
 
       it "renders player name as link to profile" do
-        expect(response.body).to include(player_path(participation.player))
-        expect(response.body).to include(participation.player.name)
+        assert_select "td a[href=?]", player_path(participation.player), text: participation.player.name
       end
 
       it "renders role icon" do
-        expect(response.body).to include("roles/peace")
-        expect(response.body).to include("<img")
+        assert_select "td img[src*='roles/peace'][alt='Мирный']"
       end
 
-      it "renders seat number" do
-        expect(response.body).to include("3")
+      it "renders seat number in table cell" do
+        assert_select "tbody td", text: "3"
       end
     end
 
