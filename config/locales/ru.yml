@@ -54,10 +54,11 @@ ru:
       view: "Итог"
   games:
     show:
+      seat: "Место"
       player: "Игрок"
       role: "Роль"
-      plus: "Плюс"
-      minus: "Минус"
+      base_score: "Балл"
+      additional_score: "Доп. балл"
       best_move: "Лучший ход"
       total: "Итого"
   player_claims:

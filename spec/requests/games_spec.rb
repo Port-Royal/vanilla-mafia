@@ -6,7 +6,7 @@ RSpec.describe GamesController do
 
     context "when game exists" do
       let_it_be(:role) { create(:role, code: "peace", name: "Мирный") }
-      let_it_be(:participation) { create(:game_participation, game: game, role_code: "peace", plus: 2.0, minus: 0.5) }
+      let_it_be(:participation) { create(:game_participation, game: game, role_code: "peace", plus: 2.0, minus: 0.5, seat: 3) }
 
       before { get game_path(game) }
 
@@ -18,12 +18,16 @@ RSpec.describe GamesController do
         expect(response.body).to include(game.full_name)
       end
 
-      it "renders player name" do
-        expect(response.body).to include(participation.player.name)
+      it "renders player name as link to profile" do
+        assert_select "td a[href=?]", player_path(participation.player), text: participation.player.name
       end
 
-      it "renders role name" do
-        expect(response.body).to include("Мирный")
+      it "renders role icon" do
+        assert_select "td img[src*='roles/peace'][alt='Мирный']"
+      end
+
+      it "renders seat number in table cell" do
+        assert_select "tbody td", text: "3"
       end
     end
 
