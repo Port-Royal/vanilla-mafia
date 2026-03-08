@@ -17,12 +17,15 @@ class GameParticipation < ApplicationRecord
   end
 
   def result
-    if game.result == "Победа мирных" && [ "peace", "sheriff" ].include?(role_code)
-      "win"
-    elsif game.result == "Победа мафии" && [ "mafia", "don" ].include?(role_code)
-      "win"
-    else
-      "lose"
+    return nil if game.result.blank? || role_code.blank?
+
+    case game.result
+    when "Победа мирных"
+      return "win" if [ "peace", "sheriff" ].include?(role_code)
+    when "Победа мафии"
+      return "win" if [ "mafia", "don" ].include?(role_code)
     end
+
+    "lose"
   end
 end

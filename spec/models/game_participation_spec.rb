@@ -95,4 +95,99 @@ RSpec.describe GameParticipation, type: :model do
       end
     end
   end
+
+  describe '#result' do
+    let(:game) { build(:game, result: game_result) }
+    let(:participation) { build(:game_participation, game:, role_code: role_code) }
+
+    context 'when game result is blank' do
+      let(:game_result) { nil }
+      let(:role_code) { "peace" }
+
+      it 'returns nil' do
+        expect(participation.result).to be_nil
+      end
+    end
+
+    context 'when role_code is blank' do
+      let(:game_result) { "Победа мирных" }
+      let(:role_code) { nil }
+
+      it 'returns nil' do
+        expect(participation.result).to be_nil
+      end
+    end
+
+    context 'when peaceful team wins' do
+      let(:game_result) { "Победа мирных" }
+
+      context 'when player is peace' do
+        let(:role_code) { "peace" }
+
+        it 'returns win' do
+          expect(participation.result).to eq("win")
+        end
+      end
+
+      context 'when player is sheriff' do
+        let(:role_code) { "sheriff" }
+
+        it 'returns win' do
+          expect(participation.result).to eq("win")
+        end
+      end
+
+      context 'when player is mafia' do
+        let(:role_code) { "mafia" }
+
+        it 'returns lose' do
+          expect(participation.result).to eq("lose")
+        end
+      end
+
+      context 'when player is don' do
+        let(:role_code) { "don" }
+
+        it 'returns lose' do
+          expect(participation.result).to eq("lose")
+        end
+      end
+    end
+
+    context 'when mafia wins' do
+      let(:game_result) { "Победа мафии" }
+
+      context 'when player is mafia' do
+        let(:role_code) { "mafia" }
+
+        it 'returns win' do
+          expect(participation.result).to eq("win")
+        end
+      end
+
+      context 'when player is don' do
+        let(:role_code) { "don" }
+
+        it 'returns win' do
+          expect(participation.result).to eq("win")
+        end
+      end
+
+      context 'when player is peace' do
+        let(:role_code) { "peace" }
+
+        it 'returns lose' do
+          expect(participation.result).to eq("lose")
+        end
+      end
+
+      context 'when player is sheriff' do
+        let(:role_code) { "sheriff" }
+
+        it 'returns lose' do
+          expect(participation.result).to eq("lose")
+        end
+      end
+    end
+  end
 end
