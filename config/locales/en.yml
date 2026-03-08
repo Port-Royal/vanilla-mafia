@@ -85,7 +85,7 @@ en:
       player: "Player"
       role: "Role"
       base_score: "Score"
-      additional_score: "Additional"
+      additional_score: "Bonus"
       best_move: "Best move"
       total: "Total"
   series:

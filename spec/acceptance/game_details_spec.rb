@@ -35,8 +35,13 @@ RSpec.describe "Game details" do
   end
 
   it "displays seat numbers" do
-    expect(page).to have_content("1")
-    expect(page).to have_content("5")
+    within("table") do
+      alexey_row = find("tr", text: "Алексей")
+      expect(alexey_row).to have_content("1")
+
+      boris_row = find("tr", text: "Борис")
+      expect(boris_row).to have_content("5")
+    end
   end
 
   it "displays participation scores" do
