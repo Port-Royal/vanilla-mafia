@@ -86,6 +86,12 @@ ru:
         dispute_already_exists: "Запрос на оспаривание этого игрока уже существует."
   players:
     show:
+      date: "Дата"
+      series: "Серия"
+      game: "Игра"
+      role: "Роль"
+      result: "Результат"
+      score: "Баллы"
       awards: "Награды"
       claim_player: "Это я"
       claim_confirm: "Подтвердить, что это ваш профиль?"
