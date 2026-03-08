@@ -1,6 +1,6 @@
 class GamesController < ApplicationController
   def show
     @game = Game.find(params[:id])
-    @participations = @game.game_participations.includes(:player, :role).order(Arel.sql('seat IS NULL'), seat: :asc, id: :asc)
+    @participations = @game.game_participations.includes(:player, :role).order(Arel.sql("seat IS NULL"), seat: :asc, id: :asc)
   end
 end
