@@ -15,4 +15,17 @@ class GameParticipation < ApplicationRecord
   def total
     (plus || 0) - (minus || 0) + (best_move || 0)
   end
+
+  def result
+    return nil if game.result.blank? || role_code.blank?
+
+    case game.result
+    when "Победа мирных"
+      return "win" if [ "peace", "sheriff" ].include?(role_code)
+    when "Победа мафии"
+      return "win" if [ "mafia", "don" ].include?(role_code)
+    end
+
+    "lose"
+  end
 end
