@@ -59,13 +59,14 @@
       </thead>
       <tbody>
         <% games.each do |game| %>
+          <% participation = game.game_participations.find_by(player: @player) %>
           <tr>
             <td><%= game.played_on %></td>
             <td><%= game.series %></td>
             <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
-            <td><%= game.game_participations.find_by(player: @player).role.name %></td>
-            <td><%= game.game_participations.find_by(player: @player).result %></td>
-            <td><%= game.game_participations.find_by(player: @player).total %></td>
+            <td><%= participation.role.name %></td>
+            <td><%= participation.result %></td>
+            <td><%= participation.total %></td>
           </tr>
         <% end %>
       </tbody>
