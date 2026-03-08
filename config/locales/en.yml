@@ -81,10 +81,11 @@ en:
       view: "Result"
   games:
     show:
+      seat: "Seat"
       player: "Player"
       role: "Role"
-      plus: "Plus"
-      minus: "Minus"
+      base_score: "Score"
+      additional_score: "Additional"
       best_move: "Best move"
       total: "Total"
   series:

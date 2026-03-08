@@ -4,10 +4,11 @@
   <table class="data-table">
     <thead>
       <tr>
+        <th><%= t(".seat") %></th>
         <th><%= t(".player") %></th>
         <th><%= t(".role") %></th>
-        <th><%= t(".plus") %></th>
-        <th><%= t(".minus") %></th>
+        <th><%= t(".base_score") %></th>
+        <th><%= t(".additional_score") %></th>
         <th><%= t(".best_move") %></th>
         <th><%= t(".total") %></th>
       </tr>
@@ -15,8 +16,13 @@
     <tbody>
       <% @participations.each do |participation| %>
         <tr>
-          <td><%= participation.player.name %></td>
-          <td><%= participation.role&.name %></td>
+          <td><%= participation.seat %></td>
+          <td><%= link_to participation.player.name, player_path(participation.player), class: "text-maroon hover:underline" %></td>
+          <td>
+            <% if participation.role_code.present? %>
+              <%= image_tag "roles/#{participation.role_code}.png", alt: participation.role&.name, class: "inline-block h-6 w-6", title: participation.role&.name %>
+            <% end %>
+          </td>
           <td><%= participation.plus %></td>
           <td><%= participation.minus %></td>
           <td><%= participation.best_move %></td>
