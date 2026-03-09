@@ -4,8 +4,8 @@ class Judge::ProtocolsController < ApplicationController
   before_action :set_game, only: [ :edit, :update ]
 
   def new
-    @game = Game.new
-    @participations = 10.times.map { |i| GameParticipation.new(seat: i + 1) }
+    @game = Game.new(played_on: Date.current)
+    @participations = 10.times.map { |i| GameParticipation.new(seat: i + 1, role_code: "peace") }
     load_form_data
   end
 
