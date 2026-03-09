@@ -64,6 +64,24 @@ RSpec.describe NewsPolicy do
     end
   end
 
+  describe "guest (nil user)" do
+    subject(:policy) { described_class.new(nil, published_news) }
+
+    it { is_expected.to be_index }
+    it { is_expected.to be_show }
+    it { is_expected.not_to be_create }
+    it { is_expected.not_to be_new }
+    it { is_expected.not_to be_update }
+    it { is_expected.not_to be_edit }
+    it { is_expected.not_to be_destroy }
+
+    context "with draft news" do
+      subject(:policy) { described_class.new(nil, draft_news) }
+
+      it { is_expected.not_to be_show }
+    end
+  end
+
   describe NewsPolicy::Scope do
     let_it_be(:published) { create(:news, :published) }
     let_it_be(:draft) { create(:news) }
@@ -81,6 +99,18 @@ RSpec.describe NewsPolicy do
 
       it "returns all news" do
         expect(resolved).to include(published, draft)
+      end
+    end
+
+    context "when guest" do
+      subject(:resolved) { described_class.new(nil, News).resolve }
+
+      it "includes published news" do
+        expect(resolved).to include(published)
+      end
+
+      it "excludes draft news" do
+        expect(resolved).not_to include(draft)
       end
     end
 

@@ -6,19 +6,19 @@ class NewsPolicy < ApplicationPolicy
   end
 
   def show?
-    record.published? || user.can_manage_news?
+    record.published? || user&.can_manage_news?
   end
 
   def create?
-    user.can_manage_news?
+    user&.can_manage_news?
   end
 
   def update?
-    user.can_manage_news?
+    user&.can_manage_news?
   end
 
   def destroy?
-    user.admin?
+    user&.admin?
   end
 
   class Scope < ApplicationPolicy::Scope
