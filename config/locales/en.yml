@@ -35,7 +35,14 @@ en:
         roles:
           user: "User"
           judge: "Judge"
+          editor: "Editor"
           admin: "Admin"
+      news:
+        title: "Title"
+        content: "Content"
+        status: "Status"
+        published_at: "Published at"
+        game_id: "Game"
   hello: "Hello world"
   game_protocols:
     new:
@@ -60,8 +67,43 @@ en:
     series: "Series"
     game: "Game"
     coming_soon: "Coming soon! Stay tuned"
+  admin_news:
+    index:
+      title: "News"
+      new: "Create news"
+      author: "Author"
+      edit: "Edit"
+      empty: "No news yet."
+    new:
+      title: "New article"
+    edit:
+      title: "Edit article"
+    show:
+      back: "← Back to news"
+      by_author: "Author: %{author}"
+      linked_game: "Game: %{game}"
+      edit: "Edit"
+      publish: "Publish"
+      delete: "Delete"
+      delete_confirm: "Are you sure you want to delete this article?"
+    form:
+      game: "Game"
+      submit_create: "Create"
+      submit_update: "Save"
+    status:
+      draft: "Draft"
+      published: "Published"
+    create:
+      success: "Article created successfully."
+    update:
+      success: "Article updated successfully."
+    destroy:
+      success: "Article deleted."
+    publish:
+      success: "Article published."
   nav:
     hall_of_fame: "Hall of Fame"
+    news: "News"
     protocols: "Protocols"
     sign_in: "Sign in"
     sign_out: "Sign out"

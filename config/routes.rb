@@ -7,6 +7,16 @@ Rails.application.routes.draw do
     end
   end
 
+  authenticate :user, ->(u) { u.can_manage_news? } do
+    namespace :admin do
+      resources :news, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
+        member do
+          patch :publish
+        end
+      end
+    end
+  end
+
   authenticate :user, ->(u) { u.admin? } do
     mount Avo::Engine => "/avo"
   end

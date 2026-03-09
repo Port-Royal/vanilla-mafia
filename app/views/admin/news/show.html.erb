@@ -1,0 +1,43 @@
+<div class="mb-6">
+  <%= link_to t("admin_news.show.back"), admin_news_index_path,
+        class: "text-blue-600 hover:underline text-sm" %>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+  <div class="flex items-start justify-between mb-4">
+    <h1 class="text-2xl font-bold"><%= @news.title %></h1>
+    <span class="inline-block px-2 py-0.5 rounded text-xs font-medium <%= @news.published? ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+      <%= t("admin_news.status.#{@news.status}") %>
+    </span>
+  </div>
+
+  <div class="text-sm text-gray-500 mb-4">
+    <%= t("admin_news.show.by_author", author: @news.author.email) %>
+    <% if @news.game %>
+      · <%= t("admin_news.show.linked_game", game: @news.game.full_name) %>
+    <% end %>
+    <% if @news.published_at %>
+      · <%= l(@news.published_at, format: :short) %>
+    <% end %>
+  </div>
+
+  <div class="prose max-w-none">
+    <%= @news.content %>
+  </div>
+</div>
+
+<div class="flex gap-2">
+  <%= link_to t("admin_news.show.edit"), edit_admin_news_path(@news),
+        class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+  <% if @news.draft? %>
+    <%= button_to t("admin_news.show.publish"), publish_admin_news_path(@news),
+          method: :patch,
+          class: "bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+  <% end %>
+  <% if policy(@news).destroy? %>
+    <%= button_to t("admin_news.show.delete"), admin_news_path(@news),
+          method: :delete,
+          data: { turbo_confirm: t("admin_news.show.delete_confirm") },
+          class: "bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+  <% end %>
+</div>
