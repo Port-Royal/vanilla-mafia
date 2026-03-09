@@ -44,6 +44,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.cancelClose()
     this.constructor.instances.delete(this)
 
     if (this.constructor.instances.size === 0 && this.constructor.globalListenersAttached) {
