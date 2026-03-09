@@ -1,21 +1,57 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["hidden", "search", "menu", "option"]
+  static targets = ["search", "menu", "option"]
+
+  static _ensureGlobalState() {
+    if (!this._initialized) {
+      this.instances = new Set()
+      this.globalListenersAttached = false
+      this.handleDocumentClick = (event) => {
+        for (const controller of this.instances) {
+          controller.closeOnOutsideClick(event)
+        }
+      }
+      this.handleReposition = () => {
+        for (const controller of this.instances) {
+          controller.repositionMenu()
+        }
+      }
+      this._initialized = true
+    }
+  }
 
   connect() {
+    this.constructor._ensureGlobalState()
+    this.constructor.instances.add(this)
+
+    if (!this.constructor.globalListenersAttached) {
+      document.addEventListener("click", this.constructor.handleDocumentClick)
+      window.addEventListener("resize", this.constructor.handleReposition)
+      window.addEventListener("scroll", this.constructor.handleReposition, true)
+      this.constructor.globalListenersAttached = true
+    }
+
     this.activeIndex = -1
-    this.boundOutsideClick = this.closeOnOutsideClick.bind(this)
-    this.boundReposition = this.repositionMenu.bind(this)
-    document.addEventListener("click", this.boundOutsideClick)
-    window.addEventListener("resize", this.boundReposition)
-    window.addEventListener("scroll", this.boundReposition, true)
+    this.populateOptions()
+  }
+
+  populateOptions() {
+    const template = document.getElementById("player-options")
+    if (template) {
+      this.menuTarget.appendChild(template.content.cloneNode(true))
+    }
   }
 
   disconnect() {
-    document.removeEventListener("click", this.boundOutsideClick)
-    window.removeEventListener("resize", this.boundReposition)
-    window.removeEventListener("scroll", this.boundReposition, true)
+    this.constructor.instances.delete(this)
+
+    if (this.constructor.instances.size === 0 && this.constructor.globalListenersAttached) {
+      document.removeEventListener("click", this.constructor.handleDocumentClick)
+      window.removeEventListener("resize", this.constructor.handleReposition)
+      window.removeEventListener("scroll", this.constructor.handleReposition, true)
+      this.constructor.globalListenersAttached = false
+    }
   }
 
   open() {
@@ -34,7 +70,6 @@ export default class extends Controller {
     })
 
     this.activeIndex = -1
-    this.hiddenTarget.value = this.searchTarget.value
   }
 
   onKeydown(event) {
@@ -89,6 +124,17 @@ export default class extends Controller {
     this.optionTargets.forEach((option) => option.classList.remove("bg-gray-100"))
   }
 
+  scheduleClose() {
+    this._blurTimeout = setTimeout(() => this.close(), 150)
+  }
+
+  cancelClose() {
+    if (this._blurTimeout) {
+      clearTimeout(this._blurTimeout)
+      this._blurTimeout = null
+    }
+  }
+
   closeOnOutsideClick(event) {
     if (!this.element.contains(event.target)) {
       this.close()
@@ -129,9 +175,9 @@ export default class extends Controller {
   }
 
   pick(option) {
+    this.cancelClose()
     const name = option.dataset.playerName
     this.searchTarget.value = name
-    this.hiddenTarget.value = name
     this.close()
   }
 

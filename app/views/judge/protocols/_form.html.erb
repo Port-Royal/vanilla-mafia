@@ -54,6 +54,13 @@
         </tr>
       </thead>
       <tbody class="divide-y">
+        <template id="player-options">
+          <% @players.each do |player| %>
+            <button type="button" class="w-full px-2 py-1 text-sm text-left hover:bg-gray-100 whitespace-nowrap" data-player-select-target="option" data-player-name="<%= player.name %>" data-action="click->player-select#select mouseenter->player-select#hover mousedown->player-select#cancelClose">
+              <%= player.name %>
+            </button>
+          <% end %>
+        </template>
         <% @participations.each_with_index do |participation, index| %>
           <% seat = index + 1 %>
           <tr>
@@ -62,21 +69,16 @@
             </td>
             <td class="px-3 py-2 overflow-visible">
               <div class="relative overflow-visible" data-controller="player-select">
-                <input type="hidden" name="participations[<%= seat %>][player_name]" value="<%= participation.player&.name %>" data-player-select-target="hidden" />
                 <input
                   type="text"
+                  name="participations[<%= seat %>][player_name]"
                   value="<%= participation.player&.name %>"
                   class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
                   autocomplete="off"
                   data-player-select-target="search"
-                  data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown blur->player-select#close"
+                  data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown blur->player-select#scheduleClose"
                 />
                 <div class="hidden fixed border border-gray-300 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto z-50" data-player-select-target="menu">
-                  <% @players.each do |player| %>
-                    <button type="button" class="w-full px-2 py-1 text-sm text-left hover:bg-gray-100 whitespace-nowrap" data-player-select-target="option" data-player-name="<%= player.name %>" data-action="click->player-select#select mouseenter->player-select#hover">
-                      <%= player.name %>
-                    </button>
-                  <% end %>
                 </div>
               </div>
             </td>
