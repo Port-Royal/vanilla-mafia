@@ -285,28 +285,30 @@ RSpec.describe "Admin::News" do
   end
 
   describe "PATCH /admin/news/:id/publish" do
-    let!(:article) { create(:news, author: editor) }
-
     context "when user is editor" do
       before { sign_in editor }
 
-      it "publishes the article" do
-        patch publish_admin_news_path(article)
-        expect(article.reload).to be_published
-      end
+      context "when article is draft" do
+        let(:article) { create(:news, author: editor) }
 
-      it "sets published_at" do
-        patch publish_admin_news_path(article)
-        expect(article.reload.published_at).to be_present
-      end
+        it "publishes the article" do
+          patch publish_admin_news_path(article)
+          expect(article.reload).to be_published
+        end
 
-      it "redirects to show" do
-        patch publish_admin_news_path(article)
-        expect(response).to redirect_to(admin_news_path(article))
+        it "sets published_at" do
+          patch publish_admin_news_path(article)
+          expect(article.reload.published_at).to be_present
+        end
+
+        it "redirects to show" do
+          patch publish_admin_news_path(article)
+          expect(response).to redirect_to(admin_news_path(article))
+        end
       end
 
       context "when article is already published" do
-        let!(:article) { create(:news, :published, author: editor) }
+        let_it_be(:article) { create(:news, :published) }
 
         it "returns unprocessable entity" do
           patch publish_admin_news_path(article)
@@ -316,6 +318,8 @@ RSpec.describe "Admin::News" do
     end
 
     context "when user is regular user" do
+      let_it_be(:article) { create(:news) }
+
       before { sign_in regular_user }
 
       it "returns not found" do
