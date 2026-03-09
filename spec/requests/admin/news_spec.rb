@@ -259,11 +259,17 @@ RSpec.describe "Admin::News" do
     context "when user is editor" do
       before { sign_in editor }
 
-      it "raises not authorized" do
+      it "returns not found" do
+        article = create(:news)
+        delete admin_news_path(article)
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "does not delete the article" do
         article = create(:news)
         expect {
           delete admin_news_path(article)
-        }.to raise_error(Pundit::NotAuthorizedError)
+        }.not_to change(News, :count)
       end
     end
 
@@ -297,6 +303,15 @@ RSpec.describe "Admin::News" do
       it "redirects to show" do
         patch publish_admin_news_path(article)
         expect(response).to redirect_to(admin_news_path(article))
+      end
+
+      context "when article is already published" do
+        let!(:article) { create(:news, :published, author: editor) }
+
+        it "returns unprocessable entity" do
+          patch publish_admin_news_path(article)
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
       end
     end
 

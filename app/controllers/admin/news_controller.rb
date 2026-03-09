@@ -1,6 +1,8 @@
 class Admin::NewsController < ApplicationController
   include Pundit::Authorization
 
+  rescue_from Pundit::NotAuthorizedError, with: -> { head :not_found }
+
   before_action :authenticate_user!
   before_action :require_news_access!
   before_action :set_news, only: [ :show, :edit, :update, :destroy, :publish ]
@@ -56,6 +58,8 @@ class Admin::NewsController < ApplicationController
 
   def publish
     authorize @news, :update?
+    head :unprocessable_entity and return unless @news.draft?
+
     @news.publish!
     redirect_to admin_news_path(@news), notice: t("admin_news.publish.success")
   end
