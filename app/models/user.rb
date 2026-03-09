@@ -5,7 +5,7 @@ class User < ApplicationRecord
   has_many :player_claims, dependent: :destroy
   has_many :news, foreign_key: :author_id, inverse_of: :author, dependent: :restrict_with_exception
 
-  enum :role, { user: "user", judge: "judge", admin: "admin" }
+  enum :role, { user: "user", judge: "judge", editor: "editor", admin: "admin" }
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :player_id, uniqueness: true, allow_nil: true
@@ -13,6 +13,10 @@ class User < ApplicationRecord
 
   def can_manage_protocols?
     admin? || judge?
+  end
+
+  def can_manage_news?
+    admin? || editor?
   end
 
   def claimed_player?

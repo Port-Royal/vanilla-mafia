@@ -33,8 +33,8 @@ RSpec.describe User, type: :model do
   end
 
   describe 'role enum' do
-    it 'defines user, judge, and admin roles' do
-      expect(described_class.roles).to eq("user" => "user", "judge" => "judge", "admin" => "admin")
+    it 'defines user, judge, editor, and admin roles' do
+      expect(described_class.roles).to eq("user" => "user", "judge" => "judge", "editor" => "editor", "admin" => "admin")
     end
 
     it 'defaults to user role' do
@@ -117,6 +117,48 @@ RSpec.describe User, type: :model do
 
       it 'returns false' do
         expect(user.can_manage_protocols?).to be false
+      end
+    end
+
+    context 'when role is editor' do
+      let(:user) { build(:user, :editor) }
+
+      it 'returns false' do
+        expect(user.can_manage_protocols?).to be false
+      end
+    end
+  end
+
+  describe '#can_manage_news?' do
+    context 'when role is admin' do
+      let(:user) { build(:user, :admin) }
+
+      it 'returns true' do
+        expect(user.can_manage_news?).to be true
+      end
+    end
+
+    context 'when role is editor' do
+      let(:user) { build(:user, :editor) }
+
+      it 'returns true' do
+        expect(user.can_manage_news?).to be true
+      end
+    end
+
+    context 'when role is user' do
+      let(:user) { build(:user) }
+
+      it 'returns false' do
+        expect(user.can_manage_news?).to be false
+      end
+    end
+
+    context 'when role is judge' do
+      let(:user) { build(:user, :judge) }
+
+      it 'returns false' do
+        expect(user.can_manage_news?).to be false
       end
     end
   end

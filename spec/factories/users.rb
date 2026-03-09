@@ -11,5 +11,9 @@ FactoryBot.define do
     trait :judge do
       role { "judge" }
     end
+
+    trait :editor do
+      role { "editor" }
+    end
   end
 end
