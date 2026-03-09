@@ -85,6 +85,14 @@ RSpec.describe "Admin::News" do
         expect(response).to have_http_status(:not_found)
       end
     end
+
+    context "when user is not signed in" do
+      before { get new_admin_news_path }
+
+      it "redirects to sign in" do
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
   end
 
   describe "POST /admin/news" do
@@ -140,6 +148,13 @@ RSpec.describe "Admin::News" do
         expect(response).to have_http_status(:not_found)
       end
     end
+
+    context "when user is not signed in" do
+      it "redirects to sign in" do
+        post admin_news_index_path, params: { news: { title: "Test" } }
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
   end
 
   describe "GET /admin/news/:id" do
@@ -170,6 +185,14 @@ RSpec.describe "Admin::News" do
         expect(response).to have_http_status(:not_found)
       end
     end
+
+    context "when user is not signed in" do
+      before { get admin_news_path(article) }
+
+      it "redirects to sign in" do
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
   end
 
   describe "GET /admin/news/:id/edit" do
@@ -198,6 +221,14 @@ RSpec.describe "Admin::News" do
 
       it "returns not found" do
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      before { get edit_admin_news_path(article) }
+
+      it "redirects to sign in" do
+        expect(response).to redirect_to(new_user_session_path)
       end
     end
   end
@@ -234,6 +265,13 @@ RSpec.describe "Admin::News" do
       it "returns not found" do
         patch admin_news_path(article), params: { news: { title: "Hack" } }
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      it "redirects to sign in" do
+        patch admin_news_path(article), params: { news: { title: "Hack" } }
+        expect(response).to redirect_to(new_user_session_path)
       end
     end
   end
@@ -282,6 +320,14 @@ RSpec.describe "Admin::News" do
         expect(response).to have_http_status(:not_found)
       end
     end
+
+    context "when user is not signed in" do
+      it "redirects to sign in" do
+        article = create(:news)
+        delete admin_news_path(article)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
   end
 
   describe "PATCH /admin/news/:id/publish" do
@@ -325,6 +371,15 @@ RSpec.describe "Admin::News" do
       it "returns not found" do
         patch publish_admin_news_path(article)
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      let_it_be(:article) { create(:news) }
+
+      it "redirects to sign in" do
+        patch publish_admin_news_path(article)
+        expect(response).to redirect_to(new_user_session_path)
       end
     end
   end
