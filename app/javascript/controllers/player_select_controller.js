@@ -56,6 +56,7 @@ export default class extends Controller {
   }
 
   open() {
+    this.cancelClose()
     this.menuTarget.classList.remove("hidden")
     this.filter()
     this.repositionMenu()
