@@ -5,7 +5,7 @@ class Judge::ProtocolsController < ApplicationController
 
   def new
     @game = Game.new(played_on: Date.current)
-    @participations = 10.times.map { |i| GameParticipation.new(seat: i + 1, role_code: 'peace') }
+    @participations = 10.times.map { |i| GameParticipation.new(seat: i + 1, role_code: "peace") }
     load_form_data
   end
 
