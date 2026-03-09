@@ -69,7 +69,7 @@
                   class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
                   autocomplete="off"
                   data-player-select-target="search"
-                  data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown"
+                  data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown blur->player-select#close"
                 />
                 <div class="hidden fixed border border-gray-300 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto z-50" data-player-select-target="menu">
                   <% @players.each do |player| %>
