@@ -23,11 +23,16 @@ class NewsPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if user.can_manage_news?
-        scope.all
-      else
-        scope.where(status: :published)
-      end
+      return default_scope unless user.present?
+      return scope.all if user.can_manage_news?
+
+      default_scope
+    end
+
+    private
+
+    def default_scope
+      scope.where(status: :published)
     end
   end
 end
