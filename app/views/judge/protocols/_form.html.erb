@@ -60,18 +60,28 @@
             <td class="px-3 py-2 text-center font-medium">
               <%= seat %>
             </td>
-            <td class="px-3 py-2">
-              <input
-                type="text"
-                name="participations[<%= seat %>][player_name]"
-                value="<%= participation.player&.name %>"
-                list="players_list"
-                class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
-                autocomplete="off"
-              />
+            <td class="px-3 py-2 overflow-visible">
+              <div class="relative overflow-visible" data-controller="player-select">
+                <input type="hidden" name="participations[<%= seat %>][player_name]" value="<%= participation.player&.name %>" data-player-select-target="hidden" />
+                <input
+                  type="text"
+                  value="<%= participation.player&.name %>"
+                  class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                  autocomplete="off"
+                  data-player-select-target="search"
+                  data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown"
+                />
+                <div class="hidden fixed border border-gray-300 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto z-50" data-player-select-target="menu">
+                  <% @players.each do |player| %>
+                    <button type="button" class="w-full px-2 py-1 text-sm text-left hover:bg-gray-100 whitespace-nowrap" data-player-select-target="option" data-player-name="<%= player.name %>" data-action="click->player-select#select mouseenter->player-select#hover">
+                      <%= player.name %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
             </td>
             <td class="px-3 py-2">
-              <select name="participations[<%= seat %>][role_code]" class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
+              <select name="participations[<%= seat %>][role_code]" class="w-auto max-w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
                 <option value=""></option>
                 <% @roles.each do |role| %>
                   <option value="<%= role.code %>" <%= "selected" if participation.role_code == role.code %>><%= role.name %></option>
@@ -79,13 +89,13 @@
               </select>
             </td>
             <td class="px-3 py-2">
-              <input type="number" step="0.01" name="participations[<%= seat %>][plus]" value="<%= participation.plus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              <input type="number" step="0.1" name="participations[<%= seat %>][plus]" value="<%= participation.plus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
             </td>
             <td class="px-3 py-2">
-              <input type="number" step="0.01" name="participations[<%= seat %>][minus]" value="<%= participation.minus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              <input type="number" step="0.1" name="participations[<%= seat %>][minus]" value="<%= participation.minus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
             </td>
             <td class="px-3 py-2">
-              <input type="number" step="0.01" name="participations[<%= seat %>][best_move]" value="<%= participation.best_move %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+              <input type="number" step="0.1" name="participations[<%= seat %>][best_move]" value="<%= participation.best_move %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
             </td>
             <td class="px-3 py-2 text-center">
               <input type="hidden" name="participations[<%= seat %>][first_shoot]" value="0" />
@@ -103,12 +113,6 @@
       </tbody>
     </table>
   </div>
-
-  <datalist id="players_list">
-    <% @players.each do |player| %>
-      <option value="<%= player.name %>" />
-    <% end %>
-  </datalist>
 </div>
 
 <div class="flex justify-end mt-4">
