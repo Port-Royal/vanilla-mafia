@@ -143,12 +143,15 @@ ru:
     show:
       back: "← К списку новостей"
       by_author: "Автор: %{author}"
+      linked_series: "Сезон %{season}, Серия %{series}"
       linked_game: "Игра: %{game}"
       edit: "Редактировать"
       publish: "Опубликовать"
       delete: "Удалить"
       delete_confirm: "Вы уверены, что хотите удалить эту новость?"
     form:
+      season: "Сезон"
+      series: "Серия"
       game: "Игра"
       submit_create: "Создать"
       submit_update: "Сохранить"

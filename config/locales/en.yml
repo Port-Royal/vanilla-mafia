@@ -81,12 +81,15 @@ en:
     show:
       back: "← Back to news"
       by_author: "Author: %{author}"
+      linked_series: "Season %{season}, Series %{series}"
       linked_game: "Game: %{game}"
       edit: "Edit"
       publish: "Publish"
       delete: "Delete"
       delete_confirm: "Are you sure you want to delete this article?"
     form:
+      season: "Season"
+      series: "Series"
       game: "Game"
       submit_create: "Create"
       submit_update: "Save"
