@@ -31,6 +31,9 @@ RSpec.describe News, type: :model do
 
       it { is_expected.to be_valid }
     end
+
+    it { is_expected.to validate_numericality_of(:season).only_integer.allow_nil }
+    it { is_expected.to validate_numericality_of(:series).only_integer.allow_nil }
   end
 
   describe '.recent' do

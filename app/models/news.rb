@@ -14,6 +14,8 @@ class News < ApplicationRecord
 
   validates :series, presence: true, if: -> { season.present? }
   validates :season, presence: true, if: -> { series.present? }
+  validates :season, numericality: { only_integer: true }, allow_nil: true
+  validates :series, numericality: { only_integer: true }, allow_nil: true
 
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
   scope :for_game, ->(game) { where(game:) }
