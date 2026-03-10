@@ -206,5 +206,5 @@ en:
       message: "An internal error occurred. Please try again later."
     back_home: "Back to home"
   pagy:
-    prev: "Previous page"
-    next: "Next page"
+    prev: "<<"
+    next: ">>"
