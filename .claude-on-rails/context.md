@@ -62,8 +62,8 @@ This project uses two mutation testing tools:
 [Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
 
 #### Running Mutant
-- **Single class**: `bundle exec mutant run -- 'YourClass'`
-- **Single method**: `bundle exec mutant run -- 'YourClass#method_name'`
+- **Single class**: `bundle exec mutant run --jobs 1 -- 'YourClass'`
+- **Single method**: `bundle exec mutant run --jobs 1 -- 'YourClass#method_name'`
 - **After writing tests**: Always run mutant against the class under test to verify test quality
 
 ### Workflow
