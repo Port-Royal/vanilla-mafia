@@ -31,7 +31,7 @@ gem "rails-i18n"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 gem "sentry-rails"
-gem "sentry-ruby"
+
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
