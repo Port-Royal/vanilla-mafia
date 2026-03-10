@@ -127,7 +127,7 @@ RSpec.describe "Admin::News" do
       context "with series params" do
         let(:series_params) { { news: { title: "Series News", content: "Content", season: 1, series: 2 } } }
 
-        it "creates a news article linked to a series" do
+        it "creates a news article linked to a series in a season" do
           post admin_news_index_path, params: series_params
           article = News.last
           expect(article.season).to eq(1)
@@ -263,7 +263,7 @@ RSpec.describe "Admin::News" do
       end
 
       context "with series params" do
-        it "updates the series association" do
+        it "updates the season/series association" do
           patch admin_news_path(article), params: { news: { season: 3, series: 5 } }
           article.reload
           expect(article.season).to eq(3)
