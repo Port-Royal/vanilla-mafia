@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_10_130014) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_10_141304) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -107,12 +107,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_130014) do
     t.datetime "created_at", null: false
     t.integer "game_id"
     t.datetime "published_at"
+    t.integer "season"
+    t.integer "series"
     t.string "status", default: "draft", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_news_on_author_id"
     t.index ["game_id"], name: "index_news_on_game_id"
     t.index ["published_at"], name: "index_news_on_published_at"
+    t.index ["season", "series"], name: "index_news_on_season_and_series"
   end
 
   create_table "player_awards", force: :cascade do |t|
