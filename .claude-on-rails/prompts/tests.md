@@ -81,19 +81,37 @@ end
 2. **Watch it fail** — confirm the test fails for the right reason
 3. **Write the minimal implementation** to make the test pass
 4. **Refactor** while keeping tests green
-5. **Run mutation testing** — verify test quality with mutant (see below)
+5. **Run mutation testing** — verify test quality with evilution and mutant (see below)
 6. **Repeat** for the next acceptance criterion
 
 ## Mutation Testing (Required)
 
-After writing or modifying tests, you MUST run mutant against the class under test to verify test quality.
+After writing or modifying tests, you MUST run mutation testing against the class under test to verify test quality. This project uses two mutation testing tools:
+
+### Evilution (primary — fast, file-level targeting)
+
+```bash
+# Test a single file
+bundle exec evilution run app/models/class_name.rb
+
+# Test specific lines
+bundle exec evilution run app/models/class_name.rb:15-30
+
+# Test a specific method
+bundle exec evilution run app/models/class_name.rb --target ClassName#method_name
+
+# JSON output for structured results
+bundle exec evilution run app/models/class_name.rb --format json --timeout 30
+```
+
+### Mutant (complementary — class-level targeting)
 
 ```bash
 # Test a single class
-bundle exec mutant run -- 'ClassName'
+bundle exec mutant run --jobs 1 -- 'ClassName'
 
 # Test a single method
-bundle exec mutant run -- 'ClassName#method_name'
+bundle exec mutant run --jobs 1 -- 'ClassName#method_name'
 ```
 
 - If mutants survive, add or strengthen assertions to kill them
