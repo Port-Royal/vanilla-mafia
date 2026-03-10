@@ -37,9 +37,31 @@ Write specs using `let_it_be`/`let`/`let!` declarations and nested `context` blo
 
 ## Mutation Testing
 
-This project uses [mutant](https://github.com/mbj/mutant) for mutation testing to verify test quality.
+This project uses two mutation testing tools:
 
-### Running Mutant
+### Evilution
+
+[Evilution](https://github.com/marinazzio/evilution) is a Prism-based mutation testing tool with structured JSON output.
+
+#### Running Evilution
+- **Single file**: `bundle exec evilution run app/models/your_model.rb`
+- **Line range**: `bundle exec evilution run app/models/your_model.rb:15-30`
+- **Specific method**: `bundle exec evilution run app/models/your_model.rb --target YourClass#method_name`
+- **JSON output**: Add `--format json` for machine-readable results
+- **Custom timeout**: `--timeout 30` (default 10s)
+- **CI gate**: `--min-score 0.8` exits non-zero if score is below threshold
+
+#### Key Differences from Mutant
+- Uses Prism parser (Ruby's official parser) instead of the `parser` gem
+- Supports line-range targeting for fast PR-level feedback
+- Structured JSON output designed for CI pipelines and AI agents
+- MIT license (no commercial restrictions)
+
+### Mutant
+
+[Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
+
+#### Running Mutant
 - **Single class**: `bundle exec mutant run -- 'YourClass'`
 - **Single method**: `bundle exec mutant run -- 'YourClass#method_name'`
 - **After writing tests**: Always run mutant against the class under test to verify test quality
@@ -47,7 +69,7 @@ This project uses [mutant](https://github.com/mbj/mutant) for mutation testing t
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
-3. Run mutant against the changed class(es) to check for surviving mutants
+3. Run mutation testing against the changed class(es) to check for surviving mutants
 4. If mutants survive, add or strengthen assertions to kill them
 5. Aim for zero surviving mutants on all new/modified code
 
