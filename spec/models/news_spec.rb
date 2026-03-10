@@ -4,6 +4,8 @@ RSpec.describe News, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:author).class_name("User") }
     it { is_expected.to belong_to(:game).optional }
+    it { is_expected.to have_many(:taggings).dependent(:destroy) }
+    it { is_expected.to have_many(:tags).through(:taggings) }
     it { is_expected.to have_rich_text(:content) }
   end
 

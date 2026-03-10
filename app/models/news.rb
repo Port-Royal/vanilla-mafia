@@ -2,6 +2,9 @@ class News < ApplicationRecord
   belongs_to :author, class_name: "User"
   belongs_to :game, optional: true
 
+  has_many :taggings, as: :taggable, dependent: :destroy
+  has_many :tags, through: :taggings
+
   has_rich_text :content
 
   enum :status, { draft: "draft", published: "published" }
