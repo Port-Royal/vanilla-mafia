@@ -34,7 +34,14 @@ ru:
         roles:
           user: "Пользователь"
           judge: "Ведущий"
+          editor: "Редактор"
           admin: "Администратор"
+      news:
+        title: "Заголовок"
+        content: "Содержание"
+        status: "Статус"
+        published_at: "Дата публикации"
+        game_id: "Игра"
       award:
         title: "Название"
         description: "Описание"
@@ -122,8 +129,43 @@ ru:
     all_awards: "Все награды"
     award:
       of_season: "%{season} сезона"
+  admin_news:
+    index:
+      title: "Новости"
+      new: "Создать новость"
+      author: "Автор"
+      edit: "Редактировать"
+      empty: "Новостей пока нет."
+    new:
+      title: "Новая новость"
+    edit:
+      title: "Редактирование новости"
+    show:
+      back: "← К списку новостей"
+      by_author: "Автор: %{author}"
+      linked_game: "Игра: %{game}"
+      edit: "Редактировать"
+      publish: "Опубликовать"
+      delete: "Удалить"
+      delete_confirm: "Вы уверены, что хотите удалить эту новость?"
+    form:
+      game: "Игра"
+      submit_create: "Создать"
+      submit_update: "Сохранить"
+    status:
+      draft: "Черновик"
+      published: "Опубликовано"
+    create:
+      success: "Новость успешно создана."
+    update:
+      success: "Новость успешно обновлена."
+    destroy:
+      success: "Новость удалена."
+    publish:
+      success: "Новость опубликована."
   nav:
     hall_of_fame: "Зал славы"
+    news: "Новости"
     protocols: "Протоколы"
     sign_in: "Войти"
     sign_out: "Выйти"
