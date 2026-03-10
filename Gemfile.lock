@@ -612,7 +612,7 @@ DEPENDENCIES
   database_cleaner-active_record
   debug
   devise
-  evilution
+  evilution (~> 0.2.0)
   factory_bot_rails
   image_processing (~> 1.2)
   importmap-rails
