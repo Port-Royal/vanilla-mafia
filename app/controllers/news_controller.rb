@@ -1,7 +1,7 @@
 class NewsController < ApplicationController
   include Pundit::Authorization
 
-  rescue_from Pundit::NotAuthorizedError, with: -> { head :not_found }
+  rescue_from Pundit::NotAuthorizedError, with: -> { raise ActiveRecord::RecordNotFound }
 
   def index
     scope = News.published.recent.includes({ author: :player }, :tags, :rich_text_content)

@@ -37,14 +37,23 @@ RSpec.describe NewsController do
 
   describe "GET /news/:id" do
     context "with a published article" do
+      let_it_be(:article_with_content) do
+        create(:news, :published, author: author, content: "Important announcement about the tournament")
+      end
+
       it "renders successfully" do
-        get news_path(published_article)
+        get news_path(article_with_content)
         expect(response).to have_http_status(:ok)
       end
 
       it "shows the article title" do
-        get news_path(published_article)
-        expect(response.body).to include(published_article.title)
+        get news_path(article_with_content)
+        expect(response.body).to include(article_with_content.title)
+      end
+
+      it "renders the article content" do
+        get news_path(article_with_content)
+        expect(response.body).to include("Important announcement about the tournament")
       end
     end
 
