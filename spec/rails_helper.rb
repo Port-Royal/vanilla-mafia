@@ -1,6 +1,6 @@
 require 'simplecov'
 SimpleCov.start 'rails' do
-  minimum_coverage 55
+  minimum_coverage 60
 end
 
 require 'spec_helper'
