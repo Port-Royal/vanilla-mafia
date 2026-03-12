@@ -4,6 +4,16 @@
         class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
 </div>
 
+<% active_filter = News.statuses.key?(params[:status]) ? params[:status] : nil %>
+<div class="flex gap-2 mb-4 text-sm">
+  <%= link_to t("admin_news.index.filter.all"), admin_news_index_path,
+        class: "px-3 py-1 rounded #{active_filter.nil? ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
+  <%= link_to t("admin_news.index.filter.draft"), admin_news_index_path(status: :draft),
+        class: "px-3 py-1 rounded #{active_filter == 'draft' ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
+  <%= link_to t("admin_news.index.filter.published"), admin_news_index_path(status: :published),
+        class: "px-3 py-1 rounded #{active_filter == 'published' ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
+</div>
+
 <% if @news.any? %>
   <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
     <table class="w-full text-sm">
@@ -12,6 +22,7 @@
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:title) %></th>
           <th class="px-4 py-3 font-semibold"><%= t("admin_news.index.author") %></th>
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:status) %></th>
+          <th class="px-4 py-3 font-semibold"><%= t("admin_news.index.tags") %></th>
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:published_at) %></th>
           <th class="px-4 py-3 font-semibold"></th>
         </tr>
@@ -28,6 +39,11 @@
                 <%= t("admin_news.status.#{article.status}") %>
               </span>
             </td>
+            <td class="px-4 py-3">
+              <% article.tags.each do |tag| %>
+                <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
+              <% end %>
+            </td>
             <td class="px-4 py-3"><%= article.published_at && l(article.published_at, format: :short) %></td>
             <td class="px-4 py-3 text-right">
               <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article),
@@ -38,6 +54,8 @@
       </tbody>
     </table>
   </div>
+
+  <%= render "shared/pagy_nav", pagy: @pagy %>
 <% else %>
   <p class="text-gray-500"><%= t("admin_news.index.empty") %></p>
 <% end %>

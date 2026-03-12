@@ -39,6 +39,27 @@ RSpec.describe "Admin::News" do
       end
     end
 
+    context "when filtering by status" do
+      before { sign_in admin }
+
+      it "shows only drafts when filtered by draft" do
+        get admin_news_index_path(status: :draft)
+        expect(response.body).to include(draft_article.title)
+        expect(response.body).not_to include(published_article.title)
+      end
+
+      it "shows only published when filtered by published" do
+        get admin_news_index_path(status: :published)
+        expect(response.body).to include(published_article.title)
+        expect(response.body).not_to include(draft_article.title)
+      end
+
+      it "ignores invalid status filter" do
+        get admin_news_index_path(status: :bogus)
+        expect(response.body).to include(published_article.title, draft_article.title)
+      end
+    end
+
     context "when user is regular user" do
       before do
         sign_in regular_user

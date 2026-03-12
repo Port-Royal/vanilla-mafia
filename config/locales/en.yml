@@ -79,8 +79,13 @@ en:
       title: "News"
       new: "Create news"
       author: "Author"
+      tags: "Tags"
       edit: "Edit"
       empty: "No news yet."
+      filter:
+        all: "All"
+        draft: "Drafts"
+        published: "Published"
     new:
       title: "New article"
     edit:
