@@ -173,6 +173,7 @@ ru:
   nav:
     hall_of_fame: "Зал славы"
     news: "Новости"
+    manage_news: "Управление новостями"
     protocols: "Протоколы"
     sign_in: "Войти"
     sign_out: "Выйти"

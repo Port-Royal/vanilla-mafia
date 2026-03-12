@@ -6,8 +6,10 @@
       <article class="border-b border-neutral-200 pb-6">
         <h2 class="text-xl font-bold mb-1"><%= article.title %></h2>
         <div class="text-sm text-neutral-500 mb-3">
-          <%= l(article.published_at, format: :short) %>
-          · <%= article.author.email %>
+          <% if article.published_at.present? %>
+            <%= l(article.published_at, format: :short) %> ·
+          <% end %>
+          <%= article.author.email %>
           <% if article.tags.any? %>
             · <% article.tags.each do |tag| %>
               <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
