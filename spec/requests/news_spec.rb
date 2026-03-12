@@ -34,4 +34,46 @@ RSpec.describe NewsController do
       end
     end
   end
+
+  describe "GET /news/:id" do
+    context "with a published article" do
+      it "renders successfully" do
+        get news_path(published_article)
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "shows the article title" do
+        get news_path(published_article)
+        expect(response.body).to include(published_article.title)
+      end
+    end
+
+    context "with a draft article" do
+      it "returns not found for guests" do
+        get news_path(draft_article)
+        expect(response).to have_http_status(:not_found)
+      end
+
+      context "when signed in as an editor" do
+        let_it_be(:editor) { create(:user, :editor) }
+
+        before { sign_in editor }
+
+        it "renders successfully" do
+          get news_path(draft_article)
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    context "with a linked game" do
+      let_it_be(:game) { create(:game) }
+      let_it_be(:article_with_game) { create(:news, :published, author: author, game: game) }
+
+      it "shows the game link" do
+        get news_path(article_with_game)
+        expect(response.body).to include(game_path(game))
+      end
+    end
+  end
 end
