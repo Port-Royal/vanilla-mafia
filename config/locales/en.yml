@@ -67,6 +67,10 @@ en:
     series: "Series"
     game: "Game"
     coming_soon: "Coming soon! Stay tuned"
+  news:
+    index:
+      title: "News"
+      empty: "No news yet."
   admin_news:
     index:
       title: "News"
@@ -107,6 +111,7 @@ en:
   nav:
     hall_of_fame: "Hall of Fame"
     news: "News"
+    manage_news: "Manage news"
     protocols: "Protocols"
     sign_in: "Sign in"
     sign_out: "Sign out"

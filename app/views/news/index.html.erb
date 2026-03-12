@@ -1,0 +1,31 @@
+<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title") %></h1>
+
+<% if @news.any? %>
+  <div class="space-y-8">
+    <% @news.each do |article| %>
+      <article class="border-b border-neutral-200 pb-6">
+        <h2 class="text-xl font-bold mb-1"><%= article.title %></h2>
+        <div class="text-sm text-neutral-500 mb-3">
+          <% if article.published_at.present? %>
+            <%= l(article.published_at, format: :short) %>
+          <% end %>
+          <% if article.author.claimed_player? %>
+            · <%= article.author.player.name %>
+          <% end %>
+          <% if article.tags.any? %>
+            <% article.tags.each do |tag| %>
+              <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
+            <% end %>
+          <% end %>
+        </div>
+        <div class="prose max-w-none text-neutral-700">
+          <%= truncate(article.content.to_plain_text, length: 300) %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+
+  <%= render "shared/pagy_nav", pagy: @pagy %>
+<% else %>
+  <p class="text-neutral-500"><%= t(".empty") %></p>
+<% end %>

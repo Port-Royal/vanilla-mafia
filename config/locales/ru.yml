@@ -129,6 +129,10 @@ ru:
     all_awards: "Все награды"
     award:
       of_season: "%{season} сезона"
+  news:
+    index:
+      title: "Новости"
+      empty: "Новостей пока нет."
   admin_news:
     index:
       title: "Новости"
@@ -169,6 +173,7 @@ ru:
   nav:
     hall_of_fame: "Зал славы"
     news: "Новости"
+    manage_news: "Управление новостями"
     protocols: "Протоколы"
     sign_in: "Войти"
     sign_out: "Выйти"
