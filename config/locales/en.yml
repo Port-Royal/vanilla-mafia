@@ -67,6 +67,10 @@ en:
     series: "Series"
     game: "Game"
     coming_soon: "Coming soon! Stay tuned"
+  news:
+    index:
+      title: "News"
+      empty: "No news yet."
   admin_news:
     index:
       title: "News"

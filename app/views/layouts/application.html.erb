@@ -52,16 +52,14 @@
           <%= link_to t("nav.hall_of_fame"), hall_path,
                 class: "block text-gray-300 hover:text-white transition-colors" %>
         </li>
+        <li>
+          <%= link_to t("nav.news"), news_index_path,
+                class: "block text-gray-300 hover:text-white transition-colors" %>
+        </li>
         <% if user_signed_in? %>
           <% if current_user.can_manage_protocols? %>
             <li>
               <%= link_to t("nav.protocols"), new_judge_protocol_path,
-                    class: "block text-gray-300 hover:text-white transition-colors" %>
-            </li>
-          <% end %>
-          <% if current_user.can_manage_news? %>
-            <li>
-              <%= link_to t("nav.news"), admin_news_index_path,
                     class: "block text-gray-300 hover:text-white transition-colors" %>
             </li>
           <% end %>
@@ -109,16 +107,14 @@
                 <%= link_to t("nav.hall_of_fame"), hall_path,
                       class: "block hover:text-white transition-colors" %>
               </li>
+              <li>
+                <%= link_to t("nav.news"), news_index_path,
+                      class: "block hover:text-white transition-colors" %>
+              </li>
               <% if user_signed_in? %>
                 <% if current_user.can_manage_protocols? %>
                   <li>
                     <%= link_to t("nav.protocols"), new_judge_protocol_path,
-                          class: "block hover:text-white transition-colors" %>
-                  </li>
-                <% end %>
-                <% if current_user.can_manage_news? %>
-                  <li>
-                    <%= link_to t("nav.news"), admin_news_index_path,
                           class: "block hover:text-white transition-colors" %>
                   </li>
                 <% end %>

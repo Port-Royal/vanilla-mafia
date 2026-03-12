@@ -129,6 +129,10 @@ ru:
     all_awards: "Все награды"
     award:
       of_season: "%{season} сезона"
+  news:
+    index:
+      title: "Новости"
+      empty: "Новостей пока нет."
   admin_news:
     index:
       title: "Новости"
