@@ -133,6 +133,9 @@ ru:
     index:
       title: "Новости"
       empty: "Новостей пока нет."
+    show:
+      back: "← К новостям"
+      linked_game: "Игра %{game}"
   admin_news:
     index:
       title: "Новости"

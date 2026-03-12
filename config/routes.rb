@@ -27,7 +27,7 @@ Rails.application.routes.draw do
     resources :series, only: [ :show ], param: :number
   end
 
-  resources :news, only: [ :index ]
+  resources :news, only: [ :index, :show ]
   resources :games, only: [ :show ]
   resources :players, only: [ :show ] do
     resource :claim, only: [ :create ], controller: "player_claims"

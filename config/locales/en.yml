@@ -71,6 +71,9 @@ en:
     index:
       title: "News"
       empty: "No news yet."
+    show:
+      back: "← Back to news"
+      linked_game: "Game %{game}"
   admin_news:
     index:
       title: "News"
