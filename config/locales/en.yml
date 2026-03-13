@@ -137,6 +137,7 @@ en:
       games: "Games"
       win_rate: "Win rate"
       view: "Result"
+      all_news: "View all news"
   games:
     show:
       seat: "Seat"
