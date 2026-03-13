@@ -10,6 +10,7 @@ RSpec.describe Scraper::PlayerScraper do
   describe "#scrape" do
     before do
       allow(scraper).to receive(:fetch).and_return(doc)
+      allow(scraper).to receive(:log)
     end
 
     it "extracts photo data" do
