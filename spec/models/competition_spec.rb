@@ -64,7 +64,7 @@ RSpec.describe Competition, type: :model do
       competition = create(:competition)
       competition.parent_id = competition.id
       expect(competition).not_to be_valid
-      expect(competition.errors.where(:parent_id, :self_referential)).to be_present
+      expect(competition.errors[:parent_id]).to include("cannot reference itself")
     end
 
     it 'is valid when parent_id differs from own id' do
