@@ -37,6 +37,34 @@ RSpec.describe SeriesController do
       end
     end
 
+    context "when series has linked published news" do
+      let_it_be(:article) { create(:news, :published, title: "Series Recap", season: 5, series: 1) }
+      let_it_be(:draft) { create(:news, title: "Draft News", season: 5, series: 1) }
+      let_it_be(:other_series_article) { create(:news, :published, title: "Other Series News", season: 5, series: 2) }
+
+      before { get season_series_path(season_number: 5, number: 1) }
+
+      it "shows published news for the series" do
+        expect(response.body).to include("Series Recap")
+      end
+
+      it "does not show draft news" do
+        expect(response.body).not_to include("Draft News")
+      end
+
+      it "does not show news from other series" do
+        expect(response.body).not_to include("Other Series News")
+      end
+    end
+
+    context "when series has no linked news" do
+      before { get season_series_path(season_number: 5, number: 1) }
+
+      it "does not render the news section" do
+        expect(response.body).not_to include("space-y-6")
+      end
+    end
+
     context "when series has no games" do
       before { get season_series_path(season_number: 99, number: 99) }
 

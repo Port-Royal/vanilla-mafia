@@ -26,3 +26,35 @@
     </tbody>
   </table>
 </div>
+
+<% if @news.any? %>
+  <section class="mt-10">
+    <h2 class="text-2xl font-bold text-maroon mb-4"><%= t("news.index.title") %></h2>
+
+    <div class="space-y-6">
+      <% @news.each do |article| %>
+        <article class="border-b border-neutral-200 pb-4">
+          <h3 class="text-lg font-bold mb-1">
+            <%= link_to article.title, news_path(article), class: "text-maroon hover:underline" %>
+          </h3>
+          <div class="text-sm text-neutral-500 mb-2">
+            <% if article.published_at.present? %>
+              <%= l(article.published_at, format: :short) %>
+            <% end %>
+            <% if article.author.claimed_player? %>
+              · <%= article.author.player.name %>
+            <% end %>
+            <% if article.tags.any? %>
+              <% article.tags.each do |tag| %>
+                <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="text-neutral-700 text-sm">
+            <%= truncate(article.content.to_plain_text, length: 200) %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  </section>
+<% end %>
