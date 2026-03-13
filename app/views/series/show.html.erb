@@ -26,3 +26,11 @@
     </tbody>
   </table>
 </div>
+
+<% if @news.any? %>
+  <section class="mt-10" data-testid="series-news">
+    <h2 class="text-2xl font-bold text-maroon mb-4"><%= t("news.index.title") %></h2>
+
+    <%= render "news/preview_list", articles: @news %>
+  </section>
+<% end %>
