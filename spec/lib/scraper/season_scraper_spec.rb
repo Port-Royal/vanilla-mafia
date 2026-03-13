@@ -10,6 +10,7 @@ RSpec.describe Scraper::SeasonScraper do
   describe "#scrape_all" do
     before do
       allow(scraper).to receive(:fetch).and_return(doc)
+      allow(scraper).to receive(:log)
     end
 
     it "returns games from all requested seasons" do
