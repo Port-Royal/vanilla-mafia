@@ -10,8 +10,7 @@ RSpec.describe Competition, type: :model do
     subject { build(:competition) }
 
     it { is_expected.to validate_presence_of(:name) }
-    it { is_expected.to validate_presence_of(:kind) }
-    it { is_expected.to validate_inclusion_of(:kind).in_array(Competition::KINDS) }
+    it { is_expected.to define_enum_for(:kind).with_values(Competition::KINDS).backed_by_column_of_type(:string).without_scopes }
     it 'validates uniqueness of slug' do
       create(:competition, slug: "taken")
       competition = build(:competition, slug: "taken")
@@ -59,13 +58,18 @@ RSpec.describe Competition, type: :model do
     end
   end
 
-  describe '.by_kind' do
-    let_it_be(:season) { create(:competition, :season) }
-    let_it_be(:series) { create(:competition, :series) }
+  describe '#parent_is_not_self' do
+    it 'is invalid when parent_id equals own id' do
+      competition = create(:competition)
+      competition.parent_id = competition.id
+      expect(competition).not_to be_valid
+      expect(competition.errors.where(:parent_id, :self_referential)).to be_present
+    end
 
-    it 'returns competitions of the given kind' do
-      expect(described_class.by_kind("season")).to include(season)
-      expect(described_class.by_kind("season")).not_to include(series)
+    it 'is valid when parent_id differs from own id' do
+      parent = create(:competition)
+      competition = create(:competition, parent: parent)
+      expect(competition).to be_valid
     end
   end
 
