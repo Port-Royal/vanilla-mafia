@@ -27,6 +27,8 @@ class Competition < ApplicationRecord
   end
 
   def parent_is_not_self
-    errors.add(:parent_id, :self_referential) if parent_id == id && id
+    if parent_id.present? && parent_id == id
+      errors.add(:parent_id, "cannot reference itself")
+    end
   end
 end
