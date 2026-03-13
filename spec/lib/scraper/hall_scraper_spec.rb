@@ -10,6 +10,7 @@ RSpec.describe Scraper::HallScraper do
   describe "#scrape" do
     before do
       allow(scraper).to receive(:fetch).and_return(doc)
+      allow(scraper).to receive(:log)
     end
 
     it "parses award definitions" do

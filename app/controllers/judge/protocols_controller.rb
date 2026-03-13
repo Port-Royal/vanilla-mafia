@@ -23,7 +23,7 @@ class Judge::ProtocolsController < ApplicationController
       @participations = build_participations_from_params
       load_form_data
       flash.now[:error] = result.errors.join(", ")
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -45,7 +45,7 @@ class Judge::ProtocolsController < ApplicationController
       @participations = build_participations_from_params
       load_form_data
       flash.now[:error] = result.errors.join(", ")
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

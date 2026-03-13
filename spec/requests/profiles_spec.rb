@@ -110,7 +110,7 @@ RSpec.describe ProfilesController do
         end
 
         it "re-renders the edit form" do
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
 
         it "renders validation errors" do

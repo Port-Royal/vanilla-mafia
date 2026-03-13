@@ -125,7 +125,7 @@ class PostsController < ApplicationController
         format.turbo_stream { render turbo_stream: turbo_stream.replace(@post) }
       end
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 end

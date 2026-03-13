@@ -20,7 +20,7 @@ class Api::BaseController < ActionController::API
   before_action :authenticate
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
-  rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity
+  rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_content
 
   private
 
@@ -34,8 +34,8 @@ class Api::BaseController < ActionController::API
     render json: { error: exception.message }, status: :not_found
   end
 
-  def unprocessable_entity(exception)
-    render json: { errors: exception.record.errors }, status: :unprocessable_entity
+  def unprocessable_content(exception)
+    render json: { errors: exception.record.errors }, status: :unprocessable_content
   end
 end
 ```
@@ -59,7 +59,7 @@ class Api::V1::ProductsController < Api::BaseController
     if product.save
       render json: product, status: :created
     else
-      render json: { errors: product.errors }, status: :unprocessable_entity
+      render json: { errors: product.errors }, status: :unprocessable_content
     end
   end
 
