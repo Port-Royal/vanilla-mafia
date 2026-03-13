@@ -93,7 +93,7 @@ RSpec.describe "Judge::Protocols" do
 
         it "renders the form with errors" do
           post judge_protocols_path, params: { game: invalid_game_params, participations: valid_participations_params }
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
 
         it "does not create a game" do
@@ -252,7 +252,7 @@ RSpec.describe "Judge::Protocols" do
             game: { season: "", series: 1, game_number: 51 },
             participations: valid_participations_params
           }
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
     end

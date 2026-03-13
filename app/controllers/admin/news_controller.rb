@@ -32,7 +32,7 @@ class Admin::NewsController < ApplicationController
       redirect_to admin_news_index_path, notice: t("admin_news.create.success")
     else
       load_form_data
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -48,7 +48,7 @@ class Admin::NewsController < ApplicationController
       redirect_to admin_news_path(@news), notice: t("admin_news.update.success")
     else
       load_form_data
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -60,7 +60,11 @@ class Admin::NewsController < ApplicationController
 
   def publish
     authorize @news, :update?
-    head :unprocessable_entity and return unless @news.draft?
+
+    unless @news.draft?
+      head :unprocessable_content
+      return
+    end
 
     @news.publish!
     redirect_to admin_news_path(@news), notice: t("admin_news.publish.success")

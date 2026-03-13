@@ -18,7 +18,7 @@ class ProfilesController < ApplicationController
     if @player.update(player_params)
       redirect_to player_path(@player), notice: t("profiles.update.success")
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
