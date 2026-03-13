@@ -59,6 +59,7 @@ ru:
       games: "Игры"
       win_rate: "Процент побед"
       view: "Итог"
+      all_news: "Все новости"
   games:
     show:
       seat: "Место"

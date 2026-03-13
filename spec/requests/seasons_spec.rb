@@ -40,6 +40,33 @@ RSpec.describe SeasonsController do
       end
     end
 
+    context "when published news exists" do
+      let_it_be(:published_article) { create(:news, :published, title: "Breaking Mafia News") }
+      let_it_be(:draft_article) { create(:news, title: "Draft Article") }
+
+      before { get season_path(number: 5) }
+
+      it "shows published news on the homepage" do
+        expect(response.body).to include("Breaking Mafia News")
+      end
+
+      it "does not show draft news" do
+        expect(response.body).not_to include("Draft Article")
+      end
+
+      it "shows the view all news link" do
+        expect(response.body).to include(news_index_path)
+      end
+    end
+
+    context "when no published news exists" do
+      before { get season_path(number: 5) }
+
+      it "does not render the news section" do
+        expect(response.body).not_to include(I18n.t("seasons.show.all_news"))
+      end
+    end
+
     context "when season has no games" do
       before { get season_path(number: 99) }
 
