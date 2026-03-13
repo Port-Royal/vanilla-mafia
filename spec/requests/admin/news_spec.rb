@@ -167,7 +167,7 @@ RSpec.describe "Admin::News" do
 
         it "renders the form with errors" do
           post admin_news_index_path, params: invalid_params
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
     end
@@ -295,7 +295,7 @@ RSpec.describe "Admin::News" do
       context "with invalid params" do
         it "renders the form with errors" do
           patch admin_news_path(article), params: { news: { title: "" } }
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
     end
@@ -399,7 +399,7 @@ RSpec.describe "Admin::News" do
 
         it "returns unprocessable entity" do
           patch publish_admin_news_path(article)
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
     end
