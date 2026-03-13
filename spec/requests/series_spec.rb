@@ -44,6 +44,10 @@ RSpec.describe SeriesController do
 
       before { get season_series_path(season_number: 5, number: 1) }
 
+      it "returns success" do
+        expect(response).to have_http_status(:ok)
+      end
+
       it "shows published news for the series" do
         expect(response.body).to include("Series Recap")
       end
@@ -59,6 +63,10 @@ RSpec.describe SeriesController do
 
     context "when series has no linked news" do
       before { get season_series_path(season_number: 5, number: 1) }
+
+      it "returns success" do
+        expect(response).to have_http_status(:ok)
+      end
 
       it "does not render the news section" do
         expect(response.body).not_to include("series-news")
