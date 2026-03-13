@@ -42,5 +42,9 @@ Rails.application.routes.draw do
   match "/422", to: "errors#show", via: :all, defaults: { code: 422 }
   match "/500", to: "errors#show", via: :all, defaults: { code: 500 }
 
+  namespace :webhooks do
+    post "telegram/:token", to: "telegram#create", as: :telegram
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
 end
