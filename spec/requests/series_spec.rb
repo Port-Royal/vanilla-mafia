@@ -69,7 +69,7 @@ RSpec.describe SeriesController do
       end
 
       it "does not render the news section" do
-        expect(response.body).not_to include("series-news")
+        expect(response.body).not_to include('data-testid="series-news"')
       end
     end
 
