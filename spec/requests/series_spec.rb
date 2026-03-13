@@ -61,7 +61,7 @@ RSpec.describe SeriesController do
       before { get season_series_path(season_number: 5, number: 1) }
 
       it "does not render the news section" do
-        expect(response.body).not_to include("space-y-6")
+        expect(response.body).not_to include("series-news")
       end
     end
 
