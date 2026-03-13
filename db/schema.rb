@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_10_141304) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_173835) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -57,6 +57,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_141304) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["staff"], name: "index_awards_on_staff"
+  end
+
+  create_table "competitions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "ended_on"
+    t.boolean "featured", default: false, null: false
+    t.string "kind", null: false
+    t.integer "legacy_season"
+    t.integer "legacy_series"
+    t.string "name", null: false
+    t.integer "parent_id"
+    t.integer "position"
+    t.string "slug", null: false
+    t.date "started_on"
+    t.datetime "updated_at", null: false
+    t.index ["featured"], name: "index_competitions_on_featured"
+    t.index ["kind"], name: "index_competitions_on_kind"
+    t.index ["legacy_season", "legacy_series"], name: "index_competitions_on_legacy_season_and_legacy_series"
+    t.index ["parent_id"], name: "index_competitions_on_parent_id"
+    t.index ["slug"], name: "index_competitions_on_slug", unique: true
   end
 
   create_table "feature_toggles", force: :cascade do |t|
@@ -201,6 +221,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_141304) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "competitions", "competitions", column: "parent_id"
   add_foreign_key "game_participations", "games"
   add_foreign_key "game_participations", "players"
   add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"
