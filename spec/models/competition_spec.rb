@@ -21,8 +21,9 @@ RSpec.describe Competition, type: :model do
     context 'when name and slug are both blank' do
       subject { build(:competition, name: nil, slug: nil) }
 
-      it 'is invalid due to blank slug' do
+      it 'is invalid due to blank name and slug' do
         expect(subject).not_to be_valid
+        expect(subject.errors[:name]).to be_present
         expect(subject.errors[:slug]).to be_present
       end
     end
