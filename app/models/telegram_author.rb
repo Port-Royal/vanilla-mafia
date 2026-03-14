@@ -7,7 +7,7 @@ class TelegramAuthor < ApplicationRecord
     exists?(telegram_user_id: telegram_user_id)
   end
 
-  def self.find_by_telegram_id(telegram_user_id)
+  def self.find_by_telegram_user_id(telegram_user_id)
     find_by(telegram_user_id: telegram_user_id)
   end
 end

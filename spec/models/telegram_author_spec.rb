@@ -25,15 +25,15 @@ RSpec.describe TelegramAuthor, type: :model do
     end
   end
 
-  describe ".find_by_telegram_id" do
+  describe ".find_by_telegram_user_id" do
     let_it_be(:author) { create(:telegram_author, telegram_user_id: 42, telegram_username: "testuser") }
 
     it "returns the author for a known telegram_user_id" do
-      expect(described_class.find_by_telegram_id(42)).to eq(author)
+      expect(described_class.find_by_telegram_user_id(42)).to eq(author)
     end
 
     it "returns nil for an unknown telegram_user_id" do
-      expect(described_class.find_by_telegram_id(999)).to be_nil
+      expect(described_class.find_by_telegram_user_id(999)).to be_nil
     end
   end
 end
