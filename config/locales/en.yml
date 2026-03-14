@@ -58,6 +58,7 @@ en:
       judge: "Judge"
       submit_create: "Create"
       submit_update: "Save"
+      no_result: "No result"
     create:
       success: "Protocol created successfully."
     update:

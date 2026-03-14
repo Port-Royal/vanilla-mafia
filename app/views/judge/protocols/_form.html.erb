@@ -23,10 +23,21 @@
       <label class="w-40 font-semibold text-sm text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>
       <input type="text" name="game[name]" id="game_name" value="<%= @game.name %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
     </div>
-    <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_result"><%= Game.human_attribute_name(:result) %></label>
-      <input type="text" name="game[result]" id="game_result" value="<%= @game.result %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
-    </div>
+    <fieldset class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+      <legend class="w-40 font-semibold text-sm text-right"><%= Game.human_attribute_name(:result) %></legend>
+      <div class="w-full flex items-center gap-6">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+          <input type="radio" name="game[result]" value="" <%= "checked" if @game.result.blank? %> class="text-blue-500" />
+          <%= t("game_protocols.form.no_result") %>
+        </label>
+        <% Game::RESULTS.each do |result_option| %>
+          <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+            <input type="radio" name="game[result]" value="<%= result_option %>" <%= "checked" if @game.result == result_option %> class="text-blue-500" />
+            <%= result_option %>
+          </label>
+        <% end %>
+      </div>
+    </fieldset>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
       <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />

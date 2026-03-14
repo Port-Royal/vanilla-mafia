@@ -222,6 +222,7 @@ ru:
       player: "Игрок"
       notes: "Примечания"
       judge: "Ведущий"
+      no_result: "Нет результата"
       submit_create: "Создать"
       submit_update: "Сохранить"
     create:

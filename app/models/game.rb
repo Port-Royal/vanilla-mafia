@@ -1,10 +1,13 @@
 class Game < ApplicationRecord
+  RESULTS = [ "Победа мирных", "Победа мафии" ].freeze
+
   has_many :game_participations, dependent: :destroy
   has_many :news, dependent: :nullify
   has_many :players, through: :game_participations
 
   validates :season, :series, :game_number, presence: true, numericality: { only_integer: true }
   validates :game_number, uniqueness: { scope: [ :season, :series ] }
+  validates :result, inclusion: { in: RESULTS }, allow_blank: true
 
   scope :for_season, ->(season) { where(season: season) }
   scope :ordered, -> { order(played_on: :asc, series: :asc, game_number: :asc) }

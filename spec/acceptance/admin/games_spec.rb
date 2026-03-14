@@ -18,14 +18,14 @@ RSpec.describe "Admin Games CRUD" do
   describe "show" do
     let_it_be(:game) do
       create(:game, season: 3, series: 2, game_number: 1,
-             played_on: Date.new(2025, 6, 15), name: "Финальная", result: "Мафия")
+             played_on: Date.new(2025, 6, 15), name: "Финальная", result: "Победа мафии")
     end
 
     it "displays game details" do
       visit "/avo/resources/games/#{game.id}"
 
       expect(page).to have_content("Финальная")
-      expect(page).to have_content("Мафия")
+      expect(page).to have_content("Победа мафии")
     end
   end
 
@@ -36,11 +36,11 @@ RSpec.describe "Admin Games CRUD" do
       fill_in "Series", with: "1"
       fill_in "Game number", with: "1"
       fill_in "Name", with: "Тестовая игра"
-      fill_in "Result", with: "Город"
+      fill_in "Result", with: "Победа мирных"
       click_on "Сохранить"
 
       expect(Game.find_by(name: "Тестовая игра")).to have_attributes(
-        season: 7, series: 1, game_number: 1, result: "Город"
+        season: 7, series: 1, game_number: 1, result: "Победа мирных"
       )
     end
   end
