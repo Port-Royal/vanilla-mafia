@@ -13,7 +13,7 @@ class Avo::Resources::Game < Avo::BaseResource
     field :game_number, as: :number, required: true, sortable: true
     field :played_on, as: :date, sortable: true
     field :name, as: :text
-    field :result, as: :select, enum: ::Game.results.transform_keys { |k| I18n.t("activerecord.attributes.game.results.#{k}") }
+    field :result, as: :select, enum: ::Game.results
     field :judge, as: :text
     field :game_participations, as: :has_many
   end

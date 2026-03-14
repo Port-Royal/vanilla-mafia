@@ -25,7 +25,7 @@ RSpec.describe "Admin Games CRUD" do
       visit "/avo/resources/games/#{game.id}"
 
       expect(page).to have_content("Финальная")
-      expect(page).to have_content(I18n.t("activerecord.attributes.game.results.mafia_victory"))
+      expect(page).to have_content("mafia_victory")
     end
   end
 
@@ -36,7 +36,7 @@ RSpec.describe "Admin Games CRUD" do
       fill_in "Series", with: "1"
       fill_in "Game number", with: "1"
       fill_in "Name", with: "Тестовая игра"
-      select I18n.t("activerecord.attributes.game.results.peace_victory"), from: "Result"
+      select "peace_victory", from: "Result"
       click_on "Сохранить"
 
       expect(Game.find_by(name: "Тестовая игра")).to have_attributes(
