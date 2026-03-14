@@ -21,7 +21,7 @@ module Telegram
 
       raw_text = @message["text"] || @message["caption"] || ""
       news = NEWS_TAG_PATTERN.match?(raw_text)
-      text = raw_text.gsub(NEWS_TAG_PATTERN, "").strip
+      text = raw_text.gsub(NEWS_TAG_PATTERN, "").squish
 
       from = @message["from"]
 

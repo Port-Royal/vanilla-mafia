@@ -208,7 +208,7 @@ RSpec.describe Telegram::MessageParser do
 
       it "strips the tag regardless of case" do
         result = described_class.call(payload)
-        expect(result.text).to eq("Update  here")
+        expect(result.text).to eq("Update here")
       end
     end
   end
