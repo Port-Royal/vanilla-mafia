@@ -16,10 +16,11 @@ RSpec.describe Game, type: :model do
     it { is_expected.to validate_presence_of(:game_number) }
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
     it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:season, :series) }
-    it { is_expected.to allow_value(*described_class::RESULTS, nil, "").for(:result) }
+    it { is_expected.to define_enum_for(:result).with_values(described_class::RESULTS).backed_by_column_of_type(:string) }
 
     it 'rejects invalid result values' do
-      game = build(:game, result: "invalid")
+      game = build(:game)
+      game.result = "invalid"
       expect(game).not_to be_valid
       expect(game.errors[:result]).to be_present
     end

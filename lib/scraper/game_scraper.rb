@@ -104,7 +104,7 @@ module Scraper
 
       # Check if any peace-side player won
       peace_won = participations.any? { |r| PEACE_ROLES.include?(r[:role_code]) && r[:win] }
-      peace_won ? "Победа мирных" : "Победа мафии"
+      peace_won ? "peace_victory" : "mafia_victory"
     end
   end
 end

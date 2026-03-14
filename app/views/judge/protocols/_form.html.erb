@@ -26,14 +26,10 @@
     <fieldset class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <legend class="w-40 font-semibold text-sm text-right"><%= Game.human_attribute_name(:result) %></legend>
       <div class="w-full flex items-center gap-6">
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
-          <input type="radio" name="game[result]" value="" <%= "checked" if @game.result.blank? %> class="text-blue-500" />
-          <%= t("game_protocols.form.no_result") %>
-        </label>
-        <% Game::RESULTS.each do |result_option| %>
+        <% Game.results.each_key do |key| %>
           <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
-            <input type="radio" name="game[result]" value="<%= result_option %>" <%= "checked" if @game.result == result_option %> class="text-blue-500" />
-            <%= result_option %>
+            <input type="radio" name="game[result]" value="<%= key %>" <%= "checked" if @game.result == key %> class="text-blue-500" />
+            <%= t("activerecord.attributes.game/result.#{key}") %>
           </label>
         <% end %>
       </div>

@@ -19,6 +19,10 @@ ru:
         name: "Название"
         result: "Результат"
         judge: "Ведущий"
+      game/result:
+        in_progress: "В процессе"
+        peace_victory: "Победа мирных"
+        mafia_victory: "Победа мафии"
       game_participation:
         role_code: "Роль"
         win: "Победа"
@@ -222,7 +226,6 @@ ru:
       player: "Игрок"
       notes: "Примечания"
       judge: "Ведущий"
-      no_result: "Нет результата"
       submit_create: "Создать"
       submit_update: "Сохранить"
     create:

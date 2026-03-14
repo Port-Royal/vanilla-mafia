@@ -18,7 +18,7 @@ RSpec.describe Scraper::GameScraper do
       result = scraper.scrape(game_info)
 
       expect(result[:game][:name]).to eq("Новогодняя")
-      expect(result[:game][:result]).to eq("Победа мирных")
+      expect(result[:game][:result]).to eq("peace_victory")
       expect(result[:game][:id]).to eq(101)
     end
 
@@ -75,7 +75,7 @@ RSpec.describe Scraper::GameScraper do
       allow(scraper).to receive(:fetch).and_return(Nokogiri::HTML(mafia_html))
 
       result = scraper.scrape(game_info)
-      expect(result[:game][:result]).to eq("Победа мафии")
+      expect(result[:game][:result]).to eq("mafia_victory")
     end
 
     context "when fetch returns nil" do

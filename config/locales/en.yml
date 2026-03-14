@@ -37,6 +37,10 @@ en:
           judge: "Judge"
           editor: "Editor"
           admin: "Admin"
+      game/result:
+        in_progress: "In progress"
+        peace_victory: "Peace victory"
+        mafia_victory: "Mafia victory"
       news:
         title: "Title"
         content: "Content"
@@ -58,7 +62,6 @@ en:
       judge: "Judge"
       submit_create: "Create"
       submit_update: "Save"
-      no_result: "No result"
     create:
       success: "Protocol created successfully."
     update:

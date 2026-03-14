@@ -8,7 +8,7 @@ RSpec.describe SaveGameProtocolService do
 
     let(:game) { Game.new }
     let(:game_params) do
-      { season: 5, series: 1, game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "Победа мирных", judge: "Иван" }
+      { season: 5, series: 1, game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "peace_victory", judge: "Иван" }
     end
 
     context "when creating a new game with participations" do
