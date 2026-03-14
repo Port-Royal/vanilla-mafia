@@ -16,7 +16,7 @@ RSpec.describe Game, type: :model do
     it { is_expected.to validate_presence_of(:game_number) }
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
     it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:season, :series) }
-    it { is_expected.to allow_value("Победа мирных", "Победа мафии", nil, "").for(:result) }
+    it { is_expected.to allow_value(*described_class::RESULTS, nil, "").for(:result) }
 
     it 'rejects invalid result values' do
       game = build(:game, result: "invalid")
