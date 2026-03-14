@@ -38,6 +38,18 @@ class PopulateCompetitionsFromGames < ActiveRecord::Migration[8.1]
   end
 
   def down
-    MigrationCompetition.where.not(legacy_season: nil).delete_all
+    # Delete series competitions (children) created by this migration
+    MigrationCompetition
+      .where(kind: "series")
+      .where("slug LIKE ?", "season-%-series-%")
+      .where.not(legacy_season: nil)
+      .delete_all
+
+    # Delete season competitions (parents) created by this migration
+    MigrationCompetition
+      .where(kind: "season")
+      .where("slug LIKE ?", "season-%")
+      .where.not(legacy_season: nil)
+      .delete_all
   end
 end
