@@ -37,10 +37,11 @@ en:
           judge: "Judge"
           editor: "Editor"
           admin: "Admin"
-      game/result:
-        in_progress: "In progress"
-        peace_victory: "Peace victory"
-        mafia_victory: "Mafia victory"
+      game:
+        results:
+          in_progress: "In progress"
+          peace_victory: "Peace victory"
+          mafia_victory: "Mafia victory"
       news:
         title: "Title"
         content: "Content"

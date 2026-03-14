@@ -12,6 +12,7 @@ class Game < ApplicationRecord
   has_many :players, through: :game_participations
 
   validates :season, :series, :game_number, presence: true, numericality: { only_integer: true }
+  validates :result, presence: true
   validates :game_number, uniqueness: { scope: [ :season, :series ] }
 
   scope :for_season, ->(season) { where(season: season) }
