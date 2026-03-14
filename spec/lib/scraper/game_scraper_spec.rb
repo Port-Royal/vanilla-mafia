@@ -91,10 +91,10 @@ RSpec.describe Scraper::GameScraper do
     context "when page has no participations table" do
       let(:doc) { Nokogiri::HTML("<html><body><td class='content'><h1>Игра 1</h1></td></body></html>") }
 
-      it "returns nil result for empty participations" do
+      it "returns in_progress result for empty participations" do
         result = scraper.scrape(game_info)
         expect(result[:game_participations]).to be_empty
-        expect(result[:game][:result]).to be_nil
+        expect(result[:game][:result]).to eq("in_progress")
       end
     end
   end

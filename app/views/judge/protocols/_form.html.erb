@@ -29,7 +29,7 @@
         <% Game.results.each_key do |key| %>
           <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
             <input type="radio" name="game[result]" value="<%= key %>" <%= "checked" if @game.result == key %> class="text-blue-500" />
-            <%= t("activerecord.attributes.game/result.#{key}") %>
+            <%= t("activerecord.attributes.game.results.#{key}") %>
           </label>
         <% end %>
       </div>
