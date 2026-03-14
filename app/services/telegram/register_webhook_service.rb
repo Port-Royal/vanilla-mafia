@@ -17,8 +17,8 @@ module Telegram
 
     def call(url:)
       token = bot_token
-      return missing_config_error("bot_token") if token.blank?
-      return missing_config_error("url") if url.blank?
+      return error("Missing required config: bot_token") if token.blank?
+      return error("Missing required parameter: url") if url.blank?
 
       secret = Rails.application.config.x.telegram.webhook_secret
       params = { "url" => url }
@@ -29,7 +29,7 @@ module Telegram
 
     def delete
       token = bot_token
-      return missing_config_error("bot_token") if token.blank?
+      return error("Missing required config: bot_token") if token.blank?
 
       post_telegram("bot#{token}/deleteWebhook", {})
     end
@@ -47,11 +47,11 @@ module Telegram
 
       Result.new(success: data["ok"], description: data["description"])
     rescue StandardError => e
-      Result.new(success: false, description: e.class.to_s)
+      Result.new(success: false, description: "#{e.class}: #{e.message}")
     end
 
-    def missing_config_error(field)
-      Result.new(success: false, description: "Missing required config: #{field}")
+    def error(message)
+      Result.new(success: false, description: message)
     end
   end
 end

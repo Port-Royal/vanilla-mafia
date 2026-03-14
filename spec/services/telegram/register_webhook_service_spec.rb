@@ -7,9 +7,15 @@ RSpec.describe Telegram::RegisterWebhookService do
   let(:response_body) { { "ok" => true, "result" => true, "description" => "Webhook was set" } }
   let(:http_response) { instance_double(Net::HTTPOK, body: response_body.to_json) }
 
-  before do
+  around do |example|
+    original_token = Rails.application.config.x.telegram.bot_token
+    original_secret = Rails.application.config.x.telegram.webhook_secret
     Rails.application.config.x.telegram.bot_token = bot_token
     Rails.application.config.x.telegram.webhook_secret = webhook_secret
+    example.run
+  ensure
+    Rails.application.config.x.telegram.bot_token = original_token
+    Rails.application.config.x.telegram.webhook_secret = original_secret
   end
 
   describe ".call" do

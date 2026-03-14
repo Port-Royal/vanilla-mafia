@@ -1,9 +1,11 @@
 require "rails_helper"
+require "rake"
 
 RSpec.describe "telegram rake tasks" do
-  before(:all) do
-    Rake::Task.clear
-    Rails.application.load_tasks
+  before do
+    Rails.application.load_tasks unless Rake::Task.task_defined?("telegram:set_webhook")
+    Rake::Task["telegram:set_webhook"].reenable
+    Rake::Task["telegram:delete_webhook"].reenable
   end
 
   describe "telegram:set_webhook" do
@@ -11,9 +13,8 @@ RSpec.describe "telegram rake tasks" do
 
     before do
       allow(Telegram::RegisterWebhookService).to receive(:call).and_return(result)
-      allow(ENV).to receive(:fetch).and_call_original
-      allow(ENV).to receive(:fetch).with("WEBHOOK_URL").and_return("https://example.com/webhooks/telegram")
-      Rake::Task["telegram:set_webhook"].reenable
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("WEBHOOK_URL").and_return("https://example.com/webhooks/telegram")
     end
 
     it "calls RegisterWebhookService with the WEBHOOK_URL" do
@@ -28,7 +29,6 @@ RSpec.describe "telegram rake tasks" do
 
     before do
       allow(Telegram::RegisterWebhookService).to receive(:delete).and_return(result)
-      Rake::Task["telegram:delete_webhook"].reenable
     end
 
     it "calls RegisterWebhookService.delete" do
