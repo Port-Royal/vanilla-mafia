@@ -89,11 +89,11 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with valid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 97, result: "Победа мирных" } }
+        let(:game_params) { { season: 5, series: 1, game_number: 97, result: Game::RESULTS.first } }
 
         it "persists the chosen result" do
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
-          expect(Game.last.result).to eq("Победа мирных")
+          expect(Game.last.result).to eq(Game::RESULTS.first)
         end
       end
 
@@ -101,7 +101,9 @@ RSpec.describe "Judge::Protocols" do
         let(:game_params) { { season: 5, series: 1, game_number: 96, result: "invalid" } }
 
         it "rejects the invalid result" do
-          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect {
+            post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          }.not_to change(Game, :count)
           expect(response).to have_http_status(:unprocessable_content)
         end
       end
