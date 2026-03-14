@@ -2,6 +2,6 @@ class ProcessTelegramWebhookJob < ApplicationJob
   queue_as :default
 
   def perform(payload)
-    Rails.logger.info("Received Telegram webhook: #{payload.inspect}")
+    Rails.logger.debug { "Processing Telegram webhook update_id=#{payload['update_id']}" }
   end
 end

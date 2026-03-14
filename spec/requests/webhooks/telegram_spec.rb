@@ -14,34 +14,48 @@ RSpec.describe "Webhooks::Telegram" do
     }
   end
 
-  before do
+  around do |example|
+    original_token = Rails.application.config.x.telegram.bot_token
     Rails.application.config.x.telegram.bot_token = bot_token
+    example.run
+  ensure
+    Rails.application.config.x.telegram.bot_token = original_token
   end
 
-  describe "POST /webhooks/telegram/:token" do
+  def post_webhook(token: bot_token)
+    post webhooks_telegram_path,
+         params: telegram_payload,
+         headers: { "X-Telegram-Bot-Api-Secret-Token" => token },
+         as: :json
+  end
+
+  describe "POST /webhooks/telegram" do
     context "with valid token" do
       it "returns 200 OK" do
-        post webhooks_telegram_path(token: bot_token), params: telegram_payload, as: :json
+        post_webhook
         expect(response).to have_http_status(:ok)
       end
 
       it "enqueues a ProcessTelegramWebhookJob" do
-        expect {
-          post webhooks_telegram_path(token: bot_token), params: telegram_payload, as: :json
-        }.to have_enqueued_job(ProcessTelegramWebhookJob)
+        expect { post_webhook }.to have_enqueued_job(ProcessTelegramWebhookJob)
       end
     end
 
     context "with invalid token" do
       it "returns 401 Unauthorized" do
-        post webhooks_telegram_path(token: "wrong-token"), params: telegram_payload, as: :json
+        post_webhook(token: "wrong-token")
         expect(response).to have_http_status(:unauthorized)
       end
 
       it "does not enqueue a job" do
-        expect {
-          post webhooks_telegram_path(token: "wrong-token"), params: telegram_payload, as: :json
-        }.not_to have_enqueued_job(ProcessTelegramWebhookJob)
+        expect { post_webhook(token: "wrong-token") }.not_to have_enqueued_job(ProcessTelegramWebhookJob)
+      end
+    end
+
+    context "without token header" do
+      it "returns 401 Unauthorized" do
+        post webhooks_telegram_path, params: telegram_payload, as: :json
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
