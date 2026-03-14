@@ -19,10 +19,10 @@ ru:
         name: "Название"
         result: "Результат"
         judge: "Ведущий"
-      game/result:
-        in_progress: "В процессе"
-        peace_victory: "Победа мирных"
-        mafia_victory: "Победа мафии"
+        results:
+          in_progress: "В процессе"
+          peace_victory: "Победа мирных"
+          mafia_victory: "Победа мафии"
       game_participation:
         role_code: "Роль"
         win: "Победа"
