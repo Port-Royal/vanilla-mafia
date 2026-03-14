@@ -89,11 +89,11 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with valid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 97, result: Game::RESULTS.first } }
+        let(:game_params) { { season: 5, series: 1, game_number: 97, result: "peace_victory" } }
 
         it "persists the chosen result" do
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
-          expect(Game.last.result).to eq(Game::RESULTS.first)
+          expect(Game.last).to be_peace_victory
         end
       end
 

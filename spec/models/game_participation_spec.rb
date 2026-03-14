@@ -100,8 +100,8 @@ RSpec.describe GameParticipation, type: :model do
     let(:game) { build(:game, result: game_result) }
     let(:participation) { build(:game_participation, game:, role_code: role_code) }
 
-    context 'when game result is blank' do
-      let(:game_result) { nil }
+    context 'when game is in progress' do
+      let(:game_result) { "in_progress" }
       let(:role_code) { "peace" }
 
       it 'returns nil' do
@@ -110,7 +110,7 @@ RSpec.describe GameParticipation, type: :model do
     end
 
     context 'when role_code is blank' do
-      let(:game_result) { "Победа мирных" }
+      let(:game_result) { "peace_victory" }
       let(:role_code) { nil }
 
       it 'returns nil' do
@@ -119,7 +119,7 @@ RSpec.describe GameParticipation, type: :model do
     end
 
     context 'when peaceful team wins' do
-      let(:game_result) { "Победа мирных" }
+      let(:game_result) { "peace_victory" }
 
       context 'when player is peace' do
         let(:role_code) { "peace" }
@@ -155,7 +155,7 @@ RSpec.describe GameParticipation, type: :model do
     end
 
     context 'when mafia wins' do
-      let(:game_result) { "Победа мафии" }
+      let(:game_result) { "mafia_victory" }
 
       context 'when player is mafia' do
         let(:role_code) { "mafia" }

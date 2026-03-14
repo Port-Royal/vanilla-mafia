@@ -18,7 +18,7 @@ RSpec.describe Scraper::GameScraper do
       result = scraper.scrape(game_info)
 
       expect(result[:game][:name]).to eq("Новогодняя")
-      expect(result[:game][:result]).to eq("Победа мирных")
+      expect(result[:game][:result]).to eq("peace_victory")
       expect(result[:game][:id]).to eq(101)
     end
 
@@ -75,7 +75,7 @@ RSpec.describe Scraper::GameScraper do
       allow(scraper).to receive(:fetch).and_return(Nokogiri::HTML(mafia_html))
 
       result = scraper.scrape(game_info)
-      expect(result[:game][:result]).to eq("Победа мафии")
+      expect(result[:game][:result]).to eq("mafia_victory")
     end
 
     context "when fetch returns nil" do
@@ -91,10 +91,10 @@ RSpec.describe Scraper::GameScraper do
     context "when page has no participations table" do
       let(:doc) { Nokogiri::HTML("<html><body><td class='content'><h1>Игра 1</h1></td></body></html>") }
 
-      it "returns nil result for empty participations" do
+      it "returns in_progress result for empty participations" do
         result = scraper.scrape(game_info)
         expect(result[:game_participations]).to be_empty
-        expect(result[:game][:result]).to be_nil
+        expect(result[:game][:result]).to eq("in_progress")
       end
     end
   end
