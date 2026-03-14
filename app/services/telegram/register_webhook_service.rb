@@ -46,7 +46,12 @@ module Telegram
       data = JSON.parse(response.body)
 
       Result.new(success: data["ok"], description: data["description"])
-    rescue StandardError => e
+    rescue JSON::ParserError,
+           SocketError,
+           IOError,
+           SystemCallError,
+           Net::OpenTimeout,
+           Net::ReadTimeout => e
       Result.new(success: false, description: "#{e.class}: #{e.message}")
     end
 

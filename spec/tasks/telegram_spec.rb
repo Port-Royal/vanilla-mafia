@@ -18,7 +18,7 @@ RSpec.describe "telegram rake tasks" do
     end
 
     it "calls RegisterWebhookService with the WEBHOOK_URL" do
-      Rake::Task["telegram:set_webhook"].execute
+      Rake::Task["telegram:set_webhook"].invoke
       expect(Telegram::RegisterWebhookService).to have_received(:call)
         .with(url: "https://example.com/webhooks/telegram")
     end
@@ -32,7 +32,7 @@ RSpec.describe "telegram rake tasks" do
     end
 
     it "calls RegisterWebhookService.delete" do
-      Rake::Task["telegram:delete_webhook"].execute
+      Rake::Task["telegram:delete_webhook"].invoke
       expect(Telegram::RegisterWebhookService).to have_received(:delete)
     end
   end
