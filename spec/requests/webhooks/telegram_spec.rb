@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Webhooks::Telegram" do
-  let(:bot_token) { "test-bot-token-123" }
+  let(:webhook_secret) { "test-webhook-secret-123" }
   let(:telegram_payload) do
     {
       update_id: 123456,
@@ -15,22 +15,22 @@ RSpec.describe "Webhooks::Telegram" do
   end
 
   around do |example|
-    original_token = Rails.application.config.x.telegram.bot_token
-    Rails.application.config.x.telegram.bot_token = bot_token
+    original_secret = Rails.application.config.x.telegram.webhook_secret
+    Rails.application.config.x.telegram.webhook_secret = webhook_secret
     example.run
   ensure
-    Rails.application.config.x.telegram.bot_token = original_token
+    Rails.application.config.x.telegram.webhook_secret = original_secret
   end
 
-  def post_webhook(token: bot_token)
+  def post_webhook(secret: webhook_secret)
     post webhooks_telegram_path,
          params: telegram_payload,
-         headers: { "X-Telegram-Bot-Api-Secret-Token" => token },
+         headers: { "X-Telegram-Bot-Api-Secret-Token" => secret },
          as: :json
   end
 
   describe "POST /webhooks/telegram" do
-    context "with valid token" do
+    context "with valid secret" do
       it "returns 200 OK" do
         post_webhook
         expect(response).to have_http_status(:ok)
@@ -41,18 +41,18 @@ RSpec.describe "Webhooks::Telegram" do
       end
     end
 
-    context "with invalid token" do
+    context "with invalid secret" do
       it "returns 401 Unauthorized" do
-        post_webhook(token: "wrong-token")
+        post_webhook(secret: "wrong-secret")
         expect(response).to have_http_status(:unauthorized)
       end
 
       it "does not enqueue a job" do
-        expect { post_webhook(token: "wrong-token") }.not_to have_enqueued_job(ProcessTelegramWebhookJob)
+        expect { post_webhook(secret: "wrong-secret") }.not_to have_enqueued_job(ProcessTelegramWebhookJob)
       end
     end
 
-    context "without token header" do
+    context "without secret header" do
       it "returns 401 Unauthorized" do
         post webhooks_telegram_path, params: telegram_payload, as: :json
         expect(response).to have_http_status(:unauthorized)
