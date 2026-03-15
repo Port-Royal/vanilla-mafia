@@ -21,7 +21,25 @@ class Competition < ApplicationRecord
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
 
+  def subtree_ids
+    self.class.connection.select_values(subtree_ids_sql)
+  end
+
   private
+
+  def subtree_ids_sql
+    sanitized_id = self.class.connection.quote(id)
+    <<~SQL
+      WITH RECURSIVE subtree AS (
+        SELECT id FROM competitions WHERE id = #{sanitized_id}
+        UNION ALL
+        SELECT c.id FROM competitions c
+        INNER JOIN subtree s ON c.parent_id = s.id
+      )
+      SELECT id FROM subtree
+    SQL
+  end
+
 
   def generate_slug
     self.slug = name.parameterize

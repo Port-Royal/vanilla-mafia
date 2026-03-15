@@ -28,9 +28,16 @@ class Player < ApplicationRecord
     )
   }
 
+  scope :with_stats_for_competition, ->(competition) {
+    with_aggregated_stats.where(games: { competition_id: competition.subtree_ids })
+  }
+
   scope :with_stats_for_season, ->(season) {
+    with_aggregated_stats.where(games: { season: season })
+  }
+
+  scope :with_aggregated_stats, -> {
     joins(game_participations: :game)
-      .where(games: { season: season })
       .group(:id)
       .select(
         "players.*",
