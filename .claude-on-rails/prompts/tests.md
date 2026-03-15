@@ -81,14 +81,14 @@ end
 2. **Watch it fail** — confirm the test fails for the right reason
 3. **Write the minimal implementation** to make the test pass
 4. **Refactor** while keeping tests green
-5. **Run mutation testing** — verify test quality with evilution and mutant (see below)
+5. **Run mutation testing** — run evilution first, then mutant; fix survivors from each (see below)
 6. **Repeat** for the next acceptance criterion
 
 ## Mutation Testing (Required)
 
-After writing or modifying tests, you MUST run mutation testing against the class under test to verify test quality. This project uses two mutation testing tools:
+After writing or modifying tests, you MUST run **both** mutation testing tools against the class under test. Run evilution first, fix survivors, then run mutant and fix any additional survivors.
 
-### Evilution (primary — fast, file-level targeting)
+### Step 1: Evilution (run first — fast, file-level targeting)
 
 ```bash
 # Test a single file
@@ -104,7 +104,7 @@ bundle exec evilution run app/models/class_name.rb --target ClassName#method_nam
 bundle exec evilution run app/models/class_name.rb --format json --timeout 30
 ```
 
-### Mutant (complementary — class-level targeting)
+### Step 2: Mutant (run second — class-level targeting)
 
 ```bash
 # Test a single class
@@ -114,10 +114,22 @@ bundle exec mutant run --jobs 1 -- 'ClassName'
 bundle exec mutant run --jobs 1 -- 'ClassName#method_name'
 ```
 
-- If mutants survive, add or strengthen assertions to kill them
+### After both tools
+
+- If mutants survive in either tool, add or strengthen assertions to kill them
 - Aim for zero surviving mutants on all new/modified code
 - Common survivors: missing boundary assertions, untested return values, conditional branches without dedicated tests
-- Do NOT skip this step — passing tests with surviving mutants means incomplete coverage
+- Do NOT skip either tool — we are collecting data to compare them
+
+### Data Collection
+
+In the PR description, always include mutation testing results from both tools:
+```
+- Evilution: X% (Y/Z mutants killed)
+- Mutant: X% (Y/Z mutants killed)
+- Additional mutants caught by mutant only: N
+```
+This helps evaluate whether mutant catches meaningful gaps that evilution misses.
 
 ## Test Organization
 
