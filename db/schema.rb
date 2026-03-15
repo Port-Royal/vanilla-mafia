@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_15_121205) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_142549) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -142,12 +142,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_121205) do
 
   create_table "player_awards", force: :cascade do |t|
     t.integer "award_id", null: false
+    t.integer "competition_id"
     t.datetime "created_at", null: false
     t.integer "player_id", null: false
     t.integer "position"
     t.integer "season"
     t.datetime "updated_at", null: false
     t.index ["award_id"], name: "index_player_awards_on_award_id"
+    t.index ["competition_id"], name: "index_player_awards_on_competition_id"
     t.index ["player_id", "award_id", "season"], name: "index_player_awards_on_player_id_and_award_id_and_season", unique: true
     t.index ["player_id"], name: "index_player_awards_on_player_id"
   end
@@ -241,6 +243,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_121205) do
   add_foreign_key "news", "games"
   add_foreign_key "news", "users", column: "author_id"
   add_foreign_key "player_awards", "awards"
+  add_foreign_key "player_awards", "competitions"
   add_foreign_key "player_awards", "players"
   add_foreign_key "player_claims", "players"
   add_foreign_key "player_claims", "users"
