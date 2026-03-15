@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_14_165420) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_121205) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -108,6 +108,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_165420) do
   end
 
   create_table "games", force: :cascade do |t|
+    t.integer "competition_id"
     t.datetime "created_at", null: false
     t.integer "game_number", null: false
     t.string "judge"
@@ -117,6 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_165420) do
     t.integer "season", null: false
     t.integer "series", null: false
     t.datetime "updated_at", null: false
+    t.index ["competition_id"], name: "index_games_on_competition_id"
     t.index ["season", "series", "game_number"], name: "index_games_on_season_and_series_and_game_number", unique: true
     t.index ["season", "series"], name: "index_games_on_season_and_series"
     t.index ["season"], name: "index_games_on_season"
@@ -235,6 +237,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_165420) do
   add_foreign_key "game_participations", "games"
   add_foreign_key "game_participations", "players"
   add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"
+  add_foreign_key "games", "competitions"
   add_foreign_key "news", "games"
   add_foreign_key "news", "users", column: "author_id"
   add_foreign_key "player_awards", "awards"
