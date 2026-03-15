@@ -9,6 +9,8 @@ class AddCompetitionIdToGames < ActiveRecord::Migration[8.1]
   end
 
   def backfill_competition_ids
+    detect_duplicate_legacy_mappings
+
     execute <<~SQL
       UPDATE games
       SET competition_id = (
@@ -16,15 +18,25 @@ class AddCompetitionIdToGames < ActiveRecord::Migration[8.1]
         FROM competitions c
         WHERE c.legacy_season = games.season
           AND c.legacy_series = games.series
-        ORDER BY c.id
-        LIMIT 1
       )
       WHERE games.competition_id IS NULL
-        AND EXISTS (
-          SELECT 1 FROM competitions c
-          WHERE c.legacy_season = games.season
-            AND c.legacy_series = games.series
-        )
     SQL
+  end
+
+  private
+
+  def detect_duplicate_legacy_mappings
+    duplicates = execute(<<~SQL)
+      SELECT legacy_season, legacy_series, COUNT(*) AS cnt
+      FROM competitions
+      WHERE legacy_season IS NOT NULL AND legacy_series IS NOT NULL
+      GROUP BY legacy_season, legacy_series
+      HAVING COUNT(*) > 1
+    SQL
+
+    return if duplicates.empty?
+
+    pairs = duplicates.map { |r| "(#{r['legacy_season']}, #{r['legacy_series']})" }.join(", ")
+    raise "Duplicate (legacy_season, legacy_series) pairs found in competitions: #{pairs}. Resolve before backfilling."
   end
 end
