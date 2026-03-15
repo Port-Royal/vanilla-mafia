@@ -60,6 +60,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def load_form_data
+    @competitions = Competition.ordered
     @roles = Role.all
     @players = Player.order(:name)
   end

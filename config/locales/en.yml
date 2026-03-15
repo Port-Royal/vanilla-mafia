@@ -60,6 +60,7 @@ en:
       seat: "Seat"
       player: "Player"
       notes: "Notes"
+      competition: "Competition"
       judge: "Judge"
       submit_create: "Create"
       submit_update: "Save"

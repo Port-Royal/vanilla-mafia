@@ -225,6 +225,7 @@ ru:
       seat: "Место"
       player: "Игрок"
       notes: "Примечания"
+      competition: "Турнир"
       judge: "Ведущий"
       submit_create: "Создать"
       submit_update: "Сохранить"
