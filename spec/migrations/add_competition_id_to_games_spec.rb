@@ -1,4 +1,5 @@
 require "rails_helper"
+require_relative "../../db/migrate/20260315121205_add_competition_id_to_games"
 
 RSpec.describe "AddCompetitionIdToGames migration", type: :model do
   describe "schema" do
@@ -20,22 +21,15 @@ RSpec.describe "AddCompetitionIdToGames migration", type: :model do
     end
   end
 
-  describe "backfill logic" do
+  describe "backfill" do
     let_it_be(:season_comp) { create(:competition, :season, legacy_season: 1, legacy_series: nil) }
     let_it_be(:series_comp) { create(:competition, :series, legacy_season: 2, legacy_series: 3, parent: season_comp) }
     let_it_be(:game_with_match) { create(:game, season: 2, series: 3) }
     let_it_be(:game_without_match) { create(:game, season: 99, series: 99) }
 
     before_all do
-      ActiveRecord::Base.connection.execute(<<~SQL)
-        UPDATE games
-        SET competition_id = (
-          SELECT competitions.id
-          FROM competitions
-          WHERE competitions.legacy_season = games.season
-            AND competitions.legacy_series = games.series
-        )
-      SQL
+      ActiveRecord::Base.connection.execute("UPDATE games SET competition_id = NULL")
+      AddCompetitionIdToGames.new.backfill_competition_ids
     end
 
     it "links games to competitions by legacy_season and legacy_series" do
