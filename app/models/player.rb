@@ -29,20 +29,15 @@ class Player < ApplicationRecord
   }
 
   scope :with_stats_for_competition, ->(competition) {
-    joins(game_participations: :game)
-      .where(games: { competition_id: competition.subtree_ids })
-      .group(:id)
-      .select(
-        "players.*",
-        "COUNT(game_participations.id) AS games_count",
-        "SUM(CASE WHEN game_participations.win THEN 1 ELSE 0 END) AS wins_count",
-        "ROUND(SUM(COALESCE(game_participations.plus, 0) - COALESCE(game_participations.minus, 0) + COALESCE(game_participations.best_move, 0)), 2) AS total_rating"
-      )
+    with_aggregated_stats.where(games: { competition_id: competition.subtree_ids })
   }
 
   scope :with_stats_for_season, ->(season) {
+    with_aggregated_stats.where(games: { season: season })
+  }
+
+  scope :with_aggregated_stats, -> {
     joins(game_participations: :game)
-      .where(games: { season: season })
       .group(:id)
       .select(
         "players.*",
