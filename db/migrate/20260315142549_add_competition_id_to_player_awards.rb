@@ -1,5 +1,6 @@
 class AddCompetitionIdToPlayerAwards < ActiveRecord::Migration[8.1]
   def up
+    detect_duplicate_season_competitions
     add_reference :player_awards, :competition, null: true, foreign_key: true
     backfill_competition_ids
   end
@@ -9,8 +10,6 @@ class AddCompetitionIdToPlayerAwards < ActiveRecord::Migration[8.1]
   end
 
   def backfill_competition_ids
-    detect_duplicate_season_competitions
-
     execute <<~SQL
       UPDATE player_awards
       SET competition_id = c.id

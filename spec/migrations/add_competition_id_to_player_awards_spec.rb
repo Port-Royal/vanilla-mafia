@@ -51,4 +51,15 @@ RSpec.describe "AddCompetitionIdToPlayerAwards migration" do
       expect(award_already_linked.reload.competition_id).to eq(other_season_comp.id)
     end
   end
+
+  describe "duplicate detection" do
+    it "raises when duplicate season competitions share the same legacy_season" do
+      create(:competition, :season, legacy_season: 10, legacy_series: nil)
+      create(:competition, :season, legacy_season: 10, legacy_series: nil)
+
+      migration = AddCompetitionIdToPlayerAwards.new
+      expect { migration.send(:detect_duplicate_season_competitions) }
+        .to raise_error(RuntimeError, /Duplicate season competitions found for legacy_season: 10/)
+    end
+  end
 end
