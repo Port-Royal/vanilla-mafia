@@ -11,11 +11,20 @@ class AddCompetitionIdToGames < ActiveRecord::Migration[8.1]
   def backfill_competition_ids
     execute <<~SQL
       UPDATE games
-      SET competition_id = competitions.id
-      FROM competitions
-      WHERE competitions.legacy_season = games.season
-        AND competitions.legacy_series = games.series
-        AND games.competition_id IS NULL
+      SET competition_id = (
+        SELECT c.id
+        FROM competitions c
+        WHERE c.legacy_season = games.season
+          AND c.legacy_series = games.series
+        ORDER BY c.id
+        LIMIT 1
+      )
+      WHERE games.competition_id IS NULL
+        AND EXISTS (
+          SELECT 1 FROM competitions c
+          WHERE c.legacy_season = games.season
+            AND c.legacy_series = games.series
+        )
     SQL
   end
 end

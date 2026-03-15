@@ -1,7 +1,7 @@
 require "rails_helper"
 require_relative "../../db/migrate/20260315121205_add_competition_id_to_games"
 
-RSpec.describe "AddCompetitionIdToGames migration", type: :model do
+RSpec.describe "AddCompetitionIdToGames migration" do
   describe "schema" do
     it "adds competition_id column to games" do
       column = Game.column_for_attribute(:competition_id)
