@@ -5,10 +5,11 @@ RSpec.describe SaveGameProtocolService do
     let_it_be(:role_don) { create(:role, code: "don", name: "Дон") }
     let_it_be(:role_maf) { create(:role, code: "maf", name: "Мафия") }
     let_it_be(:existing_player) { create(:player, name: "Алексей") }
+    let_it_be(:competition) { create(:competition, :series) }
 
     let(:game) { Game.new }
     let(:game_params) do
-      { season: 5, series: 1, game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "peace_victory", judge: "Иван" }
+      { season: 5, series: 1, game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "peace_victory", judge: "Иван", competition_id: competition.id }
     end
 
     context "when creating a new game with participations" do

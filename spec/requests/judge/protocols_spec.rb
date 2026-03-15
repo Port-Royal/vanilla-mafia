@@ -5,6 +5,7 @@ RSpec.describe "Judge::Protocols" do
   let_it_be(:judge) { create(:user, :judge) }
   let_it_be(:role) { create(:role, code: "don", name: "Дон") }
   let_it_be(:player) { create(:player, name: "Тестовый") }
+  let_it_be(:competition) { create(:competition, :series) }
 
   def valid_participations_params
     params = {}
@@ -71,7 +72,7 @@ RSpec.describe "Judge::Protocols" do
       before { sign_in admin }
 
       context "with valid params" do
-        let(:game_params) { { season: 5, series: 1, game_number: 99, played_on: "2026-01-15", judge: "Иван" } }
+        let(:game_params) { { season: 5, series: 1, game_number: 99, played_on: "2026-01-15", judge: "Иван", competition_id: competition.id } }
 
         it "creates a game and redirects" do
           expect {
@@ -89,7 +90,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with valid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 97, result: "peace_victory" } }
+        let(:game_params) { { season: 5, series: 1, game_number: 97, result: "peace_victory", competition_id: competition.id } }
 
         it "persists the chosen result" do
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
@@ -98,7 +99,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with invalid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 96, result: "invalid" } }
+        let(:game_params) { { season: 5, series: 1, game_number: 96, result: "invalid", competition_id: competition.id } }
 
         it "rejects the invalid result" do
           expect {
@@ -140,7 +141,7 @@ RSpec.describe "Judge::Protocols" do
     context "when user is judge" do
       before { sign_in judge }
 
-      let(:game_params) { { season: 5, series: 1, game_number: 98, played_on: "2026-01-15", judge: "Мария" } }
+      let(:game_params) { { season: 5, series: 1, game_number: 98, played_on: "2026-01-15", judge: "Мария", competition_id: competition.id } }
 
       it "creates a game and redirects" do
         expect {

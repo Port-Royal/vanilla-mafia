@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Game, type: :model do
   describe 'associations' do
-    it { is_expected.to belong_to(:competition).optional }
+    it { is_expected.to belong_to(:competition) }
     it { is_expected.to have_many(:game_participations).dependent(:destroy) }
     it { is_expected.to have_many(:players).through(:game_participations) }
   end

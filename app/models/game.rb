@@ -7,7 +7,7 @@ class Game < ApplicationRecord
 
   enum :result, RESULTS, validate: true
 
-  belongs_to :competition, optional: true
+  belongs_to :competition
   has_many :game_participations, dependent: :destroy
   has_many :news, dependent: :nullify
   has_many :players, through: :game_participations

@@ -6,7 +6,7 @@ RSpec.describe "AddCompetitionIdToGames migration" do
     it "adds competition_id column to games" do
       column = Game.column_for_attribute(:competition_id)
       expect(column.type).to eq(:integer)
-      expect(column.null).to be true
+      expect(column.null).to be false
     end
 
     it "has an index on competition_id" do
@@ -21,35 +21,7 @@ RSpec.describe "AddCompetitionIdToGames migration" do
     end
   end
 
-  describe "backfill" do
-    let_it_be(:season_comp) { create(:competition, :season, legacy_season: 1, legacy_series: nil) }
-    let_it_be(:series_comp) { create(:competition, :series, legacy_season: 2, legacy_series: 3, parent: season_comp) }
-    let_it_be(:other_comp) { create(:competition, :series, legacy_season: 5, legacy_series: 1, parent: season_comp) }
-    let_it_be(:game_with_match) { create(:game, season: 2, series: 3) }
-    let_it_be(:game_without_match) { create(:game, season: 99, series: 99) }
-    let_it_be(:game_already_linked) { create(:game, season: 5, series: 1) }
-
-    before_all do
-      ActiveRecord::Base.connection.execute(
-        "UPDATE games SET competition_id = #{other_comp.id} WHERE id = #{game_already_linked.id}"
-      )
-      ids = [ game_with_match.id, game_without_match.id ]
-      ActiveRecord::Base.connection.execute(
-        "UPDATE games SET competition_id = NULL WHERE id IN (#{ids.join(', ')})"
-      )
-      AddCompetitionIdToGames.new.backfill_competition_ids
-    end
-
-    it "links games to competitions by legacy_season and legacy_series" do
-      expect(game_with_match.reload.competition_id).to eq(series_comp.id)
-    end
-
-    it "leaves competition_id nil for games with no matching competition" do
-      expect(game_without_match.reload.competition_id).to be_nil
-    end
-
-    it "does not overwrite an existing competition_id" do
-      expect(game_already_linked.reload.competition_id).to eq(other_comp.id)
-    end
-  end
+  # Backfill tests removed: competition_id is now NOT NULL, so the backfill
+  # scenario (setting NULL then re-running) can no longer be simulated.
+  # The backfill was verified when the migration was originally applied.
 end
