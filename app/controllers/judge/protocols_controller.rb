@@ -60,12 +60,13 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def load_form_data
+    @competitions = Competition.ordered
     @roles = Role.all
     @players = Player.order(:name)
   end
 
   def game_params
-    params.require(:game).permit(:season, :series, :game_number, :played_on, :name, :result, :judge)
+    params.require(:game).permit(:season, :series, :game_number, :played_on, :name, :result, :judge, :competition_id)
   end
 
   def participations_params
