@@ -25,6 +25,22 @@ RSpec.describe Game, type: :model do
       expect(game).not_to be_valid
       expect(game.errors[:result]).to be_present
     end
+
+    it 'allows same game_number across different competitions' do
+      comp_a = create(:competition, :series)
+      comp_b = create(:competition, :series)
+      create(:game, game_number: 1, competition: comp_a)
+      game = build(:game, game_number: 1, competition: comp_b)
+      expect(game).to be_valid
+    end
+
+    it 'rejects duplicate game_number within same competition' do
+      comp = create(:competition, :series)
+      create(:game, game_number: 1, competition: comp)
+      game = build(:game, game_number: 1, competition: comp)
+      expect(game).not_to be_valid
+      expect(game.errors[:game_number]).to be_present
+    end
   end
 
   describe '.for_competition' do
