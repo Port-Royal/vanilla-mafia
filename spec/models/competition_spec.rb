@@ -4,6 +4,7 @@ RSpec.describe Competition, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:parent).class_name("Competition").optional }
     it { is_expected.to have_many(:children).class_name("Competition").with_foreign_key(:parent_id).dependent(:destroy) }
+    it { is_expected.to have_many(:games).dependent(:restrict_with_error) }
   end
 
   describe 'validations' do

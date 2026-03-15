@@ -9,6 +9,7 @@ class Competition < ApplicationRecord
 
   belongs_to :parent, class_name: "Competition", optional: true
   has_many :children, class_name: "Competition", foreign_key: :parent_id, dependent: :destroy
+  has_many :games, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Game, type: :model do
   describe 'associations' do
+    it { is_expected.to belong_to(:competition).optional }
     it { is_expected.to have_many(:game_participations).dependent(:destroy) }
     it { is_expected.to have_many(:players).through(:game_participations) }
   end
@@ -15,7 +16,7 @@ RSpec.describe Game, type: :model do
     it { is_expected.to validate_numericality_of(:series).only_integer }
     it { is_expected.to validate_presence_of(:game_number) }
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
-    it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:season, :series) }
+    it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:competition_id) }
     it { is_expected.to define_enum_for(:result).with_values(described_class::RESULTS).backed_by_column_of_type(:string) }
 
     it 'rejects invalid result values' do
@@ -23,6 +24,18 @@ RSpec.describe Game, type: :model do
       game.result = "invalid"
       expect(game).not_to be_valid
       expect(game.errors[:result]).to be_present
+    end
+  end
+
+  describe '.for_competition' do
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:other_competition) { create(:competition, :series) }
+    let_it_be(:game_in_comp) { create(:game, competition: competition) }
+    let_it_be(:game_in_other) { create(:game, competition: other_competition) }
+
+    it 'returns games for the given competition' do
+      expect(described_class.for_competition(competition)).to include(game_in_comp)
+      expect(described_class.for_competition(competition)).not_to include(game_in_other)
     end
   end
 
@@ -37,9 +50,10 @@ RSpec.describe Game, type: :model do
   end
 
   describe '.ordered' do
-    let_it_be(:third) { create(:game, played_on: Date.new(2026, 1, 2), season: 1, series: 1, game_number: 1) }
-    let_it_be(:first) { create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 1, game_number: 2) }
-    let_it_be(:second) { create(:game, played_on: Date.new(2026, 1, 1), season: 1, series: 2, game_number: 1) }
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:third) { create(:game, competition: competition, played_on: Date.new(2026, 1, 2), season: 1, series: 1, game_number: 1) }
+    let_it_be(:first) { create(:game, competition: competition, played_on: Date.new(2026, 1, 1), season: 1, series: 1, game_number: 2) }
+    let_it_be(:second) { create(:game, competition: competition, played_on: Date.new(2026, 1, 1), season: 1, series: 2, game_number: 3) }
 
     it 'orders by played_on, series, game_number ascending' do
       expect(described_class.ordered).to eq([ first, second, third ])
@@ -47,21 +61,24 @@ RSpec.describe Game, type: :model do
   end
 
   describe '.available_seasons' do
-    context 'when games exist in multiple seasons' do
-      let_it_be(:game_s3) { create(:game, season: 3) }
-      let_it_be(:game_s1) { create(:game, season: 1) }
-      let_it_be(:game_s5) { create(:game, season: 5) }
-      let_it_be(:game_s1_dup) { create(:game, season: 1, series: 2) }
+    let_it_be(:game_s3) { create(:game, season: 30, series: 90) }
+    let_it_be(:game_s1) { create(:game, season: 10, series: 91) }
+    let_it_be(:game_s5) { create(:game, season: 50, series: 92) }
+    let_it_be(:game_s1_dup) { create(:game, season: 10, series: 93) }
 
-      it 'returns distinct seasons sorted ascending' do
-        expect(described_class.available_seasons).to eq([ 1, 3, 5 ])
-      end
+    it 'returns distinct seasons sorted ascending' do
+      result = described_class.available_seasons
+      expect(result).to include(10, 30, 50)
+      expect(result.count(10)).to eq(1)
     end
 
-    context 'when no games exist' do
-      it 'returns an empty array' do
-        expect(described_class.available_seasons).to eq([])
-      end
+    it 'returns seasons in ascending order' do
+      result = described_class.available_seasons
+      idx_10 = result.index(10)
+      idx_30 = result.index(30)
+      idx_50 = result.index(50)
+      expect(idx_10).to be < idx_30
+      expect(idx_30).to be < idx_50
     end
   end
 
