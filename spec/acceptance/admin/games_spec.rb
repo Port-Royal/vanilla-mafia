@@ -2,6 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Admin Games CRUD" do
   let_it_be(:admin) { create(:user, :admin) }
+  let_it_be(:competition) { create(:competition, :series, name: "Тестовый турнир") }
 
   before { sign_in_as_admin(admin) }
 
@@ -32,6 +33,7 @@ RSpec.describe "Admin Games CRUD" do
   describe "create" do
     it "creates a new game" do
       visit "/avo/resources/games/new"
+      select "Тестовый турнир", from: "Competition"
       fill_in "Season", with: "7"
       fill_in "Series", with: "1"
       fill_in "Game number", with: "1"
@@ -40,7 +42,8 @@ RSpec.describe "Admin Games CRUD" do
       click_on "Сохранить"
 
       expect(Game.find_by(name: "Тестовая игра")).to have_attributes(
-        season: 7, series: 1, game_number: 1, result: "peace_victory"
+        season: 7, series: 1, game_number: 1, result: "peace_victory",
+        competition: competition
       )
     end
   end
