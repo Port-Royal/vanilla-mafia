@@ -69,12 +69,24 @@ This project uses two mutation testing tools:
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
-3. Run mutation testing against the changed class(es) to check for surviving mutants
-4. If mutants survive, add or strengthen assertions to kill them
-5. Aim for zero surviving mutants on all new/modified code
+3. Run **evilution first** against the changed file(s) — fix any surviving mutants
+4. Run **mutant second** against the changed class(es) — fix any additional surviving mutants
+5. In the PR description, note mutation testing results from both tools, including how many additional fixes mutant caught that evilution missed (data collection for tool comparison)
+6. Aim for zero surviving mutants on all new/modified code
+
+### Data Collection (Evilution vs Mutant)
+
+We are collecting data to compare the two tools. In every PR, include a mutation testing section:
+```
+- Evilution: X% (Y/Z mutants killed)
+- Mutant: X% (Y/Z mutants killed)
+- Additional mutants caught by mutant only: N
+```
+This helps evaluate whether mutant catches meaningful gaps that evilution misses.
 
 ### Limitations
 - Mutant only mutates `def` method bodies — Rails DSL (scopes, validations, associations) are not mutated
+- Evilution mutates at the file level including DSL code, but may generate different mutation operators
 - For scopes and validations, rely on RSpec + Shoulda Matchers for coverage
 
 ### Common Surviving Mutants to Watch For
