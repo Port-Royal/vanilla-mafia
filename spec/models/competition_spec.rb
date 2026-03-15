@@ -101,4 +101,34 @@ RSpec.describe Competition, type: :model do
       expect(child.parent).to eq(parent)
     end
   end
+
+  describe '#subtree_ids' do
+    context 'when competition has no children' do
+      let_it_be(:leaf) { create(:competition) }
+
+      it 'returns only its own id' do
+        expect(leaf.subtree_ids).to eq([ leaf.id ])
+      end
+    end
+
+    context 'when competition has children' do
+      let_it_be(:root) { create(:competition, :season) }
+      let_it_be(:child1) { create(:competition, :series, parent: root) }
+      let_it_be(:child2) { create(:competition, :series, parent: root) }
+
+      it 'returns its own id and all children ids' do
+        expect(root.subtree_ids).to contain_exactly(root.id, child1.id, child2.id)
+      end
+    end
+
+    context 'when competition has nested descendants' do
+      let_it_be(:root) { create(:competition, :season) }
+      let_it_be(:child) { create(:competition, :series, parent: root) }
+      let_it_be(:grandchild) { create(:competition, :round, parent: child) }
+
+      it 'returns all descendant ids recursively' do
+        expect(root.subtree_ids).to contain_exactly(root.id, child.id, grandchild.id)
+      end
+    end
+  end
 end

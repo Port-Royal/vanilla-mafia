@@ -21,6 +21,10 @@ class Competition < ApplicationRecord
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
 
+  def subtree_ids
+    [ id ] + children.flat_map(&:subtree_ids)
+  end
+
   private
 
   def generate_slug

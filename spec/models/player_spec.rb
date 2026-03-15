@@ -148,6 +148,102 @@ RSpec.describe Player, type: :model do
     end
   end
 
+  describe '.with_stats_for_competition' do
+    context 'when player has games in the competition' do
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game1) { create(:game, competition: competition, game_number: 1) }
+      let_it_be(:game2) { create(:game, competition: competition, game_number: 2) }
+
+      before do
+        create(:game_participation, player: player, game: game1, plus: 3, minus: 1, win: true)
+        create(:game_participation, player: player, game: game2, plus: 2, minus: 0, win: false)
+      end
+
+      it 'returns games_count, wins_count, and total_rating' do
+        result = Player.with_stats_for_competition(competition).find(player.id)
+
+        expect(result.games_count).to eq(2)
+        expect(result.wins_count).to eq(1)
+        expect(result.total_rating).to eq(4)
+      end
+    end
+
+    context 'when competition has child competitions' do
+      let_it_be(:parent) { create(:competition, :season) }
+      let_it_be(:child1) { create(:competition, :series, parent: parent) }
+      let_it_be(:child2) { create(:competition, :series, parent: parent) }
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game_c1) { create(:game, competition: child1, game_number: 1) }
+      let_it_be(:game_c2) { create(:game, competition: child2, game_number: 1) }
+
+      before do
+        create(:game_participation, player: player, game: game_c1, plus: 3, minus: 0, win: true)
+        create(:game_participation, player: player, game: game_c2, plus: 2, minus: 1, win: false)
+      end
+
+      it 'aggregates stats across the entire subtree' do
+        result = Player.with_stats_for_competition(parent).find(player.id)
+
+        expect(result.games_count).to eq(2)
+        expect(result.wins_count).to eq(1)
+        expect(result.total_rating).to eq(4)
+      end
+    end
+
+    context 'when player has games in a different competition' do
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:other) { create(:competition, :series) }
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game_in) { create(:game, competition: competition, game_number: 1) }
+      let_it_be(:game_out) { create(:game, competition: other, game_number: 1) }
+
+      before do
+        create(:game_participation, player: player, game: game_in, plus: 5, minus: 0, win: true)
+        create(:game_participation, player: player, game: game_out, plus: 10, minus: 0, win: true)
+      end
+
+      it 'excludes games from other competitions' do
+        result = Player.with_stats_for_competition(competition).find(player.id)
+
+        expect(result.games_count).to eq(1)
+        expect(result.total_rating).to eq(5)
+      end
+    end
+
+    context 'when plus and minus are nil' do
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game) { create(:game, competition: competition, game_number: 1) }
+
+      before do
+        create(:game_participation, player: player, game: game, plus: nil, minus: nil, win: false)
+      end
+
+      it 'handles nil with COALESCE' do
+        result = Player.with_stats_for_competition(competition).find(player.id)
+
+        expect(result.total_rating).to eq(0)
+      end
+    end
+
+    context 'when best_move is present' do
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:player) { create(:player) }
+      let_it_be(:game) { create(:game, competition: competition, game_number: 1) }
+
+      before do
+        create(:game_participation, player: player, game: game, plus: 2, minus: 1, best_move: 0.5, win: true)
+      end
+
+      it 'includes best_move in total_rating' do
+        result = Player.with_stats_for_competition(competition).find(player.id)
+
+        expect(result.total_rating).to eq(1.5)
+      end
+    end
+  end
+
   describe '.with_stats_for_season' do
     context 'when player has games in the season' do
       let_it_be(:player) { create(:player) }
