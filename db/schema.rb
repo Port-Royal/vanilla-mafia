@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_15_144855) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_150501) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -120,7 +120,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_144855) do
     t.datetime "updated_at", null: false
     t.index ["competition_id", "game_number"], name: "index_games_on_competition_id_and_game_number", unique: true
     t.index ["competition_id"], name: "index_games_on_competition_id"
-    t.index ["season", "series", "game_number"], name: "index_games_on_season_and_series_and_game_number", unique: true
     t.index ["season", "series"], name: "index_games_on_season_and_series"
     t.index ["season"], name: "index_games_on_season"
   end

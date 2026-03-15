@@ -61,24 +61,32 @@ RSpec.describe Game, type: :model do
   end
 
   describe '.available_seasons' do
-    let_it_be(:game_s3) { create(:game, season: 30, series: 90) }
-    let_it_be(:game_s1) { create(:game, season: 10, series: 91) }
-    let_it_be(:game_s5) { create(:game, season: 50, series: 92) }
-    let_it_be(:game_s1_dup) { create(:game, season: 10, series: 93) }
+    context 'when games exist in multiple seasons' do
+      let_it_be(:game_s3) { create(:game, season: 30, series: 90) }
+      let_it_be(:game_s1) { create(:game, season: 10, series: 91) }
+      let_it_be(:game_s5) { create(:game, season: 50, series: 92) }
+      let_it_be(:game_s1_dup) { create(:game, season: 10, series: 93) }
 
-    it 'returns distinct seasons sorted ascending' do
-      result = described_class.available_seasons
-      expect(result).to include(10, 30, 50)
-      expect(result.count(10)).to eq(1)
+      it 'returns distinct seasons including created ones' do
+        result = described_class.available_seasons
+        expect(result).to include(10, 30, 50)
+        expect(result.count(10)).to eq(1)
+      end
+
+      it 'returns seasons in ascending order' do
+        result = described_class.available_seasons
+        idx_10 = result.index(10)
+        idx_30 = result.index(30)
+        idx_50 = result.index(50)
+        expect(idx_10).to be < idx_30
+        expect(idx_30).to be < idx_50
+      end
     end
 
-    it 'returns seasons in ascending order' do
-      result = described_class.available_seasons
-      idx_10 = result.index(10)
-      idx_30 = result.index(30)
-      idx_50 = result.index(50)
-      expect(idx_10).to be < idx_30
-      expect(idx_30).to be < idx_50
+    context 'when no games exist' do
+      it 'returns an empty array' do
+        expect(described_class.available_seasons).to eq([])
+      end
     end
   end
 
