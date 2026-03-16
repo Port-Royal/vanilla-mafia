@@ -1,7 +1,22 @@
 class ProcessTelegramWebhookJob < ApplicationJob
   queue_as :default
 
+  MAX_TITLE_LENGTH = 255
+
   def perform(payload)
-    Rails.logger.debug { "Processing Telegram webhook update_id=#{payload['update_id']}" }
+    parsed = Telegram::MessageParser.call(payload)
+    return if parsed.nil?
+    return unless parsed.news?
+    return unless TelegramAuthor.whitelisted?(parsed.from_id)
+
+    author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
+    return if author.user.nil?
+
+    News.create!(
+      title: parsed.text.truncate(MAX_TITLE_LENGTH),
+      content: parsed.text,
+      author: author.user,
+      status: :draft
+    )
   end
 end
