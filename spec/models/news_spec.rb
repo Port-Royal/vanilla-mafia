@@ -4,6 +4,7 @@ RSpec.describe News, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:author).class_name("User") }
     it { is_expected.to belong_to(:game).optional }
+    it { is_expected.to belong_to(:competition).optional }
     it { is_expected.to have_many(:taggings).dependent(:destroy) }
     it { is_expected.to have_many(:tags).through(:taggings) }
     it { is_expected.to have_rich_text(:content) }
@@ -69,6 +70,21 @@ RSpec.describe News, type: :model do
       result = described_class.for_series(1, 2)
       expect(result).to include(linked)
       expect(result).not_to include(other_series, unlinked)
+    end
+  end
+
+  describe '.for_competition' do
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:other_competition) { create(:competition, :series) }
+    let_it_be(:author) { create(:user) }
+    let_it_be(:linked) { create(:news, author:, competition: competition) }
+    let_it_be(:other) { create(:news, author:, competition: other_competition) }
+    let_it_be(:unlinked) { create(:news, author:) }
+
+    it 'returns news for the given competition' do
+      result = described_class.for_competition(competition)
+      expect(result).to include(linked)
+      expect(result).not_to include(other, unlinked)
     end
   end
 
