@@ -21,6 +21,10 @@ class Competition < ApplicationRecord
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
 
+  def to_param
+    slug
+  end
+
   def subtree_ids
     self.class.connection.select_values(subtree_ids_sql)
   end

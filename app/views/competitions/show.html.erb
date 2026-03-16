@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-bold mb-6"><%= @competition.name %></h1>
 
-<% if @result.parent_view %>
-  <% @result.games_by_child.each do |child, games| %>
+<% if @parent_view %>
+  <% @games_by_child.each do |child, games| %>
     <h2 class="text-xl font-semibold mt-4 mb-2"><%= child.name %></h2>
   <% end %>
 <% end %>
