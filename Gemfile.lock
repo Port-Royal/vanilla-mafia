@@ -201,7 +201,7 @@ GEM
     et-orbi (1.4.0)
       tzinfo
     event_stream_parser (1.0.0)
-    evilution (0.3.0)
+    evilution (0.4.0)
       diff-lcs (>= 1.5, < 3)
     factory_bot (6.5.6)
       activesupport (>= 6.1.0)
@@ -612,7 +612,7 @@ DEPENDENCIES
   database_cleaner-active_record
   debug
   devise
-  evilution (~> 0.3.0)
+  evilution (~> 0.4.0)
   factory_bot_rails
   image_processing (~> 1.2)
   importmap-rails
@@ -699,7 +699,7 @@ CHECKSUMS
   erubi (1.13.1) sha256=a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9
   et-orbi (1.4.0) sha256=6c7e3c90779821f9e3b324c5e96fda9767f72995d6ae435b96678a4f3e2de8bc
   event_stream_parser (1.0.0) sha256=a2683bab70126286f8184dc88f7968ffc4028f813161fb073ec90d171f7de3c8
-  evilution (0.3.0) sha256=9c4f83e54d7890ff334efa95cafc8fe55f40c8d2b978c317b28c20385e6309e6
+  evilution (0.4.0) sha256=8ff508bb9488b4f8b8bda34ba8030f3940de2fc9b085a503fce71bfeab5c0fbb
   factory_bot (6.5.6) sha256=12beb373214dccc086a7a63763d6718c49769d5606f0501e0a4442676917e077
   factory_bot_rails (6.5.1) sha256=d3cc4851eae4dea8a665ec4a4516895045e710554d2b5ac9e68b94d351bc6d68
   faraday (2.14.1) sha256=a43cceedc1e39d188f4d2cdd360a8aaa6a11da0c407052e426ba8d3fb42ef61c
