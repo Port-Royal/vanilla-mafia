@@ -122,10 +122,37 @@ en:
       success: "Article deleted."
     publish:
       success: "Article published."
+  admin_telegram:
+    title: "Telegram Bot Settings"
+    webhook:
+      title: "Webhook"
+      active: "Active"
+      inactive: "Not configured"
+      url: "URL"
+      pending_updates: "Pending updates"
+      error: "Error: %{message}"
+    news_tag:
+      title: "News Tag"
+      current: "Current tag"
+    authors:
+      title: "Author Whitelist"
+      user_id: "Telegram ID"
+      username: "Username"
+      linked_user: "Linked user"
+      remove: "Remove"
+      remove_confirm: "Remove this author from the whitelist?"
+      empty: "Whitelist is empty."
+      add: "Add author"
+      add_submit: "Add"
+      create:
+        success: "Author added to whitelist."
+      destroy:
+        success: "Author removed from whitelist."
   nav:
     hall_of_fame: "Hall of Fame"
     news: "News"
     manage_news: "Manage news"
+    telegram: "Telegram"
     protocols: "Protocols"
     sign_in: "Sign in"
     sign_out: "Sign out"

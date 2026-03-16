@@ -18,6 +18,13 @@ Rails.application.routes.draw do
   end
 
   authenticate :user, ->(u) { u.admin? } do
+    namespace :admin do
+      resource :telegram_settings, only: [ :show ], path: "telegram"
+      resources :telegram_authors, only: [ :create, :destroy ], path: "telegram/authors"
+    end
+  end
+
+  authenticate :user, ->(u) { u.admin? } do
     mount Avo::Engine => "/avo"
   end
 
