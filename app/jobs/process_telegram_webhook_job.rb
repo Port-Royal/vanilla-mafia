@@ -7,9 +7,10 @@ class ProcessTelegramWebhookJob < ApplicationJob
     parsed = Telegram::MessageParser.call(payload)
     return if parsed.nil?
     return unless parsed.news?
-    return unless TelegramAuthor.whitelisted?(parsed.from_id)
+    return if parsed.text.blank?
 
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
+    return if author.nil?
     return if author.user.nil?
 
     News.create!(

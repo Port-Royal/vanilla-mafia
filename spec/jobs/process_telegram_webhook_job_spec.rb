@@ -106,6 +106,40 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
+    context "when message text is only the news tag" do
+      let(:payload) do
+        {
+          "update_id" => 7,
+          "message" => {
+            "text" => "#news",
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 }
+          }
+        }
+      end
+
+      it "does not create a news article" do
+        expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
+    context "when message text is news tag with only whitespace" do
+      let(:payload) do
+        {
+          "update_id" => 8,
+          "message" => {
+            "text" => "#news   ",
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 }
+          }
+        }
+      end
+
+      it "does not create a news article" do
+        expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
     context "when message title would be too long" do
       let(:payload) do
         {
