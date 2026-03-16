@@ -102,6 +102,14 @@ RSpec.describe Competition, type: :model do
     end
   end
 
+  describe '#to_param' do
+    let_it_be(:competition) { create(:competition, slug: "season-5") }
+
+    it 'returns the slug' do
+      expect(competition.to_param).to eq("season-5")
+    end
+  end
+
   describe '#subtree_ids' do
     context 'when competition has no children' do
       let_it_be(:leaf) { create(:competition) }

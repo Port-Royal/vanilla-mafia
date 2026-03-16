@@ -23,6 +23,8 @@ Rails.application.routes.draw do
 
   root "seasons#show", defaults: { number: 5 }
 
+  resources :competitions, only: [ :show ], param: :slug
+
   resources :seasons, only: [ :show ], param: :number do
     resources :series, only: [ :show ], param: :number
   end
