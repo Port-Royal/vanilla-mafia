@@ -34,7 +34,7 @@ RSpec.describe CompetitionOverviewService do
       end
 
       it "returns empty defaults for leaf-only fields" do
-        expect(result.games).to eq([])
+        expect(result.games).to be_empty
         expect(result.participations_by_player).to eq({})
         expect(result.players_sorted).to eq([])
       end

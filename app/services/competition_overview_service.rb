@@ -10,7 +10,7 @@ class CompetitionOverviewService
   end
 
   def call
-    children = @competition.children.ordered
+    children = @competition.children.ordered.to_a
     if children.any?
       parent_result(children)
     else
@@ -22,15 +22,15 @@ class CompetitionOverviewService
 
   def parent_result(children)
     subtree_ids = @competition.subtree_ids
-    games_by_competition_id = Game.where(competition_id: children.select(:id)).ordered.to_a.group_by(&:competition_id)
+    games_by_competition_id = Game.where(competition_id: subtree_ids).ordered.to_a.group_by(&:competition_id)
     games_by_child = children.index_with { |child| games_by_competition_id.fetch(child.id, []) }
 
     Result.new(
       parent_view: true,
       games_by_child: games_by_child,
-      players: Player.with_stats_for_competition(@competition).ranked,
+      players: Player.with_aggregated_stats.where(games: { competition_id: subtree_ids }).ranked,
       player_count: Player.joins(game_participations: :game).where(games: { competition_id: subtree_ids }).distinct.count,
-      games: [],
+      games: Game.none,
       participations_by_player: {},
       players_sorted: []
     )
