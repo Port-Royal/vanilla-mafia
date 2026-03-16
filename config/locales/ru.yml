@@ -194,10 +194,37 @@ ru:
       success: "Новость удалена."
     publish:
       success: "Новость опубликована."
+  admin_telegram:
+    title: "Настройки Telegram-бота"
+    webhook:
+      title: "Вебхук"
+      active: "Активен"
+      inactive: "Не настроен"
+      url: "URL"
+      pending_updates: "Ожидающие обновления"
+      error: "Ошибка: %{message}"
+    news_tag:
+      title: "Тег новостей"
+      current: "Текущий тег"
+    authors:
+      title: "Белый список авторов"
+      user_id: "Telegram ID"
+      username: "Имя пользователя"
+      linked_user: "Связанный пользователь"
+      remove: "Удалить"
+      remove_confirm: "Удалить этого автора из белого списка?"
+      empty: "Белый список пуст."
+      add: "Добавить автора"
+      add_submit: "Добавить"
+      create:
+        success: "Автор добавлен в белый список."
+      destroy:
+        success: "Автор удалён из белого списка."
   nav:
     hall_of_fame: "Зал славы"
     news: "Новости"
     manage_news: "Управление новостями"
+    telegram: "Telegram"
     protocols: "Протоколы"
     sign_in: "Войти"
     sign_out: "Выйти"

@@ -71,6 +71,10 @@
           <% end %>
           <% if current_user.admin? %>
             <li>
+              <%= link_to t("nav.telegram"), admin_telegram_settings_path,
+                    class: "block text-gray-300 hover:text-white transition-colors" %>
+            </li>
+            <li>
               <%= link_to t("nav.admin"), avo.root_path,
                     class: "block text-gray-300 hover:text-white transition-colors" %>
             </li>
@@ -131,6 +135,10 @@
                   </li>
                 <% end %>
                 <% if current_user.admin? %>
+                  <li>
+                    <%= link_to t("nav.telegram"), admin_telegram_settings_path,
+                          class: "block hover:text-white transition-colors" %>
+                  </li>
                   <li>
                     <%= link_to t("nav.admin"), avo.root_path,
                           class: "block hover:text-white transition-colors" %>
