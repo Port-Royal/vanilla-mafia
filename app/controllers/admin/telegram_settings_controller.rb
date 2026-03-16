@@ -4,7 +4,7 @@ class Admin::TelegramSettingsController < ApplicationController
 
   def show
     @webhook_info = Telegram::WebhookInfoService.call
-    @telegram_authors = TelegramAuthor.order(:telegram_username)
+    @telegram_authors = TelegramAuthor.includes(:user).order(:telegram_username)
     @telegram_author = TelegramAuthor.new
   end
 
