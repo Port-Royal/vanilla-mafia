@@ -55,5 +55,10 @@ RSpec.describe "Legacy redirects" do
       get "/"
       expect(response).to redirect_to(competition_path(slug: competition.slug))
     end
+
+    it "returns moved permanently status" do
+      get "/"
+      expect(response).to have_http_status(:moved_permanently)
+    end
   end
 end
