@@ -1,5 +1,8 @@
 class Avo::Resources::Competition < Avo::BaseResource
   self.title = :name
+  self.find_record_method = -> {
+    query.find_by(slug: id) || query.find(id)
+  }
 
   def fields
     field :id, as: :id
