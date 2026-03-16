@@ -8,7 +8,7 @@ RSpec.describe PlayerAward, type: :model do
   end
 
   describe 'validations' do
-    subject { build(:player_award) }
+    subject { build(:player_award, competition: create(:competition, :season)) }
 
     it { is_expected.to validate_uniqueness_of(:award_id).scoped_to(:player_id, :competition_id) }
 
@@ -17,8 +17,8 @@ RSpec.describe PlayerAward, type: :model do
       comp_b = create(:competition, :season)
       player = create(:player)
       award = create(:award)
-      create(:player_award, player: player, award: award, competition: comp_a)
-      dup = build(:player_award, player: player, award: award, competition: comp_b)
+      create(:player_award, player: player, award: award, competition: comp_a, season: 1)
+      dup = build(:player_award, player: player, award: award, competition: comp_b, season: 1)
       expect(dup).to be_valid
     end
 
