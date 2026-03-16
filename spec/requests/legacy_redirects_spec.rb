@@ -7,7 +7,7 @@ RSpec.describe "Legacy redirects" do
 
       it "redirects to the competition page" do
         get "/seasons/5"
-        expect(response).to redirect_to(competition_path(slug: "season-5"))
+        expect(response).to redirect_to(competition_path(slug: competition.slug))
       end
 
       it "returns moved permanently status" do
@@ -31,7 +31,7 @@ RSpec.describe "Legacy redirects" do
 
       it "redirects to the competition page" do
         get "/seasons/5/series/3"
-        expect(response).to redirect_to(competition_path(slug: "season-5-series-3"))
+        expect(response).to redirect_to(competition_path(slug: series.slug))
       end
 
       it "returns moved permanently status" do
@@ -53,7 +53,7 @@ RSpec.describe "Legacy redirects" do
 
     it "redirects to the current season competition" do
       get "/"
-      expect(response).to redirect_to(competition_path(slug: "season-5"))
+      expect(response).to redirect_to(competition_path(slug: competition.slug))
     end
   end
 end
