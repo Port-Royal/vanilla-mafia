@@ -7,7 +7,9 @@ class Avo::Resources::Competition < Avo::BaseResource
   def fields
     field :id, as: :id
     field :name, as: :text
+    field :slug, as: :text
     field :kind, as: :select, enum: ::Competition.kinds
+    field :position, as: :number
     field :parent, as: :belongs_to, required: false
     field :games, as: :has_many
   end
