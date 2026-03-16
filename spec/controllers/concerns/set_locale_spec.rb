@@ -1,9 +1,12 @@
 require "rails_helper"
 
 RSpec.describe SetLocale, type: :request do
+  let_it_be(:competition) { create(:competition, :season, slug: "locale-test") }
+  let(:test_path) { competition_path(slug: competition.slug) }
+
   context "when guest with no cookie" do
     it "uses default locale" do
-      get root_path
+      get test_path
       expect(response.body).to include('lang="ru"')
     end
   end
@@ -12,7 +15,7 @@ RSpec.describe SetLocale, type: :request do
     before { cookies[:locale] = "en" }
 
     it "uses cookie locale" do
-      get root_path
+      get test_path
       expect(response.body).to include('lang="en"')
     end
   end
@@ -21,7 +24,7 @@ RSpec.describe SetLocale, type: :request do
     before { cookies[:locale] = "xx" }
 
     it "falls back to default locale" do
-      get root_path
+      get test_path
       expect(response.body).to include('lang="ru"')
     end
   end
@@ -32,7 +35,7 @@ RSpec.describe SetLocale, type: :request do
     before { sign_in user }
 
     it "uses user locale" do
-      get root_path
+      get test_path
       expect(response.body).to include('lang="en"')
     end
   end
@@ -46,7 +49,7 @@ RSpec.describe SetLocale, type: :request do
     end
 
     it "user locale wins over cookie" do
-      get root_path
+      get test_path
       expect(response.body).to include('lang="en"')
     end
   end

@@ -21,13 +21,12 @@ Rails.application.routes.draw do
     mount Avo::Engine => "/avo"
   end
 
-  root "seasons#show", defaults: { number: 5 }
+  root to: redirect("/competitions/season-5", status: 301)
 
   resources :competitions, only: [ :show ], param: :slug
 
-  resources :seasons, only: [ :show ], param: :number do
-    resources :series, only: [ :show ], param: :number
-  end
+  get "seasons/:number", to: "legacy_redirects#season", as: :season
+  get "seasons/:season_number/series/:number", to: "legacy_redirects#series", as: :season_series
 
   resources :news, only: [ :index, :show ]
   resources :games, only: [ :show ]
