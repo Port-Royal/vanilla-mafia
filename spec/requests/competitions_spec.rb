@@ -7,8 +7,12 @@ RSpec.describe CompetitionsController do
       let_it_be(:child1) { create(:competition, :series, name: "Series 1", parent: parent, position: 1) }
       let_it_be(:child2) { create(:competition, :series, name: "Series 2", parent: parent, position: 2) }
       let_it_be(:game1) { create(:game, competition: child1, game_number: 1) }
-      let_it_be(:player) { create(:player, name: "Алексей") }
-      let_it_be(:participation) { create(:game_participation, game: game1, player: player, plus: 3.0, minus: 0.5, win: true) }
+      let_it_be(:game2) { create(:game, competition: child1, game_number: 2) }
+      let_it_be(:game3) { create(:game, competition: child2, game_number: 1) }
+      let_it_be(:player1) { create(:player, name: "Алексей") }
+      let_it_be(:player2) { create(:player, name: "Борис") }
+      let_it_be(:participation1) { create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5, win: true) }
+      let_it_be(:participation2) { create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5, win: false) }
 
       before { get competition_path(slug: parent.slug) }
 
@@ -20,22 +24,68 @@ RSpec.describe CompetitionsController do
         expect(response.body).to include("Season 5")
       end
 
-      it "assigns child competitions" do
+      it "renders child competition names" do
         expect(response.body).to include("Series 1")
         expect(response.body).to include("Series 2")
+      end
+
+      it "renders game links" do
+        expect(response.body).to include(game_path(game1))
+        expect(response.body).to include(game_path(game2))
+      end
+
+      it "renders child competition links" do
+        expect(response.body).to include(competition_path(slug: child1.slug))
+      end
+
+      it "renders player rankings" do
+        expect(response.body).to include("Алексей")
+        expect(response.body).to include("Борис")
+      end
+
+      it "renders ranking table headers" do
+        expect(response.body).to include(I18n.t("competitions.show.rank"))
+        expect(response.body).to include(I18n.t("competitions.show.rating"))
+      end
+
+      it "links player names to profiles" do
+        expect(response.body).to include(player_path(player1))
       end
     end
 
     context "when competition is a leaf" do
       let_it_be(:competition) { create(:competition, :series, name: "Series 1", slug: "series-1") }
-      let_it_be(:game) { create(:game, competition: competition, game_number: 1) }
-      let_it_be(:player) { create(:player, name: "Борис") }
-      let_it_be(:participation) { create(:game_participation, game: game, player: player, plus: 2.0, minus: 0.5) }
+      let_it_be(:game1) { create(:game, competition: competition, game_number: 1) }
+      let_it_be(:game2) { create(:game, competition: competition, game_number: 2) }
+      let_it_be(:player1) { create(:player, name: "Виктор") }
+      let_it_be(:player2) { create(:player, name: "Галина") }
+      let_it_be(:p1) { create(:game_participation, game: game1, player: player1, plus: 3.0, minus: 0.5) }
+      let_it_be(:p2) { create(:game_participation, game: game1, player: player2, plus: 1.0, minus: 1.5) }
+      let_it_be(:p3) { create(:game_participation, game: game2, player: player1, plus: 2.0, minus: 1.0) }
+      let_it_be(:p4) { create(:game_participation, game: game2, player: player2, plus: 5.0, minus: 0.0) }
 
       before { get competition_path(slug: competition.slug) }
 
       it "returns success" do
         expect(response).to have_http_status(:ok)
+      end
+
+      it "renders player names" do
+        expect(response.body).to include("Виктор")
+        expect(response.body).to include("Галина")
+      end
+
+      it "renders game columns" do
+        expect(response.body).to include(I18n.t("common.game") + " 1")
+        expect(response.body).to include(I18n.t("common.game") + " 2")
+      end
+
+      it "renders total column" do
+        expect(response.body).to include(I18n.t("competitions.show.total"))
+      end
+
+      it "sorts players by total descending" do
+        expect(response.body).to match(/Галина.*Виктор/m)
       end
     end
 

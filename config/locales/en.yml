@@ -130,6 +130,17 @@ en:
     sign_in: "Sign in"
     sign_out: "Sign out"
     admin: "Admin"
+  competitions:
+    show:
+      by_children: "By series and games"
+      by_players: "By players"
+      rank: "Rank"
+      player: "Player"
+      rating: "Rating"
+      games: "Games"
+      win_rate: "Win rate"
+      view: "Result"
+      total: "Total"
   seasons:
     show:
       date: "Date"
