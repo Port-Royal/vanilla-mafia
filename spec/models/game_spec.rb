@@ -107,16 +107,19 @@ RSpec.describe Game, type: :model do
   end
 
   describe '#full_name' do
-    context 'when all fields are present' do
-      let(:game) { build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: "Финал") }
+    let_it_be(:parent) { create(:competition, :season, name: "Сезон 1") }
+    let_it_be(:child) { create(:competition, :series, name: "Серия 2", parent: parent) }
 
-      it 'includes all parts' do
+    context 'when all fields are present' do
+      let(:game) { build(:game, competition: child, played_on: Date.new(2026, 1, 15), game_number: 3, name: "Финал") }
+
+      it 'includes all parts from competition hierarchy' do
         expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3 Финал")
       end
     end
 
     context 'when played_on is nil' do
-      let(:game) { build(:game, played_on: nil, season: 1, series: 2, game_number: 3, name: "Финал") }
+      let(:game) { build(:game, competition: child, played_on: nil, game_number: 3, name: "Финал") }
 
       it 'omits played_on' do
         expect(game.full_name).to eq("Сезон 1 Серия 2 Игра 3 Финал")
@@ -124,19 +127,39 @@ RSpec.describe Game, type: :model do
     end
 
     context 'when name is nil' do
-      let(:game) { build(:game, played_on: Date.new(2026, 1, 15), season: 1, series: 2, game_number: 3, name: nil) }
+      let(:game) { build(:game, competition: child, played_on: Date.new(2026, 1, 15), game_number: 3, name: nil) }
 
       it 'omits name' do
         expect(game.full_name).to eq("2026-01-15 Сезон 1 Серия 2 Игра 3")
       end
     end
+
+    context 'when competition has no parent' do
+      let_it_be(:root) { create(:competition, :season, name: "Турнир") }
+      let(:game) { build(:game, competition: root, played_on: nil, game_number: 1, name: nil) }
+
+      it 'shows only competition name and game number' do
+        expect(game.full_name).to eq("Турнир Игра 1")
+      end
+    end
   end
 
   describe '#in_season_name' do
-    let(:game) { build(:game, series: 3, game_number: 5) }
+    let_it_be(:parent) { create(:competition, :season, name: "Сезон 3") }
+    let_it_be(:child) { create(:competition, :series, name: "Серия 5", parent: parent) }
+    let(:game) { build(:game, competition: child, game_number: 5) }
 
-    it 'returns series and game number' do
-      expect(game.in_season_name).to eq("Серия 3 Игра 5")
+    it 'returns competition name and game number' do
+      expect(game.in_season_name).to eq("Серия 5 Игра 5")
+    end
+
+    context 'when competition has no parent' do
+      let_it_be(:root) { create(:competition, :season, name: "Кубок") }
+      let(:game) { build(:game, competition: root, game_number: 2) }
+
+      it 'returns competition name and game number' do
+        expect(game.in_season_name).to eq("Кубок Игра 2")
+      end
     end
   end
 end

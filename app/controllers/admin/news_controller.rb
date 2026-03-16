@@ -77,11 +77,11 @@ class Admin::NewsController < ApplicationController
   end
 
   def set_news
-    @news = News.find(params[:id])
+    @news = News.includes(game: { competition: :parent }).find(params[:id])
   end
 
   def load_form_data
-    @games = Game.order(played_on: :desc)
+    @games = Game.includes(competition: :parent).order(played_on: :desc)
   end
 
   def news_params
