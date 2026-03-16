@@ -98,6 +98,10 @@ RSpec.describe CompetitionOverviewService do
         expect(result.participations_by_player[player2]).to contain_exactly(participation2, participation4)
       end
 
+      it "returns the player count" do
+        expect(result.player_count).to eq(2)
+      end
+
       it "sorts players by total rating descending" do
         expect(result.players_sorted).to eq([ player2, player1 ])
       end
