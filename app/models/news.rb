@@ -1,5 +1,6 @@
 class News < ApplicationRecord
   belongs_to :author, class_name: "User"
+  belongs_to :competition, optional: true
   belongs_to :game, optional: true
 
   has_many :taggings, as: :taggable, dependent: :destroy
@@ -19,6 +20,7 @@ class News < ApplicationRecord
 
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
   scope :for_game, ->(game) { where(game:) }
+  scope :for_competition, ->(competition) { where(competition: competition) }
   scope :for_series, ->(season, series) { where(season: season, series: series) }
   scope :by_author, ->(user) { where(author: user) }
 
