@@ -25,6 +25,6 @@ class Admin::TelegramAuthorsController < ApplicationController
   end
 
   def telegram_author_params
-    params.require(:telegram_author).permit(:telegram_user_id, :telegram_username)
+    params.require(:telegram_author).permit(:telegram_user_id, :telegram_username, :user_id)
   end
 end

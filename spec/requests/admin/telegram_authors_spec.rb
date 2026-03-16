@@ -22,6 +22,11 @@ RSpec.describe "Admin::TelegramAuthors" do
         expect(author.telegram_username).to eq("testbot")
       end
 
+      it "links the telegram author to a user" do
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999333, telegram_username: "linked", user_id: admin.id } }
+        expect(TelegramAuthor.last.user).to eq(admin)
+      end
+
       context "with invalid params" do
         it "redirects with alert when telegram_user_id is blank" do
           expect {
