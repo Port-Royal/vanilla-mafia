@@ -50,6 +50,17 @@ ru:
         title: "Название"
         description: "Описание"
         staff: "Организаторская"
+  competitions:
+    show:
+      by_children: "По сериям и играм"
+      by_players: "По игрокам"
+      rank: "Место"
+      player: "Игрок"
+      rating: "Рейтинг"
+      games: "Игры"
+      win_rate: "Процент побед"
+      view: "Итог"
+      total: "Итого"
   seasons:
     show:
       date: "Дата"
