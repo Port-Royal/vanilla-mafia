@@ -42,9 +42,9 @@
     <%# Mobile nav (hidden by default) %>
     <nav id="mobile-nav" data-menu-target="nav" class="hidden lg:hidden bg-neutral-900 px-4 pb-4">
       <ul class="space-y-2">
-        <% available_seasons.each do |n| %>
+        <% featured_competitions.each do |competition| %>
           <li>
-            <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
+            <%= link_to competition.name, competition_path(slug: competition.slug),
                   class: "block text-gray-300 hover:text-white transition-colors" %>
           </li>
         <% end %>
@@ -107,9 +107,9 @@
 
           <nav>
             <ul class="space-y-3 text-sm">
-              <% available_seasons.each do |n| %>
+              <% featured_competitions.each do |competition| %>
                 <li>
-                  <%= link_to "#{t('common.season')} #{n}", season_path(number: n),
+                  <%= link_to competition.name, competition_path(slug: competition.slug),
                         class: "block hover:text-white transition-colors" %>
                 </li>
               <% end %>
