@@ -1,7 +1,7 @@
 module ApplicationHelper
   include Pagy::Frontend
 
-  def available_seasons
-    @available_seasons ||= Game.available_seasons
+  def featured_competitions
+    @featured_competitions ||= Competition.featured.ordered
   end
 end
