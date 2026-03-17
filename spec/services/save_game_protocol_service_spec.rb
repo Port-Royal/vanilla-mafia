@@ -9,7 +9,7 @@ RSpec.describe SaveGameProtocolService do
 
     let(:game) { Game.new }
     let(:game_params) do
-      { season: 5, series: 1, game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "peace_victory", judge: "Иван", competition_id: competition.id }
+      { game_number: 1, played_on: "2026-01-15", name: "Тестовая", result: "peace_victory", judge: "Иван", competition_id: competition.id }
     end
 
     context "when creating a new game with participations" do
@@ -34,7 +34,7 @@ RSpec.describe SaveGameProtocolService do
 
       it "sets game attributes correctly" do
         result = described_class.call(game: game, game_params: game_params, participations_params: participations_params)
-        expect(result.game).to have_attributes(season: 5, series: 1, game_number: 1, judge: "Иван")
+        expect(result.game).to have_attributes(game_number: 1, judge: "Иван")
       end
 
       it "creates participations for filled seats" do
@@ -86,7 +86,7 @@ RSpec.describe SaveGameProtocolService do
     end
 
     context "when game params are invalid" do
-      let(:invalid_game_params) { { season: nil, series: 1, game_number: 1 } }
+      let(:invalid_game_params) { { game_number: nil, competition_id: competition.id } }
       let(:participations_params) do
         params = {}
         (1..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
@@ -111,9 +111,9 @@ RSpec.describe SaveGameProtocolService do
     end
 
     context "when updating an existing game" do
-      let!(:game_to_update) { create(:game, season: 5, series: 1, game_number: 2, judge: "Старый") }
+      let!(:game_to_update) { create(:game, game_number: 2, judge: "Старый") }
       let!(:old_participation) { create(:game_participation, game: game_to_update, player: existing_player, seat: 1) }
-      let(:update_game_params) { { season: 5, series: 1, game_number: 2, judge: "Новый" } }
+      let(:update_game_params) { { game_number: 2, judge: "Новый" } }
       let(:participations_params) do
         params = {}
         params["1"] = { player_name: "Алексей", role_code: "don", plus: "2", minus: "0", best_move: "", win: "1", first_shoot: "0", notes: "" }
@@ -138,7 +138,7 @@ RSpec.describe SaveGameProtocolService do
     end
 
     context "when clearing a previously filled seat" do
-      let!(:game_to_update) { create(:game, season: 5, series: 1, game_number: 3) }
+      let!(:game_to_update) { create(:game, game_number: 3) }
       let!(:participation_to_remove) { create(:game_participation, game: game_to_update, player: existing_player, seat: 1) }
       let(:participations_params) do
         params = {}
@@ -148,14 +148,14 @@ RSpec.describe SaveGameProtocolService do
 
       it "removes the participation" do
         expect {
-          described_class.call(game: game_to_update, game_params: { season: 5, series: 1, game_number: 3 }, participations_params: participations_params)
+          described_class.call(game: game_to_update, game_params: { game_number: 3 }, participations_params: participations_params)
         }.to change(GameParticipation, :count).by(-1)
       end
     end
 
     context "when game has legacy participations without seats" do
       let_it_be(:other_player) { create(:player, name: "Борис") }
-      let!(:game_to_update) { create(:game, season: 5, series: 1, game_number: 4) }
+      let!(:game_to_update) { create(:game, game_number: 4) }
       let!(:legacy_participation) { create(:game_participation, game: game_to_update, player: existing_player, seat: nil) }
       let(:participations_params) do
         params = {}
@@ -165,13 +165,13 @@ RSpec.describe SaveGameProtocolService do
       end
 
       it "assigns a seat to the legacy participation" do
-        described_class.call(game: game_to_update, game_params: { season: 5, series: 1, game_number: 4 }, participations_params: participations_params)
+        described_class.call(game: game_to_update, game_params: { game_number: 4 }, participations_params: participations_params)
         expect(legacy_participation.reload.seat).to eq(1)
       end
 
       it "does not create a duplicate participation" do
         expect {
-          described_class.call(game: game_to_update, game_params: { season: 5, series: 1, game_number: 4 }, participations_params: participations_params)
+          described_class.call(game: game_to_update, game_params: { game_number: 4 }, participations_params: participations_params)
         }.not_to change(GameParticipation, :count)
       end
     end
