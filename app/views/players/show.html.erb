@@ -50,7 +50,7 @@
       <thead>
         <tr>
           <th><%= t(".date") %></th>
-          <th><%= t(".series") %></th>
+          <th><%= t(".competition") %></th>
           <th><%= t(".game") %></th>
           <th><%= t(".role") %></th>
           <th><%= t(".result") %></th>
@@ -62,7 +62,7 @@
           <% participation = game.game_participations.find { |gp| gp.player_id == @player.id } %>
           <tr>
             <td><%= game.played_on %></td>
-            <td><%= game.series %></td>
+            <td><%= link_to game.competition.name, competition_path(slug: game.competition.slug), class: "text-maroon hover:underline" %></td>
             <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
             <td><%= participation&.role&.name %></td>
             <td><%= participation&.result %></td>

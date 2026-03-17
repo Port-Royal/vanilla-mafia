@@ -21,8 +21,12 @@ RSpec.describe PlayersController do
         expect(response.body).to include("Алексей")
       end
 
-      it "renders competition heading" do
+      it "renders root competition heading" do
         expect(response.body).to include("Сезон 5")
+      end
+
+      it "renders competition name as link" do
+        assert_select "td a[href=?]", competition_path(slug: series_competition.slug), text: series_competition.name
       end
 
       it "renders game link" do
