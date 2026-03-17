@@ -17,15 +17,15 @@ RSpec.describe GamesController do
       end
 
       it "renders breadcrumb with link to root competition" do
-        assert_select "nav a[href=?]", competition_path(slug: season.slug), text: season.name
+        assert_select "nav[aria-label='Breadcrumb'] a[href=?]", competition_path(slug: season.slug), text: season.name
       end
 
       it "renders breadcrumb with link to parent competition" do
-        assert_select "nav a[href=?]", competition_path(slug: series.slug), text: series.name
+        assert_select "nav[aria-label='Breadcrumb'] a[href=?]", competition_path(slug: series.slug), text: series.name
       end
 
       it "renders breadcrumb with game name as text" do
-        assert_select "nav span", text: /#{I18n.t('common.game')} #{game.game_number}/
+        assert_select "nav[aria-label='Breadcrumb'] span", text: /#{I18n.t('common.game')} #{game.game_number}/
       end
 
       it "renders player name as link to profile" do

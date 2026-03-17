@@ -1,4 +1,4 @@
-<nav class="text-sm text-gray-500 mb-4">
+<nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-4">
   <% @game.competition.ancestors.each do |ancestor| %>
     <%= link_to ancestor.name, competition_path(slug: ancestor.slug), class: "text-maroon hover:underline" %> /
   <% end %>
