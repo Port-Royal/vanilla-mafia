@@ -28,6 +28,13 @@ RSpec.describe "Judge::Protocols" do
       it "renders the new protocol form" do
         expect(response.body).to include(I18n.t("game_protocols.new.title"))
       end
+
+      it "excludes competitions without legacy_season from the dropdown" do
+        comp_without_legacy = create(:competition, name: "No Legacy", legacy_season: nil)
+        get new_judge_protocol_path
+        expect(response.body).not_to include("No Legacy")
+        expect(response.body).to include(competition.name)
+      end
     end
 
     context "when user is judge" do

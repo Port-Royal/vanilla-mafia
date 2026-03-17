@@ -60,7 +60,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def load_form_data
-    @competitions = Competition.ordered
+    @competitions = Competition.where.not(legacy_season: nil).ordered
     @roles = Role.all
     @players = Player.order(:name)
   end

@@ -38,6 +38,24 @@ RSpec.describe Game, type: :model do
         expect(game.series).to be_nil
       end
     end
+
+    context 'when competition_id changes on a persisted game' do
+      let_it_be(:old_comp) { create(:competition, :series, legacy_season: 1, legacy_series: 1) }
+      let_it_be(:new_comp) { create(:competition, :series, legacy_season: 2, legacy_series: 5) }
+      let!(:game) { create(:game, competition: old_comp) }
+
+      it 're-derives season from the new competition' do
+        game.competition = new_comp
+        game.valid?
+        expect(game.season).to eq(2)
+      end
+
+      it 're-derives series from the new competition' do
+        game.competition = new_comp
+        game.valid?
+        expect(game.series).to eq(5)
+      end
+    end
   end
 
   describe 'validations' do

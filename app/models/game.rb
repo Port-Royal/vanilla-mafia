@@ -39,7 +39,12 @@ class Game < ApplicationRecord
   def derive_season_and_series_from_competition
     return if competition.nil?
 
-    self.season = competition.legacy_season if season.blank?
-    self.series = competition.legacy_series if series.blank?
+    if persisted? && competition_id_changed?
+      self.season = competition.legacy_season
+      self.series = competition.legacy_series
+    else
+      self.season = competition.legacy_season if season.blank?
+      self.series = competition.legacy_series if series.blank?
+    end
   end
 end
