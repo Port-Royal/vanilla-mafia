@@ -3,7 +3,7 @@ class PlayersController < ApplicationController
     result = PlayerProfileService.call(player_id: params[:id])
     @player = result.player
     @pagy, games = pagy(result.games)
-    @games_by_season = games.group_by(&:season)
+    @games_by_competition = games.group_by { |g| g.competition.root }
     @player_awards = result.player_awards
   end
 end

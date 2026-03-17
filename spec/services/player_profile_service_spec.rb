@@ -39,6 +39,17 @@ RSpec.describe PlayerProfileService do
       expect(result.player_awards).to eq([ player_award2, player_award1 ])
     end
 
+    it "eager loads competition association on games" do
+      loaded_games = result.games.load
+      expect(loaded_games.first.association(:competition)).to be_loaded
+    end
+
+    it "eager loads competition parent association on games" do
+      loaded_games = result.games.load
+      competition = loaded_games.first.competition
+      expect(competition.association(:parent)).to be_loaded
+    end
+
     it "eager loads award association" do
       expect(result.player_awards.first.association(:award)).to be_loaded
     end

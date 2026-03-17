@@ -110,6 +110,46 @@ RSpec.describe Competition, type: :model do
     end
   end
 
+  describe '#root' do
+    context 'when competition has no parent' do
+      let_it_be(:competition) { create(:competition, :season) }
+
+      it 'returns itself' do
+        expect(competition.root).to eq(competition)
+      end
+    end
+
+    context 'when competition has a parent' do
+      let_it_be(:parent) { create(:competition, :season) }
+      let_it_be(:child) { create(:competition, :series, parent: parent) }
+
+      it 'returns the root ancestor' do
+        expect(child.root).to eq(parent)
+      end
+    end
+
+    context 'when competition has a grandparent' do
+      let_it_be(:grandparent) { create(:competition, :season) }
+      let_it_be(:parent) { create(:competition, :series, parent: grandparent) }
+      let_it_be(:grandchild) { create(:competition, :round, parent: parent) }
+
+      it 'returns the root ancestor' do
+        expect(grandchild.root).to eq(grandparent)
+      end
+    end
+
+    context 'when parent is eager-loaded' do
+      let_it_be(:parent) { create(:competition, :season) }
+      let_it_be(:child) { create(:competition, :series, parent: parent) }
+
+      it 'uses the eager-loaded parent' do
+        loaded = Competition.includes(:parent).find(child.id)
+        expect(loaded.association(:parent)).to be_loaded
+        expect(loaded.root).to eq(parent)
+      end
+    end
+  end
+
   describe '#subtree_ids' do
     context 'when competition has no children' do
       let_it_be(:leaf) { create(:competition) }

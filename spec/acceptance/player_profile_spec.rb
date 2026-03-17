@@ -2,8 +2,10 @@ require "rails_helper"
 
 RSpec.describe "Player profile" do
   let_it_be(:player) { create(:player, name: "Алексей") }
+  let_it_be(:season_competition) { create(:competition, :season, name: "Сезон 5") }
+  let_it_be(:series_competition) { create(:competition, :series, parent: season_competition) }
   let_it_be(:game) do
-    create(:game, season: 5, series: 1, game_number: 1,
+    create(:game, competition: series_competition, game_number: 1,
            played_on: Date.new(2025, 1, 10))
   end
   let_it_be(:participation) { create(:game_participation, game:, player:, plus: 3.0, minus: 0.5, win: true) }
@@ -16,7 +18,7 @@ RSpec.describe "Player profile" do
     expect(page).to have_content("Алексей")
   end
 
-  it "displays per-season stats" do
+  it "displays per-competition stats" do
     expect(page).to have_content("Сезон 5")
   end
 
