@@ -9,11 +9,15 @@ RSpec.describe HallOfFameService do
     let_it_be(:season4) { create(:competition, :season, name: "Сезон 4") }
     let_it_be(:season5) { create(:competition, :season, name: "Сезон 5") }
     let_it_be(:player_award_type) { create(:award, title: "Лучший игрок", staff: false) }
+    let_it_be(:player_award_type2) { create(:award, title: "Лучший стратег", staff: false) }
     let_it_be(:staff_award_type) { create(:award, title: "Лучший ведущий", staff: true) }
-    let_it_be(:player_award2) { create(:player_award, player: player2, award: player_award_type, competition: season5, season: 5, position: 2) }
+    let_it_be(:staff_award_type2) { create(:award, title: "Лучший организатор", staff: true) }
+    let_it_be(:player_award2) { create(:player_award, player: player1, award: player_award_type2, competition: season5, season: 5, position: 2) }
     let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, competition: season4, season: 4, position: 1) }
-    let_it_be(:staff_award2) { create(:player_award, player: organizer2, award: staff_award_type, competition: season5, season: 5, position: 2) }
+    let_it_be(:player_award3) { create(:player_award, player: player2, award: player_award_type, competition: season4, season: 4, position: 3) }
+    let_it_be(:staff_award2) { create(:player_award, player: organizer1, award: staff_award_type2, competition: season5, season: 5, position: 2) }
     let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, competition: season4, season: 4, position: 1) }
+    let_it_be(:staff_award3) { create(:player_award, player: organizer2, award: staff_award_type, competition: season4, season: 4, position: 3) }
     let(:result) { described_class.call }
 
     it "returns a Result" do
@@ -21,19 +25,23 @@ RSpec.describe HallOfFameService do
     end
 
     it "returns player awards grouped by player" do
-      expect(result.player_awards).to eq(player1 => [ player_award1 ], player2 => [ player_award2 ])
+      expect(result.player_awards.keys).to contain_exactly(player1, player2)
+      expect(result.player_awards.fetch(player1)).to eq([ player_award1, player_award2 ])
+      expect(result.player_awards.fetch(player2)).to eq([ player_award3 ])
     end
 
     it "returns staff awards grouped by player" do
-      expect(result.staff_awards).to eq(organizer1 => [ staff_award1 ], organizer2 => [ staff_award2 ])
+      expect(result.staff_awards.keys).to contain_exactly(organizer1, organizer2)
+      expect(result.staff_awards.fetch(organizer1)).to eq([ staff_award1, staff_award2 ])
+      expect(result.staff_awards.fetch(organizer2)).to eq([ staff_award3 ])
     end
 
     it "does not include staff awards in player awards" do
-      expect(result.player_awards.keys).not_to include(organizer1)
+      expect(result.player_awards.keys).not_to include(organizer1, organizer2)
     end
 
     it "does not include player awards in staff awards" do
-      expect(result.staff_awards.keys).not_to include(player1)
+      expect(result.staff_awards.keys).not_to include(player1, player2)
     end
 
     it "eager loads player association on player awards" do
@@ -60,22 +68,22 @@ RSpec.describe HallOfFameService do
       expect(result.staff_awards.fetch(organizer1).first.association(:competition)).to be_loaded
     end
 
-    it "eager loads photo blob on players" do
+    it "eager loads photo attachment on players" do
       player_award = result.player_awards.fetch(player1).first
       expect(player_award.player.association(:photo_attachment)).to be_loaded
     end
 
-    it "eager loads icon blob on awards" do
+    it "eager loads icon attachment on awards" do
       player_award = result.player_awards.fetch(player1).first
       expect(player_award.award.association(:icon_attachment)).to be_loaded
     end
 
-    it "returns player awards ordered by position" do
-      expect(result.player_awards.values.flatten).to eq([ player_award1, player_award2 ])
+    it "returns player awards ordered by position within a player" do
+      expect(result.player_awards.fetch(player1)).to eq([ player_award1, player_award2 ])
     end
 
-    it "returns staff awards ordered by position" do
-      expect(result.staff_awards.values.flatten).to eq([ staff_award1, staff_award2 ])
+    it "returns staff awards ordered by position within a player" do
+      expect(result.staff_awards.fetch(organizer1)).to eq([ staff_award1, staff_award2 ])
     end
 
     context "when no awards exist" do
