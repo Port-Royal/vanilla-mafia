@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vanilla-mafia": {
+      "type": "stdio",
+      "command": "evilution",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -47,13 +47,17 @@ This project uses two mutation testing tools:
 - **Single file**: `bundle exec evilution run app/models/your_model.rb`
 - **Line range**: `bundle exec evilution run app/models/your_model.rb:15-30`
 - **Specific method**: `bundle exec evilution run app/models/your_model.rb --target YourClass#method_name`
+- **Parallel execution**: `--jobs N` or `-j N` for parallel mutation testing (e.g., `-j 4`)
 - **JSON output**: Add `--format json` for machine-readable results
-- **Custom timeout**: `--timeout 30` (default 10s)
+- **Custom timeout**: `--timeout 30` (default 30s)
 - **CI gate**: `--min-score 0.8` exits non-zero if score is below threshold
+- **Fail fast**: `--fail-fast` stops after first surviving mutant (or `--fail-fast=N` for N survivors)
+- **Override spec**: `--spec spec/models/foo_spec.rb` to override auto-detected spec file
 
 #### Key Differences from Mutant
 - Uses Prism parser (Ruby's official parser) instead of the `parser` gem
 - Supports line-range targeting for fast PR-level feedback
+- Per-mutation spec targeting — automatically resolves matching spec file for each source file
 - Structured JSON output designed for CI pipelines and AI agents
 - MIT license (no commercial restrictions)
 
