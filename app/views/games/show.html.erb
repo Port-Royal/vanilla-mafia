@@ -1,3 +1,11 @@
+<nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-4">
+  <% @game.competition.ancestors.each do |ancestor| %>
+    <%= link_to ancestor.name, competition_path(slug: ancestor.slug), class: "text-maroon hover:underline" %> /
+  <% end %>
+  <%= link_to @game.competition.name, competition_path(slug: @game.competition.slug), class: "text-maroon hover:underline" %> /
+  <span class="text-gray-700"><%= t("common.game") %> <%= @game.game_number %></span>
+</nav>
+
 <h1 class="text-3xl font-bold text-maroon mb-6"><%= @game.full_name %></h1>
 
 <div class="scroll-wrapper">
