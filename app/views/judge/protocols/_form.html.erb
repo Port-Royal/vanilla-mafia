@@ -13,14 +13,6 @@
       </select>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_season"><%= Game.human_attribute_name(:season) %></label>
-      <input type="number" name="game[season]" id="game_season" value="<%= @game.season %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
-    </div>
-    <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_series"><%= Game.human_attribute_name(:series) %></label>
-      <input type="number" name="game[series]" id="game_series" value="<%= @game.series %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
-    </div>
-    <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
       <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
     </div>

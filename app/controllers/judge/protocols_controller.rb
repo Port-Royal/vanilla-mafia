@@ -66,7 +66,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def game_params
-    params.require(:game).permit(:season, :series, :game_number, :played_on, :name, :result, :judge, :competition_id)
+    params.require(:game).permit(:game_number, :played_on, :name, :result, :judge, :competition_id)
   end
 
   def participations_params

@@ -72,7 +72,7 @@ RSpec.describe "Judge::Protocols" do
       before { sign_in admin }
 
       context "with valid params" do
-        let(:game_params) { { season: 5, series: 1, game_number: 99, played_on: "2026-01-15", judge: "Иван", competition_id: competition.id } }
+        let(:game_params) { { game_number: 99, played_on: "2026-01-15", judge: "Иван", competition_id: competition.id } }
 
         it "creates a game and redirects" do
           expect {
@@ -90,7 +90,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with valid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 97, result: "peace_victory", competition_id: competition.id } }
+        let(:game_params) { { game_number: 97, result: "peace_victory", competition_id: competition.id } }
 
         it "persists the chosen result" do
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
@@ -99,7 +99,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with invalid result" do
-        let(:game_params) { { season: 5, series: 1, game_number: 96, result: "invalid", competition_id: competition.id } }
+        let(:game_params) { { game_number: 96, result: "invalid", competition_id: competition.id } }
 
         it "rejects the invalid result" do
           expect {
@@ -110,7 +110,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with invalid game params" do
-        let(:invalid_game_params) { { season: "", series: 1, game_number: 1 } }
+        let(:invalid_game_params) { { game_number: 1 } }
 
         it "renders the form with errors" do
           post judge_protocols_path, params: { game: invalid_game_params, participations: valid_participations_params }
@@ -141,7 +141,7 @@ RSpec.describe "Judge::Protocols" do
     context "when user is judge" do
       before { sign_in judge }
 
-      let(:game_params) { { season: 5, series: 1, game_number: 98, played_on: "2026-01-15", judge: "Мария", competition_id: competition.id } }
+      let(:game_params) { { game_number: 98, played_on: "2026-01-15", judge: "Мария", competition_id: competition.id } }
 
       it "creates a game and redirects" do
         expect {
@@ -158,21 +158,21 @@ RSpec.describe "Judge::Protocols" do
       before { sign_in user }
 
       it "returns not found" do
-        post judge_protocols_path, params: { game: { season: 5 }, participations: valid_participations_params }
+        post judge_protocols_path, params: { game: { game_number: 1 }, participations: valid_participations_params }
         expect(response).to have_http_status(:not_found)
       end
     end
 
     context "when user is not signed in" do
       it "redirects to sign in" do
-        post judge_protocols_path, params: { game: { season: 5 }, participations: valid_participations_params }
+        post judge_protocols_path, params: { game: { game_number: 1 }, participations: valid_participations_params }
         expect(response).to redirect_to(new_user_session_path)
       end
     end
   end
 
   describe "GET /judge/protocols/:id/edit" do
-    let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 50, judge: "Судья") }
+    let_it_be(:game) { create(:game, game_number: 50, judge: "Судья") }
     let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1) }
 
     context "when user is admin" do
@@ -210,7 +210,7 @@ RSpec.describe "Judge::Protocols" do
     end
 
     context "when game has legacy participations without seats" do
-      let!(:legacy_game) { create(:game, season: 5, series: 2, game_number: 50) }
+      let!(:legacy_game) { create(:game, game_number: 50) }
       let!(:legacy_participation) { create(:game_participation, game: legacy_game, player: player, seat: nil) }
 
       before do
@@ -250,7 +250,7 @@ RSpec.describe "Judge::Protocols" do
   end
 
   describe "PATCH /judge/protocols/:id" do
-    let!(:game) { create(:game, season: 5, series: 1, game_number: 51, judge: "Старый") }
+    let!(:game) { create(:game, game_number: 51, judge: "Старый") }
     let!(:participation) { create(:game_participation, game: game, player: player, seat: 1) }
 
     context "when user is admin" do
@@ -259,7 +259,7 @@ RSpec.describe "Judge::Protocols" do
       context "with valid params" do
         it "updates the game and redirects" do
           patch judge_protocol_path(game), params: {
-            game: { season: 5, series: 1, game_number: 51, judge: "Новый" },
+            game: { game_number: 51, judge: "Новый" },
             participations: valid_participations_params
           }
           expect(response).to redirect_to(game_path(game))
@@ -270,7 +270,7 @@ RSpec.describe "Judge::Protocols" do
       context "with invalid game params" do
         it "renders the form with errors" do
           patch judge_protocol_path(game), params: {
-            game: { season: "", series: 1, game_number: 51 },
+            game: { game_number: nil, competition_id: competition.id },
             participations: valid_participations_params
           }
           expect(response).to have_http_status(:unprocessable_content)
@@ -283,7 +283,7 @@ RSpec.describe "Judge::Protocols" do
 
       it "updates the game and redirects" do
         patch judge_protocol_path(game), params: {
-          game: { season: 5, series: 1, game_number: 51, judge: "Новый Ведущий" },
+          game: { game_number: 51, judge: "Новый Ведущий" },
           participations: valid_participations_params
         }
         expect(response).to redirect_to(game_path(game))
@@ -298,7 +298,7 @@ RSpec.describe "Judge::Protocols" do
 
       it "returns not found" do
         patch judge_protocol_path(game), params: {
-          game: { season: 5, series: 1, game_number: 51 },
+          game: { game_number: 51 },
           participations: valid_participations_params
         }
         expect(response).to have_http_status(:not_found)
@@ -308,7 +308,7 @@ RSpec.describe "Judge::Protocols" do
     context "when user is not signed in" do
       it "redirects to sign in" do
         patch judge_protocol_path(game), params: {
-          game: { season: 5, series: 1, game_number: 51 },
+          game: { game_number: 51 },
           participations: valid_participations_params
         }
         expect(response).to redirect_to(new_user_session_path)

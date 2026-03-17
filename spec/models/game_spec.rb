@@ -7,16 +7,55 @@ RSpec.describe Game, type: :model do
     it { is_expected.to have_many(:players).through(:game_participations) }
   end
 
-  describe 'validations' do
-    subject { build(:game) }
+  describe 'callbacks' do
+    context 'when competition has legacy_season and legacy_series' do
+      let_it_be(:parent) { create(:competition, :season, legacy_season: 7) }
+      let_it_be(:series_comp) { create(:competition, :series, legacy_season: 7, legacy_series: 3, parent: parent) }
+      let(:game) { build(:game, competition: series_comp, season: nil, series: nil) }
 
-    it { is_expected.to validate_presence_of(:season) }
-    it { is_expected.to validate_numericality_of(:season).only_integer }
-    it { is_expected.to validate_presence_of(:series) }
-    it { is_expected.to validate_numericality_of(:series).only_integer }
+      it 'derives season from competition' do
+        game.valid?
+        expect(game.season).to eq(7)
+      end
+
+      it 'derives series from competition' do
+        game.valid?
+        expect(game.series).to eq(3)
+      end
+    end
+
+    context 'when competition has only legacy_season' do
+      let_it_be(:season_comp) { create(:competition, :season, legacy_season: 4) }
+      let(:game) { build(:game, competition: season_comp, season: nil, series: nil) }
+
+      it 'derives season from competition' do
+        game.valid?
+        expect(game.season).to eq(4)
+      end
+
+      it 'leaves series as nil' do
+        game.valid?
+        expect(game.series).to be_nil
+      end
+    end
+  end
+
+  describe 'validations' do
+    subject { create(:game) }
+
     it { is_expected.to validate_presence_of(:game_number) }
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
     it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:competition_id) }
+
+    context 'when competition lacks legacy_season' do
+      let(:comp) { create(:competition, :series, legacy_season: nil) }
+      let(:game) { build(:game, competition: comp) }
+
+      it 'is invalid' do
+        expect(game).not_to be_valid
+        expect(game.errors[:season]).to be_present
+      end
+    end
     it { is_expected.to define_enum_for(:result).with_values(described_class::RESULTS).backed_by_column_of_type(:string) }
 
     it 'rejects invalid result values' do
