@@ -44,8 +44,8 @@
   <% end %>
 <% end %>
 
-<% @games_by_season.each do |season, games| %>
-  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= t("common.season") %> <%= season %></h2>
+<% @games_by_competition.each do |competition, games| %>
+  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= competition.name %></h2>
     <table class="data-table">
       <thead>
         <tr>

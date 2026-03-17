@@ -3,8 +3,10 @@ require "rails_helper"
 RSpec.describe PlayersController do
   describe "GET /players/:id" do
     context "when player exists" do
+      let_it_be(:season_competition) { create(:competition, :season, name: "Сезон 5") }
+      let_it_be(:series_competition) { create(:competition, :series, parent: season_competition) }
       let_it_be(:player) { create(:player, name: "Алексей") }
-      let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 1) }
+      let_it_be(:game) { create(:game, competition: series_competition, game_number: 1) }
       let_it_be(:participation) { create(:game_participation, game: game, player: player) }
       let_it_be(:award) { create(:award, title: "Лучший игрок") }
       let_it_be(:player_award) { create(:player_award, player: player, award: award, season: 5) }
@@ -19,8 +21,8 @@ RSpec.describe PlayersController do
         expect(response.body).to include("Алексей")
       end
 
-      it "renders season heading" do
-        expect(response.body).to include("#{I18n.t('common.season')} 5")
+      it "renders competition heading" do
+        expect(response.body).to include("Сезон 5")
       end
 
       it "renders game link" do

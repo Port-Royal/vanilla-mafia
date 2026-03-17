@@ -25,6 +25,12 @@ class Competition < ApplicationRecord
     slug
   end
 
+  def root
+    node = self
+    node = node.parent while node.parent
+    node
+  end
+
   def subtree_ids
     self.class.connection.select_values(subtree_ids_sql)
   end

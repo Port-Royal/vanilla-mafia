@@ -13,7 +13,7 @@ class PlayerProfileService
     player = Player.find(@player_id)
     Result.new(
       player: player,
-      games: player.games.ordered,
+      games: player.games.includes(competition: :parent).ordered,
       player_awards: player.player_awards.ordered.includes(:award).load
     )
   end
