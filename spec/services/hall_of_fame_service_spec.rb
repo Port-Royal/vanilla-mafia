@@ -6,12 +6,14 @@ RSpec.describe HallOfFameService do
     let_it_be(:player2) { create(:player, name: "Борис") }
     let_it_be(:organizer1) { create(:player, name: "Ведущий") }
     let_it_be(:organizer2) { create(:player, name: "Главный") }
+    let_it_be(:season4) { create(:competition, :season, name: "Сезон 4") }
+    let_it_be(:season5) { create(:competition, :season, name: "Сезон 5") }
     let_it_be(:player_award_type) { create(:award, title: "Лучший игрок", staff: false) }
     let_it_be(:staff_award_type) { create(:award, title: "Лучший ведущий", staff: true) }
-    let_it_be(:player_award2) { create(:player_award, player: player2, award: player_award_type, season: 5, position: 2) }
-    let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, season: 4, position: 1) }
-    let_it_be(:staff_award2) { create(:player_award, player: organizer2, award: staff_award_type, season: 5, position: 2) }
-    let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, season: 4, position: 1) }
+    let_it_be(:player_award2) { create(:player_award, player: player2, award: player_award_type, competition: season5, season: 5, position: 2) }
+    let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, competition: season4, season: 4, position: 1) }
+    let_it_be(:staff_award2) { create(:player_award, player: organizer2, award: staff_award_type, competition: season5, season: 5, position: 2) }
+    let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, competition: season4, season: 4, position: 1) }
     let(:result) { described_class.call }
 
     it "returns a Result" do
@@ -48,6 +50,32 @@ RSpec.describe HallOfFameService do
 
     it "eager loads award association on staff awards" do
       expect(result.staff_awards.fetch(organizer1).first.association(:award)).to be_loaded
+    end
+
+    it "eager loads competition association on player awards" do
+      expect(result.player_awards.fetch(player1).first.association(:competition)).to be_loaded
+    end
+
+    it "eager loads competition association on staff awards" do
+      expect(result.staff_awards.fetch(organizer1).first.association(:competition)).to be_loaded
+    end
+
+    it "eager loads photo blob on players" do
+      player_award = result.player_awards.fetch(player1).first
+      expect(player_award.player.association(:photo_attachment)).to be_loaded
+    end
+
+    it "eager loads icon blob on awards" do
+      player_award = result.player_awards.fetch(player1).first
+      expect(player_award.award.association(:icon_attachment)).to be_loaded
+    end
+
+    it "returns player awards ordered by position" do
+      expect(result.player_awards.values.flatten).to eq([ player_award1, player_award2 ])
+    end
+
+    it "returns staff awards ordered by position" do
+      expect(result.staff_awards.values.flatten).to eq([ staff_award1, staff_award2 ])
     end
 
     context "when no awards exist" do

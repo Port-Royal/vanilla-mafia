@@ -16,7 +16,7 @@ class HallOfFameService
 
   def grouped_awards(scope)
     PlayerAward
-      .includes(player: { photo_attachment: :blob }, award: { icon_attachment: :blob })
+      .includes(:competition, player: { photo_attachment: :blob }, award: { icon_attachment: :blob })
       .where(award: scope)
       .ordered
       .load
