@@ -80,7 +80,7 @@ group :test do
   gem "shoulda-matchers"
   gem "simplecov", require: false
   gem "database_cleaner-active_record"
-  gem "evilution", "~> 0.5.0"
+  gem "evilution"
   gem "mutant-rspec"
   gem "test-prof"
 end
