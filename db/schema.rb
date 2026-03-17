@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_16_084550) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_16_164043) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -152,7 +152,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_16_084550) do
     t.datetime "updated_at", null: false
     t.index ["award_id"], name: "index_player_awards_on_award_id"
     t.index ["competition_id"], name: "index_player_awards_on_competition_id"
-    t.index ["player_id", "award_id", "season"], name: "index_player_awards_on_player_id_and_award_id_and_season", unique: true
+    t.index ["player_id", "award_id", "competition_id"], name: "idx_on_player_id_award_id_competition_id_3f522704bb", unique: true
     t.index ["player_id"], name: "index_player_awards_on_player_id"
   end
 

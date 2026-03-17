@@ -4,12 +4,32 @@ RSpec.describe PlayerAward, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:player) }
     it { is_expected.to belong_to(:award) }
+    it { is_expected.to belong_to(:competition).optional }
   end
 
   describe 'validations' do
-    subject { build(:player_award) }
+    subject { build(:player_award, competition: create(:competition, :season)) }
 
-    it { is_expected.to validate_uniqueness_of(:award_id).scoped_to(:player_id, :season) }
+    it { is_expected.to validate_uniqueness_of(:award_id).scoped_to(:player_id, :competition_id) }
+
+    it 'allows same award for same player in different competitions' do
+      comp_a = create(:competition, :season)
+      comp_b = create(:competition, :season)
+      player = create(:player)
+      award = create(:award)
+      create(:player_award, player: player, award: award, competition: comp_a, season: 1)
+      dup = build(:player_award, player: player, award: award, competition: comp_b, season: 1)
+      expect(dup).to be_valid
+    end
+
+    it 'rejects duplicate award for same player in same competition' do
+      comp = create(:competition, :season)
+      player = create(:player)
+      award = create(:award)
+      create(:player_award, player: player, award: award, competition: comp)
+      dup = build(:player_award, player: player, award: award, competition: comp)
+      expect(dup).not_to be_valid
+    end
   end
 
   describe '.ordered' do
