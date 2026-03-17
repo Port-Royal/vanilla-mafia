@@ -150,6 +150,35 @@ RSpec.describe Competition, type: :model do
     end
   end
 
+  describe '#ancestors' do
+    context 'when competition has no parent' do
+      let_it_be(:competition) { create(:competition, :season) }
+
+      it 'returns an empty array' do
+        expect(competition.ancestors).to eq([])
+      end
+    end
+
+    context 'when competition has a parent' do
+      let_it_be(:parent) { create(:competition, :season) }
+      let_it_be(:child) { create(:competition, :series, parent: parent) }
+
+      it 'returns the parent in an array' do
+        expect(child.ancestors).to eq([ parent ])
+      end
+    end
+
+    context 'when competition has a grandparent' do
+      let_it_be(:grandparent) { create(:competition, :season) }
+      let_it_be(:parent) { create(:competition, :series, parent: grandparent) }
+      let_it_be(:grandchild) { create(:competition, :round, parent: parent) }
+
+      it 'returns ancestors from root to immediate parent' do
+        expect(grandchild.ancestors).to eq([ grandparent, parent ])
+      end
+    end
+  end
+
   describe '#subtree_ids' do
     context 'when competition has no children' do
       let_it_be(:leaf) { create(:competition) }
