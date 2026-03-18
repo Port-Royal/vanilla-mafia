@@ -111,7 +111,7 @@ ru:
   players:
     show:
       date: "Дата"
-      series: "Серия"
+      competition: "Турнир"
       game: "Игра"
       role: "Роль"
       result: "Результат"
