@@ -199,8 +199,7 @@ en:
     title: "Hall of Fame"
     organizers: "Organizers"
     all_awards: "All awards"
-    award:
-      of_season: "of season %{season}"
+    award: {}
   player_disputes:
     new:
       title: "Dispute profile %{player_name}"
