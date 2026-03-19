@@ -6,6 +6,7 @@ class News < ApplicationRecord
   has_many :taggings, as: :taggable, dependent: :destroy
   has_many :tags, through: :taggings
 
+  has_many_attached :photos
   has_rich_text :content
 
   enum :status, { draft: "draft", published: "published" }

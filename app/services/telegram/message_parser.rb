@@ -1,6 +1,6 @@
 module Telegram
   class MessageParser
-    Result = Data.define(:text, :from_id, :from_username, :from_first_name, :chat_id, :photo_file_ids, :news) do
+    Result = Data.define(:text, :from_id, :from_username, :from_first_name, :chat_id, :photo_file_id, :news) do
       def news?
         news
       end
@@ -31,18 +31,18 @@ module Telegram
         from_username: from&.dig("username"),
         from_first_name: from&.dig("first_name"),
         chat_id: @message.dig("chat", "id"),
-        photo_file_ids: extract_photo_ids,
+        photo_file_id: extract_largest_photo_id,
         news: news
       )
     end
 
     private
 
-    def extract_photo_ids
+    def extract_largest_photo_id
       photos = @message["photo"]
-      return [] if photos.nil?
+      return nil if photos.nil?
 
-      photos.map { |p| p["file_id"] }
+      photos.max_by { |p| p["file_size"].to_i }["file_id"]
     end
   end
 end

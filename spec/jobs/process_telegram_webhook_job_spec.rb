@@ -43,6 +43,100 @@ RSpec.describe ProcessTelegramWebhookJob do
         described_class.new.perform(payload)
         expect(News.last.status).to eq("draft")
       end
+
+      it "does not call DownloadFileService" do
+        allow(Telegram::DownloadFileService).to receive(:call)
+        described_class.new.perform(payload)
+        expect(Telegram::DownloadFileService).not_to have_received(:call)
+      end
+    end
+
+    context "when message has a photo" do
+      let(:payload) do
+        {
+          "update_id" => 1,
+          "message" => {
+            "photo" => [
+              { "file_id" => "small_id", "file_size" => 1024, "width" => 90, "height" => 90 },
+              { "file_id" => "large_id", "file_size" => 51200, "width" => 800, "height" => 800 }
+            ],
+            "caption" => "#news Photo news",
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      let(:download_result) do
+        Telegram::DownloadFileService::SuccessResult.new(
+          io: StringIO.new("fake image"),
+          filename: "photo.jpg",
+          content_type: "image/jpeg"
+        )
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(download_result)
+      end
+
+      it "creates a news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+
+      it "downloads the largest photo" do
+        described_class.new.perform(payload)
+        expect(Telegram::DownloadFileService).to have_received(:call).with("large_id")
+      end
+
+      it "attaches the photo to the news article" do
+        described_class.new.perform(payload)
+        expect(News.last.photos).to be_attached
+      end
+
+      it "attaches the photo with correct filename" do
+        described_class.new.perform(payload)
+        expect(News.last.photos.first.filename.to_s).to eq("photo.jpg")
+      end
+
+      it "attaches the photo with correct content type" do
+        described_class.new.perform(payload)
+        expect(News.last.photos.first.content_type).to eq("image/jpeg")
+      end
+    end
+
+    context "when photo download fails" do
+      let(:payload) do
+        {
+          "update_id" => 1,
+          "message" => {
+            "photo" => [
+              { "file_id" => "bad_id", "file_size" => 1024, "width" => 90, "height" => 90 }
+            ],
+            "caption" => "#news Photo news",
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      let(:failure_result) do
+        Telegram::DownloadFileService::FailureResult.new(description: "Download failed")
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(failure_result)
+      end
+
+      it "still creates the news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+
+      it "does not attach any photo" do
+        described_class.new.perform(payload)
+        expect(News.last.photos).not_to be_attached
+      end
     end
 
     context "when message has news tag but sender is not whitelisted" do
