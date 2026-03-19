@@ -2,7 +2,7 @@
 <% cache [I18n.locale, player_award, award] do %>
   <span>
     <% if award.icon.attached? %>
-      <%= image_tag award.icon.variant(resize_to_limit: [32, 32]), size: "32x32", loading: "lazy", alt: award.title, title: "#{award.title} #{t('hall_of_fame.award.of_season', season: player_award.season)}" %>
+      <%= image_tag award.icon.variant(resize_to_limit: [32, 32]), size: "32x32", loading: "lazy", alt: award.title, title: "#{award.title} — #{player_award.competition.name}" %>
     <% else %>
       <span><%= award.title %></span>
     <% end %>
