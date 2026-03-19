@@ -21,6 +21,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     )
 
     attach_photo(news, parsed.photo_file_id) if parsed.photo_file_id.present?
+    NotifyEditorsAboutDraftService.call(news)
   end
 
   private

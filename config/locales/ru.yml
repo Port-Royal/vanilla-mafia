@@ -225,9 +225,26 @@ ru:
     manage_news: "Управление новостями"
     telegram: "Telegram"
     protocols: "Протоколы"
+    notification_settings: "Уведомления"
     sign_in: "Войти"
     sign_out: "Выйти"
     admin: "Админка"
+  notification_settings:
+    edit:
+      title: "Настройки уведомлений"
+      notify_on_news_draft_label: "Уведомлять о новых черновиках новостей"
+      notify_on_news_draft_hint: "Получать email при создании черновика из Telegram"
+      save: "Сохранить"
+    update:
+      success: "Настройки уведомлений сохранены."
+    errors:
+      unauthorized: "Доступ запрещён."
+  news_draft_mailer:
+    draft_created:
+      subject: "Новый черновик: %{title}"
+      greeting: "Создан новый черновик новости."
+      body: "«%{title}» ожидает редактирования и публикации."
+      footer: "Это автоматическое уведомление. Вы можете отключить его в настройках."
   dispute_mailer:
     dispute_filed:
       subject: "Оспаривание профиля %{player_name}"

@@ -79,6 +79,12 @@
                     class: "block text-gray-300 hover:text-white transition-colors" %>
             </li>
           <% end %>
+          <% if current_user.can_manage_news? %>
+            <li>
+              <%= link_to t("nav.notification_settings"), edit_notification_settings_path,
+                    class: "block text-gray-300 hover:text-white transition-colors" %>
+            </li>
+          <% end %>
           <li class="border-t border-neutral-700 pt-2">
             <%= button_to t("nav.sign_out"), destroy_user_session_path,
                   method: :delete,
@@ -141,6 +147,12 @@
                   </li>
                   <li>
                     <%= link_to t("nav.admin"), avo.root_path,
+                          class: "block hover:text-white transition-colors" %>
+                  </li>
+                <% end %>
+                <% if current_user.can_manage_news? %>
+                  <li>
+                    <%= link_to t("nav.notification_settings"), edit_notification_settings_path,
                           class: "block hover:text-white transition-colors" %>
                   </li>
                 <% end %>
