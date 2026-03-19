@@ -143,8 +143,7 @@ ru:
     title: "Зал Славы"
     organizers: "Организаторы"
     all_awards: "Все награды"
-    award:
-      of_season: "%{season} сезона"
+    award: {}
   news:
     index:
       title: "Новости"
