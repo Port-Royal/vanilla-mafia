@@ -40,7 +40,7 @@ module Telegram
 
     def extract_largest_photo_id
       photos = @message["photo"]
-      return nil if photos.nil?
+      return nil if photos.blank?
 
       photos.max_by { |p| p["file_size"].to_i }["file_id"]
     end

@@ -40,7 +40,10 @@ module Telegram
 
       return failure(data["description"]) unless data["ok"]
 
-      data.dig("result", "file_path")
+      file_path = data.dig("result", "file_path")
+      return failure("Missing file_path in getFile response") if file_path.blank?
+
+      file_path
     rescue JSON::ParserError,
            SocketError,
            IOError,

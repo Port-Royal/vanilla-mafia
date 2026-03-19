@@ -112,6 +112,27 @@ RSpec.describe Telegram::MessageParser do
       end
     end
 
+    context "with an empty photo array" do
+      let(:payload) do
+        {
+          "update_id" => 131,
+          "message" => {
+            "message_id" => 4,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "photo" => [],
+            "caption" => "Empty photo"
+          }
+        }
+      end
+
+      it "returns nil for photo_file_id" do
+        result = described_class.call(payload)
+        expect(result.photo_file_id).to be_nil
+      end
+    end
+
     context "with an edited message" do
       let(:payload) do
         {

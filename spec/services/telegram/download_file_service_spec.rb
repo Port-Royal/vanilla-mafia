@@ -88,6 +88,25 @@ RSpec.describe Telegram::DownloadFileService do
       end
     end
 
+    context "when getFile response is missing file_path" do
+      let(:get_file_body) { { "ok" => true, "result" => { "file_id" => "abc123" } }.to_json }
+      let(:get_file_response) { instance_double(Net::HTTPOK, body: get_file_body) }
+
+      before do
+        allow(Net::HTTP).to receive(:get_response).and_return(get_file_response)
+      end
+
+      it "returns a failure result" do
+        result = described_class.call("abc123")
+        expect(result).not_to be_success
+      end
+
+      it "includes a descriptive error message" do
+        result = described_class.call("abc123")
+        expect(result.description).to eq("Missing file_path in getFile response")
+      end
+    end
+
     context "when a network error occurs" do
       before do
         allow(Net::HTTP).to receive(:get_response).and_raise(Net::OpenTimeout.new("execution expired"))
