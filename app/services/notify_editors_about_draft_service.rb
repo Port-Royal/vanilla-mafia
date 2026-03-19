@@ -8,6 +8,8 @@ class NotifyEditorsAboutDraftService
   end
 
   def call
+    return unless @news.draft?
+
     recipients.find_each do |user|
       NewsDraftMailer.draft_created(user, @news).deliver_later
     end
