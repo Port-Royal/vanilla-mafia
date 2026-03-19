@@ -13,11 +13,26 @@ class ProcessTelegramWebhookJob < ApplicationJob
     return if author.nil?
     return if author.user.nil?
 
-    News.create!(
+    news = News.create!(
       title: parsed.text.truncate(MAX_TITLE_LENGTH),
       content: parsed.text,
       author: author.user,
       status: :draft
+    )
+
+    attach_photo(news, parsed.photo_file_id) if parsed.photo_file_id.present?
+  end
+
+  private
+
+  def attach_photo(news, file_id)
+    result = Telegram::DownloadFileService.call(file_id)
+    return unless result.success?
+
+    news.photos.attach(
+      io: result.io,
+      filename: result.filename,
+      content_type: result.content_type
     )
   end
 end

@@ -43,7 +43,7 @@ RSpec.describe Telegram::MessageParser do
 
       it "has no photo" do
         result = described_class.call(payload)
-        expect(result.photo_file_ids).to be_empty
+        expect(result.photo_file_id).to be_nil
       end
 
       it "is not a news message" do
@@ -87,18 +87,18 @@ RSpec.describe Telegram::MessageParser do
             "chat" => { "id" => 42, "type" => "private" },
             "date" => 1_700_000_000,
             "photo" => [
-              { "file_id" => "small_id", "width" => 90, "height" => 90 },
-              { "file_id" => "medium_id", "width" => 320, "height" => 320 },
-              { "file_id" => "large_id", "width" => 800, "height" => 800 }
+              { "file_id" => "small_id", "file_size" => 1024, "width" => 90, "height" => 90 },
+              { "file_id" => "medium_id", "file_size" => 10240, "width" => 320, "height" => 320 },
+              { "file_id" => "large_id", "file_size" => 51200, "width" => 800, "height" => 800 }
             ],
             "caption" => "Photo caption #news"
           }
         }
       end
 
-      it "extracts photo file_ids" do
+      it "extracts the largest photo file_id" do
         result = described_class.call(payload)
-        expect(result.photo_file_ids).to eq(%w[small_id medium_id large_id])
+        expect(result.photo_file_id).to eq("large_id")
       end
 
       it "uses caption as text" do
@@ -109,6 +109,27 @@ RSpec.describe Telegram::MessageParser do
       it "detects #news in caption" do
         result = described_class.call(payload)
         expect(result).to be_news
+      end
+    end
+
+    context "with an empty photo array" do
+      let(:payload) do
+        {
+          "update_id" => 131,
+          "message" => {
+            "message_id" => 4,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "photo" => [],
+            "caption" => "Empty photo"
+          }
+        }
+      end
+
+      it "returns nil for photo_file_id" do
+        result = described_class.call(payload)
+        expect(result.photo_file_id).to be_nil
       end
     end
 
