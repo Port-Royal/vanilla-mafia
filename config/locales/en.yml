@@ -154,9 +154,26 @@ en:
     manage_news: "Manage news"
     telegram: "Telegram"
     protocols: "Protocols"
+    notification_settings: "Notifications"
     sign_in: "Sign in"
     sign_out: "Sign out"
     admin: "Admin"
+  notification_settings:
+    edit:
+      title: "Notification settings"
+      notify_on_news_draft_label: "Notify about new news drafts"
+      notify_on_news_draft_hint: "Receive email when a draft is created from Telegram"
+      save: "Save"
+    update:
+      success: "Notification settings saved."
+    errors:
+      unauthorized: "Access denied."
+  news_draft_mailer:
+    draft_created:
+      subject: "New draft: %{title}"
+      greeting: "A new news draft has been created."
+      body: "\"%{title}\" is waiting for editing and publication."
+      footer: "This is an automatic notification. You can disable it in your settings."
   competitions:
     show:
       by_children: "By series and games"

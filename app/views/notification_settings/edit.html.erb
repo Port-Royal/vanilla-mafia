@@ -1,0 +1,20 @@
+<div class="mx-auto max-w-sm">
+  <h1 class="text-3xl font-bold text-maroon mb-6"><%= t(".title") %></h1>
+
+  <%= form_with(model: current_user, url: notification_settings_path, method: :patch) do |f| %>
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <%= f.check_box :notify_on_news_draft,
+              class: "rounded border-neutral-300 text-maroon focus:ring-maroon" %>
+        <%= f.label :notify_on_news_draft, t(".notify_on_news_draft_label"),
+              class: "text-sm font-medium text-neutral-700" %>
+      </div>
+      <p class="text-xs text-neutral-500"><%= t(".notify_on_news_draft_hint") %></p>
+
+      <div>
+        <%= f.submit t(".save"),
+              class: "w-full rounded-md bg-neutral-900 px-6 py-2 text-white text-sm font-medium hover:bg-neutral-700 transition-colors cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+</div>

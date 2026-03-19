@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   end
   resource :locale, only: [ :update ]
   resource :profile, only: [ :edit, :update ]
+  resource :notification_settings, only: [ :edit, :update ]
 
   get "hall", to: "hall_of_fame#show"
 
