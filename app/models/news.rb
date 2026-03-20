@@ -29,7 +29,7 @@ class News < ApplicationRecord
       .joins(game: :game_participations)
       .where(game_participations: { player_id: player.id })
       .distinct
-      .order(published_at: :desc)
+      .recent
   }
 
   def publish!

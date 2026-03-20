@@ -77,6 +77,14 @@ RSpec.describe PlayerProfileService do
       expect(articles.first.association(:author)).to be_loaded
     end
 
+    it "eager loads author player association on news articles" do
+      claimed_player = create(:player)
+      news_author = create(:user, player: claimed_player)
+      create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      articles = result.news_articles.load
+      expect(articles.first.author.association(:player)).to be_loaded
+    end
+
     it "eager loads tags association on news articles" do
       news_author = create(:user)
       create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
