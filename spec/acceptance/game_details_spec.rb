@@ -4,7 +4,7 @@ RSpec.describe "Game details" do
   let_it_be(:role_peace) { create(:role, code: "peace", name: "Мирный") }
   let_it_be(:role_mafia) { create(:role, code: "mafia", name: "Мафия") }
   let_it_be(:game) do
-    create(:game, season: 5, series: 1, game_number: 1,
+    create(:game, game_number: 1,
            played_on: Date.new(2025, 1, 10), name: "Финал")
   end
   let_it_be(:player1) { create(:player, name: "Алексей") }

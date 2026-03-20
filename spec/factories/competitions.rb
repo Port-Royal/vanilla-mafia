@@ -5,13 +5,10 @@ FactoryBot.define do
 
     trait :season do
       kind { "season" }
-      sequence(:legacy_season)
     end
 
     trait :series do
       kind { "series" }
-      sequence(:legacy_season)
-      sequence(:legacy_series)
     end
 
     trait :minicup do

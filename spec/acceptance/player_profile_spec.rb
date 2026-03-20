@@ -10,7 +10,7 @@ RSpec.describe "Player profile" do
   end
   let_it_be(:participation) { create(:game_participation, game:, player:, plus: 3.0, minus: 0.5, win: true) }
   let_it_be(:award) { create(:award, title: "Лучший игрок", staff: false) }
-  let_it_be(:player_award) { create(:player_award, player:, award:, season: 5) }
+  let_it_be(:player_award) { create(:player_award, player:, award:) }
 
   before { visit player_path(player) }
 

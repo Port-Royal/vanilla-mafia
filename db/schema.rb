@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_143758) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_173402) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -64,8 +64,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_143758) do
     t.date "ended_on"
     t.boolean "featured", default: false, null: false
     t.string "kind", null: false
-    t.integer "legacy_season"
-    t.integer "legacy_series"
     t.string "name", null: false
     t.integer "parent_id"
     t.integer "position"
@@ -74,7 +72,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_143758) do
     t.datetime "updated_at", null: false
     t.index ["featured"], name: "index_competitions_on_featured"
     t.index ["kind"], name: "index_competitions_on_kind"
-    t.index ["legacy_season", "legacy_series"], name: "index_competitions_on_legacy_season_and_legacy_series"
     t.index ["parent_id"], name: "index_competitions_on_parent_id"
     t.index ["slug"], name: "index_competitions_on_slug", unique: true
   end
@@ -115,13 +112,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_143758) do
     t.string "name"
     t.date "played_on"
     t.string "result", default: "in_progress", null: false
-    t.integer "season", null: false
-    t.integer "series", null: false
     t.datetime "updated_at", null: false
     t.index ["competition_id", "game_number"], name: "index_games_on_competition_id_and_game_number", unique: true
     t.index ["competition_id"], name: "index_games_on_competition_id"
-    t.index ["season", "series"], name: "index_games_on_season_and_series"
-    t.index ["season"], name: "index_games_on_season"
   end
 
   create_table "news", force: :cascade do |t|
@@ -148,7 +141,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_143758) do
     t.datetime "created_at", null: false
     t.integer "player_id", null: false
     t.integer "position"
-    t.integer "season"
     t.datetime "updated_at", null: false
     t.index ["award_id"], name: "index_player_awards_on_award_id"
     t.index ["competition_id"], name: "index_player_awards_on_competition_id"

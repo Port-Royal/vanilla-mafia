@@ -7,8 +7,8 @@ RSpec.describe "Hall of Fame" do
   let_it_be(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
 
   before do
-    create(:player_award, player: player, award: award, season: 5)
-    create(:player_award, player: organizer, award: staff_award, season: 5)
+    create(:player_award, player: player, award: award)
+    create(:player_award, player: organizer, award: staff_award)
 
     visit hall_path
   end

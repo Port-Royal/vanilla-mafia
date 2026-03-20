@@ -12,12 +12,12 @@ RSpec.describe HallOfFameService do
     let_it_be(:player_award_type2) { create(:award, title: "Лучший стратег", staff: false) }
     let_it_be(:staff_award_type) { create(:award, title: "Лучший ведущий", staff: true) }
     let_it_be(:staff_award_type2) { create(:award, title: "Лучший организатор", staff: true) }
-    let_it_be(:player_award2) { create(:player_award, player: player1, award: player_award_type2, competition: season5, season: 5, position: 2) }
-    let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, competition: season4, season: 4, position: 1) }
-    let_it_be(:player_award3) { create(:player_award, player: player2, award: player_award_type, competition: season4, season: 4, position: 3) }
-    let_it_be(:staff_award2) { create(:player_award, player: organizer1, award: staff_award_type2, competition: season5, season: 5, position: 2) }
-    let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, competition: season4, season: 4, position: 1) }
-    let_it_be(:staff_award3) { create(:player_award, player: organizer2, award: staff_award_type, competition: season4, season: 4, position: 3) }
+    let_it_be(:player_award2) { create(:player_award, player: player1, award: player_award_type2, competition: season5, position: 2) }
+    let_it_be(:player_award1) { create(:player_award, player: player1, award: player_award_type, competition: season4, position: 1) }
+    let_it_be(:player_award3) { create(:player_award, player: player2, award: player_award_type, competition: season4, position: 3) }
+    let_it_be(:staff_award2) { create(:player_award, player: organizer1, award: staff_award_type2, competition: season5, position: 2) }
+    let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, competition: season4, position: 1) }
+    let_it_be(:staff_award3) { create(:player_award, player: organizer2, award: staff_award_type, competition: season4, position: 3) }
     let(:result) { described_class.call }
 
     it "returns a Result" do

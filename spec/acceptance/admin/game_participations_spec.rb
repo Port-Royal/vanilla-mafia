@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Admin Game Participations CRUD" do
   let_it_be(:admin) { create(:user, :admin) }
-  let_it_be(:game) { create(:game, season: 5, series: 1, game_number: 1, name: "Тестовая") }
+  let_it_be(:game) { create(:game, game_number: 1, name: "Тестовая") }
   let_it_be(:player) { create(:player, name: "Тестовый Игрок") }
 
   before { sign_in_as_admin(admin) }

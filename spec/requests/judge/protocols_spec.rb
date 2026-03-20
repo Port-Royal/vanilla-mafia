@@ -29,10 +29,10 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).to include(I18n.t("game_protocols.new.title"))
       end
 
-      it "excludes competitions without legacy_season from the dropdown" do
-        comp_without_legacy = create(:competition, name: "No Legacy", legacy_season: nil)
+      it "excludes season competitions from the dropdown" do
+        season_comp = create(:competition, :season, name: "Season Parent")
         get new_judge_protocol_path
-        expect(response.body).not_to include("No Legacy")
+        expect(response.body).not_to include("Season Parent")
         expect(response.body).to include(competition.name)
       end
     end

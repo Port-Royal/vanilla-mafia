@@ -12,8 +12,8 @@ RSpec.describe HallOfFameController do
         end
       end
       let_it_be(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
-      let_it_be(:player_award) { create(:player_award, player: player, award: award, competition: competition, season: 5) }
-      let_it_be(:staff_player_award) { create(:player_award, player: organizer, award: staff_award, competition: competition, season: 5) }
+      let_it_be(:player_award) { create(:player_award, player: player, award: award, competition: competition) }
+      let_it_be(:staff_player_award) { create(:player_award, player: organizer, award: staff_award, competition: competition) }
 
       before { get hall_path }
 

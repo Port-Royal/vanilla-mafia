@@ -17,8 +17,8 @@ RSpec.describe PlayerAward, type: :model do
       comp_b = create(:competition, :season)
       player = create(:player)
       award = create(:award)
-      create(:player_award, player: player, award: award, competition: comp_a, season: 1)
-      dup = build(:player_award, player: player, award: award, competition: comp_b, season: 1)
+      create(:player_award, player: player, award: award, competition: comp_a)
+      dup = build(:player_award, player: player, award: award, competition: comp_b)
       expect(dup).to be_valid
     end
 

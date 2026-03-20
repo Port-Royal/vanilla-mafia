@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Legacy redirects" do
   describe "GET /seasons/:number" do
     context "when matching competition exists" do
-      let_it_be(:competition) { create(:competition, :season, slug: "season-5", legacy_season: 5) }
+      let_it_be(:competition) { create(:competition, :season, slug: "season-5") }
 
       it "redirects to the competition page" do
         get "/seasons/5"
@@ -26,8 +26,8 @@ RSpec.describe "Legacy redirects" do
 
   describe "GET /seasons/:season_number/series/:number" do
     context "when matching competition exists" do
-      let_it_be(:parent) { create(:competition, :season, legacy_season: 5) }
-      let_it_be(:series) { create(:competition, :series, slug: "season-5-series-3", legacy_season: 5, legacy_series: 3, parent: parent) }
+      let_it_be(:parent) { create(:competition, :season, slug: "season-5") }
+      let_it_be(:series) { create(:competition, :series, slug: "season-5-series-3", parent: parent) }
 
       it "redirects to the competition page" do
         get "/seasons/5/series/3"
@@ -49,7 +49,7 @@ RSpec.describe "Legacy redirects" do
   end
 
   describe "GET / (root)" do
-    let_it_be(:competition) { create(:competition, :season, slug: "season-5", legacy_season: 5) }
+    let_it_be(:competition) { create(:competition, :season, slug: "season-5") }
 
     it "redirects to the current season competition" do
       get "/"

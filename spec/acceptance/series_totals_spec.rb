@@ -1,10 +1,10 @@
 require "rails_helper"
 
 RSpec.describe "Series totals" do
-  let_it_be(:season) { create(:competition, :season, legacy_season: 5) }
-  let_it_be(:series) { create(:competition, :series, parent: season, slug: "season-5-series-1", legacy_season: 5, legacy_series: 1) }
-  let_it_be(:game1) { create(:game, competition: series, season: 5, series: 1, game_number: 1) }
-  let_it_be(:game2) { create(:game, competition: series, season: 5, series: 1, game_number: 2) }
+  let_it_be(:season) { create(:competition, :season, slug: "season-5") }
+  let_it_be(:series) { create(:competition, :series, parent: season, slug: "season-5-series-1") }
+  let_it_be(:game1) { create(:game, competition: series, game_number: 1) }
+  let_it_be(:game2) { create(:game, competition: series, game_number: 2) }
   let_it_be(:player1) { create(:player, name: "Алексей") }
   let_it_be(:player2) { create(:player, name: "Борис") }
 
