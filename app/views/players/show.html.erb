@@ -74,3 +74,8 @@
 <% end %>
 
 <%= render "shared/pagy_nav", pagy: @pagy %>
+
+<% if @news_articles.any? %>
+  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= t(".news") %></h2>
+  <%= render "news/preview_list", articles: @news_articles %>
+<% end %>

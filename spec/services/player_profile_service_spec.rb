@@ -58,6 +58,47 @@ RSpec.describe PlayerProfileService do
       expect(result.player_awards).to be_loaded
     end
 
+    it "returns news articles mentioning the player" do
+      news_author = create(:user)
+      news_article = create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      expect(result.news_articles).to include(news_article)
+    end
+
+    it "excludes draft news" do
+      news_author = create(:user)
+      create(:news, author: news_author, game: game1, status: :draft)
+      expect(result.news_articles.select(&:draft?)).to be_empty
+    end
+
+    it "eager loads author association on news articles" do
+      news_author = create(:user)
+      create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      articles = result.news_articles.load
+      expect(articles.first.association(:author)).to be_loaded
+    end
+
+    it "eager loads author player association on news articles" do
+      claimed_player = create(:player)
+      news_author = create(:user, player: claimed_player)
+      create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      articles = result.news_articles.load
+      expect(articles.first.author.association(:player)).to be_loaded
+    end
+
+    it "eager loads tags association on news articles" do
+      news_author = create(:user)
+      create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      articles = result.news_articles.load
+      expect(articles.first.association(:tags)).to be_loaded
+    end
+
+    it "eager loads rich_text_content on news articles" do
+      news_author = create(:user)
+      create(:news, author: news_author, game: game1, status: :published, published_at: 1.day.ago)
+      articles = result.news_articles.load
+      expect(articles.first.association(:rich_text_content)).to be_loaded
+    end
+
     context "when player has no games or awards" do
       let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
       let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
@@ -68,6 +109,10 @@ RSpec.describe PlayerProfileService do
 
       it "returns empty player_awards" do
         expect(lonely_result.player_awards).to be_empty
+      end
+
+      it "returns empty news_articles" do
+        expect(lonely_result.news_articles).to be_empty
       end
     end
 

@@ -1,5 +1,5 @@
 class PlayerProfileService
-  Result = Data.define(:player, :games, :player_awards)
+  Result = Data.define(:player, :games, :player_awards, :news_articles)
 
   def self.call(player_id:)
     new(player_id).call
@@ -14,7 +14,8 @@ class PlayerProfileService
     Result.new(
       player: player,
       games: player.games.includes(competition: :parent).ordered,
-      player_awards: player.player_awards.ordered.includes(:award).load
+      player_awards: player.player_awards.ordered.includes(:award).load,
+      news_articles: News.mentioning_player(player).includes({ author: :player }, :tags, :rich_text_content)
     )
   end
 end

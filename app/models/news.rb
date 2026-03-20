@@ -24,6 +24,13 @@ class News < ApplicationRecord
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :for_series, ->(season, series) { where(season: season, series: series) }
   scope :by_author, ->(user) { where(author: user) }
+  scope :mentioning_player, ->(player) {
+    published
+      .joins(game: :game_participations)
+      .where(game_participations: { player_id: player.id })
+      .distinct
+      .recent
+  }
 
   def publish!
     update!(status: :published, published_at: Time.current)
