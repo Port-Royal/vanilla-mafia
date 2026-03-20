@@ -9,8 +9,6 @@ class Avo::Resources::Game < Avo::BaseResource
   def fields
     field :id, as: :id
     field :competition, as: :belongs_to, required: true
-    field :season, as: :number, required: true, sortable: true
-    field :series, as: :number, required: true, sortable: true
     field :game_number, as: :number, required: true, sortable: true
     field :played_on, as: :date, sortable: true
     field :name, as: :text
