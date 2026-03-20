@@ -34,15 +34,13 @@ RSpec.describe "Admin Games CRUD" do
     it "creates a new game" do
       visit "/avo/resources/games/new"
       select "Тестовый турнир", from: "Competition"
-      fill_in "Season", with: "7"
-      fill_in "Series", with: "1"
       fill_in "Game number", with: "1"
       fill_in "Name", with: "Тестовая игра"
       select "peace_victory", from: "Result"
       click_on "Сохранить"
 
       expect(Game.find_by(name: "Тестовая игра")).to have_attributes(
-        season: 7, series: 1, game_number: 1, result: "peace_victory",
+        game_number: 1, result: "peace_victory",
         competition: competition
       )
     end

@@ -6,7 +6,7 @@ class Avo::Resources::PlayerAward < Avo::BaseResource
     field :id, as: :id
     field :player, as: :belongs_to, searchable: true, sortable: true
     field :award, as: :belongs_to, searchable: true, sortable: true
-    field :season, as: :number, required: true, sortable: true
+    field :competition, as: :belongs_to
     field :position, as: :number, sortable: true
   end
 end
