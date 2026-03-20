@@ -94,7 +94,7 @@ def phase3_scrape_hall
       PlayerAward.find_or_initialize_by(
         player: player,
         award: award,
-        season: nil
+        competition: nil
       ).save!
     end
 
@@ -112,10 +112,11 @@ def phase3_scrape_hall
         next
       end
 
+      competition = pa[:season] ? find_or_create_competition(pa[:season], nil) : nil
       PlayerAward.find_or_initialize_by(
         player: player,
         award: award,
-        season: pa[:season]
+        competition: competition
       ).save!
     end
   end
@@ -186,16 +187,33 @@ def phase6_verify
 end
 
 def create_game(game_data)
+  competition = find_or_create_competition(game_data[:season], game_data[:series])
   game = Game.find_or_initialize_by(id: game_data[:id])
   game.assign_attributes(
-    season: game_data[:season],
-    series: game_data[:series],
+    competition: competition,
     game_number: game_data[:game_number],
     played_on: game_data[:played_on],
     name: game_data[:name],
     result: game_data[:result]
   )
   game.save!
+end
+
+def find_or_create_competition(season_num, series_num)
+  season_slug = "season-#{season_num}"
+  season = Competition.find_or_create_by!(slug: season_slug) do |c|
+    c.name = "Сезон #{season_num}"
+    c.kind = :season
+  end
+
+  return season if series_num.blank?
+
+  series_slug = "#{season_slug}-series-#{series_num}"
+  Competition.find_or_create_by!(slug: series_slug) do |c|
+    c.name = "Серия #{series_num}"
+    c.kind = :series
+    c.parent = season
+  end
 end
 
 def create_player_and_participation(game_id, participation_data)

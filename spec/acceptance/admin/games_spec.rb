@@ -7,7 +7,7 @@ RSpec.describe "Admin Games CRUD" do
   before { sign_in_as_admin(admin) }
 
   describe "index" do
-    let_it_be(:game) { create(:game, season: 3, series: 2, game_number: 1, name: "Финальная") }
+    let_it_be(:game) { create(:game, game_number: 1, name: "Финальная") }
 
     it "displays games" do
       visit "/avo/resources/games"
@@ -18,7 +18,7 @@ RSpec.describe "Admin Games CRUD" do
 
   describe "show" do
     let_it_be(:game) do
-      create(:game, season: 3, series: 2, game_number: 1,
+      create(:game, game_number: 1,
              played_on: Date.new(2025, 6, 15), name: "Финальная", result: "mafia_victory")
     end
 
@@ -47,7 +47,7 @@ RSpec.describe "Admin Games CRUD" do
   end
 
   describe "edit" do
-    let!(:game) { create(:game, season: 1, series: 1, game_number: 1, name: "Старое") }
+    let!(:game) { create(:game, game_number: 1, name: "Старое") }
 
     it "updates the game" do
       visit "/avo/resources/games/#{game.id}/edit"
@@ -59,7 +59,7 @@ RSpec.describe "Admin Games CRUD" do
   end
 
   describe "destroy" do
-    let!(:game) { create(:game, season: 1, series: 1, game_number: 99, name: "Удалить") }
+    let!(:game) { create(:game, game_number: 99, name: "Удалить") }
 
     it "deletes the game" do
       visit "/avo/resources/games/#{game.id}"

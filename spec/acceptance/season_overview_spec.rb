@@ -1,12 +1,12 @@
 require "rails_helper"
 
 RSpec.describe "Season overview" do
-  let_it_be(:season) { create(:competition, :season, name: "Сезон 5", slug: "season-5", legacy_season: 5) }
-  let_it_be(:series1) { create(:competition, :series, name: "Серия 1", slug: "season-5-series-1", parent: season, position: 1, legacy_season: 5, legacy_series: 1) }
-  let_it_be(:series2) { create(:competition, :series, name: "Серия 2", slug: "season-5-series-2", parent: season, position: 2, legacy_season: 5, legacy_series: 2) }
-  let_it_be(:game1) { create(:game, competition: series1, season: 5, series: 1, game_number: 1, played_on: Date.new(2025, 1, 10)) }
-  let_it_be(:game2) { create(:game, competition: series1, season: 5, series: 1, game_number: 2, played_on: Date.new(2025, 1, 17)) }
-  let_it_be(:game3) { create(:game, competition: series2, season: 5, series: 2, game_number: 1, played_on: Date.new(2025, 2, 7)) }
+  let_it_be(:season) { create(:competition, :season, name: "Сезон 5", slug: "season-5") }
+  let_it_be(:series1) { create(:competition, :series, name: "Серия 1", slug: "season-5-series-1", parent: season, position: 1) }
+  let_it_be(:series2) { create(:competition, :series, name: "Серия 2", slug: "season-5-series-2", parent: season, position: 2) }
+  let_it_be(:game1) { create(:game, competition: series1, game_number: 1, played_on: Date.new(2025, 1, 10)) }
+  let_it_be(:game2) { create(:game, competition: series1, game_number: 2, played_on: Date.new(2025, 1, 17)) }
+  let_it_be(:game3) { create(:game, competition: series2, game_number: 1, played_on: Date.new(2025, 2, 7)) }
 
   let_it_be(:player1) { create(:player, name: "Алексей") }
   let_it_be(:player2) { create(:player, name: "Борис") }

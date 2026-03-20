@@ -110,8 +110,9 @@ RSpec.describe Player, type: :model do
       let_it_be(:alice) { create(:player, name: 'Alice') }
       let_it_be(:bob) { create(:player, name: 'Bob') }
       let_it_be(:charlie) { create(:player, name: 'Charlie') }
-      let_it_be(:game1) { create(:game, season: 1, series: 1, game_number: 1) }
-      let_it_be(:game2) { create(:game, season: 1, series: 1, game_number: 2) }
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:game1) { create(:game, competition: competition, game_number: 1) }
+      let_it_be(:game2) { create(:game, competition: competition, game_number: 2) }
 
       before do
         # Alice: total_rating=2, wins=1, games=1
@@ -124,7 +125,7 @@ RSpec.describe Player, type: :model do
       end
 
       it 'orders by total_rating DESC, wins_count DESC, games_count DESC, name ASC' do
-        result = Player.with_stats_for_season(1).ranked
+        result = Player.with_stats_for_competition(competition).ranked
 
         expect(result.map(&:name)).to eq(%w[Charlie Bob Alice])
       end
@@ -133,7 +134,8 @@ RSpec.describe Player, type: :model do
     context 'when players have equal totals' do
       let_it_be(:alice) { create(:player, name: 'Alice') }
       let_it_be(:bob) { create(:player, name: 'Bob') }
-      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
+      let_it_be(:competition) { create(:competition, :series) }
+      let_it_be(:game) { create(:game, competition: competition, game_number: 1) }
 
       before do
         create(:game_participation, player: alice, game: game, plus: 2, minus: 0, win: true)
@@ -141,7 +143,7 @@ RSpec.describe Player, type: :model do
       end
 
       it 'breaks ties on name ascending' do
-        result = Player.with_stats_for_season(1).ranked
+        result = Player.with_stats_for_competition(competition).ranked
 
         expect(result.map(&:name)).to eq(%w[Alice Bob])
       end
@@ -238,75 +240,6 @@ RSpec.describe Player, type: :model do
 
       it 'includes best_move in total_rating' do
         result = Player.with_stats_for_competition(competition).find(player.id)
-
-        expect(result.total_rating).to eq(1.5)
-      end
-    end
-  end
-
-  describe '.with_stats_for_season' do
-    context 'when player has games in the season' do
-      let_it_be(:player) { create(:player) }
-      let_it_be(:game1) { create(:game, season: 1, series: 1, game_number: 1) }
-      let_it_be(:game2) { create(:game, season: 1, series: 1, game_number: 2) }
-
-      before do
-        create(:game_participation, player: player, game: game1, plus: 3, minus: 1, win: true)
-        create(:game_participation, player: player, game: game2, plus: 2, minus: 0, win: false)
-      end
-
-      it 'returns games_count, wins_count, and total_rating for the given season' do
-        result = Player.with_stats_for_season(1).find(player.id)
-
-        expect(result.games_count).to eq(2)
-        expect(result.wins_count).to eq(1)
-        expect(result.total_rating).to eq(4)
-      end
-    end
-
-    context 'when player has games in multiple seasons' do
-      let_it_be(:player) { create(:player) }
-      let_it_be(:game_s1) { create(:game, season: 1, series: 1, game_number: 1) }
-      let_it_be(:game_s2) { create(:game, season: 2, series: 1, game_number: 1) }
-
-      before do
-        create(:game_participation, player: player, game: game_s1, plus: 5, minus: 0, win: true)
-        create(:game_participation, player: player, game: game_s2, plus: 10, minus: 0, win: true)
-      end
-
-      it 'excludes games from other seasons' do
-        result = Player.with_stats_for_season(1).find(player.id)
-
-        expect(result.games_count).to eq(1)
-        expect(result.total_rating).to eq(5)
-      end
-    end
-
-    context 'when plus and minus are nil' do
-      let_it_be(:player) { create(:player) }
-      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
-
-      before do
-        create(:game_participation, player: player, game: game, plus: nil, minus: nil, win: false)
-      end
-
-      it 'handles nil with COALESCE' do
-        result = Player.with_stats_for_season(1).find(player.id)
-
-        expect(result.total_rating).to eq(0)
-      end
-    end
-
-    context 'when best_move is present' do
-      let_it_be(:player) { create(:player) }
-      let_it_be(:game) { create(:game, season: 1, series: 1, game_number: 1) }
-
-      before do
-        create(:game_participation, player: player, game: game, plus: 2, minus: 1, best_move: 0.5, win: true)
-      end
-
-      it 'includes best_move in total_rating' do
-        result = Player.with_stats_for_season(1).find(player.id)
 
         expect(result.total_rating).to eq(1.5)
       end
