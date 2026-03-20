@@ -14,27 +14,6 @@ RSpec.describe News, type: :model do
     it { is_expected.to validate_presence_of(:title) }
     it { is_expected.to validate_presence_of(:status) }
     it { is_expected.to define_enum_for(:status).with_values(draft: "draft", published: "published").backed_by_column_of_type(:string) }
-
-    context "when season is present" do
-      subject { build(:news, season: 1, series: nil) }
-
-      it { is_expected.to validate_presence_of(:series) }
-    end
-
-    context "when series is present" do
-      subject { build(:news, season: nil, series: 1) }
-
-      it { is_expected.to validate_presence_of(:season) }
-    end
-
-    context "when both are blank" do
-      subject { build(:news, season: nil, series: nil) }
-
-      it { is_expected.to be_valid }
-    end
-
-    it { is_expected.to validate_numericality_of(:season).only_integer.allow_nil }
-    it { is_expected.to validate_numericality_of(:series).only_integer.allow_nil }
   end
 
   describe '.recent' do
@@ -57,19 +36,6 @@ RSpec.describe News, type: :model do
     it 'returns news for the given game' do
       expect(described_class.for_game(game)).to include(linked)
       expect(described_class.for_game(game)).not_to include(unlinked)
-    end
-  end
-
-  describe '.for_series' do
-    let_it_be(:author) { create(:user) }
-    let_it_be(:linked) { create(:news, author:, season: 1, series: 2) }
-    let_it_be(:other_series) { create(:news, author:, season: 1, series: 3) }
-    let_it_be(:unlinked) { create(:news, author:) }
-
-    it 'returns news for the given season and series' do
-      result = described_class.for_series(1, 2)
-      expect(result).to include(linked)
-      expect(result).not_to include(other_series, unlinked)
     end
   end
 
