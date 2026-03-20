@@ -123,6 +123,7 @@ ru:
       dispute_player: "Оспорить профиль"
       dispute_pending: "Запрос на оспаривание на рассмотрении"
       edit_profile: "Редактировать профиль"
+      news: "Новости"
   profiles:
     edit:
       title: "Редактирование профиля"

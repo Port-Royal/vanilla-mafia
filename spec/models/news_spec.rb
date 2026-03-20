@@ -100,6 +100,49 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe '.mentioning_player' do
+    let_it_be(:author) { create(:user) }
+    let_it_be(:player) { create(:player) }
+    let_it_be(:other_player) { create(:player) }
+    let_it_be(:game_with_player) { create(:game) }
+    let_it_be(:game_without_player) { create(:game, game_number: 2) }
+    let_it_be(:participation) { create(:game_participation, game: game_with_player, player: player) }
+    let_it_be(:other_participation) { create(:game_participation, game: game_without_player, player: other_player) }
+    let_it_be(:published_linked) { create(:news, author: author, game: game_with_player, status: :published, published_at: 1.day.ago) }
+    let_it_be(:draft_linked) { create(:news, author: author, game: game_with_player, status: :draft) }
+    let_it_be(:published_unlinked) { create(:news, author: author, game: game_without_player, status: :published, published_at: 2.days.ago) }
+    let_it_be(:no_game) { create(:news, author: author, status: :published, published_at: 3.days.ago) }
+
+    it 'returns published news linked to games the player participated in' do
+      expect(described_class.mentioning_player(player)).to include(published_linked)
+    end
+
+    it 'excludes draft news' do
+      expect(described_class.mentioning_player(player)).not_to include(draft_linked)
+    end
+
+    it 'excludes news for games the player did not participate in' do
+      expect(described_class.mentioning_player(player)).not_to include(published_unlinked)
+    end
+
+    it 'excludes news without a game' do
+      expect(described_class.mentioning_player(player)).not_to include(no_game)
+    end
+
+    it 'orders by published_at descending' do
+      game2 = create(:game, game_number: 3)
+      create(:game_participation, game: game2, player: player)
+      older = create(:news, author: author, game: game2, status: :published, published_at: 5.days.ago)
+
+      result = described_class.mentioning_player(player)
+      expect(result.to_a).to eq([ published_linked, older ])
+    end
+
+    it 'does not return duplicates when player has multiple participations' do
+      expect(described_class.mentioning_player(player).count).to eq(described_class.mentioning_player(player).distinct.count)
+    end
+  end
+
   describe '#publish!' do
     let(:author) { create(:user) }
     let(:news) { create(:news, author:) }

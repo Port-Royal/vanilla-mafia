@@ -38,6 +38,36 @@ RSpec.describe PlayersController do
       end
     end
 
+    context "when player has news mentions" do
+      let_it_be(:player) { create(:player, name: "Упомянутый") }
+      let_it_be(:game) { create(:game, game_number: 12) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
+      let_it_be(:news_author) { create(:user) }
+      let_it_be(:news_article) { create(:news, author: news_author, game: game, title: "Новость об игроке", status: :published, published_at: 1.day.ago) }
+
+      before { get player_path(player) }
+
+      it "renders the news section heading" do
+        assert_select "h2", text: I18n.t("players.show.news")
+      end
+
+      it "renders the news article title" do
+        expect(response.body).to include("Новость об игроке")
+      end
+    end
+
+    context "when player has no news mentions" do
+      let_it_be(:player) { create(:player, name: "Без новостей") }
+      let_it_be(:game) { create(:game, game_number: 13) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
+
+      before { get player_path(player) }
+
+      it "does not render the news section heading" do
+        assert_select "h2", text: I18n.t("players.show.news"), count: 0
+      end
+    end
+
     context "when user owns the player" do
       let_it_be(:player) { create(:player, name: "Владелец") }
       let_it_be(:game) { create(:game, game_number: 2) }
