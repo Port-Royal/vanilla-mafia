@@ -15,7 +15,7 @@ class PlayerProfileService
       player: player,
       games: player.games.includes(competition: :parent).ordered,
       player_awards: player.player_awards.ordered.includes(:award).load,
-      news_articles: News.mentioning_player(player)
+      news_articles: News.mentioning_player(player).includes({ author: :player }, :tags, :rich_text_content)
     )
   end
 end
