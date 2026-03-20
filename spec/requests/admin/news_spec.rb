@@ -145,17 +145,6 @@ RSpec.describe "Admin::News" do
         end
       end
 
-      context "with series params" do
-        let(:series_params) { { news: { title: "Series News", content: "Content", season: 1, series: 2 } } }
-
-        it "creates a news article linked to a series in a season" do
-          post admin_news_index_path, params: series_params
-          article = News.last
-          expect(article.season).to eq(1)
-          expect(article.series).to eq(2)
-        end
-      end
-
       context "with invalid params" do
         let(:invalid_params) { { news: { title: "" } } }
 
@@ -280,15 +269,6 @@ RSpec.describe "Admin::News" do
         it "redirects to show" do
           patch admin_news_path(article), params: { news: { title: "Updated Title" } }
           expect(response).to redirect_to(admin_news_path(article))
-        end
-      end
-
-      context "with series params" do
-        it "updates the season/series association" do
-          patch admin_news_path(article), params: { news: { season: 3, series: 5 } }
-          article.reload
-          expect(article.season).to eq(3)
-          expect(article.series).to eq(5)
         end
       end
 

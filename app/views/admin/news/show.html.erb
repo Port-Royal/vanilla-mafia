@@ -13,9 +13,6 @@
 
   <div class="text-sm text-gray-500 mb-4">
     <%= t("admin_news.show.by_author", author: @news.author.email) %>
-    <% if @news.season && @news.series %>
-      · <%= t("admin_news.show.linked_series", season: @news.season, series: @news.series) %>
-    <% end %>
     <% if @news.game %>
       · <%= t("admin_news.show.linked_game", game: @news.game.full_name) %>
     <% end %>
