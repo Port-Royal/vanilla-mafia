@@ -283,6 +283,12 @@ ru:
       submit_update: "Сохранить"
     create:
       success: "Протокол успешно создан."
+    autosave:
+      toggle_on: "LIVE"
+      toggle_off: "OFF"
+      saving: "Сохранение..."
+      saved: "Сохранено"
+      error: "Ошибка"
     update:
       success: "Протокол успешно обновлён."
   common:

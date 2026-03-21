@@ -1,5 +1,26 @@
-<h1 class="text-2xl font-bold mb-6"><%= t("game_protocols.edit.title") %></h1>
+<div data-controller="protocol-autosave"
+     data-protocol-autosave-url-value="<%= autosave_judge_protocol_path(@game) %>"
+     data-protocol-autosave-saving-text-value="<%= t('game_protocols.autosave.saving') %>"
+     data-protocol-autosave-saved-text-value="<%= t('game_protocols.autosave.saved') %>"
+     data-protocol-autosave-error-text-value="<%= t('game_protocols.autosave.error') %>">
 
-<%= form_with url: judge_protocol_path(@game), method: :patch, local: true do %>
-  <%= render "form", submit_label: t("game_protocols.form.submit_update") %>
-<% end %>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold"><%= t("game_protocols.edit.title") %></h1>
+    <div class="flex items-center gap-3">
+      <span data-protocol-autosave-target="status" class="text-sm font-medium"></span>
+      <button type="button"
+              data-protocol-autosave-target="toggle"
+              data-action="click->protocol-autosave#toggle"
+              data-label-on="<%= t('game_protocols.autosave.toggle_on') %>"
+              data-label-off="<%= t('game_protocols.autosave.toggle_off') %>"
+              class="px-3 py-1 rounded-md text-sm font-semibold bg-gray-200 text-gray-700">
+        <%= t("game_protocols.autosave.toggle_off") %>
+      </button>
+    </div>
+  </div>
+
+  <%= form_with url: judge_protocol_path(@game), method: :patch, local: true,
+        html: { data: { action: "change->protocol-autosave#fieldChanged input->protocol-autosave#fieldInput" } } do %>
+    <%= render "form", submit_label: t("game_protocols.form.submit_update") %>
+  <% end %>
+</div>

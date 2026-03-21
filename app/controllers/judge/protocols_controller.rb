@@ -1,7 +1,7 @@
 class Judge::ProtocolsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_protocol_access!
-  before_action :set_game, only: [ :edit, :update ]
+  before_action :set_game, only: [ :edit, :update, :autosave ]
 
   def new
     @game = Game.new(played_on: Date.current)
@@ -30,6 +30,22 @@ class Judge::ProtocolsController < ApplicationController
   def edit
     @participations = load_participations
     load_form_data
+  end
+
+  def autosave
+    result = AutosaveGameProtocolService.call(
+      game: @game,
+      scope: params[:scope],
+      field: params[:field],
+      value: params[:value],
+      seat: params[:seat]
+    )
+
+    if result.success
+      render json: { success: true }
+    else
+      render json: { success: false, errors: result.errors }, status: :unprocessable_content
+    end
   end
 
   def update
