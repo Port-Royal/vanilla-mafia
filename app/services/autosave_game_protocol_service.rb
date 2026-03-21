@@ -42,6 +42,7 @@ class AutosaveGameProtocolService
 
   def update_participation_field
     return Result.new(success: false, errors: [ "Field not allowed: #{@field}" ]) unless PARTICIPATION_FIELDS.include?(@field)
+    return Result.new(success: false, errors: [ "Invalid seat" ]) unless @seat.in?(1..10)
 
     if @field == "player_name"
       update_player_name

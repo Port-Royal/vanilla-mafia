@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["status", "toggle"]
   static values = {
-    gameId: Number,
     url: String,
     savingText: { type: String, default: "..." },
     savedText: { type: String, default: "OK" },
@@ -18,6 +17,7 @@ export default class extends Controller {
 
   disconnect() {
     Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer))
+    clearTimeout(this.savedTimer)
     if (this.pendingRequest) {
       this.pendingRequest.abort()
     }
@@ -89,6 +89,10 @@ export default class extends Controller {
       body.seat = fieldInfo.seat
     }
 
+    if (this.pendingRequest) {
+      this.pendingRequest.abort()
+    }
+
     const controller = new AbortController()
     this.pendingRequest = controller
 
@@ -122,6 +126,7 @@ export default class extends Controller {
 
     const target = this.statusTarget
     target.classList.remove("text-gray-500", "text-green-600", "text-red-600")
+    clearTimeout(this.savedTimer)
 
     switch (state) {
       case "saving":
@@ -131,7 +136,6 @@ export default class extends Controller {
       case "saved":
         target.textContent = this.savedTextValue
         target.classList.add("text-green-600")
-        clearTimeout(this.savedTimer)
         this.savedTimer = setTimeout(() => {
           target.textContent = ""
         }, 2000)

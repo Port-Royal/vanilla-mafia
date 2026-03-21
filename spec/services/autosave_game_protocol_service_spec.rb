@@ -213,6 +213,38 @@ RSpec.describe AutosaveGameProtocolService do
         end
       end
 
+      context "when seat is nil" do
+        let(:result) do
+          described_class.call(
+            game: game, scope: "participation", field: "role_code", value: "don", seat: nil
+          )
+        end
+
+        it "returns failure" do
+          expect(result.success).to be false
+        end
+
+        it "includes error message" do
+          expect(result.errors).to include("Invalid seat")
+        end
+      end
+
+      context "when seat is out of range" do
+        let(:result) do
+          described_class.call(
+            game: game, scope: "participation", field: "role_code", value: "don", seat: 11
+          )
+        end
+
+        it "returns failure" do
+          expect(result.success).to be false
+        end
+
+        it "includes error message" do
+          expect(result.errors).to include("Invalid seat")
+        end
+      end
+
       context "when no participation exists at seat" do
         let(:result) do
           described_class.call(

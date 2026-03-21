@@ -285,7 +285,7 @@ ru:
       success: "Протокол успешно создан."
     autosave:
       toggle_on: "LIVE"
-      toggle_off: "LIVE"
+      toggle_off: "OFF"
       saving: "Сохранение..."
       saved: "Сохранено"
       error: "Ошибка"

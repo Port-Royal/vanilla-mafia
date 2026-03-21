@@ -209,6 +209,24 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(response.parsed_body["success"]).to be false
         end
 
+        it "rejects missing seat" do
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "participation", field: "role_code", value: "don"
+          }, as: :json
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response.parsed_body["success"]).to be false
+        end
+
+        it "rejects out-of-range seat" do
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "participation", seat: 11, field: "role_code", value: "don"
+          }, as: :json
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response.parsed_body["success"]).to be false
+        end
+
         it "returns error for participation update without existing player when field is not player_name" do
           patch autosave_judge_protocol_path(game), params: {
             scope: "participation", seat: 9, field: "role_code", value: "don"

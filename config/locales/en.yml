@@ -68,7 +68,7 @@ en:
       success: "Protocol created successfully."
     autosave:
       toggle_on: "LIVE"
-      toggle_off: "LIVE"
+      toggle_off: "OFF"
       saving: "Saving..."
       saved: "Saved"
       error: "Error"
