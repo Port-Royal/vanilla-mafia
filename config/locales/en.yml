@@ -66,6 +66,12 @@ en:
       submit_update: "Save"
     create:
       success: "Protocol created successfully."
+    autosave:
+      toggle_on: "LIVE"
+      toggle_off: "LIVE"
+      saving: "Saving..."
+      saved: "Saved"
+      error: "Error"
     update:
       success: "Protocol updated successfully."
   common:

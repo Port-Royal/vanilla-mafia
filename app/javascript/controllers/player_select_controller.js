@@ -181,6 +181,7 @@ export default class extends Controller {
     const name = option.dataset.playerName
     this.searchTarget.value = name
     this.close()
+    this.searchTarget.dispatchEvent(new Event("change", { bubbles: true }))
   }
 
   repositionMenu() {
