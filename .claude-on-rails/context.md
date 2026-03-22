@@ -73,20 +73,25 @@ This project uses two mutation testing tools:
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
-3. Run **evilution first** against the changed file(s) — fix any surviving mutants
-4. Run **mutant second** against the changed class(es) — fix any additional surviving mutants
-5. In the PR description, note mutation testing results from both tools, including how many additional fixes mutant caught that evilution missed (data collection for tool comparison)
-6. Aim for zero surviving mutants on all new/modified code
+3. Run **mutant first** against the changed class(es) — fix any surviving mutants
+4. Run **evilution second** (via MCP tool or CLI) against the changed file(s) — fix any additional surviving mutants
+5. Compare results from both tools and append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
+6. In the PR description, note mutation testing results from both tools (mutant listed first)
+7. Aim for zero surviving mutants on all new/modified code
 
-### Data Collection (Evilution vs Mutant)
+### Data Collection (Mutant vs Evilution)
 
-We are collecting data to compare the two tools. In every PR, include a mutation testing section:
+In every PR, include mutation scores in the description:
 ```
-- Evilution: X% (Y/Z mutants killed)
 - Mutant: X% (Y/Z mutants killed)
-- Additional mutants caught by mutant only: N
+- Evilution: X% (Y/Z mutants killed)
 ```
-This helps evaluate whether mutant catches meaningful gaps that evilution misses.
+
+After each mutation testing run, append a detailed entry to `.artifacts.local/regular-evilution-feedback.log` including:
+- Evilution version (from `bundle exec evilution --version` or gem lockfile)
+- What mutant does better (operators, precision, equivalent mutant detection)
+- What evilution is missing or could improve
+- Suggestions for making evilution greater
 
 ### Limitations
 - Mutant only mutates `def` method bodies — Rails DSL (scopes, validations, associations) are not mutated
