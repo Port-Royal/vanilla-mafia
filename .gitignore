@@ -46,3 +46,6 @@
 claude-swarm.log
 
 coverage/*
+
+# Local artifacts (mutation testing feedback, etc.)
+.artifacts.local/
