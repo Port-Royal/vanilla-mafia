@@ -42,6 +42,8 @@ class Judge::ProtocolsController < ApplicationController
     )
 
     if result.success
+      broadcast_protocol_update
+
       render json: { success: true }
     else
       render json: { success: false, errors: result.errors }, status: :unprocessable_content
@@ -66,6 +68,12 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   private
+
+  def broadcast_protocol_update
+    payload = { scope: params[:scope], field: params[:field], value: params[:value] }
+    payload[:seat] = params[:seat].to_i if params[:seat].present?
+    GameProtocolChannel.broadcast_to(@game, payload)
+  end
 
   def require_protocol_access!
     head :not_found unless current_user.can_manage_protocols?
