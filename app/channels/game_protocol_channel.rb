@@ -1,6 +1,6 @@
 class GameProtocolChannel < ApplicationCable::Channel
   def subscribed
-    game = Game.find_by(id: params.fetch(:game_id))
+    game = Game.find_by(id: params[:game_id])
 
     if game
       stream_for game

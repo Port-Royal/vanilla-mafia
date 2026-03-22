@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "GameProtocol broadcasting" do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:competition) { create(:competition, :series) }
-  let_it_be(:role_don) { create(:role, code: "don_broadcast", name: "Дон") }
+  let_it_be(:role) { create(:role, code: "don_broadcast", name: "Дон") }
   let_it_be(:player) { create(:player, name: "Тестовый Broadcast") }
 
   let_it_be(:game) do
