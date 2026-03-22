@@ -84,6 +84,11 @@ ru:
       additional_score: "Доп. балл"
       best_move: "Лучший ход"
       total: "Итого"
+    overlay:
+      seat: "Место"
+      player: "Игрок"
+      role: "Роль"
+      best_move: "Лучший ход"
   player_claims:
     create:
       pending: "Заявка отправлена и ожидает подтверждения."

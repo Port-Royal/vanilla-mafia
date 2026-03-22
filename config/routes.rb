@@ -40,7 +40,11 @@ Rails.application.routes.draw do
   get "seasons/:season_number/series/:number", to: "legacy_redirects#series", as: :season_series
 
   resources :news, only: [ :index, :show ]
-  resources :games, only: [ :show ]
+  resources :games, only: [ :show ] do
+    member do
+      get :overlay
+    end
+  end
   resources :players, only: [ :show ] do
     resource :claim, only: [ :create ], controller: "player_claims"
     resource :dispute, only: [ :new, :create ], controller: "player_disputes"
