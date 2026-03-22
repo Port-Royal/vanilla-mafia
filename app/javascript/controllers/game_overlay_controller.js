@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { createConsumer } from "@rails/actioncable"
 
 export default class extends Controller {
-  static values = { gameId: Number }
+  static values = { gameId: Number, roleIconTemplate: String }
   static targets = ["playerName", "roleCode", "bestMove"]
 
   connect() {
@@ -37,6 +37,22 @@ export default class extends Controller {
         target.textContent = value || ""
       }
     }
+
+    if (field === "player_name" && (!value || value.trim() === "")) {
+      this.clearSeat(seat)
+    }
+  }
+
+  clearSeat(seat) {
+    const roleTarget = this.findTarget("role_code", seat)
+    if (roleTarget) {
+      this.updateRoleDisplay(roleTarget, null)
+    }
+
+    const bestMoveTarget = this.findTarget("best_move", seat)
+    if (bestMoveTarget) {
+      bestMoveTarget.textContent = ""
+    }
   }
 
   findTarget(field, seat) {
@@ -57,10 +73,16 @@ export default class extends Controller {
   }
 
   updateRoleDisplay(target, roleCode) {
-    if (roleCode) {
-      target.innerHTML = `<img src="/assets/roles/${roleCode}.png" alt="${roleCode}" class="inline-block h-5 w-5" title="${roleCode}">`
-    } else {
-      target.textContent = ""
+    target.textContent = ""
+
+    if (roleCode && this.hasRoleIconTemplateValue) {
+      const src = this.roleIconTemplateValue.replace("%ROLE_CODE%", roleCode)
+      const img = document.createElement("img")
+      img.src = src
+      img.alt = roleCode
+      img.title = roleCode
+      img.className = "inline-block h-5 w-5"
+      target.appendChild(img)
     }
   }
 }

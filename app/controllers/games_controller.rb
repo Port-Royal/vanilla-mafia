@@ -6,7 +6,7 @@ class GamesController < ApplicationController
 
   def overlay
     @game = Game.find(params[:id])
-    @participations = @game.game_participations.includes(:player, :role).order(seat: :asc, id: :asc)
+    @participations_by_seat = @game.game_participations.includes(:player, :role).index_by(&:seat)
     render layout: "overlay"
   end
 end
