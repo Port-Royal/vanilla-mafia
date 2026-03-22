@@ -43,6 +43,7 @@ class Judge::ProtocolsController < ApplicationController
 
     if result.success
       broadcast_protocol_update
+
       render json: { success: true }
     else
       render json: { success: false, errors: result.errors }, status: :unprocessable_content
