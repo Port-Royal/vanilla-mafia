@@ -90,6 +90,32 @@ RSpec.describe "Games#overlay" do
         expect(response.body).not_to include("color:")
       end
 
+      it "ignores color with invalid length" do
+        get overlay_game_path(game, color: "ff00f")
+
+        expect(response.body).not_to include("color:")
+      end
+
+      it "accepts 3-digit hex color" do
+        get overlay_game_path(game, color: "f00")
+
+        expect(response.body).to include("color: #f00")
+      end
+
+      it "handles array parameter for font_size gracefully" do
+        get overlay_game_path(game, font_size: [ "24" ])
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("font-size:")
+      end
+
+      it "handles array parameter for color gracefully" do
+        get overlay_game_path(game, color: [ "ff0000" ])
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("color:")
+      end
+
       it "hides roles column when hide_roles param is set" do
         get overlay_game_path(game, hide_roles: "1")
 

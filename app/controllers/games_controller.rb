@@ -24,13 +24,14 @@ class GamesController < ApplicationController
   end
 
   def clamp_font_size(value)
-    return nil unless value.present? && value.match?(/\A\d+\z/)
+    return nil unless value.is_a?(String) && value.match?(/\A\d+\z/)
 
     value.to_i.clamp(8, 72)
   end
 
   def sanitize_hex_color(value)
-    return nil unless value.present? && value.match?(/\A[0-9a-fA-F]{3,8}\z/)
+    return nil unless value.is_a?(String) &&
+                      value.match?(/\A(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\z/)
 
     value.downcase
   end
