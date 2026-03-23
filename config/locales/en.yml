@@ -214,6 +214,11 @@ en:
       additional_score: "Bonus"
       best_move: "Best move"
       total: "Total"
+    overlay:
+      seat: "Seat"
+      player: "Player"
+      role: "Role"
+      best_move: "Best move"
   series:
     show:
       player: "Player"
