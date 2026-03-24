@@ -54,7 +54,9 @@ Rails.application.routes.draw do
   resource :notification_settings, only: [ :edit, :update ]
 
   namespace :podcast do
-    resources :episodes, only: [ :index, :show ]
+    resources :episodes, only: [ :index, :show ] do
+      resource :position, only: [ :update ], controller: "playback_positions"
+    end
     resources :playlists, only: [ :index, :show ]
   end
 
