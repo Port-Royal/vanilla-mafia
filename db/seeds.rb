@@ -35,4 +35,7 @@ if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
   user.role = "admin"
   user.password = ENV["ADMIN_PASSWORD"] if user.new_record?
   user.save!
+
+  admin_grant = Grant.find_or_create_by!(code: "admin")
+  UserGrant.find_or_create_by!(user: user, grant: admin_grant)
 end

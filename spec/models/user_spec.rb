@@ -78,24 +78,27 @@ RSpec.describe User, type: :model do
   end
 
   describe "#admin?" do
-    context "when role is admin" do
-      let(:user) { build(:user, :admin) }
+    let(:user) { create(:user) }
+    let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
+
+    context "when user has admin grant" do
+      before { create(:user_grant, user: user, grant: admin_grant) }
 
       it "returns true" do
         expect(user.admin?).to be true
       end
     end
 
-    context "when role is user" do
-      let(:user) { build(:user) }
-
+    context "when user has no admin grant" do
       it "returns false" do
         expect(user.admin?).to be false
       end
     end
 
-    context "when role is judge" do
-      let(:user) { build(:user, :judge) }
+    context "when user has a different grant" do
+      let(:judge_grant) { Grant.find_or_create_by!(code: "judge") }
+
+      before { create(:user_grant, user: user, grant: judge_grant) }
 
       it "returns false" do
         expect(user.admin?).to be false
@@ -104,24 +107,27 @@ RSpec.describe User, type: :model do
   end
 
   describe "#judge?" do
-    context "when role is judge" do
-      let(:user) { build(:user, :judge) }
+    let(:user) { create(:user) }
+    let(:judge_grant) { Grant.find_or_create_by!(code: "judge") }
+
+    context "when user has judge grant" do
+      before { create(:user_grant, user: user, grant: judge_grant) }
 
       it "returns true" do
         expect(user.judge?).to be true
       end
     end
 
-    context "when role is user" do
-      let(:user) { build(:user) }
-
+    context "when user has no judge grant" do
       it "returns false" do
         expect(user.judge?).to be false
       end
     end
 
-    context "when role is admin" do
-      let(:user) { build(:user, :admin) }
+    context "when user has a different grant" do
+      let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
+
+      before { create(:user_grant, user: user, grant: admin_grant) }
 
       it "returns false" do
         expect(user.judge?).to be false
@@ -129,33 +135,58 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#editor?" do
+    let(:user) { create(:user) }
+    let(:editor_grant) { Grant.find_or_create_by!(code: "editor") }
+
+    context "when user has editor grant" do
+      before { create(:user_grant, user: user, grant: editor_grant) }
+
+      it "returns true" do
+        expect(user.editor?).to be true
+      end
+    end
+
+    context "when user has no editor grant" do
+      it "returns false" do
+        expect(user.editor?).to be false
+      end
+    end
+  end
+
   describe "#can_manage_protocols?" do
-    context "when role is admin" do
-      let(:user) { build(:user, :admin) }
+    let(:user) { create(:user) }
+
+    context "when user has admin grant" do
+      let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
+
+      before { create(:user_grant, user: user, grant: admin_grant) }
 
       it "returns true" do
         expect(user.can_manage_protocols?).to be true
       end
     end
 
-    context "when role is judge" do
-      let(:user) { build(:user, :judge) }
+    context "when user has judge grant" do
+      let(:judge_grant) { Grant.find_or_create_by!(code: "judge") }
+
+      before { create(:user_grant, user: user, grant: judge_grant) }
 
       it "returns true" do
         expect(user.can_manage_protocols?).to be true
       end
     end
 
-    context "when role is user" do
-      let(:user) { build(:user) }
-
+    context "when user has no grants" do
       it "returns false" do
         expect(user.can_manage_protocols?).to be false
       end
     end
 
-    context "when role is editor" do
-      let(:user) { build(:user, :editor) }
+    context "when user has editor grant" do
+      let(:editor_grant) { Grant.find_or_create_by!(code: "editor") }
+
+      before { create(:user_grant, user: user, grant: editor_grant) }
 
       it "returns false" do
         expect(user.can_manage_protocols?).to be false
@@ -164,32 +195,38 @@ RSpec.describe User, type: :model do
   end
 
   describe "#can_manage_news?" do
-    context "when role is admin" do
-      let(:user) { build(:user, :admin) }
+    let(:user) { create(:user) }
+
+    context "when user has admin grant" do
+      let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
+
+      before { create(:user_grant, user: user, grant: admin_grant) }
 
       it "returns true" do
         expect(user.can_manage_news?).to be true
       end
     end
 
-    context "when role is editor" do
-      let(:user) { build(:user, :editor) }
+    context "when user has editor grant" do
+      let(:editor_grant) { Grant.find_or_create_by!(code: "editor") }
+
+      before { create(:user_grant, user: user, grant: editor_grant) }
 
       it "returns true" do
         expect(user.can_manage_news?).to be true
       end
     end
 
-    context "when role is user" do
-      let(:user) { build(:user) }
-
+    context "when user has no grants" do
       it "returns false" do
         expect(user.can_manage_news?).to be false
       end
     end
 
-    context "when role is judge" do
-      let(:user) { build(:user, :judge) }
+    context "when user has judge grant" do
+      let(:judge_grant) { Grant.find_or_create_by!(code: "judge") }
+
+      before { create(:user_grant, user: user, grant: judge_grant) }
 
       it "returns false" do
         expect(user.can_manage_news?).to be false
