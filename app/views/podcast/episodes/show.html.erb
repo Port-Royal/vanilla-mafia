@@ -11,9 +11,61 @@
   <% end %>
 </div>
 
-<div id="audio-player-placeholder" class="bg-neutral-100 border border-neutral-300 rounded-lg p-6 mb-6" data-saved-position="<%= @saved_position %>">
-  <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon") %></p>
-</div>
+<% if @episode.audio.attached? %>
+  <div class="bg-neutral-100 border border-neutral-300 rounded-lg p-4 mb-6"
+       data-controller="audio-player"
+       data-audio-player-saved-position-value="<%= @saved_position %>">
+
+    <audio data-audio-player-target="audio"
+           data-action="loadedmetadata->audio-player#audioLoaded
+                        timeupdate->audio-player#timeUpdate
+                        play->audio-player#playing
+                        pause->audio-player#paused
+                        ended->audio-player#ended"
+           preload="metadata">
+      <source src="<%= url_for(@episode.audio) %>" type="<%= @episode.audio.content_type %>">
+    </audio>
+
+    <div class="flex items-center gap-3">
+      <button data-audio-player-target="playButton"
+              data-action="click->audio-player#togglePlay"
+              aria-label="Play"
+              class="w-10 h-10 flex items-center justify-center rounded-full bg-maroon text-white text-lg hover:bg-maroon/90 transition-colors shrink-0">
+        ▶
+      </button>
+
+      <span data-audio-player-target="currentTime"
+            class="text-sm text-neutral-600 w-12 text-right tabular-nums shrink-0">0:00</span>
+
+      <div data-audio-player-target="progress"
+           data-action="mousedown->audio-player#seekStart
+                        mousemove@window->audio-player#seekMove
+                        mouseup@window->audio-player#seekEnd
+                        touchstart->audio-player#seekStart
+                        touchmove@window->audio-player#seekMove
+                        touchend@window->audio-player#seekEnd"
+           class="flex-1 h-2 bg-neutral-300 rounded-full cursor-pointer relative">
+        <div data-audio-player-target="progressBar"
+             class="h-full bg-maroon rounded-full transition-[width] duration-100"
+             style="width: 0%"></div>
+      </div>
+
+      <span data-audio-player-target="duration"
+            class="text-sm text-neutral-600 w-12 tabular-nums shrink-0">0:00</span>
+
+      <button data-audio-player-target="speedButton"
+              data-action="click->audio-player#cycleSpeed"
+              aria-label="Playback speed"
+              class="text-sm font-medium text-neutral-600 hover:text-maroon transition-colors px-2 py-1 rounded border border-neutral-300 shrink-0">
+        1x
+      </button>
+    </div>
+  </div>
+<% else %>
+  <div id="audio-player-placeholder" class="bg-neutral-100 border border-neutral-300 rounded-lg p-6 mb-6" data-saved-position="<%= @saved_position %>">
+    <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon") %></p>
+  </div>
+<% end %>
 
 <% if @episode.description.present? %>
   <div class="prose max-w-none text-neutral-700">

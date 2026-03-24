@@ -106,7 +106,7 @@ RSpec.describe "Podcast::Episodes" do
         expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
       end
 
-      it "includes audio player placeholder" do
+      it "shows placeholder when no audio attached" do
         get "/podcast/episodes/#{published_episode.id}"
         expect(response.body).to include("audio-player-placeholder")
       end
@@ -116,15 +116,48 @@ RSpec.describe "Podcast::Episodes" do
         expect(response.body).to include(podcast_episodes_path)
       end
 
-      it "includes saved position as data attribute" do
+      context "when episode has audio" do
+        let(:episode_with_audio) do
+          episode = create(:episode, title: "Audio Episode", status: "published", published_at: Time.current)
+          episode.audio.attach(
+            io: StringIO.new("fake-audio"),
+            filename: "episode.mp3",
+            content_type: "audio/mpeg"
+          )
+          episode
+        end
+
+        it "renders the audio player with Stimulus controller" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('data-controller="audio-player"')
+        end
+
+        it "includes saved position value" do
+          create(:playback_position, user: subscriber, episode: episode_with_audio, position_seconds: 90)
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('data-audio-player-saved-position-value="90"')
+        end
+
+        it "defaults saved position to zero" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('data-audio-player-saved-position-value="0"')
+        end
+
+        it "includes speed control button" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('data-audio-player-target="speedButton"')
+        end
+
+        it "does not show placeholder" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).not_to include("audio-player-placeholder")
+        end
+      end
+
+      it "includes saved position on placeholder when no audio" do
         create(:playback_position, user: subscriber, episode: published_episode, position_seconds: 90)
         get "/podcast/episodes/#{published_episode.id}"
         expect(response.body).to include('data-saved-position="90"')
-      end
-
-      it "defaults saved position to zero when none exists" do
-        get "/podcast/episodes/#{published_episode.id}"
-        expect(response.body).to include('data-saved-position="0"')
       end
     end
   end
