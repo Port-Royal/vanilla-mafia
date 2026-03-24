@@ -43,7 +43,14 @@
                         mouseup@window->audio-player#seekEnd
                         touchstart->audio-player#seekStart
                         touchmove@window->audio-player#seekMove
-                        touchend@window->audio-player#seekEnd"
+                        touchend@window->audio-player#seekEnd
+                        keydown->audio-player#seekKeyboard"
+           role="slider"
+           tabindex="0"
+           aria-label="<%= t(".seek") %>"
+           aria-valuenow="0"
+           aria-valuemin="0"
+           aria-valuemax="100"
            class="flex-1 h-2 bg-neutral-300 rounded-full cursor-pointer relative">
         <div data-audio-player-target="progressBar"
              class="h-full bg-maroon rounded-full transition-[width] duration-100"

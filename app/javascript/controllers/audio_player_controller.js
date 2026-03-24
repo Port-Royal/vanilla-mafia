@@ -28,6 +28,8 @@ export default class extends Controller {
     if (this.savedPositionValue > 0) {
       this.audioTarget.currentTime = this.savedPositionValue
     }
+
+    this.updateProgressUI()
   }
 
   togglePlay() {
@@ -53,24 +55,22 @@ export default class extends Controller {
 
   timeUpdate() {
     if (this.seeking) return
-
-    const current = this.audioTarget.currentTime
-    const duration = this.audioTarget.duration
-
-    this.currentTimeTarget.textContent = this.formatTime(current)
-
-    if (duration > 0) {
-      const percent = (current / duration) * 100
-      this.progressBarTarget.style.width = `${percent}%`
-    }
+    this.updateProgressUI()
   }
 
   seek(event) {
+    const duration = this.audioTarget.duration
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+      return
+    }
+
     const clientX = event.touches ? event.touches[0].clientX : event.clientX
     const rect = this.progressTarget.getBoundingClientRect()
     const percent = (clientX - rect.left) / rect.width
     const clampedPercent = Math.max(0, Math.min(1, percent))
-    this.audioTarget.currentTime = clampedPercent * this.audioTarget.duration
+    this.audioTarget.currentTime = clampedPercent * duration
+    this.updateProgressUI()
   }
 
   seekStart(event) {
@@ -87,6 +87,33 @@ export default class extends Controller {
     this.seeking = false
   }
 
+  seekKeyboard(event) {
+    const duration = this.audioTarget.duration
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+      return
+    }
+
+    const step = duration * 0.05
+    let handled = true
+
+    switch (event.key) {
+      case "ArrowLeft":
+        this.audioTarget.currentTime = Math.max(0, this.audioTarget.currentTime - step)
+        break
+      case "ArrowRight":
+        this.audioTarget.currentTime = Math.min(duration, this.audioTarget.currentTime + step)
+        break
+      default:
+        handled = false
+    }
+
+    if (handled) {
+      event.preventDefault()
+      this.updateProgressUI()
+    }
+  }
+
   cycleSpeed() {
     this.speedIndex = (this.speedIndex + 1) % SPEEDS.length
     const speed = SPEEDS[this.speedIndex]
@@ -98,6 +125,20 @@ export default class extends Controller {
     this.playButtonTarget.textContent = "▶"
     this.playButtonTarget.setAttribute("aria-label", "Play")
     this.progressBarTarget.style.width = "0%"
+    this.currentTimeTarget.textContent = this.formatTime(0)
+  }
+
+  updateProgressUI() {
+    const current = this.audioTarget.currentTime
+    const duration = this.audioTarget.duration
+
+    this.currentTimeTarget.textContent = this.formatTime(current)
+
+    if (duration > 0) {
+      const percent = (current / duration) * 100
+      this.progressBarTarget.style.width = `${percent}%`
+      this.progressTarget.setAttribute("aria-valuenow", Math.round(percent))
+    }
   }
 
   formatTime(seconds) {

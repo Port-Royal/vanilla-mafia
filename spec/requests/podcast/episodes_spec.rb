@@ -148,10 +148,20 @@ RSpec.describe "Podcast::Episodes" do
           expect(response.body).to include('data-audio-player-target="speedButton"')
         end
 
+        it "renders progress bar with slider role" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('role="slider"')
+        end
+
         it "does not show placeholder" do
           get "/podcast/episodes/#{episode_with_audio.id}"
           expect(response.body).not_to include("audio-player-placeholder")
         end
+      end
+
+      it "defaults saved position to zero on placeholder when no audio" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include('data-saved-position="0"')
       end
 
       it "includes saved position on placeholder when no audio" do
