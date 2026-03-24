@@ -1,1 +1,91 @@
-<p><%= t("common.coming_soon") %></p>
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".setup_title") %></h2>
+
+<ol class="list-decimal list-inside space-y-3 mb-8">
+  <li><%= t(".step_open_obs") %></li>
+  <li><%= t(".step_add_source") %></li>
+  <li><%= t(".step_enter_url") %>
+    <pre class="bg-gray-100 rounded px-3 py-2 mt-1 text-sm overflow-x-auto"><%= t(".url_example") %></pre>
+  </li>
+  <li><%= t(".step_set_size") %></li>
+  <li><%= t(".step_done") %></li>
+</ol>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".recommended_title") %></h2>
+
+<table class="data-table mb-8">
+  <tbody>
+    <tr>
+      <td class="font-medium"><%= t(".setting_width") %></td>
+      <td>800–1920 px</td>
+    </tr>
+    <tr>
+      <td class="font-medium"><%= t(".setting_height") %></td>
+      <td>400–600 px</td>
+    </tr>
+    <tr>
+      <td class="font-medium"><%= t(".setting_fps") %></td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td class="font-medium"><%= t(".setting_css") %></td>
+      <td><code>body { background-color: rgba(0,0,0,0); }</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".params_title") %></h2>
+
+<p class="mb-3"><%= t(".params_description") %></p>
+
+<table class="data-table mb-8">
+  <thead>
+    <tr>
+      <th><%= t(".param_name") %></th>
+      <th><%= t(".param_example") %></th>
+      <th><%= t(".param_description") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>font_size</code></td>
+      <td><code>font_size=20</code></td>
+      <td><%= t(".param_font_size") %></td>
+    </tr>
+    <tr>
+      <td><code>color</code></td>
+      <td><code>color=ffffff</code></td>
+      <td><%= t(".param_color") %></td>
+    </tr>
+    <tr>
+      <td><code>hide_seats</code></td>
+      <td><code>hide_seats=1</code></td>
+      <td><%= t(".param_hide_seats") %></td>
+    </tr>
+    <tr>
+      <td><code>hide_roles</code></td>
+      <td><code>hide_roles=1</code></td>
+      <td><%= t(".param_hide_roles") %></td>
+    </tr>
+    <tr>
+      <td><code>hide_best_move</code></td>
+      <td><code>hide_best_move=1</code></td>
+      <td><%= t(".param_hide_best_move") %></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="mb-3"><%= t(".params_example_full") %></p>
+<pre class="bg-gray-100 rounded px-3 py-2 text-sm overflow-x-auto mb-8"><%= t(".params_example_url") %></pre>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".judge_title") %></h2>
+
+<ol class="list-decimal list-inside space-y-3 mb-8">
+  <li><%= t(".judge_step_open") %></li>
+  <li><%= t(".judge_step_enable") %></li>
+  <li><%= t(".judge_step_fill") %></li>
+  <li><%= t(".judge_step_auto") %></li>
+</ol>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".realtime_title") %></h2>
+
+<p><%= t(".realtime_description") %></p>
