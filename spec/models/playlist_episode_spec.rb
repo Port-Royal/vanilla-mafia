@@ -27,7 +27,7 @@ RSpec.describe PlaylistEpisode, type: :model do
     end
   end
 
-  describe "default scope" do
+  describe "association ordering" do
     let(:playlist) { create(:playlist) }
     let!(:third) { create(:playlist_episode, playlist: playlist, position: 3) }
     let!(:first) { create(:playlist_episode, playlist: playlist, position: 1) }

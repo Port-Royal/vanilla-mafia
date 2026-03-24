@@ -11,4 +11,17 @@ RSpec.describe Playlist, type: :model do
 
     it { is_expected.to validate_presence_of(:title) }
   end
+
+  describe "#episodes" do
+    it "returns episodes ordered by playlist position" do
+      playlist = create(:playlist)
+      first_episode = create(:episode)
+      second_episode = create(:episode)
+
+      create(:playlist_episode, playlist: playlist, episode: second_episode, position: 2)
+      create(:playlist_episode, playlist: playlist, episode: first_episode, position: 1)
+
+      expect(playlist.episodes).to eq([ first_episode, second_episode ])
+    end
+  end
 end

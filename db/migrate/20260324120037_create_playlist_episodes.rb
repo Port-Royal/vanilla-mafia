@@ -6,9 +6,9 @@ class CreatePlaylistEpisodes < ActiveRecord::Migration[8.1]
       t.integer :position, null: false
 
       t.timestamps
-
-      t.index [ :playlist_id, :episode_id ], unique: true
-      t.index [ :playlist_id, :position ], unique: true
     end
+
+    add_index :playlist_episodes, [ :playlist_id, :episode_id ], unique: true
+    add_index :playlist_episodes, [ :playlist_id, :position ], unique: true
   end
 end
