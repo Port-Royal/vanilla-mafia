@@ -12,6 +12,11 @@ roles.each do |code, name|
   role.save!
 end
 
+# Grants (user permission grants)
+Grant::CODES.each do |code|
+  Grant.find_or_create_by!(code: code)
+end
+
 # Feature toggles
 toggle = FeatureToggle.find_or_initialize_by(key: "require_approval")
 if toggle.new_record?
