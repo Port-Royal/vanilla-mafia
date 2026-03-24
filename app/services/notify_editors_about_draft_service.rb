@@ -19,7 +19,7 @@ class NotifyEditorsAboutDraftService
 
   def recipients
     User
-      .where(role: %w[editor admin])
+      .joins(:grants).where(grants: { code: %w[editor admin] })
       .where(notify_on_news_draft: true)
       .where.not(id: @news.author_id)
   end

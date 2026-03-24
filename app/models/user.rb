@@ -7,11 +7,8 @@ class User < ApplicationRecord
   has_many :user_grants, dependent: :destroy
   has_many :grants, through: :user_grants
 
-  enum :role, { user: "user", judge: "judge", editor: "editor", admin: "admin" }
-
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :player_id, uniqueness: true, allow_nil: true
-  validates :role, presence: true
 
   def has_grant?(code)
     grants.exists?(code: code)

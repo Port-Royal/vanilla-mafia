@@ -15,7 +15,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
     it { is_expected.to validate_presence_of(:password) }
     it { is_expected.to validate_inclusion_of(:locale).in_array(%w[ru en]) }
-    it { is_expected.to validate_presence_of(:role) }
+
 
     describe "player_id uniqueness" do
       let(:player) { create(:player) }
@@ -31,17 +31,6 @@ RSpec.describe User, type: :model do
         expect(user).not_to be_valid
         expect(user.errors.where(:player_id, :taken)).to be_present
       end
-    end
-  end
-
-  describe "role enum" do
-    it "defines user, judge, editor, and admin roles" do
-      expect(described_class.roles).to eq("user" => "user", "judge" => "judge", "editor" => "editor", "admin" => "admin")
-    end
-
-    it "defaults to user role" do
-      user = build(:user)
-      expect(user.role).to eq("user")
     end
   end
 

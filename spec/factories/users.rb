@@ -5,8 +5,6 @@ FactoryBot.define do
     locale { "ru" }
 
     trait :admin do
-      role { "admin" }
-
       after(:create) do |user|
         grant = Grant.find_or_create_by!(code: "admin")
         create(:user_grant, user: user, grant: grant)
@@ -14,8 +12,6 @@ FactoryBot.define do
     end
 
     trait :judge do
-      role { "judge" }
-
       after(:create) do |user|
         grant = Grant.find_or_create_by!(code: "judge")
         create(:user_grant, user: user, grant: grant)
@@ -23,8 +19,6 @@ FactoryBot.define do
     end
 
     trait :editor do
-      role { "editor" }
-
       after(:create) do |user|
         grant = Grant.find_or_create_by!(code: "editor")
         create(:user_grant, user: user, grant: grant)
