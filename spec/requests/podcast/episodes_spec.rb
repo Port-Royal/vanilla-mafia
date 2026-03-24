@@ -4,7 +4,10 @@ RSpec.describe "Podcast::Episodes" do
   let_it_be(:subscriber) { create(:user, :subscriber) }
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:published_episode) { create(:episode, status: "published", published_at: Time.current) }
+  let_it_be(:published_episode) do
+    create(:episode, title: "First Episode", description: "A great episode",
+           status: "published", published_at: Time.current)
+  end
   let_it_be(:draft_episode) { create(:episode, status: "draft") }
 
   describe "GET /podcast/episodes" do
@@ -30,6 +33,26 @@ RSpec.describe "Podcast::Episodes" do
       it "returns success" do
         get "/podcast/episodes"
         expect(response).to have_http_status(:ok)
+      end
+
+      it "displays published episode titles" do
+        get "/podcast/episodes"
+        expect(response.body).to include(published_episode.title)
+      end
+
+      it "does not display draft episodes" do
+        get "/podcast/episodes"
+        expect(response.body).not_to include(draft_episode.title)
+      end
+
+      it "links to episode show page" do
+        get "/podcast/episodes"
+        expect(response.body).to include(podcast_episode_path(published_episode))
+      end
+
+      it "displays published_at date" do
+        get "/podcast/episodes"
+        expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
       end
     end
 
@@ -66,6 +89,31 @@ RSpec.describe "Podcast::Episodes" do
       it "returns success for published episode" do
         get "/podcast/episodes/#{published_episode.id}"
         expect(response).to have_http_status(:ok)
+      end
+
+      it "displays the episode title" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include(published_episode.title)
+      end
+
+      it "displays the episode description" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include(published_episode.description)
+      end
+
+      it "displays published_at date" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
+      end
+
+      it "includes audio player placeholder" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include("audio-player-placeholder")
+      end
+
+      it "links back to episodes list" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include(podcast_episodes_path)
       end
     end
   end

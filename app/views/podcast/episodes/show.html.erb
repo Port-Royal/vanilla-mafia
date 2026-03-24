@@ -1,1 +1,22 @@
-<h1><%= @episode.title %></h1>
+<div class="mb-6">
+  <%= link_to t(".back", default: "Back to episodes"), podcast_episodes_path,
+        class: "text-maroon hover:underline text-sm" %>
+</div>
+
+<h1 class="text-3xl font-bold text-maroon mb-4"><%= @episode.title %></h1>
+
+<div class="text-sm text-neutral-500 mb-6">
+  <% if @episode.published_at.present? %>
+    <%= l(@episode.published_at, format: :short) %>
+  <% end %>
+</div>
+
+<div id="audio-player-placeholder" class="bg-neutral-100 border border-neutral-300 rounded-lg p-6 mb-6">
+  <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon", default: "Audio player coming soon") %></p>
+</div>
+
+<% if @episode.description.present? %>
+  <div class="prose max-w-none text-neutral-700">
+    <p><%= @episode.description %></p>
+  </div>
+<% end %>

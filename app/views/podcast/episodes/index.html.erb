@@ -1,1 +1,25 @@
-<h1><%= t(".title", default: "Episodes") %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title", default: "Episodes") %></h1>
+
+<% if @episodes.any? %>
+  <div class="space-y-6">
+    <% @episodes.each do |episode| %>
+      <article class="border-b border-neutral-200 pb-6">
+        <h2 class="text-xl font-bold mb-1">
+          <%= link_to episode.title, podcast_episode_path(episode), class: "text-maroon hover:underline" %>
+        </h2>
+        <div class="text-sm text-neutral-500 mb-3">
+          <% if episode.published_at.present? %>
+            <%= l(episode.published_at, format: :short) %>
+          <% end %>
+        </div>
+        <% if episode.description.present? %>
+          <p class="text-neutral-700"><%= truncate(episode.description, length: 300) %></p>
+        <% end %>
+      </article>
+    <% end %>
+  </div>
+
+  <%= render "shared/pagy_nav", pagy: @pagy %>
+<% else %>
+  <p class="text-neutral-500"><%= t(".empty", default: "No episodes yet.") %></p>
+<% end %>

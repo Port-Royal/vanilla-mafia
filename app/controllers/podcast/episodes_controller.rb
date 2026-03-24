@@ -2,7 +2,7 @@ class Podcast::EpisodesController < ApplicationController
   include RequireSubscriber
 
   def index
-    @episodes = Episode.published.recent
+    @pagy, @episodes = pagy(Episode.published.recent)
   end
 
   def show
