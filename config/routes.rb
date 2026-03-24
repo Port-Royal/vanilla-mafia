@@ -53,6 +53,9 @@ Rails.application.routes.draw do
   resource :profile, only: [ :edit, :update ]
   resource :notification_settings, only: [ :edit, :update ]
 
+  get "help", to: "help#index", as: :help_index
+  get "help/:slug", to: "help#show", as: :help
+
   get "hall", to: "hall_of_fame#show"
 
   match "/404", to: "errors#show", via: :all, defaults: { code: 404 }

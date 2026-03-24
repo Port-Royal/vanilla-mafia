@@ -205,6 +205,13 @@ en:
       win_rate: "Win rate"
       view: "Result"
       all_news: "View all news"
+  help:
+    index:
+      title: "Help"
+    pages:
+      obs-overlay:
+        title: "OBS Overlay Setup"
+        summary: "How to set up the game overlay as an OBS browser source"
   games:
     show:
       seat: "Seat"

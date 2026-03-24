@@ -1,0 +1,11 @@
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= t(".title") %></h1>
+
+<ul class="space-y-3">
+  <% @pages.each do |slug| %>
+    <li>
+      <%= link_to t("help.pages.#{slug}.title"), help_path(slug: slug),
+            class: "text-maroon hover:underline text-lg" %>
+      <p class="text-gray-500 text-sm"><%= t("help.pages.#{slug}.summary") %></p>
+    </li>
+  <% end %>
+</ul>
