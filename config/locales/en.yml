@@ -154,7 +154,26 @@ en:
         success: "Author added to whitelist."
       destroy:
         success: "Author removed from whitelist."
+  podcast:
+    episodes:
+      index:
+        title: "Episodes"
+        empty: "No episodes yet."
+      show:
+        back: "← Back to episodes"
+        audio_player_coming_soon: "Audio player coming soon"
+    playlists:
+      index:
+        title: "Playlists"
+        episode_count:
+          one: "%{count} episode"
+          other: "%{count} episodes"
+        empty: "No playlists yet."
+      show:
+        back: "← Back to playlists"
+        no_episodes: "No episodes in this playlist yet."
   nav:
+    podcast: "Podcast"
     hall_of_fame: "Hall of Fame"
     news: "News"
     manage_news: "Manage news"

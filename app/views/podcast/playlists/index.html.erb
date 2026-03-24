@@ -1,4 +1,4 @@
-<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title", default: "Playlists") %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title") %></h1>
 
 <% if @playlists.any? %>
   <div class="space-y-6">
@@ -8,11 +8,11 @@
           <%= link_to playlist.title, podcast_playlist_path(playlist), class: "text-maroon hover:underline" %>
         </h2>
         <div class="text-sm text-neutral-500">
-          <%= t(".episode_count", count: playlist.playlist_episodes.size, default: "%{count} episodes") %>
+          <%= t(".episode_count", count: playlist.playlist_episodes.size) %>
         </div>
       </article>
     <% end %>
   </div>
 <% else %>
-  <p class="text-neutral-500"><%= t(".empty", default: "No playlists yet.") %></p>
+  <p class="text-neutral-500"><%= t(".empty") %></p>
 <% end %>

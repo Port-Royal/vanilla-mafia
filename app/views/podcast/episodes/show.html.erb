@@ -1,5 +1,5 @@
 <div class="mb-6">
-  <%= link_to t(".back", default: "Back to episodes"), podcast_episodes_path,
+  <%= link_to t(".back"), podcast_episodes_path,
         class: "text-maroon hover:underline text-sm" %>
 </div>
 
@@ -12,7 +12,7 @@
 </div>
 
 <div id="audio-player-placeholder" class="bg-neutral-100 border border-neutral-300 rounded-lg p-6 mb-6">
-  <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon", default: "Audio player coming soon") %></p>
+  <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon") %></p>
 </div>
 
 <% if @episode.description.present? %>

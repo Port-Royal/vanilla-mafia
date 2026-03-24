@@ -260,7 +260,28 @@ ru:
         success: "Автор добавлен в белый список."
       destroy:
         success: "Автор удалён из белого списка."
+  podcast:
+    episodes:
+      index:
+        title: "Эпизоды"
+        empty: "Эпизодов пока нет."
+      show:
+        back: "← К списку эпизодов"
+        audio_player_coming_soon: "Аудиоплеер скоро появится"
+    playlists:
+      index:
+        title: "Плейлисты"
+        episode_count:
+          one: "%{count} эпизод"
+          few: "%{count} эпизода"
+          many: "%{count} эпизодов"
+          other: "%{count} эпизодов"
+        empty: "Плейлистов пока нет."
+      show:
+        back: "← К списку плейлистов"
+        no_episodes: "В этом плейлисте пока нет эпизодов."
   nav:
+    podcast: "Подкаст"
     hall_of_fame: "Зал славы"
     news: "Новости"
     manage_news: "Управление новостями"
