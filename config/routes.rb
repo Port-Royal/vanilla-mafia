@@ -53,6 +53,11 @@ Rails.application.routes.draw do
   resource :profile, only: [ :edit, :update ]
   resource :notification_settings, only: [ :edit, :update ]
 
+  namespace :podcast do
+    resources :episodes, only: [ :index, :show ]
+    resources :playlists, only: [ :index, :show ]
+  end
+
   get "help", to: "help#index", as: :help_index
   get "help/:slug", to: "help#show", as: :help
 
