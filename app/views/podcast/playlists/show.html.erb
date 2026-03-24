@@ -1,5 +1,5 @@
 <div class="mb-6">
-  <%= link_to t(".back", default: "Back to playlists"), podcast_playlists_path,
+  <%= link_to t(".back"), podcast_playlists_path,
         class: "text-maroon hover:underline text-sm" %>
 </div>
 
@@ -23,5 +23,5 @@
     <% end %>
   </ol>
 <% else %>
-  <p class="text-neutral-500"><%= t(".no_episodes", default: "No episodes in this playlist yet.") %></p>
+  <p class="text-neutral-500"><%= t(".no_episodes") %></p>
 <% end %>
