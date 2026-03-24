@@ -4,12 +4,18 @@ class User < ApplicationRecord
   belongs_to :player, optional: true
   has_many :player_claims, dependent: :destroy
   has_many :news, foreign_key: :author_id, inverse_of: :author, dependent: :restrict_with_exception
+  has_many :user_grants, dependent: :destroy
+  has_many :grants, through: :user_grants
 
   enum :role, { user: "user", judge: "judge", editor: "editor", admin: "admin" }
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :player_id, uniqueness: true, allow_nil: true
   validates :role, presence: true
+
+  def has_grant?(code)
+    grants.exists?(code: code)
+  end
 
   def can_manage_protocols?
     admin? || judge?
