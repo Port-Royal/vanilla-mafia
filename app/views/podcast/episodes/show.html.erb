@@ -22,8 +22,8 @@
                         play->audio-player#playing
                         pause->audio-player#paused
                         ended->audio-player#ended"
+           src="<%= url_for(@episode.audio) %>"
            preload="metadata">
-      <source src="<%= url_for(@episode.audio) %>" type="<%= @episode.audio.content_type %>">
     </audio>
 
     <div class="flex items-center gap-3">

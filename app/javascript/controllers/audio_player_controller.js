@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+const SPEEDS = [1, 1.25, 1.5, 1.75, 2]
+
 export default class extends Controller {
   static targets = [
     "audio",
@@ -14,8 +16,6 @@ export default class extends Controller {
   static values = {
     savedPosition: { type: Number, default: 0 }
   }
-
-  static speeds = [1, 1.25, 1.5, 1.75, 2]
 
   connect() {
     this.speedIndex = 0
@@ -32,7 +32,10 @@ export default class extends Controller {
 
   togglePlay() {
     if (this.audioTarget.paused) {
-      this.audioTarget.play()
+      const promise = this.audioTarget.play()
+      if (promise) {
+        promise.catch(() => {})
+      }
     } else {
       this.audioTarget.pause()
     }
@@ -63,8 +66,9 @@ export default class extends Controller {
   }
 
   seek(event) {
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX
     const rect = this.progressTarget.getBoundingClientRect()
-    const percent = (event.clientX - rect.left) / rect.width
+    const percent = (clientX - rect.left) / rect.width
     const clampedPercent = Math.max(0, Math.min(1, percent))
     this.audioTarget.currentTime = clampedPercent * this.audioTarget.duration
   }
@@ -84,8 +88,8 @@ export default class extends Controller {
   }
 
   cycleSpeed() {
-    this.speedIndex = (this.speedIndex + 1) % this.constructor.speeds.length
-    const speed = this.constructor.speeds[this.speedIndex]
+    this.speedIndex = (this.speedIndex + 1) % SPEEDS.length
+    const speed = SPEEDS[this.speedIndex]
     this.audioTarget.playbackRate = speed
     this.speedButtonTarget.textContent = `${speed}x`
   }
