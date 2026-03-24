@@ -12,6 +12,7 @@ RSpec.describe "Avo admin resources" do
   let_it_be(:game_participation) { create(:game_participation, game: game, player: player) }
   let_it_be(:player_award) { create(:player_award, player: player, award: award) }
   let_it_be(:feature_toggle) { create(:feature_toggle) }
+  let_it_be(:episode) { create(:episode) }
   let_it_be(:player_claim) { create(:player_claim, user: non_admin, player: player) }
   let_it_be(:claimed_player) { create(:player, user: create(:user)) }
   let_it_be(:dispute_claim) { create(:player_claim, :dispute, user: admin, player: claimed_player) }
@@ -53,7 +54,8 @@ RSpec.describe "Avo admin resources" do
     "player_awards" => :player_award,
     "users" => :admin,
     "feature_toggles" => :feature_toggle,
-    "player_claims" => :player_claim
+    "player_claims" => :player_claim,
+    "episodes" => :episode
   }.each do |resource_name, record_method|
     describe resource_name do
       describe "GET /avo/resources/#{resource_name}" do
