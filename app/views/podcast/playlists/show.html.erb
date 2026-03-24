@@ -1,1 +1,27 @@
-<h1><%= @playlist.title %></h1>
+<div class="mb-6">
+  <%= link_to t(".back", default: "Back to playlists"), podcast_playlists_path,
+        class: "text-maroon hover:underline text-sm" %>
+</div>
+
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= @playlist.title %></h1>
+
+<% if @playlist.playlist_episodes.any? %>
+  <ol class="space-y-4">
+    <% @playlist.playlist_episodes.each do |playlist_episode| %>
+      <% episode = playlist_episode.episode %>
+      <li class="flex items-start gap-4 border-b border-neutral-200 pb-4">
+        <span class="text-neutral-400 font-bold text-lg w-8 shrink-0"><%= playlist_episode.position %></span>
+        <div>
+          <h2 class="text-lg font-bold">
+            <%= link_to episode.title, podcast_episode_path(episode), class: "text-maroon hover:underline" %>
+          </h2>
+          <% if episode.published_at.present? %>
+            <div class="text-sm text-neutral-500"><%= l(episode.published_at, format: :short) %></div>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+<% else %>
+  <p class="text-neutral-500"><%= t(".no_episodes", default: "No episodes in this playlist yet.") %></p>
+<% end %>

@@ -1,1 +1,18 @@
-<h1><%= t(".title", default: "Playlists") %></h1>
+<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title", default: "Playlists") %></h1>
+
+<% if @playlists.any? %>
+  <div class="space-y-6">
+    <% @playlists.each do |playlist| %>
+      <article class="border-b border-neutral-200 pb-6">
+        <h2 class="text-xl font-bold mb-1">
+          <%= link_to playlist.title, podcast_playlist_path(playlist), class: "text-maroon hover:underline" %>
+        </h2>
+        <div class="text-sm text-neutral-500">
+          <%= t(".episode_count", count: playlist.playlist_episodes.size, default: "%{count} episodes") %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-neutral-500"><%= t(".empty", default: "No playlists yet.") %></p>
+<% end %>
