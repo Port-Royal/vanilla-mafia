@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe PlaybackPosition do
+RSpec.describe PlaybackPosition, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:episode) }
