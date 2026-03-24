@@ -1,5 +1,5 @@
 class Grant < ApplicationRecord
-  CODES = %w[user judge editor admin].freeze
+  CODES = %w[user judge editor admin subscriber].freeze
 
   has_many :user_grants, dependent: :destroy
   has_many :users, through: :user_grants

@@ -143,6 +143,25 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#subscriber?" do
+    let(:user) { create(:user) }
+    let(:subscriber_grant) { Grant.find_or_create_by!(code: "subscriber") }
+
+    context "when user has subscriber grant" do
+      before { create(:user_grant, user: user, grant: subscriber_grant) }
+
+      it "returns true" do
+        expect(user.subscriber?).to be true
+      end
+    end
+
+    context "when user has no subscriber grant" do
+      it "returns false" do
+        expect(user.subscriber?).to be false
+      end
+    end
+  end
+
   describe "#can_manage_protocols?" do
     let(:user) { create(:user) }
 

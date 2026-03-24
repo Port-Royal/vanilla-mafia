@@ -16,7 +16,7 @@ RSpec.describe Grant, type: :model do
 
   describe "CODES" do
     it "includes all expected grant codes" do
-      expect(Grant::CODES).to contain_exactly("user", "judge", "editor", "admin")
+      expect(Grant::CODES).to contain_exactly("user", "judge", "editor", "admin", "subscriber")
     end
   end
 end
