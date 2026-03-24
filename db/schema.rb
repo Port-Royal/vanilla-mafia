@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_115021) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_120037) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -188,6 +188,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_115021) do
     t.index ["name"], name: "index_players_on_name", unique: true
   end
 
+  create_table "playlist_episodes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "episode_id", null: false
+    t.integer "playlist_id", null: false
+    t.integer "position", null: false
+    t.datetime "updated_at", null: false
+    t.index ["episode_id"], name: "index_playlist_episodes_on_episode_id"
+    t.index ["playlist_id", "episode_id"], name: "index_playlist_episodes_on_playlist_id_and_episode_id", unique: true
+    t.index ["playlist_id", "position"], name: "index_playlist_episodes_on_playlist_id_and_position", unique: true
+    t.index ["playlist_id"], name: "index_playlist_episodes_on_playlist_id"
+  end
+
+  create_table "playlists", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
@@ -266,6 +284,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_115021) do
   add_foreign_key "player_claims", "players"
   add_foreign_key "player_claims", "users"
   add_foreign_key "player_claims", "users", column: "reviewed_by_id"
+  add_foreign_key "playlist_episodes", "episodes"
+  add_foreign_key "playlist_episodes", "playlists"
   add_foreign_key "taggings", "tags"
   add_foreign_key "telegram_authors", "users"
   add_foreign_key "user_grants", "grants"
