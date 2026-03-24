@@ -17,6 +17,18 @@ class User < ApplicationRecord
     grants.exists?(code: code)
   end
 
+  def admin?
+    has_grant?("admin")
+  end
+
+  def judge?
+    has_grant?("judge")
+  end
+
+  def editor?
+    has_grant?("editor")
+  end
+
   def can_manage_protocols?
     admin? || judge?
   end

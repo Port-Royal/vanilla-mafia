@@ -17,6 +17,8 @@ RSpec.describe SeedGrantsAndMigrateUserRoles do
       let!(:regular_user) { create(:user) }
 
       it "creates user_grants matching each user's current role" do
+        UserGrant.delete_all
+        Grant.delete_all
         described_class.new.up
 
         expect(grant_code_for(admin_user)).to eq("admin")
