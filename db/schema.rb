@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_111830) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_115021) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -74,6 +74,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_111830) do
     t.index ["kind"], name: "index_competitions_on_kind"
     t.index ["parent_id"], name: "index_competitions_on_parent_id"
     t.index ["slug"], name: "index_competitions_on_slug", unique: true
+  end
+
+  create_table "episodes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "published_at"
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "feature_toggles", force: :cascade do |t|
