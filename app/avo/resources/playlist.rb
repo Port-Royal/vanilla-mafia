@@ -1,12 +1,14 @@
 class Avo::Resources::Playlist < Avo::BaseResource
-  # self.includes = []
-  # self.attachments = []
-  # self.search = {
-  #   query: -> { query.ransack(id_eq: q, m: "or").result(distinct: false) }
-  # }
+  self.title = :title
+  self.default_view_type = :table
+
+  self.search = {
+    query: -> { query.where("title ILIKE ?", "%#{params[:q]}%") }
+  }
 
   def fields
     field :id, as: :id
-    field :title, as: :text
+    field :title, as: :text, required: true, sortable: true
+    field :playlist_episodes, as: :has_many
   end
 end
