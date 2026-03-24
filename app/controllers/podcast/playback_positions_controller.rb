@@ -2,9 +2,10 @@ class Podcast::PlaybackPositionsController < ApplicationController
   include RequireSubscriber
 
   def update
+    episode = Episode.published.find(params[:episode_id])
     position = PlaybackPosition.find_or_initialize_by(
       user: current_user,
-      episode_id: params[:episode_id]
+      episode: episode
     )
     position.position_seconds = params[:position_seconds]
 
@@ -13,5 +14,7 @@ class Podcast::PlaybackPositionsController < ApplicationController
     else
       head :unprocessable_content
     end
+  rescue ActiveRecord::RecordNotUnique
+    retry
   end
 end

@@ -5,6 +5,7 @@ RSpec.describe "Podcast::PlaybackPositions" do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:user) { create(:user) }
   let_it_be(:episode) { create(:episode, status: "published", published_at: Time.current) }
+  let_it_be(:draft_episode) { create(:episode, status: "draft") }
 
   describe "PATCH /podcast/episodes/:episode_id/position" do
     let(:params) { { position_seconds: 120 } }
@@ -62,6 +63,16 @@ RSpec.describe "Podcast::PlaybackPositions" do
       it "rejects non-integer position" do
         patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: "abc" }
         expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "returns not found for non-existent episode" do
+        patch "/podcast/episodes/0/position", params: params
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for draft episode" do
+        patch "/podcast/episodes/#{draft_episode.id}/position", params: params
+        expect(response).to have_http_status(:not_found)
       end
     end
 
