@@ -75,6 +75,13 @@ ru:
       win_rate: "Процент побед"
       view: "Итог"
       all_news: "Все новости"
+  help:
+    index:
+      title: "Справка"
+    pages:
+      obs-overlay:
+        title: "Настройка OBS-оверлея"
+        summary: "Как настроить оверлей игры как источник браузера в OBS"
   games:
     show:
       seat: "Место"

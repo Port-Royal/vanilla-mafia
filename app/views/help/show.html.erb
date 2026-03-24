@@ -1,0 +1,10 @@
+<nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-4">
+  <%= link_to t("help.index.title"), help_index_path, class: "text-maroon hover:underline" %> /
+  <span class="text-gray-700"><%= t("help.pages.#{@slug}.title") %></span>
+</nav>
+
+<h1 class="text-3xl font-bold text-maroon mb-6"><%= t("help.pages.#{@slug}.title") %></h1>
+
+<div class="prose max-w-none">
+  <%= render "help/pages/#{@slug}" %>
+</div>
