@@ -8,7 +8,6 @@ class Avo::Resources::User < Avo::BaseResource
   def fields
     field :id, as: :id
     field :email, as: :text
-    field :role, as: :select, enum: ::User.roles, readonly: true, help: "Legacy field — use grants below"
     field :player, as: :belongs_to
     field :user_grants, as: :has_many
   end
