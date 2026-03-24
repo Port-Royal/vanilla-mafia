@@ -115,6 +115,17 @@ RSpec.describe "Podcast::Episodes" do
         get "/podcast/episodes/#{published_episode.id}"
         expect(response.body).to include(podcast_episodes_path)
       end
+
+      it "includes saved position as data attribute" do
+        create(:playback_position, user: subscriber, episode: published_episode, position_seconds: 90)
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include('data-saved-position="90"')
+      end
+
+      it "defaults saved position to zero when none exists" do
+        get "/podcast/episodes/#{published_episode.id}"
+        expect(response.body).to include('data-saved-position="0"')
+      end
     end
   end
 end
