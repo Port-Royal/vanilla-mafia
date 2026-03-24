@@ -24,5 +24,12 @@ FactoryBot.define do
         create(:user_grant, user: user, grant: grant)
       end
     end
+
+    trait :subscriber do
+      after(:create) do |user|
+        grant = Grant.find_or_create_by!(code: "subscriber")
+        create(:user_grant, user: user, grant: grant)
+      end
+    end
   end
 end

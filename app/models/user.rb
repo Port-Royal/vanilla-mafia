@@ -26,6 +26,10 @@ class User < ApplicationRecord
     has_grant?("editor")
   end
 
+  def subscriber?
+    has_grant?("subscriber")
+  end
+
   def can_manage_protocols?
     admin? || judge?
   end
