@@ -153,6 +153,11 @@ RSpec.describe "Podcast::Episodes" do
           expect(response.body).to include('role="slider"')
         end
 
+        it "includes episode title value for media session" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include('data-audio-player-episode-title-value="Audio Episode"')
+        end
+
         it "does not show placeholder" do
           get "/podcast/episodes/#{episode_with_audio.id}"
           expect(response.body).not_to include("audio-player-placeholder")
