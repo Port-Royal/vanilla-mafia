@@ -6,9 +6,7 @@ class HelpController < ApplicationController
   end
 
   def show
-    slug = params[:slug]
-    head :not_found unless PAGES.include?(slug)
-
-    @slug = slug
+    @slug = params[:slug]
+    raise ActiveRecord::RecordNotFound unless PAGES.include?(@slug)
   end
 end
