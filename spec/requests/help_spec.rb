@@ -17,6 +17,16 @@ RSpec.describe HelpController do
 
         expect(response).to have_http_status(:ok)
       end
+
+      it "renders OBS overlay help content" do
+        get help_path(slug: "obs-overlay")
+
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.setup_title"))
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.recommended_title"))
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.params_title"))
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.judge_title"))
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.realtime_title"))
+      end
     end
 
     context "when help page does not exist" do
