@@ -57,6 +57,12 @@
                 class: "block text-gray-300 hover:text-white transition-colors" %>
         </li>
         <% if user_signed_in? %>
+          <% if current_user.subscriber? || current_user.admin? %>
+            <li>
+              <%= link_to t("nav.podcast"), podcast_episodes_path,
+                    class: "block text-gray-300 hover:text-white transition-colors" %>
+            </li>
+          <% end %>
           <% if current_user.can_manage_protocols? %>
             <li>
               <%= link_to t("nav.protocols"), new_judge_protocol_path,
@@ -128,6 +134,12 @@
                       class: "block hover:text-white transition-colors" %>
               </li>
               <% if user_signed_in? %>
+                <% if current_user.subscriber? || current_user.admin? %>
+                  <li>
+                    <%= link_to t("nav.podcast"), podcast_episodes_path,
+                          class: "block hover:text-white transition-colors" %>
+                  </li>
+                <% end %>
                 <% if current_user.can_manage_protocols? %>
                   <li>
                     <%= link_to t("nav.protocols"), new_judge_protocol_path,
