@@ -14,7 +14,8 @@ export default class extends Controller {
   ]
 
   static values = {
-    savedPosition: { type: Number, default: 0 }
+    savedPosition: { type: Number, default: 0 },
+    episodeTitle: { type: String, default: "" }
   }
 
   connect() {
@@ -30,6 +31,7 @@ export default class extends Controller {
     }
 
     this.updateProgressUI()
+    this.setupMediaSession()
   }
 
   togglePlay() {
@@ -46,6 +48,7 @@ export default class extends Controller {
   playing() {
     this.playButtonTarget.textContent = "⏸"
     this.playButtonTarget.setAttribute("aria-label", "Pause")
+    this.updateMediaPositionState()
   }
 
   paused() {
@@ -119,6 +122,7 @@ export default class extends Controller {
     const speed = SPEEDS[this.speedIndex]
     this.audioTarget.playbackRate = speed
     this.speedButtonTarget.textContent = `${speed}x`
+    this.updateMediaPositionState()
   }
 
   ended() {
@@ -126,6 +130,81 @@ export default class extends Controller {
     this.playButtonTarget.setAttribute("aria-label", "Play")
     this.progressBarTarget.style.width = "0%"
     this.currentTimeTarget.textContent = this.formatTime(0)
+  }
+
+  setupMediaSession() {
+    if (!("mediaSession" in navigator)) return
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: this.episodeTitleValue
+    })
+
+    navigator.mediaSession.setActionHandler("play", () => {
+      if (this.audioTarget.paused) {
+        this.togglePlay()
+      }
+    })
+    navigator.mediaSession.setActionHandler("pause", () => {
+      if (!this.audioTarget.paused) {
+        this.togglePlay()
+      }
+    })
+    navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+      const current = this.audioTarget.currentTime
+      if (!Number.isFinite(current)) return
+
+      const offset = details && Number.isFinite(details.seekOffset) ? details.seekOffset : 10
+      this.audioTarget.currentTime = Math.max(0, current - offset)
+      this.updateProgressUI()
+      this.updateMediaPositionState()
+    })
+    navigator.mediaSession.setActionHandler("seekforward", (details) => {
+      const current = this.audioTarget.currentTime
+      const duration = this.audioTarget.duration
+      if (!Number.isFinite(current)) return
+
+      const offset = details && Number.isFinite(details.seekOffset) ? details.seekOffset : 10
+      let target = current + offset
+
+      if (Number.isFinite(duration) && duration > 0) {
+        target = Math.min(target, duration)
+      }
+
+      this.audioTarget.currentTime = target
+      this.updateProgressUI()
+      this.updateMediaPositionState()
+    })
+    navigator.mediaSession.setActionHandler("seekto", (details) => {
+      const seekTime = details && Number.isFinite(details.seekTime) ? details.seekTime : null
+      if (seekTime === null) return
+
+      const duration = this.audioTarget.duration
+      let target = seekTime
+
+      if (Number.isFinite(duration) && duration > 0) {
+        target = Math.min(Math.max(0, target), duration)
+      } else {
+        target = Math.max(0, target)
+      }
+
+      this.audioTarget.currentTime = target
+      this.updateProgressUI()
+      this.updateMediaPositionState()
+    })
+  }
+
+  updateMediaPositionState() {
+    if (!("mediaSession" in navigator)) return
+    if (!navigator.mediaSession.setPositionState) return
+
+    const duration = this.audioTarget.duration
+    if (!Number.isFinite(duration) || duration <= 0) return
+
+    navigator.mediaSession.setPositionState({
+      duration: duration,
+      playbackRate: this.audioTarget.playbackRate,
+      position: this.audioTarget.currentTime
+    })
   }
 
   updateProgressUI() {
