@@ -2,10 +2,12 @@ require "rails_helper"
 
 RSpec.describe "OmniAuth Callbacks" do
   before do
+    @previous_omniauth_test_mode = OmniAuth.config.test_mode
     OmniAuth.config.test_mode = true
   end
 
   after do
+    OmniAuth.config.test_mode = @previous_omniauth_test_mode
     OmniAuth.config.mock_auth[:google_oauth2] = nil
   end
 
@@ -16,6 +18,11 @@ RSpec.describe "OmniAuth Callbacks" do
       info: {
         email: "test@example.com",
         name: "Test User"
+      },
+      extra: {
+        raw_info: {
+          email_verified: true
+        }
       }
     )
   end
@@ -46,10 +53,10 @@ RSpec.describe "OmniAuth Callbacks" do
 
       it "signs in the user" do
         get "/users/auth/google_oauth2/callback"
-        expect(controller.current_user).to be_present
+        expect(request.env["warden"].user(:user)).to be_present
       end
 
-      it "redirects to root" do
+      it "redirects after sign in" do
         get "/users/auth/google_oauth2/callback"
         expect(response).to redirect_to(root_path)
       end
@@ -68,7 +75,7 @@ RSpec.describe "OmniAuth Callbacks" do
 
       it "signs in the existing user" do
         get "/users/auth/google_oauth2/callback"
-        expect(controller.current_user).to eq(existing_user)
+        expect(request.env["warden"].user(:user)).to eq(existing_user)
       end
     end
 
@@ -90,7 +97,62 @@ RSpec.describe "OmniAuth Callbacks" do
 
       it "signs in the existing user" do
         get "/users/auth/google_oauth2/callback"
-        expect(controller.current_user).to eq(existing_user)
+        expect(request.env["warden"].user(:user)).to eq(existing_user)
+      end
+    end
+
+    context "when email is not verified" do
+      let(:unverified_auth_hash) do
+        OmniAuth::AuthHash.new(
+          provider: "google_oauth2",
+          uid: "987654321",
+          info: { email: "unverified@example.com" },
+          extra: { raw_info: { email_verified: false } }
+        )
+      end
+
+      before do
+        OmniAuth.config.mock_auth[:google_oauth2] = unverified_auth_hash
+      end
+
+      it "does not create a user" do
+        expect {
+          get "/users/auth/google_oauth2/callback"
+        }.not_to change(User, :count)
+      end
+
+      it "redirects to sign in" do
+        get "/users/auth/google_oauth2/callback"
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "does not link to existing account" do
+        create(:user, email: "unverified@example.com")
+        get "/users/auth/google_oauth2/callback"
+        expect(User.find_by(email: "unverified@example.com").provider).to be_nil
+      end
+    end
+
+    context "when email has different casing" do
+      let!(:existing_user) { create(:user, email: "test@example.com") }
+
+      let(:mixed_case_auth_hash) do
+        OmniAuth::AuthHash.new(
+          provider: "google_oauth2",
+          uid: "123456789",
+          info: { email: "Test@Example.COM" },
+          extra: { raw_info: { email_verified: true } }
+        )
+      end
+
+      before do
+        OmniAuth.config.mock_auth[:google_oauth2] = mixed_case_auth_hash
+      end
+
+      it "links to existing account by normalized email" do
+        get "/users/auth/google_oauth2/callback"
+        existing_user.reload
+        expect(existing_user.provider).to eq("google_oauth2")
       end
     end
 
@@ -99,9 +161,10 @@ RSpec.describe "OmniAuth Callbacks" do
         OmniAuth.config.mock_auth[:google_oauth2] = :invalid_credentials
       end
 
-      it "redirects to sign in page" do
-        get "/users/auth/google_oauth2/callback"
-        expect(response).to redirect_to(new_user_session_path)
+      it "does not create a user" do
+        expect {
+          get "/users/auth/google_oauth2/callback"
+        }.not_to change(User, :count)
       end
     end
   end

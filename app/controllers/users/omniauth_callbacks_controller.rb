@@ -1,12 +1,17 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def google_oauth2
-    user = find_or_create_user(auth)
+    unless auth
+      redirect_to new_user_session_path, alert: I18n.t("devise.omniauth_callbacks.failure", kind: "Google", reason: "invalid")
+      return
+    end
 
-    if user.persisted?
+    user = find_or_create_user
+
+    if user
       sign_in_and_redirect user, event: :authentication
       set_flash_message(:notice, :success, kind: "Google") if is_navigational_format?
     else
-      redirect_to new_user_session_path, alert: user.errors.full_messages.join(", ")
+      redirect_to new_user_session_path, alert: I18n.t("devise.omniauth_callbacks.failure", kind: "Google", reason: "invalid")
     end
   end
 
@@ -20,21 +25,36 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     request.env["omniauth.auth"]
   end
 
-  def find_or_create_user(auth)
+  def email_verified?
+    auth.dig(:extra, :raw_info, :email_verified) != false
+  end
+
+  def normalized_email
+    auth.info.email.to_s.strip.downcase
+  end
+
+  def find_or_create_user
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     return user if user
 
-    user = User.find_by(email: auth.info.email)
+    return unless email_verified?
+
+    email = normalized_email
+    return if email.blank?
+
+    user = User.find_by(email: email)
     if user
-      user.update!(provider: auth.provider, uid: auth.uid)
+      user.update(provider: auth.provider, uid: auth.uid)
       return user
     end
 
-    User.create!(
+    User.create(
       provider: auth.provider,
       uid: auth.uid,
-      email: auth.info.email,
+      email: email,
       password: Devise.friendly_token(32)
     )
+  rescue ActiveRecord::RecordNotUnique
+    User.find_by(provider: auth.provider, uid: auth.uid)
   end
 end
