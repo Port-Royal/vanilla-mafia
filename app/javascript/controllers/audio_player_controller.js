@@ -139,22 +139,57 @@ export default class extends Controller {
       title: this.episodeTitleValue
     })
 
-    navigator.mediaSession.setActionHandler("play", () => this.togglePlay())
-    navigator.mediaSession.setActionHandler("pause", () => this.togglePlay())
+    navigator.mediaSession.setActionHandler("play", () => {
+      if (this.audioTarget.paused) {
+        this.togglePlay()
+      }
+    })
+    navigator.mediaSession.setActionHandler("pause", () => {
+      if (!this.audioTarget.paused) {
+        this.togglePlay()
+      }
+    })
     navigator.mediaSession.setActionHandler("seekbackward", (details) => {
-      this.audioTarget.currentTime = Math.max(0, this.audioTarget.currentTime - (details.seekOffset || 10))
+      const current = this.audioTarget.currentTime
+      if (!Number.isFinite(current)) return
+
+      const offset = details && Number.isFinite(details.seekOffset) ? details.seekOffset : 10
+      this.audioTarget.currentTime = Math.max(0, current - offset)
       this.updateProgressUI()
+      this.updateMediaPositionState()
     })
     navigator.mediaSession.setActionHandler("seekforward", (details) => {
-      this.audioTarget.currentTime = Math.min(
-        this.audioTarget.duration,
-        this.audioTarget.currentTime + (details.seekOffset || 10)
-      )
+      const current = this.audioTarget.currentTime
+      const duration = this.audioTarget.duration
+      if (!Number.isFinite(current)) return
+
+      const offset = details && Number.isFinite(details.seekOffset) ? details.seekOffset : 10
+      let target = current + offset
+
+      if (Number.isFinite(duration) && duration > 0) {
+        target = Math.min(target, duration)
+      }
+
+      this.audioTarget.currentTime = target
       this.updateProgressUI()
+      this.updateMediaPositionState()
     })
     navigator.mediaSession.setActionHandler("seekto", (details) => {
-      this.audioTarget.currentTime = details.seekTime
+      const seekTime = details && Number.isFinite(details.seekTime) ? details.seekTime : null
+      if (seekTime === null) return
+
+      const duration = this.audioTarget.duration
+      let target = seekTime
+
+      if (Number.isFinite(duration) && duration > 0) {
+        target = Math.min(Math.max(0, target), duration)
+      } else {
+        target = Math.max(0, target)
+      }
+
+      this.audioTarget.currentTime = target
       this.updateProgressUI()
+      this.updateMediaPositionState()
     })
   }
 
