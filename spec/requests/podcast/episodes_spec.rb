@@ -158,6 +158,11 @@ RSpec.describe "Podcast::Episodes" do
           expect(response.body).to include('data-audio-player-episode-title-value="Audio Episode"')
         end
 
+        it "includes position URL for auto-save" do
+          get "/podcast/episodes/#{episode_with_audio.id}"
+          expect(response.body).to include("data-audio-player-position-url-value=\"#{podcast_episode_position_path(episode_with_audio)}\"")
+        end
+
         it "does not show placeholder" do
           get "/podcast/episodes/#{episode_with_audio.id}"
           expect(response.body).not_to include("audio-player-placeholder")
