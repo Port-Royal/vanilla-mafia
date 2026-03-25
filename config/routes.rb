@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
 
   authenticate :user, ->(u) { u.can_manage_protocols? } do
     namespace :judge do
