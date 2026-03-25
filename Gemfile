@@ -22,6 +22,8 @@ gem "bcrypt", "~> 3.1.22"
 
 gem "avo"
 gem "devise"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
 gem "pagy"
 gem "pundit"
 
