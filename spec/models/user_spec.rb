@@ -8,6 +8,16 @@ RSpec.describe User, type: :model do
     it { is_expected.to have_many(:grants).through(:user_grants) }
   end
 
+  describe "devise modules" do
+    it "includes omniauthable" do
+      expect(User.devise_modules).to include(:omniauthable)
+    end
+
+    it "configures google_oauth2 as omniauth provider" do
+      expect(User.omniauth_providers).to include(:google_oauth2)
+    end
+  end
+
   describe "database columns" do
     it { is_expected.to have_db_column(:provider).of_type(:string) }
     it { is_expected.to have_db_column(:uid).of_type(:string) }
