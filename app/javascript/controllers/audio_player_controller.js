@@ -15,12 +15,21 @@ export default class extends Controller {
 
   static values = {
     savedPosition: { type: Number, default: 0 },
-    episodeTitle: { type: String, default: "" }
+    episodeTitle: { type: String, default: "" },
+    positionUrl: { type: String, default: "" }
   }
 
   connect() {
     this.speedIndex = 0
     this.seeking = false
+    this.saveTimer = null
+    this.boundBeforeUnload = () => this.savePosition()
+    window.addEventListener("beforeunload", this.boundBeforeUnload)
+  }
+
+  disconnect() {
+    this.stopAutoSave()
+    window.removeEventListener("beforeunload", this.boundBeforeUnload)
   }
 
   audioLoaded() {
@@ -49,11 +58,14 @@ export default class extends Controller {
     this.playButtonTarget.textContent = "⏸"
     this.playButtonTarget.setAttribute("aria-label", "Pause")
     this.updateMediaPositionState()
+    this.startAutoSave()
   }
 
   paused() {
     this.playButtonTarget.textContent = "▶"
     this.playButtonTarget.setAttribute("aria-label", "Play")
+    this.stopAutoSave()
+    this.savePosition()
   }
 
   timeUpdate() {
@@ -130,6 +142,8 @@ export default class extends Controller {
     this.playButtonTarget.setAttribute("aria-label", "Play")
     this.progressBarTarget.style.width = "0%"
     this.currentTimeTarget.textContent = this.formatTime(0)
+    this.stopAutoSave()
+    this.savePosition()
   }
 
   setupMediaSession() {
@@ -205,6 +219,35 @@ export default class extends Controller {
       playbackRate: this.audioTarget.playbackRate,
       position: this.audioTarget.currentTime
     })
+  }
+
+  startAutoSave() {
+    if (this.saveTimer) return
+    this.saveTimer = setInterval(() => this.savePosition(), 10000)
+  }
+
+  stopAutoSave() {
+    if (this.saveTimer) {
+      clearInterval(this.saveTimer)
+      this.saveTimer = null
+    }
+  }
+
+  savePosition() {
+    if (!this.positionUrlValue) return
+
+    const position = Math.floor(this.audioTarget.currentTime)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+
+    fetch(this.positionUrlValue, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken
+      },
+      body: JSON.stringify({ position_seconds: position }),
+      keepalive: true
+    }).catch(() => {})
   }
 
   updateProgressUI() {
