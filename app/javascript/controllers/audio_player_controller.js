@@ -29,6 +29,7 @@ export default class extends Controller {
 
   disconnect() {
     this.stopAutoSave()
+    this.savePosition()
     window.removeEventListener("beforeunload", this.boundBeforeUnload)
   }
 
