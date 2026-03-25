@@ -8,6 +8,12 @@ RSpec.describe User, type: :model do
     it { is_expected.to have_many(:grants).through(:user_grants) }
   end
 
+  describe "database columns" do
+    it { is_expected.to have_db_column(:provider).of_type(:string) }
+    it { is_expected.to have_db_column(:uid).of_type(:string) }
+    it { is_expected.to have_db_index(%i[provider uid]).unique }
+  end
+
   describe "validations" do
     subject { build(:user) }
 
