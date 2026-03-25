@@ -70,6 +70,8 @@ ru:
         sign_up: "Зарегистрироваться"
         forgot_password: "Забыли пароль?"
         back: "Назад"
+        or: "или"
+        sign_in_with_google: "Войти через Google"
     mailer:
       reset_password_instructions:
         subject: "Инструкции по сбросу пароля"
