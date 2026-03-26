@@ -71,7 +71,15 @@ module Telegram
     def tags_for(entity)
       type = entity["type"]
 
-      
+      if type == "text_link"
+        url = ERB::Util.html_escape(entity["url"])
+        return [ "<a href=\"#{url}\">", "</a>" ]
+      end
+
+      tag = TAG_MAP[type]
+      return nil unless tag
+
+      [ "<#{tag}>", "</#{tag}>" ]
     end
 
     def build_pre_ranges(offset_map)

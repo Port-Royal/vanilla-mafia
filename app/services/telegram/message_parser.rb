@@ -94,7 +94,7 @@ module Telegram
       photos = @message["photo"]
       return nil if photos.blank?
 
-      photos.max_by { |p| p["file_size"].to_i }[nil]
+      photos.max_by { |p| p["file_size"].to_i }["file_id"]
     end
   end
 end
