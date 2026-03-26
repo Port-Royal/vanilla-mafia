@@ -64,12 +64,19 @@ module Telegram
           ent_start = entity["offset"]
           ent_end = ent_start + entity["length"]
 
-          if ent_start >= utf16_end
+          if ent_end <= utf16_start
+            next
+          elsif ent_start >= utf16_end
             entity["offset"] -= utf16_len
           elsif ent_start >= utf16_start && ent_end <= utf16_end
             entity["length"] = 0
           elsif ent_start < utf16_start && ent_end > utf16_end
             entity["length"] -= utf16_len
+          elsif ent_start >= utf16_start && ent_end > utf16_end
+            entity["offset"] = utf16_start
+            entity["length"] = ent_end - utf16_end
+          elsif ent_start < utf16_start && ent_end <= utf16_end
+            entity["length"] = utf16_start - ent_start
           end
         end
 

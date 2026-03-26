@@ -208,7 +208,7 @@ RSpec.describe Telegram::MessageParser do
       end
     end
 
-    context "with a text message" do
+    context "with a plain text message for html_content" do
       let(:payload) do
         {
           "update_id" => 200,

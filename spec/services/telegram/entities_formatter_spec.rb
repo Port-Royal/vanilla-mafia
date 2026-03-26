@@ -31,7 +31,7 @@ RSpec.describe Telegram::EntitiesFormatter do
       end
     end
 
-    context "when entities is nil" do
+    context "when entities are nil" do
       let(:text) { "Hello" }
       let(:entities) { nil }
 
