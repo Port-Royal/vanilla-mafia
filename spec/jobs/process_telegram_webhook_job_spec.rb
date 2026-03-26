@@ -28,7 +28,7 @@ RSpec.describe ProcessTelegramWebhookJob do
         expect(news.title).to eq("Breaking: tournament results announced")
       end
 
-      it "sets the news content from the message text" do
+      it "sets the news content as formatted HTML" do
         described_class.new.perform(payload)
         news = News.last
         expect(news.content.body.to_plain_text).to eq("Breaking: tournament results announced")
@@ -231,6 +231,34 @@ RSpec.describe ProcessTelegramWebhookJob do
 
       it "does not create a news article" do
         expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
+    context "when message has formatting entities" do
+      let(:payload) do
+        {
+          "update_id" => 10,
+          "message" => {
+            "text" => "#news Bold announcement here",
+            "entities" => [
+              { "type" => "hashtag", "offset" => 0, "length" => 5 },
+              { "type" => "bold", "offset" => 6, "length" => 4 }
+            ],
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      it "stores formatted HTML in content" do
+        described_class.new.perform(payload)
+        expect(News.last.content.body.to_s).to include("<strong>Bold</strong>")
+      end
+
+      it "uses plain text for the title" do
+        described_class.new.perform(payload)
+        expect(News.last.title).to eq("Bold announcement here")
       end
     end
 
