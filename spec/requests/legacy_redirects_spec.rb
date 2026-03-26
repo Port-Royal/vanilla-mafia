@@ -49,16 +49,9 @@ RSpec.describe "Legacy redirects" do
   end
 
   describe "GET / (root)" do
-    let_it_be(:competition) { create(:competition, :season, slug: "season-5") }
-
-    it "redirects to the current season competition" do
+    it "serves the home page" do
       get "/"
-      expect(response).to redirect_to(competition_path(slug: competition.slug))
-    end
-
-    it "returns moved permanently status" do
-      get "/"
-      expect(response).to have_http_status(:moved_permanently)
+      expect(response).to have_http_status(:ok)
     end
   end
 end

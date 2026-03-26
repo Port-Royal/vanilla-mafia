@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     mount Avo::Engine => "/avo"
   end
 
-  root to: redirect("/competitions/season-5", status: 301)
+  root to: "home#index"
 
   resources :competitions, only: [ :show ], param: :slug
 
