@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :grants, through: :user_grants
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
+  validates :password, password_strength: true, if: :password_required?
   validates :player_id, uniqueness: true, allow_nil: true
 
   def has_grant?(code)

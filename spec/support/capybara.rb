@@ -4,7 +4,7 @@ module AdminSignInHelper
   def sign_in_as_admin(user)
     visit "/users/sign_in"
     fill_in I18n.t("activerecord.attributes.user.email"), with: user.email
-    fill_in I18n.t("activerecord.attributes.user.password"), with: "password123"
+    fill_in I18n.t("activerecord.attributes.user.password"), with: "Str0ng!pass"
     find("input[type='submit']").click
   end
 end
