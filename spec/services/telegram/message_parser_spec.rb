@@ -208,6 +208,105 @@ RSpec.describe Telegram::MessageParser do
       end
     end
 
+    context "with a text message" do
+      let(:payload) do
+        {
+          "update_id" => 200,
+          "message" => {
+            "message_id" => 20,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "text" => "Hello world"
+          }
+        }
+      end
+
+      it "sets html_content to plain text" do
+        result = described_class.call(payload)
+        expect(result.html_content).to eq("Hello world")
+      end
+    end
+
+    context "with entities in text" do
+      let(:payload) do
+        {
+          "update_id" => 201,
+          "message" => {
+            "message_id" => 21,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "text" => "#news Bold update here",
+            "entities" => [
+              { "type" => "hashtag", "offset" => 0, "length" => 5 },
+              { "type" => "bold", "offset" => 6, "length" => 4 }
+            ]
+          }
+        }
+      end
+
+      it "strips #news and adjusts entity offsets in html_content" do
+        result = described_class.call(payload)
+        expect(result.html_content).to eq("<strong>Bold</strong> update here")
+      end
+
+      it "strips #news from plain text" do
+        result = described_class.call(payload)
+        expect(result.text).to eq("Bold update here")
+      end
+    end
+
+    context "with entities in caption" do
+      let(:payload) do
+        {
+          "update_id" => 202,
+          "message" => {
+            "message_id" => 22,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "photo" => [ { "file_id" => "abc", "file_size" => 1024, "width" => 90, "height" => 90 } ],
+            "caption" => "#news Photo caption",
+            "caption_entities" => [
+              { "type" => "hashtag", "offset" => 0, "length" => 5 },
+              { "type" => "italic", "offset" => 6, "length" => 5 }
+            ]
+          }
+        }
+      end
+
+      it "applies caption entities to html_content" do
+        result = described_class.call(payload)
+        expect(result.html_content).to eq("<em>Photo</em> caption")
+      end
+    end
+
+    context "with newlines in text" do
+      let(:payload) do
+        {
+          "update_id" => 203,
+          "message" => {
+            "message_id" => 23,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "text" => "#news Line one\nLine two"
+          }
+        }
+      end
+
+      it "preserves newlines as br tags in html_content" do
+        result = described_class.call(payload)
+        expect(result.html_content).to eq("Line one<br>Line two")
+      end
+
+      it "squishes newlines in plain text" do
+        result = described_class.call(payload)
+        expect(result.text).to eq("Line one Line two")
+      end
+    end
+
     context "with #news tag case-insensitivity" do
       let(:payload) do
         {

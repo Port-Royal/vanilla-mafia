@@ -15,7 +15,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     news = News.create!(
       title: parsed.text.truncate(MAX_TITLE_LENGTH),
-      content: parsed.text,
+      content: parsed.html_content,
       author: author.user,
       status: :draft
     )
