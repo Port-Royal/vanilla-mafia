@@ -18,6 +18,8 @@ ru:
             password:
               too_short: "слишком короткий (минимум %{count} символов)"
               blank: "не может быть пустым"
+              insufficient_diversity: "должен содержать минимум 3 из 4 типов символов: строчная буква, заглавная буква, цифра, спецсимвол"
+              common_password: "слишком распространённый и легко угадываемый"
             password_confirmation:
               confirmation: "не совпадает с паролем"
             current_password:
