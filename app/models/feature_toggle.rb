@@ -1,5 +1,15 @@
 class FeatureToggle < ApplicationRecord
-  KEYS = %w[require_approval].freeze
+  KEYS = %w[
+    require_approval
+    home_hero
+    home_running_tournaments
+    home_recently_finished
+    home_recent_games
+    home_latest_news
+    home_hall_of_fame
+    home_stats
+    home_documents
+  ].freeze
   CACHE_TTL = 5.minutes
 
   validates :key, presence: true, uniqueness: true, inclusion: { in: KEYS }
@@ -14,6 +24,13 @@ class FeatureToggle < ApplicationRecord
     end
   end
 
+  def self.disabled?(key)
+    Rails.cache.fetch(cache_key_for("#{key}_disabled"), expires_in: CACHE_TTL) do
+      toggle = find_by(key: key)
+      toggle.present? && !toggle.enabled
+    end
+  end
+
   def self.cache_key_for(key)
     "feature_toggle/#{key}"
   end
@@ -23,10 +40,17 @@ class FeatureToggle < ApplicationRecord
   def clear_cache
     if respond_to?(:saved_change_to_key?) && saved_change_to_key?
       old_key, new_key = saved_change_to_key
-      Rails.cache.delete(self.class.cache_key_for(old_key)) if old_key.present?
-      Rails.cache.delete(self.class.cache_key_for(new_key)) if new_key.present?
+      clear_cache_for(old_key)
+      clear_cache_for(new_key)
     else
-      Rails.cache.delete(self.class.cache_key_for(key))
+      clear_cache_for(key)
     end
+  end
+
+  def clear_cache_for(toggle_key)
+    return if toggle_key.blank?
+
+    self.class.cache_key_for(toggle_key).then { |k| Rails.cache.delete(k) }
+    self.class.cache_key_for("#{toggle_key}_disabled").then { |k| Rails.cache.delete(k) }
   end
 end

@@ -1,34 +1,40 @@
 <div class="space-y-12">
-  <%= render "home/hero" %>
+  <% if @block_visible[:hero] %>
+    <%= render "home/hero" %>
+  <% end %>
 
-  <% if @running_competitions.any? %>
+  <% if @block_visible[:running_tournaments] && @running_competitions.any? %>
     <%= render "home/running_tournaments",
          running_competitions: @running_competitions,
          mini_standings: @mini_standings %>
   <% end %>
 
-  <% if @recently_finished.any? %>
+  <% if @block_visible[:recently_finished] && @recently_finished.any? %>
     <%= render "home/recently_finished",
          recently_finished: @recently_finished,
          winners: @winners %>
   <% end %>
 
-  <% if @recent_games.any? %>
+  <% if @block_visible[:recent_games] && @recent_games.any? %>
     <%= render "home/recent_games",
          recent_games: @recent_games %>
   <% end %>
 
-  <% if @latest_news.any? %>
+  <% if @block_visible[:latest_news] && @latest_news.any? %>
     <%= render "home/latest_news",
          latest_news: @latest_news %>
   <% end %>
 
-  <% if @hall_of_fame_players.any? %>
+  <% if @block_visible[:hall_of_fame] && @hall_of_fame_players.any? %>
     <%= render "home/hall_of_fame",
          hall_of_fame_players: @hall_of_fame_players %>
   <% end %>
 
-  <%= render "home/stats", stats: @stats %>
+  <% if @block_visible[:stats] %>
+    <%= render "home/stats", stats: @stats %>
+  <% end %>
 
-  <%= render "home/documents" %>
+  <% if @block_visible[:documents] %>
+    <%= render "home/documents" %>
+  <% end %>
 </div>

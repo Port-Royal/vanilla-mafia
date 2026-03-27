@@ -577,4 +577,105 @@ RSpec.describe HomeController do
       expect(response.body).to include(I18n.t("home.documents.rating_system"))
     end
   end
+
+  describe "block visibility toggles" do
+    let_it_be(:competition) { create(:competition, :season, name: "Toggle Season", ended_on: nil) }
+    let_it_be(:child) { create(:competition, :series, parent: competition, name: "Toggle Series") }
+    let_it_be(:role) { create(:role) }
+    let_it_be(:player) { create(:player, name: "Toggle Player") }
+    let_it_be(:game) { create(:game, competition: child, result: "peace_victory", played_on: Date.new(2026, 3, 1)) }
+    let_it_be(:article) { create(:news, :published, title: "Toggle News") }
+    let_it_be(:award) { create(:award, title: "Toggle Award") }
+    let_it_be(:player_award) { create(:player_award, player: player, award: award) }
+
+    before_all do
+      create(:game_participation, game: game, player: player, role: role, plus: 10)
+    end
+
+    context "when home_hero toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_hero", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the hero section" do
+        expect(response.body).not_to include(I18n.t("home.hero.tagline"))
+      end
+    end
+
+    context "when home_running_tournaments toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_running_tournaments", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the running tournaments section" do
+        expect(response.body).not_to include(I18n.t("home.running_tournaments.running_tournaments"))
+      end
+    end
+
+    context "when home_recent_games toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_recent_games", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the recent games section" do
+        expect(response.body).not_to include(I18n.t("home.recent_games.title"))
+      end
+    end
+
+    context "when home_latest_news toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_latest_news", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the latest news section" do
+        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
+      end
+    end
+
+    context "when home_hall_of_fame toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_hall_of_fame", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the hall of fame section" do
+        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
+      end
+    end
+
+    context "when home_stats toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_stats", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the stats section" do
+        expect(response.body).not_to include(I18n.t("home.stats.title"))
+      end
+    end
+
+    context "when home_documents toggle is disabled" do
+      let_it_be(:toggle) { create(:feature_toggle, key: "home_documents", enabled: false) }
+
+      before { get root_path }
+
+      it "does not render the documents section" do
+        expect(response.body).not_to include(I18n.t("home.documents.title"))
+      end
+    end
+
+    context "when toggle does not exist (defaults to enabled)" do
+      before { get root_path }
+
+      it "renders the hero section" do
+        expect(response.body).to include(I18n.t("home.hero.tagline"))
+      end
+
+      it "renders the stats section" do
+        expect(response.body).to include(I18n.t("home.stats.title"))
+      end
+
+      it "renders the documents section" do
+        expect(response.body).to include(I18n.t("home.documents.title"))
+      end
+    end
+  end
 end
