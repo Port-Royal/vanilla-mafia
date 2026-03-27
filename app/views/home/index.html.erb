@@ -6,4 +6,10 @@
          running_competitions: @running_competitions,
          mini_standings: @mini_standings %>
   <% end %>
+
+  <% if @recently_finished.any? %>
+    <%= render "home/recently_finished",
+         recently_finished: @recently_finished,
+         winners: @winners %>
+  <% end %>
 </div>

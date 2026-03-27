@@ -55,6 +55,10 @@ ru:
       title: "Vanilla Mafia"
       tagline: "Клуб спортивной мафии"
       cta: "Текущий турнир"
+    recently_finished:
+      title: "Недавно завершённые турниры"
+      winner: "Победитель"
+      ended_on: "Завершён"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"

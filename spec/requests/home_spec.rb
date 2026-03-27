@@ -157,4 +157,92 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "recently finished tournaments block" do
+    context "when recently finished competitions exist" do
+      let_it_be(:role) { create(:role) }
+      let_it_be(:finished_comp) do
+        create(:competition, :season, name: "Season 5", ended_on: Date.new(2026, 3, 1))
+      end
+      let_it_be(:child) { create(:competition, :series, parent: finished_comp, name: "Series F1") }
+      let_it_be(:winner) { create(:player, name: "Champion Alice") }
+      let_it_be(:runner_up) { create(:player, name: "Runner Bob") }
+      let_it_be(:game) { create(:game, competition: child) }
+
+      before_all do
+        create(:game_participation, game: game, player: winner, role: role, plus: 20)
+        create(:game_participation, game: game, player: runner_up, role: role, plus: 10)
+      end
+
+      before { get root_path }
+
+      it "renders the section title" do
+        expect(response.body).to include(I18n.t("home.recently_finished.title"))
+      end
+
+      it "renders the competition name" do
+        expect(response.body).to include("Season 5")
+      end
+
+      it "renders a link to the competition page" do
+        expect(response.body).to include(competition_path(slug: finished_comp.slug))
+      end
+
+      it "renders the winner name" do
+        expect(response.body).to include("Champion Alice")
+      end
+    end
+
+    context "when more than 3 finished competitions exist" do
+      let_it_be(:comps) do
+        (1..4).map do |i|
+          create(:competition, :season, name: "Finished #{i}", ended_on: Date.new(2026, i, 1))
+        end
+      end
+
+      before { get root_path }
+
+      it "shows only the 3 most recent" do
+        expect(response.body).to include("Finished 4")
+        expect(response.body).to include("Finished 3")
+        expect(response.body).to include("Finished 2")
+      end
+
+      it "does not show the oldest" do
+        expect(response.body).not_to include("Finished 1")
+      end
+    end
+
+    context "when competitions are ordered by ended_on" do
+      let_it_be(:older) { create(:competition, :season, name: "Older Comp", ended_on: Date.new(2025, 6, 1)) }
+      let_it_be(:newer) { create(:competition, :season, name: "Newer Comp", ended_on: Date.new(2026, 1, 1)) }
+
+      before { get root_path }
+
+      it "renders newer competition before older" do
+        body = response.body
+        pos_newer = body.index("Newer Comp")
+        pos_older = body.index("Older Comp")
+        expect(pos_newer).to be < pos_older
+      end
+    end
+
+    context "when no finished competitions exist" do
+      before { get root_path }
+
+      it "does not render the recently finished section" do
+        expect(response.body).not_to include(I18n.t("home.recently_finished.title"))
+      end
+    end
+
+    context "when a finished competition has no games" do
+      let_it_be(:empty_finished) { create(:competition, :season, name: "Empty Finished", ended_on: Date.new(2026, 2, 1)) }
+
+      before { get root_path }
+
+      it "renders the competition name" do
+        expect(response.body).to include("Empty Finished")
+      end
+    end
+  end
 end
