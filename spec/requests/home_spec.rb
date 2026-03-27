@@ -306,18 +306,33 @@ RSpec.describe HomeController do
     context "when games are ordered by played_on" do
       let_it_be(:competition) { create(:competition, :season, name: "Season 10", ended_on: nil) }
       let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series O") }
-      let_it_be(:older_game) { create(:game, competition: child, played_on: Date.new(2026, 1, 1), game_number: 1, name: "OlderGame") }
-      let_it_be(:newer_game) { create(:game, competition: child, played_on: Date.new(2026, 3, 1), game_number: 2, name: "NewerGame") }
+      let_it_be(:older_game) { create(:game, competition: child, played_on: Date.new(2026, 1, 1), result: "peace_victory", game_number: 1) }
+      let_it_be(:newer_game) { create(:game, competition: child, played_on: Date.new(2026, 3, 1), result: "mafia_victory", game_number: 2) }
 
       before { get root_path }
 
       it "renders newer game before older" do
         body = response.body
-        pos_newer = body.index("NewerGame")
-        pos_older = body.index("OlderGame")
+        pos_newer = body.index(game_path(newer_game))
+        pos_older = body.index(game_path(older_game))
         expect(pos_newer).not_to be_nil
         expect(pos_older).not_to be_nil
         expect(pos_newer).to be < pos_older
+      end
+    end
+
+    context "when only in_progress games exist" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season IP", ended_on: nil) }
+      let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series IP") }
+      let_it_be(:game) do
+        create(:game, competition: child, played_on: Date.new(2026, 3, 25),
+               result: "in_progress", game_number: 1)
+      end
+
+      before { get root_path }
+
+      it "does not render the recent games section" do
+        expect(response.body).not_to include(I18n.t("home.recent_games.title"))
       end
     end
 

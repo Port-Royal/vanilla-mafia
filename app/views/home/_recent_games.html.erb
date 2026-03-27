@@ -6,7 +6,7 @@
       <div class="border border-gray-200 rounded-lg p-4 flex items-center justify-between gap-4">
         <div>
           <h3 class="font-semibold">
-            <%= link_to game.full_name, game_path(game), class: "text-maroon hover:underline" %>
+            <%= link_to game.in_season_name, game_path(game), class: "text-maroon hover:underline" %>
           </h3>
           <p class="text-sm text-neutral-500">
             <% if game.played_on %>

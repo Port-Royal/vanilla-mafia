@@ -8,7 +8,7 @@ class HomeController < ApplicationController
     @mini_standings = load_mini_standings(@running_competitions)
     @recently_finished = Competition.roots.recently_finished.limit(RECENTLY_FINISHED_LIMIT)
     @winners = load_winners(@recently_finished)
-    @recent_games = Game.recent.limit(RECENT_GAMES_LIMIT)
+    @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT)
   end
 
   private
