@@ -344,4 +344,73 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "latest news block" do
+    context "when published news exist" do
+      let_it_be(:article) do
+        create(:news, :published, title: "Big Tournament Recap")
+      end
+
+      before { get root_path }
+
+      it "renders the section title" do
+        expect(response.body).to include(I18n.t("home.latest_news.title"))
+      end
+
+      it "renders the article title" do
+        expect(response.body).to include("Big Tournament Recap")
+      end
+
+      it "renders a link to the article" do
+        expect(response.body).to include(news_path(article))
+      end
+
+      it "renders the published date" do
+        expect(response.body).to include(I18n.l(article.published_at.to_date, format: :short))
+      end
+
+      it "renders a link to the news index" do
+        expect(response.body).to include(news_index_path)
+      end
+    end
+
+    context "when more than 3 published news exist" do
+      let_it_be(:articles) do
+        (1..4).map do |i|
+          create(:news, :published, title: "Article #{i}",
+                 published_at: Time.zone.local(2026, 3, i))
+        end
+      end
+
+      before { get root_path }
+
+      it "shows only the 3 most recent" do
+        expect(response.body).to include("Article 4")
+        expect(response.body).to include("Article 3")
+        expect(response.body).to include("Article 2")
+      end
+
+      it "does not show the oldest" do
+        expect(response.body).not_to include("Article 1")
+      end
+    end
+
+    context "when only draft news exist" do
+      let_it_be(:draft) { create(:news, title: "Draft Article") }
+
+      before { get root_path }
+
+      it "does not render the latest news section" do
+        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
+      end
+    end
+
+    context "when no news exist" do
+      before { get root_path }
+
+      it "does not render the latest news section" do
+        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
+      end
+    end
+  end
 end

@@ -212,6 +212,9 @@ en:
     recent_games:
       title: "Recent games"
       judge: "Judge"
+    latest_news:
+      title: "Latest news"
+      all_news: "All news"
     running_tournaments:
       running_tournaments: "Running tournaments"
       rank: "Rank"

@@ -2,6 +2,7 @@ class HomeController < ApplicationController
   MINI_STANDINGS_LIMIT = 5
   RECENTLY_FINISHED_LIMIT = 3
   RECENT_GAMES_LIMIT = 5
+  LATEST_NEWS_LIMIT = 3
 
   def index
     @running_competitions = Competition.roots.running.ordered
@@ -9,6 +10,7 @@ class HomeController < ApplicationController
     @recently_finished = Competition.roots.recently_finished.limit(RECENTLY_FINISHED_LIMIT)
     @winners = load_winners(@recently_finished)
     @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT)
+    @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT)
   end
 
   private

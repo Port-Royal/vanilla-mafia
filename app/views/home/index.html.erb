@@ -17,4 +17,9 @@
     <%= render "home/recent_games",
          recent_games: @recent_games %>
   <% end %>
+
+  <% if @latest_news.any? %>
+    <%= render "home/latest_news",
+         latest_news: @latest_news %>
+  <% end %>
 </div>
