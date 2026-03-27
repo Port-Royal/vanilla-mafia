@@ -5,6 +5,7 @@ class Judge::ProtocolsController < ApplicationController
 
   def new
     @game = Game.new(played_on: Date.current)
+    @game.judge = current_user.player.name if current_user.claimed_player?
     @participations = 10.times.map { |i| GameParticipation.new(seat: i + 1, role_code: "peace") }
     load_form_data
   end
