@@ -413,4 +413,90 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "hall of fame teaser block" do
+    context "when player awards exist" do
+      let_it_be(:award) { create(:award, title: "Best Player") }
+      let_it_be(:player) { create(:player, name: "Star Player") }
+      let_it_be(:player_award) { create(:player_award, player: player, award: award) }
+
+      before { get root_path }
+
+      it "renders the section title" do
+        expect(response.body).to include(I18n.t("home.hall_of_fame.title"))
+      end
+
+      it "renders the player name" do
+        expect(response.body).to include("Star Player")
+      end
+
+      it "renders a link to the hall of fame page" do
+        expect(response.body).to include(hall_path)
+      end
+
+      it "renders the player photo placeholder" do
+        expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
+      end
+    end
+
+    context "when more than 6 awarded players exist" do
+      let_it_be(:award) { create(:award, title: "Top Award") }
+      let_it_be(:players) do
+        (1..7).map { |i| create(:player, name: "Awarded #{i}") }
+      end
+
+      before_all do
+        players.each { |p| create(:player_award, player: p, award: award) }
+      end
+
+      before { get root_path }
+
+      it "shows only 6 players" do
+        (1..6).each do |i|
+          expect(response.body).to include("Awarded #{i}")
+        end
+      end
+
+      it "does not show the 7th player" do
+        expect(response.body).not_to include("Awarded 7")
+      end
+    end
+
+    context "when a player has multiple awards" do
+      let_it_be(:award1) { create(:award, title: "Award A") }
+      let_it_be(:award2) { create(:award, title: "Award B") }
+      let_it_be(:player) { create(:player, name: "Multi Winner") }
+
+      before_all do
+        create(:player_award, player: player, award: award1)
+        create(:player_award, player: player, award: award2)
+      end
+
+      before { get root_path }
+
+      it "renders the player only once" do
+        expect(response.body.scan(">Multi Winner<").count).to eq(1)
+      end
+    end
+
+    context "when only staff awards exist" do
+      let_it_be(:staff_award) { create(:award, title: "Best Judge", staff: true) }
+      let_it_be(:player) { create(:player, name: "Staff Member") }
+      let_it_be(:player_award) { create(:player_award, player: player, award: staff_award) }
+
+      before { get root_path }
+
+      it "does not render the hall of fame teaser" do
+        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
+      end
+    end
+
+    context "when no awards exist" do
+      before { get root_path }
+
+      it "does not render the hall of fame teaser" do
+        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
+      end
+    end
+  end
 end

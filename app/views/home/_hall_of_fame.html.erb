@@ -1,0 +1,24 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
+
+  <div class="flex flex-wrap gap-6">
+    <% hall_of_fame_players.each do |player| %>
+      <div class="flex flex-col items-center text-center w-24">
+        <% if player.photo.attached? %>
+          <%= image_tag player.photo.variant(resize_to_limit: [80, 80]),
+                        alt: player.name,
+                        class: "w-16 h-16 rounded-full object-cover mb-2" %>
+        <% else %>
+          <%= image_tag Player::DEFAULT_PHOTO_PATH,
+                        alt: player.name,
+                        class: "w-16 h-16 rounded-full object-cover mb-2" %>
+        <% end %>
+        <p class="text-sm font-medium truncate w-full"><%= player.name %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4 text-right">
+    <%= link_to t(".view_all"), hall_path, class: "text-sm text-maroon hover:underline" %>
+  </div>
+</section>

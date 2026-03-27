@@ -22,4 +22,9 @@
     <%= render "home/latest_news",
          latest_news: @latest_news %>
   <% end %>
+
+  <% if @hall_of_fame_players.any? %>
+    <%= render "home/hall_of_fame",
+         hall_of_fame_players: @hall_of_fame_players %>
+  <% end %>
 </div>
