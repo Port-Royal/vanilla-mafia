@@ -223,6 +223,8 @@ RSpec.describe HomeController do
         body = response.body
         pos_newer = body.index("Newer Comp")
         pos_older = body.index("Older Comp")
+        expect(pos_newer).not_to be_nil
+        expect(pos_older).not_to be_nil
         expect(pos_newer).to be < pos_older
       end
     end
