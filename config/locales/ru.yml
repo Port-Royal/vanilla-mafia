@@ -73,6 +73,11 @@ ru:
       players: "Игроков"
       games: "Игр сыграно"
       competitions: "Турниров"
+    documents:
+      title: "Документы"
+      league_rules: "Регламент лиги"
+      game_rules: "Правила игры"
+      rating_system: "Система рейтинга"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"

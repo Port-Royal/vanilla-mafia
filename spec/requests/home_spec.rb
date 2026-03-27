@@ -557,4 +557,24 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "documents block" do
+    before { get root_path }
+
+    it "renders the section title" do
+      expect(response.body).to include(I18n.t("home.documents.title"))
+    end
+
+    it "renders the league rules link" do
+      expect(response.body).to include(I18n.t("home.documents.league_rules"))
+    end
+
+    it "renders the game rules link" do
+      expect(response.body).to include(I18n.t("home.documents.game_rules"))
+    end
+
+    it "renders the rating system link" do
+      expect(response.body).to include(I18n.t("home.documents.rating_system"))
+    end
+  end
 end

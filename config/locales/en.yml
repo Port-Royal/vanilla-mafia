@@ -223,6 +223,11 @@ en:
       players: "Players"
       games: "Games played"
       competitions: "Tournaments"
+    documents:
+      title: "Documents"
+      league_rules: "League rules"
+      game_rules: "Game rules"
+      rating_system: "Rating system"
     running_tournaments:
       running_tournaments: "Running tournaments"
       rank: "Rank"

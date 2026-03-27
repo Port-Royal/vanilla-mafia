@@ -1,0 +1,18 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
+
+  <ul class="space-y-2">
+    <li>
+      <%= link_to t(".league_rules"), help_path("league-rules"),
+                  class: "text-maroon hover:underline" %>
+    </li>
+    <li>
+      <%= link_to t(".game_rules"), help_path("game-rules"),
+                  class: "text-maroon hover:underline" %>
+    </li>
+    <li>
+      <%= link_to t(".rating_system"), help_path("rating-system"),
+                  class: "text-maroon hover:underline" %>
+    </li>
+  </ul>
+</section>
