@@ -29,6 +29,19 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).to include(I18n.t("game_protocols.new.title"))
       end
 
+      it "pre-fills judge with current user's player nickname" do
+        claimed_player = create(:player, name: "AdminNick")
+        admin.update!(player: claimed_player)
+        get new_judge_protocol_path
+        expect(response.body).to include('id="game_judge" value="AdminNick"')
+      end
+
+      it "leaves judge blank when user has no claimed player" do
+        admin.update!(player: nil)
+        get new_judge_protocol_path
+        expect(response.body).to include('id="game_judge" value=""')
+      end
+
       it "excludes season competitions from the dropdown" do
         season_comp = create(:competition, :season, name: "Season Parent")
         get new_judge_protocol_path
