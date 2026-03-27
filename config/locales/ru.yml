@@ -59,6 +59,9 @@ ru:
       title: "Недавно завершённые турниры"
       winner: "Победитель"
       ended_on: "Завершён"
+    recent_games:
+      title: "Последние игры"
+      judge: "Ведущий"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"

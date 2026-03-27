@@ -18,6 +18,8 @@ class Game < ApplicationRecord
 
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :ordered, -> { order(played_on: :asc, game_number: :asc) }
+  scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
+  scope :finished, -> { where.not(result: "in_progress") }
 
   def full_name
     parts = [ played_on, competition.parent&.name, competition.name, "#{I18n.t('common.game')} #{game_number}", name ].compact

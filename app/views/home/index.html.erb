@@ -12,4 +12,9 @@
          recently_finished: @recently_finished,
          winners: @winners %>
   <% end %>
+
+  <% if @recent_games.any? %>
+    <%= render "home/recent_games",
+         recent_games: @recent_games %>
+  <% end %>
 </div>

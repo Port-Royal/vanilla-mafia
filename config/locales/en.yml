@@ -209,6 +209,9 @@ en:
       title: "Recently finished tournaments"
       winner: "Winner"
       ended_on: "Ended"
+    recent_games:
+      title: "Recent games"
+      judge: "Judge"
     running_tournaments:
       running_tournaments: "Running tournaments"
       rank: "Rank"

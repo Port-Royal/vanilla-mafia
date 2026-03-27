@@ -1,0 +1,27 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
+
+  <div class="space-y-3">
+    <% recent_games.each do |game| %>
+      <div class="border border-gray-200 rounded-lg p-4 flex items-center justify-between gap-4">
+        <div>
+          <h3 class="font-semibold">
+            <%= link_to game.in_season_name, game_path(game), class: "text-maroon hover:underline" %>
+          </h3>
+          <p class="text-sm text-neutral-500">
+            <% if game.played_on %>
+              <%= l(game.played_on, format: :short) %> ·
+            <% end %>
+            <% if game.judge.present? %>
+              <%= t(".judge") %>: <%= game.judge %>
+            <% end %>
+          </p>
+        </div>
+
+        <span class="text-sm font-medium whitespace-nowrap">
+          <%= t("activerecord.attributes.game.results.#{game.result}") %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+</section>
