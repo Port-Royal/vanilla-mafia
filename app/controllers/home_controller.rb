@@ -3,6 +3,7 @@ class HomeController < ApplicationController
   RECENTLY_FINISHED_LIMIT = 3
   RECENT_GAMES_LIMIT = 5
   LATEST_NEWS_LIMIT = 3
+  HALL_OF_FAME_LIMIT = 6
 
   def index
     @running_competitions = Competition.roots.running.ordered
@@ -11,6 +12,7 @@ class HomeController < ApplicationController
     @winners = load_winners(@recently_finished)
     @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT)
     @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT)
+    @hall_of_fame_players = load_hall_of_fame_players
   end
 
   private
@@ -25,5 +27,14 @@ class HomeController < ApplicationController
     competitions.index_with do |competition|
       Player.with_stats_for_competition(competition).ranked.first
     end
+  end
+
+  def load_hall_of_fame_players
+    Player
+      .joins(:player_awards)
+      .merge(PlayerAward.joins(:award).where(awards: { staff: false }))
+      .distinct
+      .includes(photo_attachment: :blob)
+      .limit(HALL_OF_FAME_LIMIT)
   end
 end
