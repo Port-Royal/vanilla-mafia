@@ -1,2 +1,7 @@
 <div class="space-y-12">
+  <% if @running_competitions.any? %>
+    <%= render "home/running_tournaments",
+         running_competitions: @running_competitions,
+         mini_standings: @mini_standings %>
+  <% end %>
 </div>

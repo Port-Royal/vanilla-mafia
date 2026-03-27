@@ -200,6 +200,13 @@ en:
       greeting: "A new news draft has been created."
       body: "\"%{title}\" is waiting for editing and publication."
       footer: "This is an automatic notification. You can disable it in your settings."
+  home:
+    running_tournaments:
+      running_tournaments: "Running tournaments"
+      rank: "Rank"
+      player: "Player"
+      rating: "Rating"
+      view_all: "View all"
   competitions:
     show:
       by_children: "By series and games"

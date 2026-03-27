@@ -50,6 +50,13 @@ ru:
         title: "Название"
         description: "Описание"
         staff: "Организаторская"
+  home:
+    running_tournaments:
+      running_tournaments: "Текущие турниры"
+      rank: "Место"
+      player: "Игрок"
+      rating: "Рейтинг"
+      view_all: "Подробнее"
   competitions:
     show:
       by_children: "По сериям и играм"
