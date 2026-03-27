@@ -247,4 +247,86 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "recent games block" do
+    context "when games exist" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season 8", ended_on: nil) }
+      let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series 1") }
+      let_it_be(:game) do
+        create(:game, competition: child, played_on: Date.new(2026, 3, 20),
+               result: "peace_victory", judge: "Judge Judy", game_number: 1)
+      end
+
+      before { get root_path }
+
+      it "renders the section title" do
+        expect(response.body).to include(I18n.t("home.recent_games.title"))
+      end
+
+      it "renders a link to the game page" do
+        expect(response.body).to include(game_path(game))
+      end
+
+      it "renders the game result" do
+        expect(response.body).to include(I18n.t("activerecord.attributes.game.results.peace_victory"))
+      end
+
+      it "renders the judge name" do
+        expect(response.body).to include("Judge Judy")
+      end
+
+      it "renders the played_on date" do
+        expect(response.body).to include(I18n.l(game.played_on, format: :short))
+      end
+    end
+
+    context "when more than 5 games exist" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season 9", ended_on: nil) }
+      let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series G") }
+      let_it_be(:games) do
+        (1..6).map do |i|
+          create(:game, competition: child, played_on: Date.new(2026, 3, i),
+                 result: "peace_victory", game_number: i)
+        end
+      end
+
+      before { get root_path }
+
+      it "shows only the 5 most recent" do
+        (2..6).each do |i|
+          expect(response.body).to include(game_path(games[i - 1]))
+        end
+      end
+
+      it "does not show the oldest game" do
+        expect(response.body).not_to include(game_path(games[0]))
+      end
+    end
+
+    context "when games are ordered by played_on" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season 10", ended_on: nil) }
+      let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series O") }
+      let_it_be(:older_game) { create(:game, competition: child, played_on: Date.new(2026, 1, 1), game_number: 1, name: "OlderGame") }
+      let_it_be(:newer_game) { create(:game, competition: child, played_on: Date.new(2026, 3, 1), game_number: 2, name: "NewerGame") }
+
+      before { get root_path }
+
+      it "renders newer game before older" do
+        body = response.body
+        pos_newer = body.index("NewerGame")
+        pos_older = body.index("OlderGame")
+        expect(pos_newer).not_to be_nil
+        expect(pos_older).not_to be_nil
+        expect(pos_newer).to be < pos_older
+      end
+    end
+
+    context "when no games exist" do
+      before { get root_path }
+
+      it "does not render the recent games section" do
+        expect(response.body).not_to include(I18n.t("home.recent_games.title"))
+      end
+    end
+  end
 end
