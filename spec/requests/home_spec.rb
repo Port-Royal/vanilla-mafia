@@ -17,6 +17,44 @@ RSpec.describe HomeController do
     end
   end
 
+  describe "hero section" do
+    before { get root_path }
+
+    it "renders the club logo" do
+      expect(response.body).to include('src="/img/chi_light.png"')
+    end
+
+    it "renders the club name" do
+      expect(response.body).to include(I18n.t("home.hero.title"))
+    end
+
+    it "renders the tagline" do
+      expect(response.body).to include(I18n.t("home.hero.tagline"))
+    end
+
+    context "when a running competition exists" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season 7", ended_on: nil) }
+
+      before { get root_path }
+
+      it "renders the CTA button linking to the current tournament" do
+        expect(response.body).to include(competition_path(slug: competition.slug))
+      end
+
+      it "renders the CTA button text" do
+        expect(response.body).to include(I18n.t("home.hero.cta"))
+      end
+    end
+
+    context "when no running competition exists" do
+      before { get root_path }
+
+      it "does not render the CTA button" do
+        expect(response.body).not_to include(I18n.t("home.hero.cta"))
+      end
+    end
+  end
+
   describe "running tournaments block" do
     context "when running competitions with players exist" do
       let_it_be(:competition) { create(:competition, :season, name: "Season 6", ended_on: nil) }

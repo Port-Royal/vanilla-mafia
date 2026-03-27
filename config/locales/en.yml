@@ -201,6 +201,10 @@ en:
       body: "\"%{title}\" is waiting for editing and publication."
       footer: "This is an automatic notification. You can disable it in your settings."
   home:
+    hero:
+      title: "Vanilla Mafia"
+      tagline: "Competitive Mafia club"
+      cta: "Current tournament"
     running_tournaments:
       running_tournaments: "Running tournaments"
       rank: "Rank"

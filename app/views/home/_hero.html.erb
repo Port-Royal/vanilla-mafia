@@ -1,0 +1,13 @@
+<section class="text-center py-12">
+  <div class="flex flex-col items-center space-y-4">
+    <img src="/img/chi_light.png" alt="Vanilla Mafia" class="w-32">
+    <h1 class="text-3xl font-bold text-maroon"><%= t(".title") %></h1>
+    <p class="text-lg text-neutral-600"><%= t(".tagline") %></p>
+
+    <% if @running_competitions.any? %>
+      <%= link_to t(".cta"),
+            competition_path(slug: @running_competitions.first.slug),
+            class: "mt-4 inline-block bg-maroon text-white px-6 py-3 rounded hover:bg-maroon/90 font-medium transition-colors" %>
+    <% end %>
+  </div>
+</section>

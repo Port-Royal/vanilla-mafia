@@ -51,6 +51,10 @@ ru:
         description: "Описание"
         staff: "Организаторская"
   home:
+    hero:
+      title: "Vanilla Mafia"
+      tagline: "Клуб спортивной мафии"
+      cta: "Текущий турнир"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"
