@@ -1,0 +1,22 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
+
+  <div class="space-y-3">
+    <% latest_news.each do |article| %>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h3 class="font-semibold">
+          <%= link_to article.title, news_path(article), class: "text-maroon hover:underline" %>
+        </h3>
+        <% if article.published_at %>
+          <p class="text-sm text-neutral-500 mt-1">
+            <%= l(article.published_at.to_date, format: :short) %>
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4 text-right">
+    <%= link_to t(".all_news"), news_index_path, class: "text-sm text-maroon hover:underline" %>
+  </div>
+</section>

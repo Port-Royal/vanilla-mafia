@@ -62,6 +62,9 @@ ru:
     recent_games:
       title: "Последние игры"
       judge: "Ведущий"
+    latest_news:
+      title: "Последние новости"
+      all_news: "Все новости"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"
