@@ -25,22 +25,20 @@ if toggle.new_record?
 end
 toggle.save!
 
-home_blocks = {
-  "home_hero" => "Show hero section on main page",
-  "home_running_tournaments" => "Show running tournaments on main page",
-  "home_recently_finished" => "Show recently finished tournaments on main page",
-  "home_recent_games" => "Show recent games on main page",
-  "home_latest_news" => "Show latest news on main page",
-  "home_hall_of_fame" => "Show hall of fame teaser on main page",
-  "home_stats" => "Show stats block on main page",
-  "home_documents" => "Show documents section on main page"
-}
-
-home_blocks.each do |key, description|
-  block_toggle = FeatureToggle.find_or_initialize_by(key: key)
+[
+  { key: "home_hero", description: "Show hero section on main page" },
+  { key: "home_running_tournaments", description: "Show running tournaments on main page" },
+  { key: "home_recently_finished", description: "Show recently finished tournaments on main page" },
+  { key: "home_recent_games", description: "Show recent games on main page" },
+  { key: "home_latest_news", description: "Show latest news on main page" },
+  { key: "home_hall_of_fame", description: "Show hall of fame teaser on main page" },
+  { key: "home_stats", description: "Show stats block on main page" },
+  { key: "home_documents", description: "Show documents section on main page" }
+].each do |attrs|
+  block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
     block_toggle.enabled = true
-    block_toggle.description = description
+    block_toggle.description = attrs[:description]
   end
   block_toggle.save!
 end
