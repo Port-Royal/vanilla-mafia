@@ -205,6 +205,10 @@ en:
       title: "Vanilla Mafia"
       tagline: "Competitive Mafia club"
       cta: "Current tournament"
+    recently_finished:
+      title: "Recently finished tournaments"
+      winner: "Winner"
+      ended_on: "Ended"
     running_tournaments:
       running_tournaments: "Running tournaments"
       rank: "Rank"
