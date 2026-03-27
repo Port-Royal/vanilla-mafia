@@ -6,17 +6,31 @@ class HomeController < ApplicationController
   HALL_OF_FAME_LIMIT = 6
 
   def index
+    @block_visible = load_block_visibility
     @running_competitions = Competition.roots.running.ordered
-    @mini_standings = load_mini_standings(@running_competitions)
-    @recently_finished = Competition.roots.recently_finished.limit(RECENTLY_FINISHED_LIMIT)
-    @winners = load_winners(@recently_finished)
-    @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT)
-    @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT)
-    @hall_of_fame_players = load_hall_of_fame_players
-    @stats = load_stats
+
+    if @block_visible[:running_tournaments]
+      @mini_standings = load_mini_standings(@running_competitions)
+    end
+
+    if @block_visible[:recently_finished]
+      @recently_finished = Competition.roots.recently_finished.limit(RECENTLY_FINISHED_LIMIT)
+      @winners = load_winners(@recently_finished)
+    end
+
+    @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT) if @block_visible[:recent_games]
+    @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT) if @block_visible[:latest_news]
+    @hall_of_fame_players = load_hall_of_fame_players if @block_visible[:hall_of_fame]
+    @stats = load_stats if @block_visible[:stats]
   end
 
   private
+
+  BLOCK_KEYS = %i[hero running_tournaments recently_finished recent_games latest_news hall_of_fame stats documents].freeze
+
+  def load_block_visibility
+    BLOCK_KEYS.index_with { |key| !FeatureToggle.disabled?("home_#{key}") }
+  end
 
   def load_mini_standings(competitions)
     competitions.index_with do |competition|

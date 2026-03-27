@@ -47,6 +47,44 @@ RSpec.describe FeatureToggle, type: :model do
     end
   end
 
+  describe ".disabled?" do
+    context "when toggle exists and is disabled" do
+      let!(:toggle) { create(:feature_toggle, key: "home_hero", enabled: false) }
+
+      it "returns true" do
+        expect(described_class.disabled?(:home_hero)).to be true
+      end
+    end
+
+    context "when toggle exists and is enabled" do
+      let!(:toggle) { create(:feature_toggle, key: "home_hero", enabled: true) }
+
+      it "returns false" do
+        expect(described_class.disabled?(:home_hero)).to be false
+      end
+    end
+
+    context "when toggle does not exist" do
+      it "returns false" do
+        expect(described_class.disabled?(:home_hero)).to be false
+      end
+    end
+
+    it "uses Rails.cache.fetch with the correct key and TTL" do
+      cache = instance_double(ActiveSupport::Cache::Store)
+      allow(Rails).to receive(:cache).and_return(cache)
+      allow(cache).to receive(:fetch)
+        .with("feature_toggle/home_hero_disabled", expires_in: 5.minutes)
+        .and_return(false)
+
+      result = described_class.disabled?(:home_hero)
+
+      expect(cache).to have_received(:fetch)
+        .with("feature_toggle/home_hero_disabled", expires_in: 5.minutes)
+      expect(result).to be false
+    end
+  end
+
   describe ".cache_key_for" do
     it "returns a namespaced cache key" do
       expect(described_class.cache_key_for("require_approval")).to eq("feature_toggle/require_approval")
@@ -56,7 +94,7 @@ RSpec.describe FeatureToggle, type: :model do
   describe "cache invalidation" do
     let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
 
-    it "clears the cache on commit" do
+    it "clears both enabled and disabled cache keys on commit" do
       cache = instance_double(ActiveSupport::Cache::Store)
       allow(Rails).to receive(:cache).and_return(cache)
       allow(cache).to receive(:delete)
@@ -64,6 +102,7 @@ RSpec.describe FeatureToggle, type: :model do
       toggle.run_callbacks(:commit)
 
       expect(cache).to have_received(:delete).with("feature_toggle/require_approval")
+      expect(cache).to have_received(:delete).with("feature_toggle/require_approval_disabled")
     end
   end
 end

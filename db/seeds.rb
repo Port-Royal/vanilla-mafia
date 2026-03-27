@@ -25,6 +25,24 @@ if toggle.new_record?
 end
 toggle.save!
 
+[
+  { key: "home_hero", description: "Show hero section on main page" },
+  { key: "home_running_tournaments", description: "Show running tournaments on main page" },
+  { key: "home_recently_finished", description: "Show recently finished tournaments on main page" },
+  { key: "home_recent_games", description: "Show recent games on main page" },
+  { key: "home_latest_news", description: "Show latest news on main page" },
+  { key: "home_hall_of_fame", description: "Show hall of fame teaser on main page" },
+  { key: "home_stats", description: "Show stats block on main page" },
+  { key: "home_documents", description: "Show documents section on main page" }
+].each do |attrs|
+  block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
+  if block_toggle.new_record?
+    block_toggle.enabled = true
+    block_toggle.description = attrs[:description]
+  end
+  block_toggle.save!
+end
+
 # Validate all feature toggles are seeded
 missing_keys = FeatureToggle::KEYS - FeatureToggle.pluck(:key)
 raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
