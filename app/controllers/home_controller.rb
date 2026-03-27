@@ -13,6 +13,7 @@ class HomeController < ApplicationController
     @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT)
     @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT)
     @hall_of_fame_players = load_hall_of_fame_players
+    @stats = load_stats
   end
 
   private
@@ -27,6 +28,14 @@ class HomeController < ApplicationController
     competitions.index_with do |competition|
       Player.with_stats_for_competition(competition).ranked.first
     end
+  end
+
+  def load_stats
+    {
+      players: Player.count,
+      games: Game.finished.count,
+      competitions: Competition.roots.finished.count
+    }
   end
 
   def load_hall_of_fame_players

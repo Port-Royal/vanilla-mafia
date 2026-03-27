@@ -68,6 +68,11 @@ ru:
     hall_of_fame:
       title: "Зал Славы"
       view_all: "Подробнее"
+    stats:
+      title: "Клуб в цифрах"
+      players: "Игроков"
+      games: "Игр сыграно"
+      competitions: "Турниров"
     running_tournaments:
       running_tournaments: "Текущие турниры"
       rank: "Место"
