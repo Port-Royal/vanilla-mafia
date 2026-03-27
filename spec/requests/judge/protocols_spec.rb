@@ -42,6 +42,11 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).to include('id="game_judge" value=""')
       end
 
+      it "shows abbreviated label 'ПУ' for first_shoot column" do
+        expect(response.body).to include("<th", "ПУ")
+        expect(response.body).not_to include("Первый выстрел")
+      end
+
       it "excludes season competitions from the dropdown" do
         season_comp = create(:competition, :season, name: "Season Parent")
         get new_judge_protocol_path
