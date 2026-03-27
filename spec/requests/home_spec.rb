@@ -499,4 +499,62 @@ RSpec.describe HomeController do
       end
     end
   end
+
+  describe "stats block" do
+    context "when players and games exist" do
+      let_it_be(:finished_comp) { create(:competition, :season, name: "Stats Season", ended_on: Date.new(2025, 12, 31)) }
+      let_it_be(:running_comp) { create(:competition, :season, name: "Running Season", ended_on: nil) }
+      let_it_be(:finished_child) { create(:competition, :series, parent: finished_comp, name: "Stats Series", ended_on: Date.new(2025, 11, 30)) }
+      let_it_be(:running_child) { create(:competition, :series, parent: running_comp, name: "Running Series") }
+      let_it_be(:role) { create(:role) }
+      let_it_be(:players) { (1..3).map { |i| create(:player, name: "Stat Player #{i}") } }
+      let_it_be(:finished_game) { create(:game, competition: finished_child, result: "peace_victory") }
+      let_it_be(:in_progress_game) { create(:game, competition: running_child, result: "in_progress") }
+
+      before_all do
+        players.each { |p| create(:game_participation, game: finished_game, player: p, role: role) }
+      end
+
+      before { get root_path }
+
+      it "renders the section title" do
+        expect(response.body).to include(I18n.t("home.stats.title"))
+      end
+
+      it "renders the players label" do
+        expect(response.body).to include(I18n.t("home.stats.players"))
+      end
+
+      it "renders the games label" do
+        expect(response.body).to include(I18n.t("home.stats.games"))
+      end
+
+      it "renders the competitions label" do
+        expect(response.body).to include(I18n.t("home.stats.competitions"))
+      end
+
+      it "renders player count as a number" do
+        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
+        expect(stats_section).to include(">#{Player.count}<")
+      end
+
+      it "counts only finished games" do
+        finished_count = Game.finished.count
+        total_count = Game.count
+        expect(finished_count).to be < total_count
+        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
+        expect(stats_section).to include(">#{finished_count}<")
+        expect(stats_section).not_to include(">#{total_count}<")
+      end
+
+      it "counts only root finished competitions" do
+        roots_finished = Competition.roots.finished.count
+        all_finished = Competition.finished.count
+        expect(roots_finished).to be < all_finished
+        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
+        expect(stats_section).to include(">#{roots_finished}<")
+        expect(stats_section).not_to include(">#{all_finished}<")
+      end
+    end
+  end
 end

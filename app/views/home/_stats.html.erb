@@ -1,0 +1,20 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
+
+  <div class="grid grid-cols-3 gap-4 text-center">
+    <div class="rounded-lg border border-gray-200 p-4">
+      <p class="text-3xl font-bold text-maroon"><%= stats[:players] %></p>
+      <p class="text-sm text-neutral-500 mt-1"><%= t(".players") %></p>
+    </div>
+
+    <div class="rounded-lg border border-gray-200 p-4">
+      <p class="text-3xl font-bold text-maroon"><%= stats[:games] %></p>
+      <p class="text-sm text-neutral-500 mt-1"><%= t(".games") %></p>
+    </div>
+
+    <div class="rounded-lg border border-gray-200 p-4">
+      <p class="text-3xl font-bold text-maroon"><%= stats[:competitions] %></p>
+      <p class="text-sm text-neutral-500 mt-1"><%= t(".competitions") %></p>
+    </div>
+  </div>
+</section>
