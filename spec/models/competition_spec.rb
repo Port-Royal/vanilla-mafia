@@ -60,6 +60,19 @@ RSpec.describe Competition, type: :model do
     end
   end
 
+  describe '.running' do
+    let_it_be(:running) { create(:competition, ended_on: nil) }
+    let_it_be(:finished) { create(:competition, ended_on: Date.new(2025, 12, 31)) }
+
+    it 'returns competitions without an ended_on date' do
+      expect(described_class.running).to include(running)
+    end
+
+    it 'excludes finished competitions' do
+      expect(described_class.running).not_to include(finished)
+    end
+  end
+
   describe '#parent_is_not_self' do
     it 'is invalid when parent_id equals own id' do
       competition = create(:competition)

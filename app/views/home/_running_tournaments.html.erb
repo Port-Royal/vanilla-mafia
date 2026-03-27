@@ -1,0 +1,41 @@
+<section>
+  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".running_tournaments") %></h2>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    <% running_competitions.each do |competition| %>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h3 class="text-lg font-semibold mb-3">
+          <%= link_to competition.name, competition_path(slug: competition.slug),
+                class: "text-maroon hover:underline" %>
+        </h3>
+
+        <% players = mini_standings[competition] %>
+        <% if players.any? %>
+          <table class="data-table w-full text-sm">
+            <thead>
+              <tr>
+                <th><%= t(".rank") %></th>
+                <th><%= t(".player") %></th>
+                <th><%= t(".rating") %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% players.each_with_index do |player, index| %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= link_to player.name, player_path(player) %></td>
+                  <td><%= player.total_rating %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% end %>
+
+        <div class="mt-3 text-right">
+          <%= link_to t(".view_all"), competition_path(slug: competition.slug),
+                class: "text-sm text-maroon hover:underline" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>

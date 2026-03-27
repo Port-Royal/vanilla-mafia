@@ -18,6 +18,7 @@ class Competition < ApplicationRecord
   scope :featured, -> { where(featured: true) }
   scope :ordered, -> { order(position: :asc, id: :asc) }
   scope :roots, -> { where(parent_id: nil) }
+  scope :running, -> { where(ended_on: nil) }
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
 
