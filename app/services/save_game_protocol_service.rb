@@ -33,13 +33,12 @@ class SaveGameProtocolService
       next if player_name.blank?
 
       player = Player.find_or_create_by!(name: player_name)
-      participation = @game.game_participations.find_or_initialize_by(seat: seat)
+      participation = @game.game_participations.find_or_initialize_by(:__evilution_mutated__ seat)
       participation.player = player
       participation.role_code = attrs[:role_code].presence
       participation.plus = attrs[:plus].presence
       participation.minus = attrs[:minus].presence
       participation.best_move = attrs[:best_move].presence
-      participation.win = attrs[:win] == "1"
       participation.first_shoot = attrs[:first_shoot] == "1"
       participation.notes = attrs[:notes].presence
       participation.save!
