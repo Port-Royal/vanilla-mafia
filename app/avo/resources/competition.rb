@@ -19,7 +19,7 @@ class Avo::Resources::Competition < Avo::BaseResource
     }
     field :slug, as: :text, help: I18n.t("avo.competition.slug_hint")
     field :kind, as: :select, options: ::Competition::KINDS.values.to_h { |k| [ I18n.t("activerecord.attributes.competition.kinds.#{k}"), k ] }
-    field :position, as: :number
+    field :position, as: :number, default: -> { Competition.maximum(:position).to_i + 1 }
     field :parent, as: :belongs_to, required: false
     field :started_on, as: :date
     field :ended_on, as: :date
