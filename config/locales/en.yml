@@ -224,6 +224,10 @@ en:
       title: "Vanilla Mafia"
       tagline: "Competitive Mafia club"
       cta: "Current tournament"
+    whats_new:
+      title: "What's New"
+      version: "Version %{version}"
+      dismiss: "Dismiss"
     recently_finished:
       title: "Recently finished tournaments"
       winner: "Winner"

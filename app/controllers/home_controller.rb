@@ -27,7 +27,7 @@ class HomeController < ApplicationController
 
   private
 
-  BLOCK_KEYS = %i[hero running_tournaments recently_finished recent_games latest_news hall_of_fame stats documents].freeze
+  BLOCK_KEYS = %i[hero whats_new running_tournaments recently_finished recent_games latest_news hall_of_fame stats documents].freeze
 
   def load_block_visibility
     BLOCK_KEYS.index_with { |key| !FeatureToggle.disabled?("home_#{key}") }
