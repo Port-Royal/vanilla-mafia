@@ -3,6 +3,10 @@ class Judge::ProtocolsController < ApplicationController
   before_action :require_protocol_access!
   before_action :set_game, only: [ :edit, :update, :autosave ]
 
+  def index
+    @in_progress_games = Game.in_progress.includes(:competition).ordered.load
+  end
+
   def new
     @game = Game.new(played_on: Date.current)
     @game.judge = current_user.player.name if current_user.claimed_player?
@@ -19,7 +23,7 @@ class Judge::ProtocolsController < ApplicationController
     )
 
     if result.success
-      redirect_to game_path(@game), notice: t("game_protocols.create.success")
+      redirect_to after_save_path(@game), notice: t("game_protocols.create.success")
     else
       @participations = build_participations_from_params
       load_form_data
@@ -59,7 +63,7 @@ class Judge::ProtocolsController < ApplicationController
     )
 
     if result.success
-      redirect_to game_path(@game), notice: t("game_protocols.update.success")
+      redirect_to after_save_path(@game), notice: t("game_protocols.update.success")
     else
       @participations = build_participations_from_params
       load_form_data
@@ -74,6 +78,10 @@ class Judge::ProtocolsController < ApplicationController
     payload = { scope: params[:scope], field: params[:field], value: params[:value] }
     payload[:seat] = params[:seat].to_i if params[:seat].present?
     GameProtocolChannel.broadcast_to(@game, payload)
+  end
+
+  def after_save_path(game)
+    game.in_progress? ? edit_judge_protocol_path(game) : game_path(game)
   end
 
   def require_protocol_access!

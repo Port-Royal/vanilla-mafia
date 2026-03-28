@@ -50,10 +50,17 @@ en:
         game_id: "Game"
   hello: "Hello world"
   game_protocols:
+    index:
+      title: "In-Progress Protocols"
+      no_protocols: "No in-progress protocols."
+      game_number: "Game #%{number}"
+      edit: "Edit"
+      new_protocol: "New Protocol"
     new:
       title: "New Protocol"
     edit:
       title: "Edit Protocol"
+    edit_link: "Edit protocol"
     form:
       game_panel: "Game"
       protocol_panel: "Protocol"

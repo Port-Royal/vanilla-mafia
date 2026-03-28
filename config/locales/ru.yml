@@ -366,10 +366,17 @@ ru:
     prev: "<<"
     next: ">>"
   game_protocols:
+    index:
+      title: "Незавершённые протоколы"
+      no_protocols: "Нет незавершённых протоколов."
+      game_number: "Игра №%{number}"
+      edit: "Редактировать"
+      new_protocol: "Новый протокол"
     new:
       title: "Новый протокол"
     edit:
       title: "Редактирование протокола"
+    edit_link: "Редактировать протокол"
     form:
       game_panel: "Игра"
       protocol_panel: "Протокол"

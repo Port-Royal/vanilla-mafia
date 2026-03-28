@@ -1,0 +1,36 @@
+<h1 class="text-2xl font-bold mb-6"><%= t("game_protocols.index.title") %></h1>
+
+<div class="mb-4">
+  <%= link_to t("game_protocols.index.new_protocol"), new_judge_protocol_path, class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+</div>
+
+<% if @in_progress_games.any? %>
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="bg-gray-50 text-left">
+          <th class="px-4 py-3 font-semibold"><%= Game.human_attribute_name(:game_number) %></th>
+          <th class="px-4 py-3 font-semibold"><%= t("game_protocols.form.competition") %></th>
+          <th class="px-4 py-3 font-semibold"><%= Game.human_attribute_name(:played_on) %></th>
+          <th class="px-4 py-3 font-semibold"><%= t("game_protocols.form.judge") %></th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        <% @in_progress_games.each do |game| %>
+          <tr>
+            <td class="px-4 py-3"><%= game.game_number %></td>
+            <td class="px-4 py-3"><%= game.competition.name %></td>
+            <td class="px-4 py-3"><%= game.played_on %></td>
+            <td class="px-4 py-3"><%= game.judge %></td>
+            <td class="px-4 py-3 text-right">
+              <%= link_to t("game_protocols.index.edit"), edit_judge_protocol_path(game), class: "text-maroon hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="text-gray-500"><%= t("game_protocols.index.no_protocols") %></p>
+<% end %>

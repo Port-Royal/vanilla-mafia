@@ -14,6 +14,51 @@ RSpec.describe "Judge::Protocols" do
     params
   end
 
+  describe "GET /judge/protocols" do
+    context "when user is admin" do
+      before { sign_in admin }
+
+      it "returns success" do
+        get judge_protocols_path
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "lists in-progress games but not finished ones" do
+        in_progress = create(:game, game_number: 77, result: "in_progress", competition: competition)
+        finished = create(:game, game_number: 78, result: "peace_victory", competition: competition)
+
+        get judge_protocols_path
+
+        expect(response.body).to include(edit_judge_protocol_path(in_progress))
+        expect(response.body).not_to include(edit_judge_protocol_path(finished))
+      end
+
+      it "shows edit link for each in-progress game" do
+        game = create(:game, game_number: 80, result: "in_progress", competition: competition)
+        get judge_protocols_path
+        expect(response.body).to include(edit_judge_protocol_path(game))
+      end
+    end
+
+    context "when user is regular user" do
+      let(:user) { create(:user) }
+
+      before { sign_in user }
+
+      it "returns not found" do
+        get judge_protocols_path
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      it "redirects to sign in" do
+        get judge_protocols_path
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
   describe "GET /judge/protocols/new" do
     context "when user is admin" do
       before do
@@ -106,9 +151,9 @@ RSpec.describe "Judge::Protocols" do
       before { sign_in admin }
 
       context "with valid params" do
-        let(:game_params) { { game_number: 99, played_on: "2026-01-15", judge: "Иван", competition_id: competition.id } }
+        let(:game_params) { { game_number: 99, played_on: "2026-01-15", judge: "Иван", result: "peace_victory", competition_id: competition.id } }
 
-        it "creates a game and redirects" do
+        it "creates a game and redirects to show" do
           expect {
             post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
           }.to change(Game, :count).by(1)
@@ -129,6 +174,15 @@ RSpec.describe "Judge::Protocols" do
         it "persists the chosen result" do
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
           expect(Game.last).to be_peace_victory
+        end
+      end
+
+      context "with in_progress result" do
+        let(:game_params) { { game_number: 95, result: "in_progress", competition_id: competition.id } }
+
+        it "redirects to edit instead of show" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(response).to redirect_to(edit_judge_protocol_path(Game.last))
         end
       end
 
@@ -175,9 +229,9 @@ RSpec.describe "Judge::Protocols" do
     context "when user is judge" do
       before { sign_in judge }
 
-      let(:game_params) { { game_number: 98, played_on: "2026-01-15", judge: "Мария", competition_id: competition.id } }
+      let(:game_params) { { game_number: 98, played_on: "2026-01-15", judge: "Мария", result: "mafia_victory", competition_id: competition.id } }
 
-      it "creates a game and redirects" do
+      it "creates a game and redirects to show" do
         expect {
           post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
         }.to change(Game, :count).by(1)
@@ -291,13 +345,23 @@ RSpec.describe "Judge::Protocols" do
       before { sign_in admin }
 
       context "with valid params" do
-        it "updates the game and redirects" do
+        it "updates the game and redirects to show when finished" do
           patch judge_protocol_path(game), params: {
-            game: { game_number: 51, judge: "Новый" },
+            game: { game_number: 51, judge: "Новый", result: "peace_victory" },
             participations: valid_participations_params
           }
           expect(response).to redirect_to(game_path(game))
           expect(game.reload.judge).to eq("Новый")
+        end
+      end
+
+      context "with in_progress result" do
+        it "redirects to edit instead of show" do
+          patch judge_protocol_path(game), params: {
+            game: { game_number: 51, result: "in_progress" },
+            participations: valid_participations_params
+          }
+          expect(response).to redirect_to(edit_judge_protocol_path(game))
         end
       end
 
@@ -315,9 +379,9 @@ RSpec.describe "Judge::Protocols" do
     context "when user is judge" do
       before { sign_in judge }
 
-      it "updates the game and redirects" do
+      it "updates the game and redirects to show when finished" do
         patch judge_protocol_path(game), params: {
-          game: { game_number: 51, judge: "Новый Ведущий" },
+          game: { game_number: 51, judge: "Новый Ведущий", result: "mafia_victory" },
           participations: valid_participations_params
         }
         expect(response).to redirect_to(game_path(game))
