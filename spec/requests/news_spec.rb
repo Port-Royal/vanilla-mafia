@@ -18,6 +18,15 @@ RSpec.describe NewsController do
       expect(response.body).to include(published_article.title)
     end
 
+    it "renders full article content without truncation" do
+      long_content = "A" * 400
+      article = create(:news, :published, author: author, content: long_content)
+
+      get news_index_path
+
+      expect(response.body).to include(long_content)
+    end
+
     it "excludes draft articles" do
       get news_index_path
       expect(response.body).not_to include(draft_article.title)
