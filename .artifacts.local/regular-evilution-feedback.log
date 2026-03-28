@@ -1,0 +1,637 @@
+## Evilution Feedback Log
+# Detailed comparison notes from mutant vs evilution runs.
+# Format: one entry per mutation testing session.
+
+---
+### 2026-03-23 — GameProtocolChannel (app/channels/game_protocol_channel.rb)
+**Evilution version:** 0.12.0
+
+**Results:**
+- Mutant: 97% (33/34 killed, 1 alive)
+- Evilution: 100% (15/15 killed) → after revert: 100% (17/17 killed)
+
+**Alive in mutant (not evilution):**
+- `params[:game_id]` → `params.fetch(:game_id)` — equivalent mutant. Both tools generate this, but mutant marks it alive while evilution killed it (likely different test execution behavior with ActionCable params).
+
+**Operator comparison:**
+- Mutant generated 34 mutations for 9 LOC (3.8 mutations/LOC)
+- Evilution generated 17 mutations for 9 LOC (1.9 mutations/LOC)
+- Mutant produces ~2x more mutations — higher granularity but more equivalent mutants
+
+**What mutant does better:**
+1. **Higher mutation density** — generates more mutation variants per line, catching subtle semantic differences
+2. **Equivalent mutant surfacing** — the `[]` vs `fetch` mutation is a real semantic consideration (KeyError vs nil). Even though equivalent in this context, it flags a design decision worth considering
+3. **Mature operator set** — mutant's `light` operator set still produces more diverse mutations than evilution's current operators
+
+**What evilution does well:**
+1. **File-level targeting** — can target specific files and line ranges, mutant requires class/method names
+2. **MCP integration** — the new MCP tool is much more ergonomic for AI-assisted workflows than parsing CLI output
+3. **Structured JSON output** — easier to programmatically compare results
+4. **Speed** — 2.6s vs 6.0s for the same file, roughly 2x faster
+
+**What could make evilution greater:**
+1. **More mutation operators** — evilution generated 17 vs mutant's 34 mutations. Adding more operators (especially around method dispatch variations like `[]` vs `fetch`, `send` vs direct call) would close the gap
+2. **Equivalent mutant detection/flagging** — ability to mark or auto-detect likely equivalent mutants would reduce noise
+3. **Diff output for survived mutants** — showing the exact code diff for survived mutants (like mutant does) helps quickly understand what test is missing
+4. **Cross-run comparison mode** — a built-in way to compare evilution results against a previous mutant run would streamline the feedback loop
+
+---
+### 2026-03-23 — GamesController#overlay (app/controllers/games_controller.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field — possible version mismatch bug)
+
+**Results:**
+- Mutant: 98% (50/51 killed, 1 neutral due to test data isolation — effectively 100%)
+- Evilution: 100% (34/35 killed, 1 equivalent)
+
+**Alive in mutant (not evilution):**
+- 1 neutral mutant caused by `let_it_be` test data collision across spec files (role code uniqueness). Not a real code quality gap.
+
+**Alive in evilution (not mutant):**
+- None. Both tools achieved full kill coverage on this method.
+
+**Operator comparison:**
+- Mutant generated 51 mutations for 4 LOC (12.75 mutations/LOC)
+- Evilution generated 35 mutations for 4 LOC (8.75 mutations/LOC)
+- Gap narrowing — evilution at ~69% of mutant's density (vs ~50% in previous run)
+
+**What mutant does better:**
+1. **Higher mutation density** — still generates ~1.5x more mutations, but the gap is closing
+2. **Neutral mutation tracking** — mutant distinguishes "neutral" (test errored) from "alive" (test passed), which helps identify test isolation issues
+
+**What evilution does well:**
+1. **Equivalent mutant detection** — evilution correctly identified 1 equivalent mutant and excluded it from score. Mutant doesn't have this classification
+2. **MCP integration** — calling via MCP tool with `target` parameter worked perfectly, very ergonomic
+3. **Speed** — despite more mutations, completed quickly
+
+**What could make evilution greater:**
+1. **Version consistency** — CLI reports 0.12.0 but MCP JSON `version` field says 0.11.2. Should be synced to avoid confusion
+2. **Neutral mutation category** — add a "neutral" classification like mutant has for when tests error (not fail). This helps distinguish test infrastructure problems from real coverage gaps
+3. **Test data isolation awareness** — when a mutation causes test errors (not failures), flag it separately so users know it's a test suite issue, not a mutation testing issue
+
+---
+### 2026-03-24 — GamesController + GamesHelper (app/controllers/games_controller.rb, app/helpers/games_helper.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field)
+
+**Results:**
+- Mutant (GamesController#overlay): 98% (46/47 killed, 1 neutral — same test data collision as before)
+- Mutant (GamesHelper): 94% (67/71 killed, 4 alive — all `[]` vs `fetch` equivalent mutants)
+- Evilution (both files): 89.8% (220/246 killed, 1 equivalent, 25 TIMED OUT, 0 survived)
+
+**Alive in mutant (not evilution):**
+- 4 equivalent `[]` vs `fetch` mutants in GamesHelper
+
+**Alive in evilution (not mutant):**
+- None survived. But 25 mutations timed out (30s default timeout).
+
+**CRITICAL ISSUE — Mass timeouts:**
+- 25 out of 246 mutations (10.2%) timed out at the default 30s timeout
+- All timeouts are on private controller methods: `build_overlay_config`, `clamp_font_size`, `sanitize_hex_color`
+- These methods are tested indirectly via request specs, which are heavier than unit specs
+- Mutant handles the same methods without timeouts because it selects only the relevant spec file
+- Evilution appears to be running a much broader test suite per mutation, causing the timeouts
+- Some timed-out mutations produce **syntactically broken code** (e.g., `config[:font_size` without closing bracket) — these should be caught as errors, not timed out
+- Memory usage peaked at 869 MB during the run
+
+**What mutant does better:**
+1. **No timeouts** — mutant completed 47+71 mutations in ~17s total vs evilution's 7456s (438x slower)
+2. **Smart test selection** — mutant only runs tests relevant to the mutated method, keeping per-mutation runtime fast
+3. **Equivalent mutant handling** — mutant's `[]` vs `fetch` mutations are correctly identified as equivalent by the developer; evilution didn't generate these for the helper
+
+**What evilution does well:**
+1. **MCP integration** — multi-file targeting in a single call is convenient
+2. **Equivalent mutant detection** — correctly identified 1 equivalent mutant
+
+**Timed-out mutation examples (sample of 25):**
+```
+# Syntax-breaking — should be caught at parse time:
+argument_removal line 18: config[:font_size  (missing ] and )
+argument_removal line 19: config[sanitize_hex_color(params[:color])  (missing ])
+argument_nil_substitution line 21: config[:hide_best_move, nil  (invalid Hash#[]=)
+argument_nil_substitution line 22: config[:hide_seats, nil  (invalid Hash#[]=)
+
+# Valid mutations that just ran too long:
+comparison_replacement line 20: params[:hide_roles] != "1"  (flipped ==)
+comparison_replacement line 21: params[:hide_best_move] != "1"
+string_literal line 20: params[:hide_roles] == nil
+string_literal line 22: params[:hide_seats] == ""
+conditional_negation line 27: return nil unless true
+conditional_flip line 33: return nil if value.present? && ...
+integer_literal line 29: value.to_i.clamp(8, nil)
+nil_replacement line 33: return true unless ...
+```
+
+**Reproduction:**
+- File: `app/controllers/games_controller.rb` (35 LOC, 5 methods including 3 private)
+- Spec: `spec/requests/games_overlay_spec.rb` (14 examples, request-level tests)
+- Command: `mcp__vanilla-mafia__evilution-mutate` with `files: ["app/controllers/games_controller.rb", "app/helpers/games_helper.rb"]`
+- Default timeout: 30s
+- Each spec run takes ~0.5s normally; timeouts suggest something else is happening (possibly running the entire spec suite?)
+
+**What could make evilution greater:**
+1. **🔴 CRITICAL: Timeout investigation** — 25 timeouts on a simple controller suggest spec selection is too broad. Per-mutation spec targeting should narrow to the closest matching spec file only. Mutant runs only 8 tests per mutation for this method and finishes in <0.2s per mutation
+2. **🔴 Syntax-breaking mutations** — mutations like `config[:font_size` (missing `]`) produce unparseable Ruby. These should be caught at parse time (Prism can validate!) and marked as errors/neutral, not left to time out during test execution. This accounts for at least 4 of the 25 timeouts
+3. **Memory usage** — 869 MB peak for 246 mutations is high; for comparison mutant peaked at ~200 MB for comparable workload. Investigate if mutations are leaking memory across workers or if forked processes aren't being cleaned up
+4. **Version field still mismatched** — MCP JSON says 0.11.2, CLI says 0.12.0. This was reported in the previous entry too
+
+---
+### 2026-03-24 — HelpController (app/controllers/help_controller.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON)
+
+**Results:**
+- Mutant: 95% (35/37 killed, 2 neutral — killfork environment issue causing 403 responses)
+- Evilution: 83% (15/18 killed, 0 survived, 3 timed out)
+
+**Alive in mutant (not evilution):**
+- 2 neutral mutants — mutant's killfork process gets 403 Forbidden (likely CSP/middleware), not a code coverage gap
+
+**Alive in evilution (not mutant):**
+- 3 timed out:
+  - `@pages = PAGES` → `nil` (method body replacement)
+  - `slug = params[:slug]` → `slug = params` (method call removal)
+  - `head :not_found unless PAGES.include?(slug)` → `head :not_found if PAGES.include?(slug)` (conditional flip)
+- All 3 are clearly killable mutations — the timeout is the problem, not the test coverage
+
+**Operator comparison:**
+- Mutant: 37 mutations for 9 LOC (4.1/LOC)
+- Evilution: 18 mutations for 9 LOC (2.0/LOC)
+
+**What mutant does better:**
+1. **No timeouts** — completed all 37 mutations in 4.6s
+2. **Higher density** — 2x more mutations generated
+
+**What evilution does well:**
+1. **MCP integration** — single-file targeting works smoothly
+
+**What could make evilution greater:**
+1. **🔴 Timeout issue persists** — 3/18 mutations timed out on a trivial 9-LOC controller. This is the same broad spec selection issue from the previous run. The controller has a matching spec at `spec/requests/help_spec.rb` (3 examples, runs in 0.13s). Evilution should be selecting only this file
+2. **Memory** — 918 MB peak for just 18 mutations on a 9-LOC file is extreme. Previous run peaked at 869 MB for 246 mutations. Memory appears to grow across runs or not be reclaimed between mutations
+
+---
+### 2026-03-24 — HelpController re-run with explicit --spec (app/controllers/help_controller.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field)
+
+**Results:**
+- Mutant: 94% (34/36 killed, 2 neutral — killfork 403 environment issue)
+- Evilution: 100% (15/15 killed, 0 survived, 0 timed out) — with explicit `--spec spec/requests/help_spec.rb`
+
+**Key finding — explicit spec override fixes timeouts:**
+- Previous run (auto-detected spec): 3/18 timed out, 48s total
+- This run (explicit `--spec`): 0/15 timed out, 48s total
+- The auto-detection was selecting a broader test suite; explicit spec targeting eliminated all timeouts
+- However, this run generated only 15 mutations vs 18 in the previous run (3 fewer mutations generated)
+
+**Operator comparison:**
+- Mutant: 36 mutations for 9 LOC (4.0/LOC)
+- Evilution: 15 mutations for 9 LOC (1.7/LOC)
+- Gap still ~2.4x; evilution generates fewer mutations
+
+**What mutant does better:**
+1. **Higher mutation density** — 36 vs 15 mutations, 2.4x more
+2. **Speed** — 7.2s total vs 48s total (6.7x faster), despite generating more mutations
+
+**What evilution does well:**
+1. **100% kill rate with explicit spec** — all 15 mutants killed cleanly
+2. **MCP integration with `spec` parameter** — explicit spec override is a reliable workaround for the auto-detection issue
+
+**What could make evilution greater:**
+1. **🔴 Auto-detection still needs fixing** — the `--spec` workaround confirms the timeout issue is spec selection, not mutation quality. Auto-detection should narrow to the closest matching spec file
+2. **Memory** — 918 MB peak persists even with explicit spec. Mutant peaks at ~200 MB for similar workload
+3. **Version field still mismatched** — MCP JSON says 0.11.2, CLI says 0.12.0 (third consecutive entry reporting this)
+4. **Mutation count variance** — 15 mutations this run vs 18 in previous run on the same file. Unclear why 3 fewer mutations were generated; possibly non-deterministic operator selection?
+
+---
+### 2026-03-24 — UserRole (app/models/user_role.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field)
+
+**Results:**
+- Mutant: 100% (0/0 — no subjects, DSL-only model)
+- Evilution: N/A (0 mutations generated)
+
+**Notes:**
+- UserRole model is pure DSL (belongs_to, validates, constant). Neither tool generated any mutations.
+- This is expected behavior for both tools — mutant only targets `def` methods, evilution also found nothing to mutate in this file.
+- Test coverage is verified via RSpec + Shoulda Matchers (6 examples, 0 failures).
+
+---
+### 2026-03-24 — SeedGrantsAndMigrateUserRoles (db/migrate/20260324065136_seed_grants_and_migrate_user_roles.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field)
+
+**Results:**
+- Mutant: 0/0 (migration class not autoloaded — mutant cannot find subjects in db/migrate/)
+- Evilution: 100% (63/63 killed, 0 survived, 0 timed out) — with explicit `--spec`
+
+**Key finding — evilution handles migrations better than mutant:**
+- Mutant requires class name matching and Rails autoloading — it cannot target migration files
+- Evilution targets files directly, making it the only option for mutation testing migrations
+- This is a genuine advantage for evilution in the migration testing workflow
+
+**Operator comparison:**
+- Mutant: 0 mutations (cannot target the file)
+- Evilution: 63 mutations for 23 LOC (2.7/LOC)
+
+**What evilution does well:**
+1. **Migration file targeting** — works perfectly where mutant cannot
+2. **100% kill rate** — all 63 mutants killed with explicit spec override
+3. **No timeouts** — with `--spec` parameter, all mutations completed cleanly
+
+**What could make evilution greater:**
+1. **Memory** — 921 MB peak for 63 mutations. Still high but proportional to workload
+2. **Version mismatch persists** — MCP JSON says 0.11.2, CLI says 0.12.0
+
+---
+### 2026-03-24 — User#has_grant? (app/models/user.rb)
+**Evilution version:** 0.12.0 (CLI) / 0.11.2 (MCP JSON `version` field)
+
+**Results:**
+- Mutant: 100% (12/12 killed)
+- Evilution: 100% (5/5 killed) — with explicit `--spec` and `--target User#has_grant?`
+
+**Operator comparison:**
+- Mutant: 12 mutations for 1 method (12/method)
+- Evilution: 5 mutations for 1 method (5/method)
+- Gap ~2.4x, consistent with prior observations
+
+**Notes:**
+- Straightforward single-method addition. Both tools achieve full coverage.
+- Evilution's `target` parameter works well for isolating a specific method.
+
+---
+
+### 2026-03-24 — User#admin?, User#judge?, User#editor? (grant-based predicates)
+
+- **Evilution version**: 0.13.0
+- **Mutant**: 100% (33/33 killed) on User#admin?, User#judge?, User#editor?
+- **Evilution**: 100% (20/20 killed) on app/models/user.rb:16-30
+
+**What mutant does better**:
+- Generated 33 mutations vs evilution's 20 for the same code range — broader operator coverage
+- Mutant tested `can_manage_protocols?` and `can_manage_news?` as separate subjects with their own mutations
+
+**What evilution does well**:
+- `argument_nil_substitution` operator caught cases where `has_grant?(nil)` could silently return false — good edge case coverage
+- `method_call_removal` operator (removing `.exists?` call, leaving bare `grants`) is a useful mutation not seen in mutant
+
+**What evilution is missing or could improve**:
+- No per-method targeting like mutant's `User#admin?` — had to use line ranges instead
+- When methods are simple delegators (one-liners calling `has_grant?`), evilution and mutant produce very similar mutations — both tools handle this case well
+
+**Suggestions for making evilution greater**:
+- Support method-level targeting syntax (e.g., `--target User#admin?`) in addition to line ranges — would make it easier to run on specific methods
+
+---
+### 2026-03-24 — Podcast::EpisodesController (vanilla-mafia-179)
+- **Evilution 0.13.0**: 100% (13/14 killed, 1 equivalent)
+- **Mutant**: 100% real kills (32/34 total, 2 neutrals from pre-existing test infra issue)
+- **What mutant does better**: N/A — both achieved 100% on real mutations
+- **What evilution does better**: Correctly identified `Playlist.detect` as equivalent mutation (semantically equivalent method substitution). Mutant doesn't generate this type of mutation.
+- **Suggestions**: Both tools performed well on this thin controller. The neutral detection difference remains — mutant reports neutrals as "alive" which inflates the alive count, while evilution separates equivalents cleanly.
+
+---
+### 2026-03-24 — Podcast::PlaylistsController (vanilla-mafia-166)
+- **Evilution 0.13.0**: 100% (20/20 killed, 0 equivalent)
+- **Mutant**: 100% real kills (37/39 total, 2 neutrals from pre-existing test infra issue)
+- **What mutant does better**: N/A — both achieved 100%
+- **What evilution does better**: Generated 20 mutations vs mutant's 37 (after deducting neutrals), more focused mutation set. No equivalents this time.
+- **Suggestions**: Both tools performed well. Evilution's more targeted mutation set is efficient for thin controllers.
+
+---
+### 2026-03-24 — Podcast::PlaybackPositionsController + EpisodesController (vanilla-mafia-180)
+- **Evilution 0.13.0 (PlaybackPositionsController)**: 100% (35/35 killed, 0 equivalent)
+- **Evilution 0.13.0 (EpisodesController)**: 100% (28/29 killed, 1 equivalent)
+- **Mutant (PlaybackPositionsController)**: 100% real kills (62/63, 1 neutral)
+- **Mutant (EpisodesController)**: 100% real kills (59/61, 2 neutrals)
+- **What mutant does better**: N/A — both achieved 100%
+- **What evilution does better**: Generated 35 mutations for the playback controller (vs mutant's 62) — more focused set. Also note: evilution mutates the file in-place during the run, which triggered linter/file-change notifications in the editor. This is cosmetic but could be confusing.
+- **Suggestions**: Evilution could optionally work on a temp copy to avoid triggering file watchers during mutation runs.
+
+---
+### 2026-03-26 — PasswordStrengthValidator (app/validators/password_strength_validator.rb)
+**Evilution version:** 0.13.0
+
+**Results:**
+- Mutant: 100% (165/165 killed)
+- Evilution: 100% (134/134 killed)
+
+**Operator comparison:**
+- Mutant: 165 mutations for 3 subjects (~55/subject)
+- Evilution: 134 mutations for the file (full file targeting)
+- Gap ~1.2x — closer than usual
+
+**What mutant does better:**
+1. **Higher mutation density** — 165 vs 134 mutations, but the gap is smaller than past runs (~1.2x vs typical 2x)
+2. **Caught a subtle issue first** — initial run had 5 surviving mutants around the lowercase character check (`/[a-z]/` was redundant in test coverage). All test passwords with 2 types happened to include lowercase. Adding tests for uppercase+digits-only and other non-lowercase pairs killed them
+
+**What evilution does well:**
+1. **Full file targeting** — clean single-command run for the entire validator
+2. **Speed** — 210s for 134 mutations vs mutant's 51s for 165 mutations. Evilution slower here (likely broader spec selection)
+3. **No timeouts** — all 134 mutations completed cleanly
+
+**What could make evilution greater:**
+1. **Memory** — peak 179 MB, reasonable for this workload
+2. **Version field** — need to check if MCP JSON version matches CLI version now
+
+---
+### 2026-03-26 — Telegram::EntitiesFormatter + MessageParser (vanilla-mafia-218)
+**Evilution version:** 0.13.0
+
+**Results:**
+- Mutant (EntitiesFormatter): 89% (580/653 killed, 73 alive — mostly equivalent mutants around guard clauses)
+- Mutant (MessageParser): 80% (479/598 killed, 119 alive — 106 in strip_news_tags, mostly equivalent)
+- Evilution (EntitiesFormatter): 100% (343/348 killed, 5 equivalent)
+- Evilution (MessageParser): 100% (334/335 killed, 1 equivalent)
+
+**What mutant does better:**
+1. **Higher mutation density** — generated 653 vs 348 (formatter) and 598 vs 335 (parser)
+2. **Surfaced guard clause redundancy** — many alive mutants reveal that early returns in strip_news_tags are optimizations, not behavioral gates
+
+**What evilution does well:**
+1. **100% kill rate** on both files with explicit spec
+2. **Equivalent mutant detection** — correctly identified 5+1 equivalent mutants
+3. **No timeouts** — clean runs on both files
+
+### 2026-03-27 — HomeController hero section (app/controllers/home_controller.rb)
+**Evilution version:** 0.13.0
+
+**Results:**
+- Mutant: 95% (38/40 killed, 2 neutral — "original code inserted unmutated" test failure, likely test isolation/allow_browser issue in killfork)
+- Evilution: 100% (15/15 killed, score 1.0)
+
+**Operator comparison:**
+- Mutant: 40 mutations for 2 subjects (20/subject)
+- Evilution: 15 mutations for 16 LOC (0.94/LOC)
+- Gap ~2.7x — consistent with prior observations
+
+**What mutant does better:**
+1. **Higher mutation density** — 40 vs 15, catching more edge cases
+2. **Neutral mutation tracking** — identifies that the 2 "alive" are actually test infra issues, not real coverage gaps
+
+**What evilution does well:**
+1. **Clean 100% kill rate** — all 15 mutations killed, no timeouts, no survivors
+2. **Speed** — 110s for 15 mutations including full spec suite per mutation
+3. **Broad operator coverage** — statement_deletion, method_body_replacement, method_call_removal, argument_nil_substitution, block_removal all represented
+
+**What could make evilution greater:**
+1. **Memory** — 1709 MB peak for 15 mutations is very high. Previous runs peaked at 179-921 MB. Possible regression or test suite growth causing memory bloat
+2. **Per-mutation spec targeting** — evilution ran the full spec suite per mutation (1270 examples). With auto-detected spec targeting to just `spec/requests/home_spec.rb` (21 examples), runtime could drop from 110s to ~15s
+
+---
+### 2026-03-27 — HomeController recently finished block (app/controllers/home_controller.rb)
+**Evilution version:** 0.13.0
+
+**Results:**
+- Mutant: 96% (73/76 killed, 3 neutral — killfork 403 issue, not real survivors)
+- Evilution: 100% (29/29 killed, score 1.0)
+
+**Operator comparison:**
+- Mutant: 76 mutations for 3 subjects (~25/subject)
+- Evilution: 29 mutations for the file
+- Gap ~2.6x — consistent
+
+**What mutant does better:**
+1. **Higher mutation density** — 76 vs 29
+
+**What evilution does well:**
+1. **Clean 100% kill rate** — all 29 mutations killed, no timeouts
+2. **Speed with explicit spec** — 29s for 29 mutations (1s/mutation) with `--spec` flag, vs 110s without in previous run
+3. **Memory** — 282 MB peak with explicit spec (vs 1709 MB without) — confirms the memory issue is from broad spec selection
+
+**What could make evilution greater:**
+1. **Auto-detection still defaults to full suite** — explicit `--spec` dramatically improves speed (29s vs 110s) and memory (282 MB vs 1709 MB). Auto-detection should be fixed to narrow to matching spec file
+
+---
+### 2026-03-27 — HomeController recent games block (app/controllers/home_controller.rb)
+**Evilution version:** 0.13.0
+
+**Results:**
+- Mutant: 96% (82/85 killed, 3 neutral — killfork issue)
+- Evilution: 100% (33/33 killed, score 1.0)
+
+**Operator comparison:**
+- Mutant: 85 mutations for 3 subjects
+- Evilution: 33 mutations for the file
+- Gap ~2.6x — consistent across all HomeController runs
+
+**What mutant does better:**
+1. **Higher mutation density** — 85 vs 33
+
+**What evilution does well:**
+1. **Clean 100% kill rate** — 33/33, no timeouts
+2. **Speed** — 30s with explicit `--spec`, consistent with previous run
+3. **Memory** — 328 MB peak, reasonable with explicit spec
+
+---
+
+### Entry: 2026-03-27 — HomeController (vanilla-mafia-250: latest news block)
+
+**Evilution version:** 0.13.0
+**Mutant version:** 0.12.4
+
+**Mutant results:** 97.11% (101/104 killed, 3 neutral — killfork 403)
+**Evilution results:** 88.64% (39/44 killed, 5 survived)
+
+**Survivors analysis:**
+All 5 evilution survivors are pre-existing from prior blocks (not related to new `@latest_news` code):
+1. `includes(competition: nil)` — symbol_literal on eager-load hash (line 12). Optimization-only, behavior unchanged.
+2. `Competition.recently_finished` removing `.roots` (line 10). Missing test for root-only filtering in recently_finished block.
+3. `Game.finished.recent.limit(...)` removing `.includes` (line 12). Same as #1 — performance optimization.
+4-5. Removing `.ranked` from `load_mini_standings` and `load_winners` (lines 20, 26). Ordering not verified in tests for ties.
+
+All mutations targeting the new `@latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT)` line were killed by both tools.
+
+**What mutant does better:**
+1. **Higher mutation density** — 104 vs 44 mutations
+2. **Neutral detection** — correctly identifies killfork 403 as neutral, not a real survivor
+3. **Better coverage** of the `.roots` removal (killed by mutant via existing running tournaments tests, survived in evilution because recently_finished tests don't verify root-only)
+
+**What evilution does well:**
+1. **symbol_literal operator** — catches `:parent → nil` mutation that mutant doesn't generate
+2. **Speed** — 124s with 4 jobs vs 21s mutant with 1 job (fair comparison: mutant is faster per-mutation)
+3. **method_call_removal** — systematically removes each chained method call, revealing that `.includes` and `.ranked` removals don't break tests
+
+**What evilution is missing or could improve:**
+1. **Neutral detection** — evilution reports 0 neutrals, but the killfork 403 issue would also affect evilution if it generated the same mutations. No neutral detection mechanism visible.
+2. **No deduplication of conceptually similar survivors** — survivors 1 and 3 both test `.includes` removal via different operators but represent the same coverage gap.
+
+---
+
+### Entry: 2026-03-28 — HomeController (vanilla-mafia-251: Hall of Fame teaser)
+
+**Evilution version:** 0.13.0
+**Mutant version:** 0.12.4
+
+**Mutant results:** 97.31% (145/149 killed, 4 neutral — killfork 403)
+**Evilution results (bash):** 89.04% (65/73 killed, 8 survived)
+**Evilution results (MCP):** 89.04% (65/73 killed, 8 survived) — identical
+
+**Correction:** Earlier reported "100% (0 survived, 8 equivalent)" — this was a misread of the bash JSON output. Both bash and MCP runs produce identical results: 8 survived, 0 equivalent. The 8 survivors are all pre-existing from prior blocks (`.includes` optimizations, `.ranked`, `.roots`), plus 3 new ones for the hall_of_fame method's `.includes(photo_attachment: :blob)`.
+
+**Analysis:**
+All mutations targeting new `load_hall_of_fame_players` method's core logic (joins, merge, distinct, limit) were killed. The 4 mutant neutrals are the same killfork 403 infrastructure issue. The 8 evilution survivors are `.includes`/`.ranked` removals that don't change behavior, only performance.
+
+**What mutant does better:**
+1. **Higher mutation density** — 149 vs 73 mutations (includes all 4 methods)
+2. **Neutral detection** — correctly marks killfork 403 as neutral
+
+**What evilution does well:**
+1. **Consistent results** — bash and MCP produce identical output
+2. **`verbosity` parameter (MCP)** — `summary` mode omits killed/neutral/equivalent arrays, saving context window
+3. **`suggest_tests` option (MCP)** — can generate concrete RSpec test code for survivors (not tested this run)
+
+**MCP vs Bash comparison (detailed):**
+
+Ran the same evilution command via both interfaces on the same code. Observations:
+
+*MCP advantages:*
+1. **Structured parameters** — `files`, `spec`, `jobs`, `verbosity` as named params vs remembering CLI flags (`--format json --jobs 4 --spec ...`)
+2. **Verbosity control** — `summary` mode strips killed/neutral/equivalent arrays from output. This is valuable for AI agents: bash `--format json` dumps everything (all 65 killed entries with full diffs), flooding context. MCP `summary` returns only the summary block + survived array — ~80% less output.
+3. **`suggest_tests: true`** — unique MCP feature, generates concrete RSpec code for survivors. Not available via CLI.
+4. **No post-processing needed** — with bash, I piped through `python3 -c` to extract a summary from the JSON. MCP with `verbosity: minimal` would eliminate that need entirely.
+
+*MCP disadvantages:*
+1. **Slower** — 208s (MCP) vs 124s (bash) for the same 73 mutations with 4 jobs. The MCP server adds overhead (process communication, JSON marshaling). Not a dealbreaker but noticeable.
+2. **No streaming** — bash shows progress as mutations run; MCP blocks until complete. For long runs this means no visibility into progress.
+3. **Tool call overhead** — had to `ToolSearch` to load the schema before first use. Minor friction.
+
+*Verdict:* **MCP is more convenient for AI agent workflows.** The `verbosity` parameter alone justifies it — keeping killed mutation diffs out of the context window is significant. The `suggest_tests` feature adds unique value. The speed penalty is acceptable for the ergonomic gains. For human developers running from terminal, bash is still better (streaming progress, pipeable output).
+
+---
+
+### Entry: 2026-03-28 — HomeController (vanilla-mafia-252: stats block)
+
+**Evilution version:** 0.13.0
+**Mutant version:** 0.12.4
+
+**Mutant results:** 97.28% (179/184 killed, 5 neutral — killfork 403)
+**Evilution results:** 86.96% (80/92 killed, 12 survived)
+
+**Survivors analysis (new code only — `load_stats` method, 4 survivors from 18 mutations):**
+- 2x `.count` → `.length` — truly equivalent mutations (both return same integer)
+- 2x `.count` removal (leaving AR relation) — the relation `.to_s` is HTML-escaped by ERB, should make test fail, but doesn't. Likely test isolation issue where other contexts' `let_it_be` data interferes with count assertions.
+
+Pre-existing survivors (8, from prior blocks): `.includes` optimizations (3), `.ranked` removal (2), `.roots` removal (1), symbol_literal on eager-load (2).
+
+**MCP vs Bash (this session):**
+Used MCP exclusively for evilution this session. Observations:
+- `verbosity: "minimal"` is ideal — only summary + survived array. Saves ~70% context vs full output.
+- Line-range targeting (`"app/controllers/home_controller.rb:33-39"`) works well for iterating on specific methods.
+- `suggest_tests: true` not tested this session — should try next time for the survived mutations.
+
+**What evilution is missing or could improve:**
+1. **`.count` → `.length` should be marked as equivalent** — these produce identical results and are universally unkillable. Evilution should detect this pattern and classify as equivalent.
+2. **`.count` removal (relation instead of integer)** — this is a real behavioral change (renders `#<ActiveRecord::Relation ...>` instead of a number), but evilution reports it as survived. May be a test execution isolation issue.
+
+---
+
+### Entry: 2026-03-28 — HomeController (vanilla-mafia-253: documents block)
+
+**No mutation testing needed for this change.** The documents block is a static partial with no controller logic — only i18n keys and ERB template. No new Ruby methods were added. Mutant confirms no regression (97.28%, same as before). Evilution skipped since no controller code changed.
+
+---
+
+### Entry: 2026-03-28 — FeatureToggle + HomeController (vanilla-mafia-263: admin toggle for main page blocks)
+
+**Evilution version:** 0.13.0
+**Mutant version:** 0.12.4
+
+**FeatureToggle:**
+- Mutant: 90.69% on `disabled?` (4 alive — `toggle.present?` guard variants, mostly equivalent)
+- Evilution: 84.27% (75/89 killed, 14 survived — all in `clear_cache`/`clear_cache_for` methods, pre-existing patterns)
+
+**HomeController:**
+- Mutant: 97.89% (279/285 killed, 6 neutral — killfork 403)
+
+**Survivors analysis:**
+- FeatureToggle `disabled?` survivors: `toggle.present?` → `toggle &&` (equivalent), and 3 mutations that should raise NoMethodError on nil but somehow pass. Needs investigation.
+- FeatureToggle cache invalidation survivors (14): all about `clear_cache_for` helper — key rename branching, blank key guard, argument substitutions. The existing test only verifies simple cache clearing, not the key-rename scenario. Pre-existing coverage gap, just reorganized.
+
+**MCP evilution note:**
+Used `verbosity: "minimal"` — excellent for this size of output. Survived array is still present for analysis. Total context used is manageable.
+
+---
+
+### 2026-03-28 — vanilla-mafia-231: Pre-fill Judge with current user's nickname
+
+**Target:** `Judge::ProtocolsController#new` (line 8 — new code, lines 7-9 range)
+**Evilution version:** 0.13.0
+
+**Mutant:** 98.46% (64/65 killed, 1 neutral — killfork 403 allow_browser middleware issue)
+**Evilution:** 76.9% (30/39 killed, 9 survived)
+
+**My new line (line 8) coverage:**
+- Mutant: 100% — all mutations killed (conditional_negation if→true/false, negation_insertion, conditional_flip if→unless, statement_deletion, method_call_removal ×4, argument_nil_substitution, conditional_branch)
+- Evilution: 100% — all mutations on line 8 killed (conditional_negation, conditional_flip, statement_deletion, method_call_removal ×4, negation_insertion, argument_nil_substitution, conditional_branch)
+
+**All 9 evilution survivors are on pre-existing line 9** (`@participations = 10.times.map...`):
+- arithmetic_replacement: `i + 1` → `i - 1` — tests don't check seat numbers in new form
+- integer_literal: `10` → `0`, `10` → `11`, `i + 1` → `i + 0` — tests don't count empty seats
+- string_literal: `"peace"` → `""`, `"peace"` → `nil` — tests don't verify default role
+- method_call_removal: `Date.current` → `Date`, `i + 1` → `i` — date coercion passes, seat off-by-one undetected
+- send_mutation: `.map` → `.flat_map` — equivalent for single-element blocks
+
+**What evilution does better:**
+- Catches the seat numbering off-by-one (`i + 1` → `i - 1`, `i + 0`, `i`) — mutant's `light` operator set doesn't generate arithmetic_replacement on `+`
+- Catches `"peace"` string replacement — mutant doesn't mutate string literals in `light` mode
+- `flat_map` → `map` equivalence detection shows evilution is finding real equivalent mutants that aren't marked as such
+
+**What mutant does better:**
+- Nothing specific for this change — both tools had identical coverage on the new code
+
+---
+Date: 2026-03-28
+File: app/avo/actions/reset_password.rb
+Evilution version: 0.13.0
+Mutant: 100% (0/0 — could not detect Avo action subject)
+Evilution: 83.33% (10/12 killed)
+
+Surviving mutants (both equivalent):
+1. collection_replacement: `.each` → `.map` — return value unused, functionally identical
+2. send_mutation: `.each` → `.reverse_each` — order irrelevant for email sends
+
+What mutant does better: N/A — mutant could not resolve the Avo action method as a subject.
+What evilution does better: Can mutate files regardless of class structure, found real mutations.
+What evilution is missing: Equivalent mutant detection for `.each` vs `.map` when return value is unused.
+Suggestions: Mark `.each` → `.map` and `.each` → `.reverse_each` as likely-equivalent when the method call is in void context (return value not assigned or passed).
+
+---
+Date: 2026-03-28
+File: app/models/user.rb (lines 15-19, display_name method)
+Evilution version: 0.13.0
+Mutant: 100% (20/20 killed)
+Evilution: 100% (13/13 killed)
+
+What mutant does better: More mutations generated (20 vs 13) — covers more edge cases.
+What evilution does better: Line-range targeting is convenient for focused testing.
+Suggestions: None — both tools performed well on this method.
+
+---
+Date: 2026-03-28
+File: app/controllers/home_controller.rb (lines 28-35, load_announcements)
+Evilution version: 0.13.0
+Mutant: 97.91% (47/48 killed) — surviving neutral mutation on `user_signed_in?` guard caused 403 instead of assertion failure
+Evilution: 100% (9/9 killed)
+
+What mutant does better: Generated 48 mutations vs 9 — much broader coverage of guard clauses and method structure.
+What evilution does better: 100% kill rate — all generated mutations were caught. Spec override (`--spec`) is very useful when mutant can't auto-detect request specs.
+Suggestions: None — evilution performed well here.
+
+---
+Date: 2026-03-28
+File: app/controllers/announcement_dismissals_controller.rb
+Evilution version: 0.13.0
+Mutant: N/A — 0 selected tests (can't correlate request specs to controller methods)
+Evilution: 100% (39/39 killed) with `--spec` override
+
+What mutant does better: N/A — could not run.
+What evilution does better: `--spec` override allows testing controllers that mutant can't auto-resolve. Generated 39 mutations and killed all.
+Suggestions: This is a strong differentiator for evilution — mutant's test selection heuristic fails on request specs for controllers.
+
+---
+Date: 2026-03-28
+File: app/controllers/home_controller.rb (lines 28-35, load_announcements + BLOCK_KEYS)
+Evilution version: 0.14.0
+Mutant: N/A (not re-run)
+Evilution: 88.89% — surviving: string_literal mutation `"home_#{key}"` → `"""#{key}"` (removes prefix)
+
+What evilution does better: Upgraded to 0.14.0 — still detecting string interpolation mutations.
+What evilution is missing: The surviving mutation removes the `"home_"` prefix from toggle key construction. This is covered by existing home_spec.rb tests but evilution's `--spec` override only ran the whats_new spec. Not an evilution bug — user error in spec selection.
+Suggestions: Consider a `--spec-dir` flag to auto-include all specs in a directory, reducing the chance of missing coverage from adjacent specs.

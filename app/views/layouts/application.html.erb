@@ -193,5 +193,9 @@
         <%= yield %>
       </main>
     </div>
+
+    <% if @announcements&.any? && FeatureToggle.enabled?("toast_whats_new") %>
+      <%= render "layouts/announcement_toast", announcements: @announcements %>
+    <% end %>
   </body>
 </html>
