@@ -37,6 +37,15 @@ en:
           judge: "Judge"
           editor: "Editor"
           admin: "Admin"
+      competition:
+        kinds:
+          season: "Season"
+          series: "Series"
+          minicup: "Mini Cup"
+          tournament: "Tournament"
+          round: "Round"
+          group: "Group"
+          fun_session: "Fun Session"
       game:
         results:
           in_progress: "In progress"
@@ -48,6 +57,9 @@ en:
         status: "Status"
         published_at: "Published at"
         game_id: "Game"
+  avo:
+    competition:
+      slug_hint: "Leave blank to auto-generate from name"
   hello: "Hello world"
   game_protocols:
     index:

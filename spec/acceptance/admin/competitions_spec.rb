@@ -9,7 +9,7 @@ RSpec.describe "Admin Competitions CRUD" do
     it "creates a new competition with slug and position" do
       visit "/avo/resources/competitions/new"
       fill_in "Name", with: "Сезон 7"
-      select "season", from: "Kind"
+      select I18n.t("activerecord.attributes.competition.kinds.season"), from: "Kind"
       fill_in "Slug", with: "season-7"
       fill_in "Position", with: "7"
       click_on "Сохранить"

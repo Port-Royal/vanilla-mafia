@@ -11,6 +11,15 @@ ru:
         name: "Имя"
         comment: "Комментарий"
         photo: "Фото"
+      competition:
+        kinds:
+          season: "Сезон"
+          series: "Серия"
+          minicup: "Мини-кубок"
+          tournament: "Турнир"
+          round: "Раунд"
+          group: "Группа"
+          fun_session: "Покатушки"
       game:
         played_on: "Дата"
         season: "Сезон"
@@ -50,6 +59,9 @@ ru:
         title: "Название"
         description: "Описание"
         staff: "Организаторская"
+  avo:
+    competition:
+      slug_hint: "Оставьте пустым для автогенерации из названия"
   home:
     hero:
       title: "Vanilla Mafia"

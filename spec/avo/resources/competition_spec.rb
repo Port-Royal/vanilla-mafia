@@ -18,16 +18,32 @@ RSpec.describe Avo::Resources::Competition do
       expect(field).to be_a(Avo::Fields::TextField)
     end
 
-    it "includes slug as text" do
+    it "includes name with slug-suggest controller" do
+      field = items.find { |f| f.id == :name }
+      html_data = field.get_html(:data, view: :edit, element: :input)
+
+      expect(html_data[:controller]).to eq("slug-suggest")
+      expect(html_data[:action]).to eq("input->slug-suggest#suggest")
+      expect(html_data[:slug_suggest_target_value]).to eq("competition_slug")
+    end
+
+    it "includes slug as text with auto-generate hint" do
       field = items.find { |f| f.id == :slug }
 
       expect(field).to be_a(Avo::Fields::TextField)
+      expect(field.help).to be_present
     end
 
-    it "includes kind as select" do
+    it "includes kind as select with translated labels" do
       field = items.find { |f| f.id == :kind }
 
       expect(field).to be_a(Avo::Fields::SelectField)
+      options = field.options_for_select
+      expect(options.values).to include("season", "series", "minicup")
+      expect(options.keys).to include(
+        I18n.t("activerecord.attributes.competition.kinds.season"),
+        I18n.t("activerecord.attributes.competition.kinds.series")
+      )
     end
 
     it "includes position as number" do
