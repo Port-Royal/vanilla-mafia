@@ -15,7 +15,8 @@ RSpec.describe "Avo sidebar ordering" do
 
     expect(hidden).to include(
       Avo::Resources::GameParticipation,
-      Avo::Resources::PlaylistEpisode
+      Avo::Resources::PlaylistEpisode,
+      Avo::Resources::UserGrant
     )
   end
 
@@ -23,7 +24,6 @@ RSpec.describe "Avo sidebar ordering" do
     visible = Avo::BaseResource.descendants.select { |r| r.visible_on_sidebar }
 
     expect(visible).to include(
-      Avo::Resources::UserGrant,
       Avo::Resources::PlayerAward
     )
   end
