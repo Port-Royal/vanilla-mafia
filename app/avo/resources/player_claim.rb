@@ -12,8 +12,6 @@ class Avo::Resources::PlayerClaim < Avo::BaseResource
     field :rejection_reason, as: :text
     field :reviewed_by, as: :belongs_to, name: "Reviewed by"
     field :reviewed_at, as: :date_time
-    field :created_at, as: :date_time, sortable: true
-    field :updated_at, as: :date_time, sortable: true
   end
 
   def actions
