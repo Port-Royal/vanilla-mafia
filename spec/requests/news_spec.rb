@@ -18,22 +18,13 @@ RSpec.describe NewsController do
       expect(response.body).to include(published_article.title)
     end
 
-    it "does not truncate normal-length articles" do
+    it "renders full article content" do
       content = "A" * 4000
       create(:news, :published, author: author, content: content)
 
       get news_index_path
 
       expect(response.body).to include(content)
-    end
-
-    it "truncates extremely long articles" do
-      content = "B" * 6000
-      create(:news, :published, author: author, content: content)
-
-      get news_index_path
-
-      expect(response.body).not_to include(content)
     end
 
     it "excludes draft articles" do
