@@ -16,13 +16,12 @@ RSpec.describe "Admin Players CRUD" do
   end
 
   describe "show" do
-    let_it_be(:player) { create(:player, name: "Тестовый Игрок", position: 1) }
+    let_it_be(:player) { create(:player, name: "Тестовый Игрок") }
 
     it "displays player details" do
       visit "/avo/resources/players/#{player.id}"
 
       expect(page).to have_content("Тестовый Игрок")
-      expect(page).to have_content("1")
     end
   end
 
@@ -30,11 +29,10 @@ RSpec.describe "Admin Players CRUD" do
     it "creates a new player" do
       visit "/avo/resources/players/new"
       fill_in "Name", with: "Новый Игрок"
-      fill_in "Position", with: "5"
       fill_in "Comment", with: "Новый комментарий"
       click_on "Сохранить"
 
-      expect(Player.find_by(name: "Новый Игрок")).to have_attributes(position: 5, comment: "Новый комментарий")
+      expect(Player.find_by(name: "Новый Игрок")).to have_attributes(comment: "Новый комментарий")
     end
   end
 
