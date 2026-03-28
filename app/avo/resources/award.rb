@@ -6,6 +6,10 @@ class Avo::Resources::Award < Avo::BaseResource
     query: -> { query.where("title ILIKE ?", "%#{params[:q]}%") }
   }
 
+  self.index_query = -> {
+    query.order(staff: :asc, position: :asc, id: :asc)
+  }
+
   def fields
     field :id, as: :id
     field :title, as: :text, required: true, sortable: true
