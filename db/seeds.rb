@@ -49,6 +49,17 @@ end
 missing_keys = FeatureToggle::KEYS - FeatureToggle.pluck(:key)
 raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
 
+# Sample announcements
+[
+  { version: "1.0.0", grant_code: nil, message: "Добро пожаловать на обновлённый сайт Vanilla Mafia!" },
+  { version: "1.0.0", grant_code: nil, message: "Теперь доступен Зал славы и архив игр." },
+  { version: "1.1.0", grant_code: "judge", message: "Судьи: добавлены протоколы игр с автосохранением." },
+  { version: "1.1.0", grant_code: "editor", message: "Редакторы: добавлено управление новостями." },
+  { version: "1.2.0", grant_code: nil, message: "Добавлена лента новостей клуба." }
+].each do |attrs|
+  Announcement.find_or_create_by!(attrs)
+end
+
 # Admin user (set ADMIN_EMAIL and ADMIN_PASSWORD env vars)
 if ENV["ADMIN_EMAIL"].present? && ENV["ADMIN_PASSWORD"].present?
   user = User.find_or_initialize_by(email: ENV["ADMIN_EMAIL"])
