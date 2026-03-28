@@ -9,6 +9,8 @@ class FeatureToggle < ApplicationRecord
     home_hall_of_fame
     home_stats
     home_documents
+    home_whats_new
+    toast_whats_new
   ].freeze
   CACHE_TTL = 5.minutes
 
