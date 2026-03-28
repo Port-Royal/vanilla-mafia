@@ -51,6 +51,11 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).not_to include('name="participations[1][win]"')
       end
 
+      it "renders result section with same layout as other form rows" do
+        expect(response.body).not_to include("<fieldset")
+        expect(response.body).not_to include("<legend")
+      end
+
       it "excludes season competitions from the dropdown" do
         season_comp = create(:competition, :season, name: "Season Parent")
         get new_judge_protocol_path
