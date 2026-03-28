@@ -7,8 +7,8 @@ class Avo::Resources::Competition < Avo::BaseResource
   def fields
     field :id, as: :id
     field :name, as: :text
-    field :slug, as: :text
-    field :kind, as: :select, enum: ::Competition.kinds
+    field :slug, as: :text, help: I18n.t("avo.competition.slug_hint")
+    field :kind, as: :select, options: ::Competition::KINDS.values.to_h { |k| [ I18n.t("activerecord.attributes.competition.kinds.#{k}"), k ] }
     field :position, as: :number
     field :parent, as: :belongs_to, required: false
     field :started_on, as: :date
