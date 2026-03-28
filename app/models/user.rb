@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :news, foreign_key: :author_id, inverse_of: :author, dependent: :restrict_with_exception
   has_many :user_grants, dependent: :destroy
   has_many :grants, through: :user_grants
+  has_many :announcement_dismissals, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :password, password_strength: true, if: :password_required?

@@ -52,6 +52,7 @@ Rails.application.routes.draw do
   resource :locale, only: [ :update ]
   resource :profile, only: [ :edit, :update ]
   resource :notification_settings, only: [ :edit, :update ]
+  resources :announcement_dismissals, only: [ :create ], path: "announcements/dismiss"
 
   namespace :podcast do
     resources :episodes, only: [ :index, :show ] do
