@@ -18,6 +18,15 @@ RSpec.describe Avo::Resources::Competition do
       expect(field).to be_a(Avo::Fields::TextField)
     end
 
+    it "includes name with slug-suggest controller" do
+      field = items.find { |f| f.id == :name }
+      html_data = field.get_html(:data, view: :edit, element: :input)
+
+      expect(html_data[:controller]).to eq("slug-suggest")
+      expect(html_data[:action]).to eq("input->slug-suggest#suggest")
+      expect(html_data[:slug_suggest_target_value]).to eq("competition_slug")
+    end
+
     it "includes slug as text with auto-generate hint" do
       field = items.find { |f| f.id == :slug }
 

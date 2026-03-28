@@ -6,7 +6,17 @@ class Avo::Resources::Competition < Avo::BaseResource
 
   def fields
     field :id, as: :id
-    field :name, as: :text
+    field :name, as: :text, html: {
+      edit: {
+        input: {
+          data: {
+            controller: "slug-suggest",
+            slug_suggest_target_value: "competition_slug",
+            action: "input->slug-suggest#suggest"
+          }
+        }
+      }
+    }
     field :slug, as: :text, help: I18n.t("avo.competition.slug_hint")
     field :kind, as: :select, options: ::Competition::KINDS.values.to_h { |k| [ I18n.t("activerecord.attributes.competition.kinds.#{k}"), k ] }
     field :position, as: :number
