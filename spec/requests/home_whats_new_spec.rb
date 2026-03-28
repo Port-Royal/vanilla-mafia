@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe "Home What's New block" do
   let_it_be(:user) { create(:user) }
-  let_it_be(:announcement) { create(:announcement, version: "2.0.0", message: "New feature released") }
+  let_it_be(:announcement) { create(:announcement, version: "2.0.0", message_ru: "Выпущена новая функция", message_en: "New feature released") }
 
   context "when signed in with home_whats_new enabled" do
     let!(:toggle) { create(:feature_toggle, key: "home_whats_new", enabled: true) }
@@ -22,8 +22,8 @@ RSpec.describe "Home What's New block" do
       expect(response.body).to include(I18n.t("home.whats_new.version", version: "2.0.0"))
     end
 
-    it "renders the announcement message" do
-      expect(response.body).to include("New feature released")
+    it "renders the localized announcement message" do
+      expect(response.body).to include("Выпущена новая функция")
     end
 
     it "renders the dismiss button" do
@@ -74,7 +74,7 @@ RSpec.describe "Home What's New block" do
 
   context "with multiple versions" do
     let!(:toggle) { create(:feature_toggle, key: "home_whats_new", enabled: true) }
-    let!(:announcement2) { create(:announcement, version: "2.1.0", message: "Another update") }
+    let!(:announcement2) { create(:announcement, version: "2.1.0", message_ru: "Ещё обновление", message_en: "Another update") }
 
     before do
       sign_in user
