@@ -1,5 +1,6 @@
 class Avo::Resources::PlayerAward < Avo::BaseResource
   self.title = :id
+  self.visible_on_sidebar = false
   self.default_view_type = :table
 
   def fields
