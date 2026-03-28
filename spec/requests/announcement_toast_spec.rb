@@ -29,6 +29,10 @@ RSpec.describe "Announcement toast notification" do
     it "includes announcement IDs in dismiss button data" do
       expect(response.body).to include("data-announcement-ids=\"#{announcement.id}\"")
     end
+
+    it "renders the toast-specific title" do
+      expect(response.body).to include(I18n.t("home.whats_new.toast_title"))
+    end
   end
 
   context "when toast_whats_new toggle is disabled" do
