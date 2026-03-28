@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   authenticate :user, ->(u) { u.can_manage_protocols? } do
     namespace :judge do
-      resources :protocols, only: [ :new, :create, :edit, :update ] do
+      resources :protocols, only: [ :index, :new, :create, :edit, :update ] do
         member do
           patch :autosave
         end

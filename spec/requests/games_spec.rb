@@ -39,6 +39,18 @@ RSpec.describe GamesController do
       it "renders seat number in table cell" do
         assert_select "tbody td", text: "3"
       end
+
+      it "shows edit protocol link for users with protocol access" do
+        admin = create(:user, :admin)
+        sign_in admin
+        get game_path(game)
+        expect(response.body).to include(edit_judge_protocol_path(game))
+      end
+
+      it "does not show edit protocol link for regular users" do
+        get game_path(game)
+        expect(response.body).not_to include(edit_judge_protocol_path(game))
+      end
     end
 
     context "when game does not exist" do

@@ -6,7 +6,12 @@
   <span class="text-gray-700"><%= t("common.game") %> <%= @game.game_number %></span>
 </nav>
 
-<h1 class="text-3xl font-bold text-maroon mb-6"><%= @game.full_name %></h1>
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-3xl font-bold text-maroon"><%= @game.full_name %></h1>
+  <% if current_user&.can_manage_protocols? %>
+    <%= link_to t("game_protocols.edit_link"), edit_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
+  <% end %>
+</div>
 
 <div class="scroll-wrapper">
   <table class="data-table">
