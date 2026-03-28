@@ -9,6 +9,12 @@ RSpec.describe FeatureToggle, type: :model do
     it { is_expected.to validate_inclusion_of(:key).in_array(described_class::KEYS) }
   end
 
+  describe "KEYS" do
+    it "includes announcement toggle keys" do
+      expect(described_class::KEYS).to include("home_whats_new", "toast_whats_new")
+    end
+  end
+
   describe ".enabled?" do
     context "when toggle exists and is enabled" do
       let!(:toggle) { create(:feature_toggle, key: "require_approval", enabled: true) }
