@@ -3,6 +3,10 @@
     <%= render "home/hero" %>
   <% end %>
 
+  <% if @block_visible[:whats_new] && @announcements&.any? %>
+    <%= render "home/whats_new", announcements: @announcements %>
+  <% end %>
+
   <% if @block_visible[:running_tournaments] && @running_competitions.any? %>
     <%= render "home/running_tournaments",
          running_competitions: @running_competitions,
