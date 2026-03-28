@@ -300,7 +300,7 @@ ru:
     authors:
       title: "Белый список авторов"
       user_id: "Telegram ID"
-      username: "Имя пользователя"
+      player: "Игрок"
       linked_user: "Связанный пользователь"
       remove: "Удалить"
       remove_confirm: "Удалить этого автора из белого списка?"

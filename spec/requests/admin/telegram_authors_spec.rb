@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Admin::TelegramAuthors" do
@@ -10,27 +12,27 @@ RSpec.describe "Admin::TelegramAuthors" do
 
       it "creates a telegram author and redirects" do
         expect {
-          post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999111, telegram_username: "newuser" } }
+          post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999111 } }
         }.to change(TelegramAuthor, :count).by(1)
         expect(response).to redirect_to(admin_telegram_settings_path)
       end
 
-      it "sets the telegram_user_id and username" do
-        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999222, telegram_username: "testbot" } }
-        author = TelegramAuthor.last
-        expect(author.telegram_user_id).to eq(999222)
-        expect(author.telegram_username).to eq("testbot")
+      it "sets the telegram_user_id" do
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999222 } }
+
+        expect(TelegramAuthor.last.telegram_user_id).to eq(999222)
       end
 
       it "links the telegram author to a user" do
-        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999333, telegram_username: "linked", user_id: admin.id } }
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999333, user_id: admin.id } }
+
         expect(TelegramAuthor.last.user).to eq(admin)
       end
 
       context "with invalid params" do
         it "redirects with alert when telegram_user_id is blank" do
           expect {
-            post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: "", telegram_username: "noone" } }
+            post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: "" } }
           }.not_to change(TelegramAuthor, :count)
           expect(response).to redirect_to(admin_telegram_settings_path)
           expect(flash[:alert]).to be_present
@@ -38,8 +40,9 @@ RSpec.describe "Admin::TelegramAuthors" do
 
         it "redirects with alert when telegram_user_id is duplicate" do
           create(:telegram_author, telegram_user_id: 888111)
+
           expect {
-            post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 888111, telegram_username: "dup" } }
+            post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 888111 } }
           }.not_to change(TelegramAuthor, :count)
           expect(response).to redirect_to(admin_telegram_settings_path)
           expect(flash[:alert]).to be_present
@@ -51,7 +54,7 @@ RSpec.describe "Admin::TelegramAuthors" do
       before { sign_in editor }
 
       it "returns not found" do
-        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 123, telegram_username: "x" } }
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 123 } }
         expect(response).to have_http_status(:not_found)
       end
     end
