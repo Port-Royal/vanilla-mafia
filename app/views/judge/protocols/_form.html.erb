@@ -24,8 +24,8 @@
       <label class="w-40 font-semibold text-sm text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>
       <input type="text" name="game[name]" id="game_name" value="<%= @game.name %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
     </div>
-    <fieldset class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <legend class="w-40 font-semibold text-sm text-right"><%= Game.human_attribute_name(:result) %></legend>
+    <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+      <span class="w-40 font-semibold text-sm text-right"><%= Game.human_attribute_name(:result) %></span>
       <div class="w-full flex items-center gap-6">
         <% Game.results.each_key do |key| %>
           <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
@@ -34,7 +34,7 @@
           </label>
         <% end %>
       </div>
-    </fieldset>
+    </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
       <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
