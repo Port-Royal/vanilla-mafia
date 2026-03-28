@@ -22,6 +22,7 @@ class HomeController < ApplicationController
     @latest_news = News.published.recent.limit(LATEST_NEWS_LIMIT) if @block_visible[:latest_news]
     @hall_of_fame_players = load_hall_of_fame_players if @block_visible[:hall_of_fame]
     @stats = load_stats if @block_visible[:stats]
+    @announcements = load_announcements
   end
 
   private
@@ -50,6 +51,13 @@ class HomeController < ApplicationController
       games: Game.finished.count,
       competitions: Competition.roots.finished.count
     }
+  end
+
+  def load_announcements
+    return unless user_signed_in?
+    return unless FeatureToggle.enabled?("home_whats_new") || FeatureToggle.enabled?("toast_whats_new")
+
+    Announcement.for_user(current_user)
   end
 
   def load_hall_of_fame_players
