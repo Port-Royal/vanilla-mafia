@@ -1,5 +1,7 @@
 class Avo::Resources::Episode < Avo::BaseResource
   self.title = :title
+
+  def self.navigation_label = "Podcast: Episodes"
   self.default_view_type = :table
 
   self.search = {
