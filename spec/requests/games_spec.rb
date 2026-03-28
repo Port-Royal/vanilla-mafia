@@ -40,16 +40,6 @@ RSpec.describe GamesController do
         assert_select "tbody td", text: "3"
       end
 
-      context "when seat is nil" do
-        let_it_be(:seatless_participation) { create(:game_participation, game: game, seat: nil, role_code: nil) }
-
-        it "renders the row index as seat number" do
-          get game_path(game)
-
-          assert_select "tbody tr:last-child td:first-child", text: "2"
-        end
-      end
-
       it "shows edit protocol link for users with protocol access" do
         admin = create(:user, :admin)
         sign_in admin

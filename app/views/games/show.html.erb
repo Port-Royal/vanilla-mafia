@@ -27,9 +27,9 @@
       </tr>
     </thead>
     <tbody>
-      <% @participations.each_with_index do |participation, index| %>
+      <% @participations.each do |participation| %>
         <tr>
-          <td><%= participation.seat || index + 1 %></td>
+          <td><%= participation.seat %></td>
           <td><%= link_to participation.player.name, player_path(participation.player), class: "text-maroon hover:underline" %></td>
           <td>
             <% if participation.role_code.present? %>
