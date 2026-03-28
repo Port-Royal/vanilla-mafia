@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe "Home announcements" do
   let_it_be(:user) { create(:user) }
-  let_it_be(:announcement) { create(:announcement, version: "1.0.0", message: "Welcome update") }
+  let_it_be(:announcement) { create(:announcement, version: "1.0.0") }
 
   context "when user is signed in" do
     before { sign_in user }
