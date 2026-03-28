@@ -11,4 +11,8 @@ class Avo::Resources::User < Avo::BaseResource
     field :player, as: :belongs_to
     field :user_grants, as: :has_many
   end
+
+  def actions
+    action Avo::Actions::ResetPassword
+  end
 end
