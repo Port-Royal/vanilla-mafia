@@ -2,7 +2,7 @@
   <% articles.each do |article| %>
     <article class="border-b border-neutral-200 pb-4">
       <h3 class="text-lg font-bold mb-1">
-        <%= link_to article.title, news_path(article), class: "text-maroon hover:underline" %>
+        <%= article.title %>
       </h3>
       <div class="text-sm text-neutral-500 mb-2">
         <% if article.published_at.present? %>

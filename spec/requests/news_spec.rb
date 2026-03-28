@@ -32,6 +32,11 @@ RSpec.describe NewsController do
       expect(response.body).not_to include(draft_article.title)
     end
 
+    it "does not link article titles to a show page" do
+      get news_index_path
+      assert_select "a[href=?]", "/news/#{published_article.id}", count: 0
+    end
+
     context "when there are no published articles" do
       before { News.update_all(status: :draft, published_at: nil) }
 
@@ -45,53 +50,9 @@ RSpec.describe NewsController do
   end
 
   describe "GET /news/:id" do
-    context "with a published article" do
-      let_it_be(:article_with_content) do
-        create(:news, :published, author: author, content: "Important announcement about the tournament")
-      end
-
-      it "renders successfully" do
-        get news_path(article_with_content)
-        expect(response).to have_http_status(:ok)
-      end
-
-      it "shows the article title" do
-        get news_path(article_with_content)
-        expect(response.body).to include(article_with_content.title)
-      end
-
-      it "renders the article content" do
-        get news_path(article_with_content)
-        expect(response.body).to include("Important announcement about the tournament")
-      end
-    end
-
-    context "with a draft article" do
-      it "returns not found for guests" do
-        get news_path(draft_article)
-        expect(response).to have_http_status(:not_found)
-      end
-
-      context "when signed in as an editor" do
-        let_it_be(:editor) { create(:user, :editor) }
-
-        before { sign_in editor }
-
-        it "renders successfully" do
-          get news_path(draft_article)
-          expect(response).to have_http_status(:ok)
-        end
-      end
-    end
-
-    context "with a linked game" do
-      let_it_be(:game) { create(:game) }
-      let_it_be(:article_with_game) { create(:news, :published, author: author, game: game) }
-
-      it "shows the game link" do
-        get news_path(article_with_game)
-        expect(response.body).to include(game_path(game))
-      end
+    it "redirects to the news index" do
+      get "/news/#{published_article.id}"
+      expect(response).to redirect_to("/news")
     end
   end
 end
