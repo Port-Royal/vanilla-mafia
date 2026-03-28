@@ -9,7 +9,6 @@ class Avo::Resources::Player < Avo::BaseResource
   def fields
     field :id, as: :id
     field :name, as: :text, required: true, sortable: true
-    field :position, as: :number, sortable: true
     field :comment, as: :textarea
     field :photo, as: :file, is_image: true
     field :user, as: :has_one
