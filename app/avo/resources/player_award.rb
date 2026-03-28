@@ -8,6 +8,6 @@ class Avo::Resources::PlayerAward < Avo::BaseResource
     field :player, as: :belongs_to, searchable: true, sortable: true
     field :award, as: :belongs_to, searchable: true, sortable: true
     field :competition, as: :belongs_to
-    field :position, as: :number, sortable: true
+    field :position, as: :number, sortable: true, default: -> { PlayerAward.maximum(:position).to_i + 1 }
   end
 end

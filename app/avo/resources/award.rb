@@ -15,7 +15,7 @@ class Avo::Resources::Award < Avo::BaseResource
     field :title, as: :text, required: true, sortable: true
     field :description, as: :textarea
     field :staff, as: :boolean, sortable: true
-    field :position, as: :number, sortable: true
+    field :position, as: :number, sortable: true, default: -> { Award.maximum(:position).to_i + 1 }
     field :icon, as: :file, is_image: true
     field :player_awards, as: :has_many
   end
