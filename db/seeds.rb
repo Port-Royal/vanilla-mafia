@@ -51,11 +51,11 @@ raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys
 
 # Sample announcements
 [
-  { version: "1.0.0", grant_code: nil, message: "Добро пожаловать на обновлённый сайт Vanilla Mafia!" },
-  { version: "1.0.0", grant_code: nil, message: "Теперь доступен Зал славы и архив игр." },
-  { version: "1.1.0", grant_code: "judge", message: "Судьи: добавлены протоколы игр с автосохранением." },
-  { version: "1.1.0", grant_code: "editor", message: "Редакторы: добавлено управление новостями." },
-  { version: "1.2.0", grant_code: nil, message: "Добавлена лента новостей клуба." }
+  { version: "1.0.0", grant_code: nil, message_ru: "Добро пожаловать на обновлённый сайт Vanilla Mafia!", message_en: "Welcome to the updated Vanilla Mafia website!" },
+  { version: "1.0.0", grant_code: nil, message_ru: "Теперь доступен Зал славы и архив игр.", message_en: "Hall of Fame and game archive are now available." },
+  { version: "1.1.0", grant_code: "judge", message_ru: "Судьи: добавлены протоколы игр с автосохранением.", message_en: "Judges: game protocols with autosave added." },
+  { version: "1.1.0", grant_code: "editor", message_ru: "Редакторы: добавлено управление новостями.", message_en: "Editors: news management added." },
+  { version: "1.2.0", grant_code: nil, message_ru: "Добавлена лента новостей клуба.", message_en: "Club news feed added." }
 ].each do |attrs|
   Announcement.find_or_create_by!(attrs)
 end

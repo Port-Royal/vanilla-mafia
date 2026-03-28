@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe "Announcement toast notification" do
   let_it_be(:user) { create(:user) }
-  let_it_be(:announcement) { create(:announcement, version: "2.0.0", message: "Toast update") }
+  let_it_be(:announcement) { create(:announcement, version: "2.0.0", message_ru: "Обновление тоста", message_en: "Toast update") }
 
   context "when signed in with toast_whats_new enabled" do
     let!(:toggle) { create(:feature_toggle, key: "toast_whats_new", enabled: true) }
@@ -18,8 +18,8 @@ RSpec.describe "Announcement toast notification" do
       expect(response.body).to include("fixed bottom-4 right-4")
     end
 
-    it "renders the announcement message in the toast" do
-      expect(response.body).to include("Toast update")
+    it "renders the localized announcement message in the toast" do
+      expect(response.body).to include("Обновление тоста")
     end
 
     it "renders the dismiss button" do

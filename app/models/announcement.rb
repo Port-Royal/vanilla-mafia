@@ -2,7 +2,12 @@ class Announcement < ApplicationRecord
   has_many :announcement_dismissals, dependent: :destroy
 
   validates :version, presence: true
-  validates :message, presence: true
+  validates :message_ru, presence: true
+  validates :message_en, presence: true
+
+  def localized_message
+    public_send(:"message_#{I18n.locale}")
+  end
 
   scope :visible_to, ->(user) {
     grant_codes = user.grants.pluck(:code)

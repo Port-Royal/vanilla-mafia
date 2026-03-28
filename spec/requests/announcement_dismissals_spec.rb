@@ -4,8 +4,8 @@ require "rails_helper"
 
 RSpec.describe "POST /announcements/dismiss" do
   let_it_be(:user) { create(:user) }
-  let_it_be(:announcement1) { create(:announcement, version: "1.0.0", message: "First") }
-  let_it_be(:announcement2) { create(:announcement, version: "1.0.1", message: "Second") }
+  let_it_be(:announcement1) { create(:announcement, version: "1.0.0") }
+  let_it_be(:announcement2) { create(:announcement, version: "1.0.1") }
 
   context "when signed in" do
     before { sign_in user }
