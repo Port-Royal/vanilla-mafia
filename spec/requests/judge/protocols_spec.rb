@@ -23,14 +23,14 @@ RSpec.describe "Judge::Protocols" do
         expect(response).to have_http_status(:ok)
       end
 
-      it "lists in-progress games" do
+      it "lists in-progress games but not finished ones" do
         in_progress = create(:game, game_number: 77, result: "in_progress", competition: competition)
         finished = create(:game, game_number: 78, result: "peace_victory", competition: competition)
 
         get judge_protocols_path
 
-        expect(response.body).to include("77")
-        expect(response.body).not_to include("78")
+        expect(response.body).to include(edit_judge_protocol_path(in_progress))
+        expect(response.body).not_to include(edit_judge_protocol_path(finished))
       end
 
       it "shows edit link for each in-progress game" do
