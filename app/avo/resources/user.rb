@@ -1,9 +1,10 @@
 class Avo::Resources::User < Avo::BaseResource
-  # self.includes = []
-  # self.attachments = []
-  # self.search = {
-  #   query: -> { query.ransack(id_eq: q, m: "or").result(distinct: false) }
-  # }
+  self.title = :display_name
+  self.includes = [ :player ]
+
+  self.search = {
+    query: -> { query.left_joins(:player).where("users.email ILIKE :q OR players.name ILIKE :q", q: "%#{params[:q]}%") }
+  }
 
   def fields
     field :id, as: :id

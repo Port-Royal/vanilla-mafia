@@ -12,6 +12,12 @@ class User < ApplicationRecord
   validates :password, password_strength: true, if: :password_required?
   validates :player_id, uniqueness: true, allow_nil: true
 
+  def display_name
+    return email unless claimed_player?
+
+    "#{email} (#{player.name})"
+  end
+
   def has_grant?(code)
     grants.exists?(code: code)
   end
