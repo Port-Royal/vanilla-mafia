@@ -361,8 +361,8 @@ RSpec.describe HomeController do
         expect(response.body).to include("Big Tournament Recap")
       end
 
-      it "renders a link to the article" do
-        expect(response.body).to include(news_path(article))
+      it "renders the article title as plain text" do
+        assert_select "h3", text: /Big Tournament Recap/
       end
 
       it "renders the published date" do
