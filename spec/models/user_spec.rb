@@ -50,6 +50,25 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#display_name" do
+    context "when user has no claimed player" do
+      let(:user) { create(:user) }
+
+      it "returns email" do
+        expect(user.display_name).to eq(user.email)
+      end
+    end
+
+    context "when user has a claimed player" do
+      let(:player) { create(:player, name: "TestPlayer") }
+      let(:user) { create(:user, player: player) }
+
+      it "returns email with player name" do
+        expect(user.display_name).to eq("#{user.email} (TestPlayer)")
+      end
+    end
+  end
+
   describe "#has_grant?" do
     let(:user) { create(:user) }
     let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
