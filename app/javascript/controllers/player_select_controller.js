@@ -64,14 +64,27 @@ export default class extends Controller {
 
   filter() {
     const query = this.searchTarget.value.trim().toLowerCase()
+    const taken = this.takenPlayerNames()
 
     this.optionTargets.forEach((option) => {
-      const name = option.dataset.playerName.toLowerCase()
-      option.classList.toggle("hidden", !name.includes(query))
+      const name = option.dataset.playerName
+      const matchesQuery = name.toLowerCase().includes(query)
+      const alreadyTaken = taken.has(name)
+      option.classList.toggle("hidden", !matchesQuery || alreadyTaken)
       option.classList.remove("bg-gray-100")
     })
 
     this.activeIndex = -1
+  }
+
+  takenPlayerNames() {
+    const taken = new Set()
+    for (const instance of this.constructor.instances) {
+      if (instance === this) continue
+      const name = instance.searchTarget.value.trim()
+      if (name) taken.add(name)
+    }
+    return taken
   }
 
   onKeydown(event) {
