@@ -39,7 +39,6 @@ class SaveGameProtocolService
       participation.plus = attrs[:plus].presence
       participation.minus = attrs[:minus].presence
       participation.best_move = attrs[:best_move].presence
-      participation.win = attrs[:win] == "1"
       participation.first_shoot = attrs[:first_shoot] == "1"
       participation.notes = attrs[:notes].presence
       participation.save!

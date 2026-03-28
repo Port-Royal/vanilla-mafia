@@ -164,15 +164,15 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(participation.reload.plus).to eq(1.5)
         end
 
-        it "updates boolean fields" do
+        it "rejects win field (removed from form)" do
           participation = create(:game_participation, game: game, player: player, seat: 5)
 
           patch autosave_judge_protocol_path(game), params: {
             scope: "participation", seat: 5, field: "win", value: "1"
           }, as: :json
 
-          expect(response).to have_http_status(:ok)
-          expect(participation.reload.win).to be true
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(participation.reload.win).to be false
         end
 
         it "updates notes" do

@@ -167,13 +167,13 @@ RSpec.describe AutosaveGameProtocolService do
           expect(participation.reload.best_move).to eq(0.4)
         end
 
-        it "updates win" do
+        it "rejects win (removed from protocol form)" do
           result = described_class.call(
             game: game, scope: "participation", field: "win", value: "1", seat: 4
           )
 
-          expect(result.success).to be true
-          expect(participation.reload.win).to be true
+          expect(result.success).to be false
+          expect(participation.reload.win).to be false
         end
 
         it "updates first_shoot" do

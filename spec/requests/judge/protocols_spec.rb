@@ -9,8 +9,8 @@ RSpec.describe "Judge::Protocols" do
 
   def valid_participations_params
     params = {}
-    params["1"] = { player_name: "Тестовый", role_code: "don", plus: "1", minus: "0", best_move: "", win: "1", first_shoot: "0", notes: "" }
-    (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", win: "0", first_shoot: "0", notes: "" } }
+    params["1"] = { player_name: "Тестовый", role_code: "don", plus: "1", minus: "0", best_move: "", first_shoot: "0", notes: "" }
+    (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", first_shoot: "0", notes: "" } }
     params
   end
 
@@ -45,6 +45,10 @@ RSpec.describe "Judge::Protocols" do
       it "shows abbreviated label 'ПУ' for first_shoot column" do
         expect(response.body).to include("<th", "ПУ")
         expect(response.body).not_to include("Первый выстрел")
+      end
+
+      it "does not show the win column or checkbox" do
+        expect(response.body).not_to include('name="participations[1][win]"')
       end
 
       it "excludes season competitions from the dropdown" do
@@ -155,7 +159,7 @@ RSpec.describe "Judge::Protocols" do
 
         it "preserves submitted player name for new players" do
           params_with_new_player = valid_participations_params.merge(
-            "2" => { player_name: "Совсем Новый", role_code: "don", plus: "1", minus: "0", best_move: "", win: "0", first_shoot: "0", notes: "" }
+            "2" => { player_name: "Совсем Новый", role_code: "don", plus: "1", minus: "0", best_move: "", first_shoot: "0", notes: "" }
           )
           post judge_protocols_path, params: { game: invalid_game_params, participations: params_with_new_player }
           expect(response.body).to include("Совсем Новый")

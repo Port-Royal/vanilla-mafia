@@ -95,7 +95,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def participations_params
-    permitted_keys = (1..10).map { |i| [ i.to_s, [ :player_name, :role_code, :plus, :minus, :best_move, :win, :first_shoot, :notes ] ] }
+    permitted_keys = (1..10).map { |i| [ i.to_s, [ :player_name, :role_code, :plus, :minus, :best_move, :first_shoot, :notes ] ] }
     params.require(:participations).permit(permitted_keys.to_h)
   end
 
@@ -131,7 +131,6 @@ class Judge::ProtocolsController < ApplicationController
       gp.plus = attrs[:plus].presence
       gp.minus = attrs[:minus].presence
       gp.best_move = attrs[:best_move].presence
-      gp.win = attrs[:win] == "1"
       gp.first_shoot = attrs[:first_shoot] == "1"
       gp.notes = attrs[:notes].presence
       gp

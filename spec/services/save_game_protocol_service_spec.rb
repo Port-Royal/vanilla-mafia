@@ -15,9 +15,9 @@ RSpec.describe SaveGameProtocolService do
     context "when creating a new game with participations" do
       let(:participations_params) do
         params = {}
-        params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "0.5", win: "0", first_shoot: "0", notes: "Капитан" }
-        params["2"] = { player_name: "Новый Игрок", role_code: "maf", plus: "0", minus: "1", best_move: "", win: "0", first_shoot: "1", notes: "" }
-        (3..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", win: "0", first_shoot: "0", notes: "" } }
+        params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "0.5", first_shoot: "0", notes: "Капитан" }
+        params["2"] = { player_name: "Новый Игрок", role_code: "maf", plus: "0", minus: "1", best_move: "", first_shoot: "1", notes: "" }
+        (3..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", first_shoot: "0", notes: "" } }
         ActionController::Parameters.new(params).permit!
       end
 
@@ -116,7 +116,7 @@ RSpec.describe SaveGameProtocolService do
       let(:update_game_params) { { game_number: 2, judge: "Новый" } }
       let(:participations_params) do
         params = {}
-        params["1"] = { player_name: "Алексей", role_code: "don", plus: "2", minus: "0", best_move: "", win: "1", first_shoot: "0", notes: "" }
+        params["1"] = { player_name: "Алексей", role_code: "don", plus: "2", minus: "0", best_move: "", first_shoot: "0", notes: "" }
         (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
         ActionController::Parameters.new(params).permit!
       end
@@ -131,7 +131,8 @@ RSpec.describe SaveGameProtocolService do
         expect(old_participation.reload.plus).to eq(2)
       end
 
-      it "sets win on updated participation" do
+      it "does not modify win (not set from protocol form)" do
+        old_participation.update!(win: true)
         described_class.call(game: game_to_update, game_params: update_game_params, participations_params: participations_params)
         expect(old_participation.reload.win).to be true
       end
@@ -159,7 +160,7 @@ RSpec.describe SaveGameProtocolService do
       let!(:legacy_participation) { create(:game_participation, game: game_to_update, player: existing_player, seat: nil) }
       let(:participations_params) do
         params = {}
-        params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "", win: "0", first_shoot: "0", notes: "" }
+        params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "", first_shoot: "0", notes: "" }
         (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
         ActionController::Parameters.new(params).permit!
       end
