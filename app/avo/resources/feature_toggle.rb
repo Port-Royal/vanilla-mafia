@@ -1,5 +1,7 @@
 class Avo::Resources::FeatureToggle < Avo::BaseResource
   self.title = :key
+
+  def self.navigation_label = "Settings: Toggles"
   self.default_view_type = :table
 
   self.search = {

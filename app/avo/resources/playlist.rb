@@ -1,5 +1,7 @@
 class Avo::Resources::Playlist < Avo::BaseResource
   self.title = :title
+
+  def self.navigation_label = "Podcast: Playlists"
   self.default_view_type = :table
 
   self.search = {
