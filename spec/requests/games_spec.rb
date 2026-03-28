@@ -48,6 +48,8 @@ RSpec.describe GamesController do
       end
 
       it "does not show edit protocol link for regular users" do
+        user = create(:user)
+        sign_in user
         get game_path(game)
         expect(response.body).not_to include(edit_judge_protocol_path(game))
       end

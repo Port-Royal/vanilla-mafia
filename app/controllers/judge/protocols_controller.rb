@@ -4,7 +4,7 @@ class Judge::ProtocolsController < ApplicationController
   before_action :set_game, only: [ :edit, :update, :autosave ]
 
   def index
-    @in_progress_games = Game.in_progress.includes(:competition).ordered
+    @in_progress_games = Game.in_progress.includes(:competition).ordered.load
   end
 
   def new
