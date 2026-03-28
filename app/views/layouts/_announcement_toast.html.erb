@@ -1,0 +1,22 @@
+<div class="fixed bottom-4 right-4 z-50 max-w-sm"
+     data-controller="announcement-dismiss"
+     data-announcement-dismiss-url-value="<%= announcement_dismissals_path %>">
+  <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+    <div class="flex items-start justify-between mb-2">
+      <h4 class="font-semibold text-maroon"><%= t("home.whats_new.title") %></h4>
+      <button type="button"
+              class="text-neutral-400 hover:text-neutral-600 ml-4"
+              data-action="announcement-dismiss#dismiss"
+              data-announcement-ids="<%= announcements.map(&:id).join(',') %>"
+              aria-label="<%= t("home.whats_new.dismiss") %>">
+        &times;
+      </button>
+    </div>
+
+    <ul class="space-y-1">
+      <% announcements.each do |announcement| %>
+        <li class="text-sm text-neutral-700"><%= announcement.message %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
