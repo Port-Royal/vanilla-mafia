@@ -69,6 +69,7 @@ ru:
       cta: "Текущий турнир"
     whats_new:
       title: "Что нового"
+      toast_title: "Что нового"
       version: "Версия %{version}"
       dismiss: "Скрыть"
     recently_finished:
