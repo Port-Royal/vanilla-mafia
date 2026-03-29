@@ -63,10 +63,6 @@ RSpec.describe CompetitionOverviewService do
         expect(player.total_rating).to eq(2.5)
       end
 
-      it "returns the player count" do
-        expect(result.player_count).to eq(2)
-      end
-
       it "reports as parent" do
         expect(result.parent_view).to be true
       end
@@ -98,10 +94,6 @@ RSpec.describe CompetitionOverviewService do
         expect(result.participations_by_player[player2]).to contain_exactly(participation2, participation4)
       end
 
-      it "returns the player count" do
-        expect(result.player_count).to eq(2)
-      end
-
       it "sorts players by total rating descending" do
         expect(result.players_sorted).to eq([ player2, player1 ])
       end
@@ -129,7 +121,6 @@ RSpec.describe CompetitionOverviewService do
 
         expect(result.games_by_child.values.flatten).to be_empty
         expect(result.players).to be_empty
-        expect(result.player_count).to eq(0)
       end
 
       it "returns empty data for leaf" do
@@ -139,7 +130,6 @@ RSpec.describe CompetitionOverviewService do
         expect(result.games).to be_empty
         expect(result.participations_by_player).to be_empty
         expect(result.players_sorted).to be_empty
-        expect(result.player_count).to eq(0)
       end
     end
   end
