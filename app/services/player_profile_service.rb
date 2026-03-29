@@ -29,9 +29,10 @@ class PlayerProfileService
 
   def build_competitions_with_games(player)
     games = player.games.includes(:game_participations, competition: :parent).ordered
-    games.group_by { |g| g.competition.root }.map do |root, root_games|
-      CompetitionGames.new(competition: root, games: root_games)
-    end
+    games.group_by { |g| g.competition.root }
+      .map { |root, root_games| CompetitionGames.new(competition: root, games: root_games) }
+      .sort_by { |cg| cg.competition.started_on || Date.new(0) }
+      .reverse
   end
 
   def build_stats(participations)

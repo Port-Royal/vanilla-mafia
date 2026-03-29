@@ -56,6 +56,25 @@ RSpec.describe PlayerProfileService do
       end
     end
 
+    describe "competition ordering" do
+      let_it_be(:order_player) { create(:player, name: "Сортировщик") }
+      let_it_be(:old_comp) { create(:competition, :season, started_on: Date.new(2024, 1, 1)) }
+      let_it_be(:new_comp) { create(:competition, :season, started_on: Date.new(2025, 6, 1)) }
+      let_it_be(:old_game) { create(:game, competition: old_comp, game_number: 1) }
+      let_it_be(:new_game) { create(:game, competition: new_comp, game_number: 1) }
+
+      before do
+        create(:game_participation, game: old_game, player: order_player)
+        create(:game_participation, game: new_game, player: order_player)
+      end
+
+      it "orders competitions by started_on descending" do
+        order_result = described_class.call(player_id: order_player.id)
+        competitions = order_result.competitions_with_games.map(&:competition)
+        expect(competitions).to eq([ new_comp, old_comp ])
+      end
+    end
+
     describe "game ordering within competition" do
       let_it_be(:shared_comp) { create(:competition, :series) }
       let_it_be(:ordering_player) { create(:player, name: "Порядочный") }

@@ -82,8 +82,8 @@
   <% end %>
 <% end %>
 
-<% @competitions_with_games.each do |entry| %>
-  <details class="mt-4 border border-gray-200 rounded-lg">
+<% @competitions_with_games.each_with_index do |entry, i| %>
+  <details class="mt-4 border border-gray-200 rounded-lg" <%= "open" if i == 0 %>>
     <summary class="px-4 py-3 cursor-pointer font-bold text-maroon hover:bg-gray-50">
       <%= entry.competition.name %>
       <span class="text-sm font-normal text-gray-500">(<%= entry.games.size %>)</span>
