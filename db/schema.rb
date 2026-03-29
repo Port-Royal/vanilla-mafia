@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_155731) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_173957) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -241,6 +241,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_155731) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "podcast_feed_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "revoked_at"
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["token"], name: "index_podcast_feed_tokens_on_token", unique: true
+    t.index ["user_id"], name: "index_podcast_feed_tokens_on_user_id", unique: true
+  end
+
   create_table "podcasts", force: :cascade do |t|
     t.string "author", null: false
     t.string "category"
@@ -337,6 +347,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_155731) do
   add_foreign_key "player_claims", "users", column: "reviewed_by_id"
   add_foreign_key "playlist_episodes", "episodes"
   add_foreign_key "playlist_episodes", "playlists"
+  add_foreign_key "podcast_feed_tokens", "users"
   add_foreign_key "taggings", "tags"
   add_foreign_key "telegram_authors", "users"
   add_foreign_key "user_grants", "grants"

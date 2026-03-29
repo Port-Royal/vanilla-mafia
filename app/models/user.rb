@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :user_grants, dependent: :destroy
   has_many :grants, through: :user_grants
   has_many :announcement_dismissals, dependent: :destroy
+  has_one :podcast_feed_token, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :password, password_strength: true, if: :password_required?
