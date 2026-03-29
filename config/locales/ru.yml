@@ -271,6 +271,10 @@ ru:
       author: "Автор"
       tags: "Теги"
       edit: "Редактировать"
+      delete: "Удалить"
+      delete_confirm: "Вы уверены, что хотите удалить этот черновик?"
+      unpublish: "Снять с публикации"
+      unpublish_confirm: "Вы уверены, что хотите снять эту новость с публикации?"
       empty: "Новостей пока нет."
       filter:
         all: "Все"
@@ -303,6 +307,8 @@ ru:
       success: "Новость удалена."
     publish:
       success: "Новость опубликована."
+    unpublish:
+      success: "Новость снята с публикации."
   admin_telegram:
     title: "Настройки Telegram-бота"
     webhook:

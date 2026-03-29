@@ -45,9 +45,21 @@
               <% end %>
             </td>
             <td class="px-4 py-3"><%= article.published_at && l(article.published_at, format: :short) %></td>
-            <td class="px-4 py-3 text-right">
+            <td class="px-4 py-3 text-right whitespace-nowrap">
               <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article),
                     class: "text-blue-600 hover:underline text-sm" %>
+              <% if article.published? %>
+                <%= button_to t("admin_news.index.unpublish"), unpublish_admin_news_path(article),
+                      method: :patch,
+                      data: { turbo_confirm: t("admin_news.index.unpublish_confirm") },
+                      class: "text-yellow-600 hover:underline text-sm ml-2 inline" %>
+              <% end %>
+              <% if article.draft? && policy(article).destroy? %>
+                <%= button_to t("admin_news.index.delete"), admin_news_path(article),
+                      method: :delete,
+                      data: { turbo_confirm: t("admin_news.index.delete_confirm") },
+                      class: "text-red-600 hover:underline text-sm ml-2 inline" %>
+              <% end %>
             </td>
           </tr>
         <% end %>

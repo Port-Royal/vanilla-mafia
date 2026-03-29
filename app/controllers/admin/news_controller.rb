@@ -5,7 +5,7 @@ class Admin::NewsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :require_news_access!
-  before_action :set_news, only: [ :show, :edit, :update, :destroy, :publish ]
+  before_action :set_news, only: [ :show, :edit, :update, :destroy, :publish, :unpublish ]
 
   def index
     scope = policy_scope(News).includes(:author, :tags).recent
@@ -68,6 +68,18 @@ class Admin::NewsController < ApplicationController
 
     @news.publish!
     redirect_to admin_news_path(@news), notice: t("admin_news.publish.success")
+  end
+
+  def unpublish
+    authorize @news, :update?
+
+    unless @news.published?
+      head :unprocessable_content
+      return
+    end
+
+    @news.unpublish!
+    redirect_to admin_news_index_path, notice: t("admin_news.unpublish.success")
   end
 
   private
