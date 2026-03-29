@@ -3,7 +3,7 @@
   <% if award.staff? %>
     <span class="award-staff award-title text-sm font-medium"><%= award.title %></span>
   <% else %>
-    <div class="flex flex-col items-center text-center" title="<%= award.title %>">
+    <div class="flex flex-col items-center text-center rounded bg-gray-50 p-2" title="<%= award.title %>">
       <% if award.icon.attached? %>
         <%= image_tag award.icon.variant(resize_to_limit: [32, 32]), size: "32x32", loading: "lazy", alt: award.title, title: "#{award.title} — #{player_award.competition&.name}" %>
       <% else %>
