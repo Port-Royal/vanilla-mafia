@@ -23,6 +23,10 @@ RSpec.describe PlayerDisputesController do
       it "returns success" do
         expect(response).to have_http_status(:ok)
       end
+
+      it "renders the title with the player nickname" do
+        expect(response.body).to include(I18n.t("player_disputes.new.title", player_name: player.name))
+      end
     end
   end
 
