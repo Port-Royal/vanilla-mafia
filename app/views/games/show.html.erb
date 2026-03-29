@@ -13,7 +13,10 @@
   <% end %>
 </div>
 
-<p class="text-lg text-gray-600 mb-6"><%= t(".result.#{@game.result}") %></p>
+<p class="text-lg text-gray-600 mb-2"><%= t(".result.#{@game.result}") %></p>
+<% if @game.judge.present? %>
+  <p class="text-sm text-gray-500 mb-6"><%= t(".judge", name: @game.judge) %></p>
+<% end %>
 
 <div class="scroll-wrapper">
   <table class="data-table">
