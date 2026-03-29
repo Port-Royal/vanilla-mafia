@@ -293,7 +293,8 @@ ru:
       delete: "Удалить"
       delete_confirm: "Вы уверены, что хотите удалить эту новость?"
     form:
-      game: "Игра"
+      season: "Сезон"
+      series: "Серия"
       submit_create: "Создать"
       submit_update: "Сохранить"
     status:

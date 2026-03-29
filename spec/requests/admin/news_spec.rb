@@ -143,6 +143,9 @@ RSpec.describe "Admin::News" do
 
   describe "GET /admin/news/new" do
     context "when user is editor" do
+      let_it_be(:root_competition) { create(:competition, :season, name: "Сезон 10") }
+      let_it_be(:stage) { create(:competition, :series, parent: root_competition, name: "Серия 1") }
+
       before do
         sign_in editor
         get new_admin_news_path
@@ -154,6 +157,22 @@ RSpec.describe "Admin::News" do
 
       it "renders the new form" do
         expect(response.body).to include(I18n.t("admin_news.new.title"))
+      end
+
+      it "renders the competition selector" do
+        assert_select "select[name='news[competition_id]']"
+      end
+
+      it "renders the season selector with seasons" do
+        assert_select "select[data-cascade-select-target='parent'] option", text: "Сезон 10"
+      end
+
+      it "includes stages in the competition selector" do
+        assert_select "select[name='news[competition_id]'] option", text: "Серия 1"
+      end
+
+      it "does not render the game selector" do
+        assert_select "select[name='news[game_id]']", count: 0
       end
     end
 
