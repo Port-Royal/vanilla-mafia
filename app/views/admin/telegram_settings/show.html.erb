@@ -75,7 +75,7 @@
       </div>
       <div>
         <%= f.label :user_id, t("admin_telegram.authors.linked_user"), class: "block text-xs text-gray-600 mb-1" %>
-        <%= f.collection_select :user_id, @users, :id, :email, { include_blank: true }, class: "border border-gray-300 rounded px-3 py-1.5 text-sm" %>
+        <%= f.select :user_id, options_for_select(@users.map { |u| ["#{u.player&.name} (#{u.email})", u.id] }, f.object.user_id), { include_blank: true }, class: "border border-gray-300 rounded px-3 py-1.5 text-sm" %>
       </div>
       <%= f.submit t("admin_telegram.authors.add_submit"), class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded text-sm cursor-pointer" %>
     <% end %>
