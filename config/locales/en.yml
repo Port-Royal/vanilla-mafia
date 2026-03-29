@@ -270,6 +270,7 @@ en:
       win_rate: "Win rate"
       view: "Result"
       total: "Total"
+      news: "News"
   seasons:
     show:
       date: "Date"
