@@ -28,7 +28,7 @@
     </thead>
     <tbody>
       <% @participations.each do |participation| %>
-        <tr>
+        <tr class="<%= 'bg-green-50' if participation.win %>">
           <td><%= participation.seat %></td>
           <td><%= link_to participation.player.name, player_path(participation.player), class: "text-maroon hover:underline" %></td>
           <td>
