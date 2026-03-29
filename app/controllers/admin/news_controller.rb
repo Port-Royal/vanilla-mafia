@@ -8,7 +8,7 @@ class Admin::NewsController < ApplicationController
   before_action :set_news, only: [ :show, :edit, :update, :destroy, :publish, :unpublish ]
 
   def index
-    scope = policy_scope(News).includes(:author, :tags).drafts_first
+    scope = policy_scope(News).includes({ author: :player }, :tags).drafts_first
     scope = scope.where(status: params[:status]) if params[:status].present? && News.statuses.key?(params[:status])
     @pagy, @news = pagy(scope)
   end

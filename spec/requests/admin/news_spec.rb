@@ -46,6 +46,37 @@ RSpec.describe "Admin::News" do
       end
     end
 
+    context "when author has a linked player" do
+      let_it_be(:player) { create(:player, name: "Автор-Игрок") }
+      let_it_be(:author_with_player) { create(:user, :editor, player: player) }
+      let_it_be(:article_with_player_author) { create(:news, author: author_with_player) }
+
+      before do
+        sign_in admin
+        get admin_news_index_path
+      end
+
+      it "renders the player name instead of email" do
+        expect(response.body).to include("Автор-Игрок")
+        expect(response.body).not_to include(author_with_player.email)
+      end
+
+      it "links the player name to the player profile" do
+        assert_select "a[href='#{player_path(player)}']", text: "Автор-Игрок"
+      end
+    end
+
+    context "when author has no linked player" do
+      before do
+        sign_in admin
+        get admin_news_index_path
+      end
+
+      it "renders the author email" do
+        expect(response.body).to include(published_article.author.email)
+      end
+    end
+
     context "when user is editor" do
       before do
         sign_in editor
