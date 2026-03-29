@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_154259) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_155731) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -237,6 +237,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_154259) do
 
   create_table "playlists", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "podcasts", force: :cascade do |t|
+    t.string "author", null: false
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.text "description", null: false
+    t.string "language", default: "ru", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
   end
