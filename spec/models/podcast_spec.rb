@@ -18,6 +18,16 @@ RSpec.describe Podcast, type: :model do
       second = Podcast.instance
       expect(second).to eq(first)
     end
+
+    it "sets default attributes" do
+      podcast = Podcast.instance
+      expect(podcast).to have_attributes(
+        title: "Vanilla Mafia",
+        author: "Vanilla Mafia",
+        description: "Подкаст клуба спортивной мафии Vanilla Mafia",
+        language: "ru"
+      )
+    end
   end
 
   describe "cover attachment" do
