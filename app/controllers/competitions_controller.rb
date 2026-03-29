@@ -6,7 +6,7 @@ class CompetitionsController < ApplicationController
 
     if @parent_view
       @games_by_child = result.games_by_child
-      @pagy, @players = pagy(result.players, limit: 25, count: result.player_count)
+      @players = result.players
     else
       @games = result.games
       @participations_by_player = result.participations_by_player

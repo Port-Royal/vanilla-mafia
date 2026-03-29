@@ -1,5 +1,5 @@
 class CompetitionOverviewService
-  Result = Data.define(:parent_view, :games_by_child, :players, :player_count, :games, :participations_by_player, :players_sorted)
+  Result = Data.define(:parent_view, :games_by_child, :players, :games, :participations_by_player, :players_sorted)
 
   def self.call(competition:)
     new(competition).call
@@ -29,7 +29,6 @@ class CompetitionOverviewService
       parent_view: true,
       games_by_child: games_by_child,
       players: Player.with_aggregated_stats.where(games: { competition_id: subtree_ids }).ranked,
-      player_count: Player.joins(game_participations: :game).where(games: { competition_id: subtree_ids }).distinct.count,
       games: Game.none,
       participations_by_player: {},
       players_sorted: []
@@ -45,7 +44,6 @@ class CompetitionOverviewService
       parent_view: false,
       games_by_child: {},
       players: [],
-      player_count: participations_by_player.size,
       games: games,
       participations_by_player: participations_by_player,
       players_sorted: players_sorted
