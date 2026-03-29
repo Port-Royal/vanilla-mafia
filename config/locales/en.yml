@@ -358,6 +358,9 @@ en:
         - "Describe why you believe this player profile belongs to you."
         - "Provide any evidence that can help verify your identity (e.g., other players who can confirm)."
         - "Your dispute will be reviewed by an administrator."
+      selfie_label: "Selfie"
+      documents_label: "Supporting documents"
+      files_disclaimer: "All attached files are used solely to verify your identity and will be deleted after the dispute is resolved."
       submit: "Submit"
     create:
       pending: "Dispute submitted and awaiting review."

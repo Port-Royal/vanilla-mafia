@@ -8,7 +8,7 @@
   </ul>
 </div>
 
-<%= form_with url: player_dispute_path(@player), scope: :dispute, method: :post, class: "max-w-lg" do |f| %>
+<%= form_with url: player_dispute_path(@player), scope: :dispute, method: :post, multipart: true, class: "max-w-lg" do |f| %>
   <div class="mb-4">
     <%= f.label :evidence, t(".evidence_label"), class: "block text-sm font-medium text-gray-700 mb-1" %>
     <%= f.text_area :evidence,
@@ -16,6 +16,22 @@
           rows: 5,
           class: "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-maroon" %>
   </div>
+
+  <div class="mb-4">
+    <%= f.label :selfie, t(".selfie_label"), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.file_field :selfie,
+          accept: "image/*",
+          class: "w-full border border-gray-300 rounded px-3 py-2" %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :documents, t(".documents_label"), class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.file_field :documents,
+          multiple: true,
+          class: "w-full border border-gray-300 rounded px-3 py-2" %>
+  </div>
+
+  <p class="mb-4 text-xs text-neutral-500"><%= t(".files_disclaimer") %></p>
 
   <div>
     <%= f.submit t(".submit"), class: "bg-maroon text-white px-4 py-2 rounded hover:bg-maroon/90 font-medium cursor-pointer" %>

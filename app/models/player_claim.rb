@@ -5,6 +5,9 @@ class PlayerClaim < ApplicationRecord
   belongs_to :player
   belongs_to :reviewed_by, class_name: "User", optional: true
 
+  has_one_attached :selfie
+  has_many_attached :documents
+
   validates :status, inclusion: { in: STATUSES }
   validates :user_id, uniqueness: { scope: :player_id }
   validates :evidence, presence: true, if: :dispute?

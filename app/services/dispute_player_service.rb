@@ -1,14 +1,16 @@
 class DisputePlayerService
   Result = Data.define(:success, :claim, :error)
 
-  def self.call(user:, player:, evidence:)
-    new(user, player, evidence).call
+  def self.call(user:, player:, evidence:, selfie: nil, documents: nil)
+    new(user, player, evidence, selfie, documents).call
   end
 
-  def initialize(user, player, evidence)
+  def initialize(user, player, evidence, selfie, documents)
     @user = user
     @player = player
     @evidence = evidence
+    @selfie = selfie
+    @documents = documents
   end
 
   def call
@@ -50,6 +52,9 @@ class DisputePlayerService
         dispute: true,
         evidence: @evidence
       )
+
+      claim.selfie.attach(@selfie) if @selfie
+      claim.documents.attach(@documents) if @documents.present?
     end
 
     DisputeMailer.dispute_filed(claim).deliver_later
