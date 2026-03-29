@@ -99,6 +99,72 @@ RSpec.describe PlayerProfileService do
       expect(articles.first.association(:rich_text_content)).to be_loaded
     end
 
+    describe "stats" do
+      let_it_be(:stats_player) { create(:player, name: "Статистик") }
+      let_it_be(:peace_role) { Role.find_or_create_by!(code: "peace") { |r| r.name = "Мирный" } }
+      let_it_be(:mafia_role) { Role.find_or_create_by!(code: "mafia") { |r| r.name = "Мафия" } }
+      let_it_be(:sheriff_role) { Role.find_or_create_by!(code: "sheriff") { |r| r.name = "Шериф" } }
+      let_it_be(:stats_game1) { create(:game, game_number: 1, result: :peace_victory, played_on: Date.new(2024, 6, 15)) }
+      let_it_be(:stats_game2) { create(:game, game_number: 2, result: :mafia_victory, played_on: Date.new(2024, 3, 1)) }
+      let_it_be(:stats_game3) { create(:game, game_number: 3, result: :peace_victory, played_on: Date.new(2025, 1, 10)) }
+
+      before do
+        create(:game_participation, game: stats_game1, player: stats_player, role: peace_role, win: true)
+        create(:game_participation, game: stats_game2, player: stats_player, role: mafia_role, win: true)
+        create(:game_participation, game: stats_game3, player: stats_player, role: peace_role, win: false)
+      end
+
+      let(:stats) { described_class.call(player_id: stats_player.id).stats }
+
+      it "returns total games count" do
+        expect(stats.total_games).to eq(3)
+      end
+
+      it "returns total wins count" do
+        expect(stats.total_wins).to eq(2)
+      end
+
+      it "returns win rate as percentage" do
+        expect(stats.win_rate).to eq(66.7)
+      end
+
+      it "returns earliest game date regardless of order" do
+        expect(stats.first_game_date).to eq(Date.new(2024, 3, 1))
+      end
+
+      it "returns role stats for each role played" do
+        expect(stats.role_stats).to contain_exactly(
+          have_attributes(role_code: "peace", role_name: "Мирный", games: 2, wins: 1, win_rate: 50.0),
+          have_attributes(role_code: "mafia", role_name: "Мафия", games: 1, wins: 1, win_rate: 100.0)
+        )
+      end
+
+      it "orders role stats by games count descending" do
+        expect(stats.role_stats.first.role_code).to eq("peace")
+      end
+
+      context "when player has no games" do
+        let_it_be(:no_games_player) { create(:player, name: "Новичок") }
+        let(:empty_stats) { described_class.call(player_id: no_games_player.id).stats }
+
+        it "returns zero total games" do
+          expect(empty_stats.total_games).to eq(0)
+        end
+
+        it "returns zero win rate" do
+          expect(empty_stats.win_rate).to eq(0.0)
+        end
+
+        it "returns nil first game date" do
+          expect(empty_stats.first_game_date).to be_nil
+        end
+
+        it "returns empty role stats" do
+          expect(empty_stats.role_stats).to be_empty
+        end
+      end
+    end
+
     context "when player has no games or awards" do
       let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
       let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
