@@ -1,13 +1,17 @@
 <% award = player_award.award %>
 <% cache [I18n.locale, player_award, award] do %>
-  <div class="flex flex-col items-center text-center" title="<%= award.title %>">
-    <% if award.icon.attached? %>
-      <%= image_tag award.icon.variant(resize_to_limit: [32, 32]), size: "32x32", loading: "lazy", alt: award.title, title: "#{award.title} — #{player_award.competition&.name}" %>
-    <% else %>
-      <span class="text-2xl" title="<%= award.title %>">🏆</span>
-    <% end %>
-    <% if player_award.competition %>
-      <span class="award-competition text-gray-400 text-xs mt-1"><%= player_award.competition.name %></span>
-    <% end %>
-  </div>
+  <% if award.staff? %>
+    <span class="award-staff award-title text-sm font-medium"><%= award.title %></span>
+  <% else %>
+    <div class="flex flex-col items-center text-center" title="<%= award.title %>">
+      <% if award.icon.attached? %>
+        <%= image_tag award.icon.variant(resize_to_limit: [32, 32]), size: "32x32", loading: "lazy", alt: award.title, title: "#{award.title} — #{player_award.competition&.name}" %>
+      <% else %>
+        <span class="text-2xl" title="<%= award.title %>">🏆</span>
+      <% end %>
+      <% if player_award.competition %>
+        <span class="award-competition text-gray-400 text-xs mt-1"><%= player_award.competition.name %></span>
+      <% end %>
+    </div>
+  <% end %>
 <% end %>

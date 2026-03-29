@@ -51,6 +51,14 @@ RSpec.describe HallOfFameController do
         expect(response.body).to include("Ведущий")
         expect(response.body).to include("Лучший ведущий")
       end
+
+      it "renders staff award as title only" do
+        assert_select ".award-title", text: "Лучший ведущий"
+      end
+
+      it "does not render competition subtitle for staff awards" do
+        assert_select ".award-staff .award-competition", count: 0
+      end
     end
 
     context "when no awards exist" do
