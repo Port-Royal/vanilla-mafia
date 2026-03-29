@@ -15,12 +15,14 @@ export default class extends Controller {
 
   static values = {
     savedPosition: { type: Number, default: 0 },
+    savedSpeed: { type: Number, default: 1 },
     episodeTitle: { type: String, default: "" },
     positionUrl: { type: String, default: "" }
   }
 
   connect() {
-    this.speedIndex = 0
+    this.speedIndex = SPEEDS.indexOf(this.savedSpeedValue)
+    if (this.speedIndex < 0) this.speedIndex = 0
     this.seeking = false
     this.saveTimer = null
     this.boundBeforeUnload = () => this.savePosition()
@@ -39,6 +41,10 @@ export default class extends Controller {
     if (this.savedPositionValue > 0) {
       this.audioTarget.currentTime = this.savedPositionValue
     }
+
+    const speed = SPEEDS[this.speedIndex]
+    this.audioTarget.playbackRate = speed
+    this.speedButtonTarget.textContent = `${speed}x`
 
     this.updateProgressUI()
     this.setupMediaSession()
@@ -238,6 +244,7 @@ export default class extends Controller {
     if (!this.positionUrlValue) return
 
     const position = Math.floor(this.audioTarget.currentTime)
+    const speed = SPEEDS[this.speedIndex]
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
 
     fetch(this.positionUrlValue, {
@@ -246,7 +253,7 @@ export default class extends Controller {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken
       },
-      body: JSON.stringify({ position_seconds: position }),
+      body: JSON.stringify({ position_seconds: position, playback_speed: speed }),
       keepalive: true
     }).catch(() => {})
   }

@@ -8,9 +8,10 @@ class Podcast::PlaybackPositionsController < ApplicationController
       episode: episode
     )
     position.position_seconds = params[:position_seconds]
+    position.playback_speed = params[:playback_speed] if params[:playback_speed].present?
 
     if position.save
-      render json: { position_seconds: position.position_seconds }
+      render json: { position_seconds: position.position_seconds, playback_speed: position.playback_speed }
     else
       head :unprocessable_content
     end

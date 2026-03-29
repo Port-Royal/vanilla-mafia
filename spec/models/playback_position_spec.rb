@@ -17,6 +17,8 @@ RSpec.describe PlaybackPosition, type: :model do
         .is_greater_than_or_equal_to(0)
     end
 
+    it { is_expected.to validate_inclusion_of(:playback_speed).in_array(PlaybackPosition::VALID_SPEEDS) }
+
     it { is_expected.to validate_uniqueness_of(:episode_id).scoped_to(:user_id) }
   end
 

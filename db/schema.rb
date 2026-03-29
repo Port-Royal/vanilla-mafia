@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_071327) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_154259) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -173,6 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_071327) do
   create_table "playback_positions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "episode_id", null: false
+    t.float "playback_speed", default: 1.0, null: false
     t.integer "position_seconds", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
