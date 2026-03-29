@@ -85,5 +85,28 @@ RSpec.describe "Admin::TelegramSettings" do
       get admin_telegram_settings_path
       assert_select "input[name='telegram_author[telegram_username]']", count: 0
     end
+
+    context "user selector filtering" do
+      let_it_be(:player) { create(:player, name: "С Профилем") }
+      let_it_be(:user_with_player) { create(:user, player: player) }
+      let_it_be(:user_without_player) { create(:user) }
+
+      before do
+        sign_in admin
+        get admin_telegram_settings_path
+      end
+
+      it "includes users with linked players in the selector" do
+        assert_select "select[name='telegram_author[user_id]'] option", text: /С Профилем/
+      end
+
+      it "excludes users without linked players from the selector" do
+        assert_select "select[name='telegram_author[user_id]'] option", text: /#{Regexp.escape(user_without_player.email)}/, count: 0
+      end
+
+      it "shows player nickname in the selector" do
+        assert_select "select[name='telegram_author[user_id]'] option", text: "С Профилем"
+      end
+    end
   end
 end
