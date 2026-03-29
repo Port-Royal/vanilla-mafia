@@ -115,6 +115,79 @@ RSpec.describe PlayerClaim, type: :model do
         end
       end
     end
+
+    context 'when selfie is attached' do
+      let(:claim) { build(:player_claim) }
+
+      context 'with valid content type' do
+        before do
+          claim.selfie.attach(
+            io: StringIO.new("fake image"), filename: "selfie.jpg", content_type: "image/jpeg"
+          )
+        end
+
+        it 'is valid' do
+          expect(claim).to be_valid
+        end
+      end
+
+      context 'with invalid content type' do
+        before do
+          claim.selfie.attach(
+            io: StringIO.new("fake file"), filename: "selfie.exe", content_type: "application/octet-stream"
+          )
+        end
+
+        it 'is invalid' do
+          expect(claim).not_to be_valid
+          expect(claim.errors[:selfie]).to include(I18n.t("errors.messages.content_type"))
+        end
+      end
+    end
+
+    context 'when documents are attached' do
+      let(:claim) { build(:player_claim) }
+
+      context 'with valid content type' do
+        before do
+          claim.documents.attach(
+            io: StringIO.new("fake pdf"), filename: "doc.pdf", content_type: "application/pdf"
+          )
+        end
+
+        it 'is valid' do
+          expect(claim).to be_valid
+        end
+      end
+
+      context 'with invalid content type' do
+        before do
+          claim.documents.attach(
+            io: StringIO.new("fake file"), filename: "doc.exe", content_type: "application/octet-stream"
+          )
+        end
+
+        it 'is invalid' do
+          expect(claim).not_to be_valid
+          expect(claim.errors[:documents]).to include(I18n.t("errors.messages.content_type"))
+        end
+      end
+
+      context 'with too many files' do
+        before do
+          6.times do |i|
+            claim.documents.attach(
+              io: StringIO.new("fake pdf #{i}"), filename: "doc#{i}.pdf", content_type: "application/pdf"
+            )
+          end
+        end
+
+        it 'is invalid' do
+          expect(claim).not_to be_valid
+          expect(claim.errors[:documents]).to include(I18n.t("errors.messages.too_many"))
+        end
+      end
+    end
   end
 
   describe 'scopes' do

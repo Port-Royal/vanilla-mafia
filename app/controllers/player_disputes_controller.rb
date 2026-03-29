@@ -9,10 +9,13 @@ class PlayerDisputesController < ApplicationController
 
   def create
     @player = Player.find(params[:player_id])
+    dispute_params = params.require(:dispute).permit(:evidence, :selfie, documents: [])
     result = DisputePlayerService.call(
       user: current_user,
       player: @player,
-      evidence: params.require(:dispute).permit(:evidence)[:evidence]
+      evidence: dispute_params[:evidence],
+      selfie: dispute_params[:selfie],
+      documents: dispute_params[:documents]
     )
 
     if result.success

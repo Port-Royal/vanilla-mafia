@@ -35,6 +35,18 @@ RSpec.describe PlayerDisputesController do
       it "does not use the description as a placeholder" do
         assert_select "textarea[placeholder]", count: 0
       end
+
+      it "renders the selfie file upload field" do
+        assert_select "input[type=file][name='dispute[selfie]']"
+      end
+
+      it "renders the documents file upload field with multiple attribute" do
+        assert_select "input[type=file][name='dispute[documents][]'][multiple]"
+      end
+
+      it "renders the file deletion disclaimer" do
+        expect(response.body).to include(I18n.t("player_disputes.new.files_disclaimer"))
+      end
     end
   end
 
@@ -59,6 +71,26 @@ RSpec.describe PlayerDisputesController do
 
         expect(response).to redirect_to(player_path(player))
         expect(flash[:notice]).to eq(I18n.t("player_disputes.create.pending"))
+      end
+    end
+
+    context "when player is claimed and files are attached" do
+      let(:user) { create(:user) }
+      let(:owner) { create(:user, player: player) }
+      let(:selfie) { fixture_file_upload("spec/fixtures/files/selfie.jpg", "image/jpeg") }
+      let(:document) { fixture_file_upload("spec/fixtures/files/document.pdf", "application/pdf") }
+
+      before { owner }
+
+      it "attaches selfie and documents to the dispute claim" do
+        sign_in user
+        post player_dispute_path(player), params: {
+          dispute: { evidence: "This is my profile", selfie: selfie, documents: [ document ] }
+        }
+
+        claim = PlayerClaim.last
+        expect(claim.selfie).to be_attached
+        expect(claim.documents).to be_attached
       end
     end
 
