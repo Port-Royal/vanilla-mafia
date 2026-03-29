@@ -57,6 +57,13 @@
   </div>
 </div>
 
+<% if @player.bio.present? %>
+  <div id="player-bio" class="rounded border border-maroon/20 p-4 mb-6">
+    <h2 class="text-xl font-bold text-maroon mb-3"><%= t(".bio") %></h2>
+    <p class="text-sm text-neutral-700 whitespace-pre-line"><%= @player.bio %></p>
+  </div>
+<% end %>
+
 <% if user_signed_in? %>
   <% if @player.claimed_by?(current_user) %>
     <div class="mb-6">

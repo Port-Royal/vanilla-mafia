@@ -38,6 +38,30 @@ RSpec.describe PlayersController do
       end
     end
 
+    context "when player has a bio" do
+      let_it_be(:player) { create(:player, name: "С биографией", bio: "Опытный игрок клуба") }
+      let_it_be(:game) { create(:game, game_number: 14) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
+
+      before { get player_path(player) }
+
+      it "renders the bio" do
+        expect(response.body).to include("Опытный игрок клуба")
+      end
+    end
+
+    context "when player has no bio" do
+      let_it_be(:player) { create(:player, name: "Без биографии", bio: nil) }
+      let_it_be(:game) { create(:game, game_number: 15) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
+
+      before { get player_path(player) }
+
+      it "does not render the bio section" do
+        assert_select "#player-bio", count: 0
+      end
+    end
+
     context "when player has news mentions" do
       let_it_be(:player) { create(:player, name: "Упомянутый") }
       let_it_be(:game) { create(:game, game_number: 12) }
