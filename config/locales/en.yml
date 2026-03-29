@@ -330,6 +330,7 @@ en:
       additional_score: "Bonus"
       best_move: "Best move"
       total: "Total"
+      judge: "Judge: %{name}"
       result:
         in_progress: "In progress"
         peace_victory: "City wins"

@@ -173,6 +173,7 @@ ru:
       additional_score: "Доп. балл"
       best_move: "Лучший ход"
       total: "Итого"
+      judge: "Ведущий: %{name}"
       result:
         in_progress: "Игра в процессе"
         peace_victory: "Победа мирных"
