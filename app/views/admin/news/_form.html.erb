@@ -22,12 +22,26 @@
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-      <%= f.label :game_id, t("admin_news.form.game"), class: "w-40 font-semibold text-sm text-right pt-2" %>
-      <%= f.select :game_id,
-            options_from_collection_for_select(@games, :id, :full_name, f.object.game_id),
-            { include_blank: true },
-            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+    <% selected_stage = f.object.competition %>
+    <% selected_season_id = selected_stage ? selected_stage.parent_id : nil %>
+    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2"
+         data-controller="cascade-select"
+         data-cascade-select-options-value="<%= @stages_by_season.transform_values { |stages| stages.map { |s| [s.name, s.id] } }.to_json %>">
+      <%= f.label :competition_id, t("admin_news.form.season"), class: "w-40 font-semibold text-sm text-right pt-2" %>
+      <div class="flex w-full gap-2">
+        <select data-cascade-select-target="parent" data-action="cascade-select#updateChild"
+                class="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm">
+          <option value=""></option>
+          <% @seasons.each do |season| %>
+            <option value="<%= season.id %>" <%= "selected" if season.id == selected_season_id %>><%= season.name %></option>
+          <% end %>
+        </select>
+        <%= f.select :competition_id,
+              options_from_collection_for_select(@stages_by_season.values.flatten, :id, :name, f.object.competition_id),
+              { include_blank: true },
+              class: "w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm",
+              data: { cascade_select_target: "child", selected_value: f.object.competition_id } %>
+      </div>
     </div>
   </div>
 </div>

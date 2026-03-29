@@ -89,14 +89,15 @@ class Admin::NewsController < ApplicationController
   end
 
   def set_news
-    @news = News.includes(game: { competition: :parent }).find(params[:id])
+    @news = News.includes(competition: :parent).find(params[:id])
   end
 
   def load_form_data
-    @games = Game.includes(competition: :parent).order(played_on: :desc)
+    @seasons = Competition.where(kind: :season).ordered
+    @stages_by_season = Competition.where(parent_id: @seasons.select(:id)).ordered.group_by(&:parent_id)
   end
 
   def news_params
-    params.require(:news).permit(:title, :content, :game_id)
+    params.require(:news).permit(:title, :content, :competition_id)
   end
 end
