@@ -42,7 +42,7 @@ RSpec.describe "Podcast::PlaybackPositions" do
 
       it "returns JSON with saved position" do
         patch "/podcast/episodes/#{episode.id}/position", params: params
-        expect(response.parsed_body).to eq("position_seconds" => 120)
+        expect(response.parsed_body).to eq("position_seconds" => 120, "playback_speed" => 1.0)
       end
 
       it "updates an existing playback position" do
@@ -55,6 +55,21 @@ RSpec.describe "Podcast::PlaybackPositions" do
         expect(PlaybackPosition.find_by(user: subscriber, episode: episode).position_seconds).to eq(120)
       end
 
+      it "saves playback speed" do
+        patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: 100, playback_speed: 1.5 }
+        expect(PlaybackPosition.find_by(user: subscriber, episode: episode).playback_speed).to eq(1.5)
+      end
+
+      it "returns saved playback speed in JSON" do
+        patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: 100, playback_speed: 1.75 }
+        expect(response.parsed_body["playback_speed"]).to eq(1.75)
+      end
+
+      it "defaults playback speed to 1.0 when not provided" do
+        patch "/podcast/episodes/#{episode.id}/position", params: params
+        expect(PlaybackPosition.find_by(user: subscriber, episode: episode).playback_speed).to eq(1.0)
+      end
+
       it "rejects negative position" do
         patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: -1 }
         expect(response).to have_http_status(:unprocessable_content)
@@ -62,6 +77,11 @@ RSpec.describe "Podcast::PlaybackPositions" do
 
       it "rejects non-integer position" do
         patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: "abc" }
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "rejects invalid playback speed" do
+        patch "/podcast/episodes/#{episode.id}/position", params: { position_seconds: 100, playback_speed: 3.0 }
         expect(response).to have_http_status(:unprocessable_content)
       end
 

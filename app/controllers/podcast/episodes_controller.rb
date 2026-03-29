@@ -9,5 +9,6 @@ class Podcast::EpisodesController < ApplicationController
     @episode = Episode.published.find(params[:id])
     playback = PlaybackPosition.find_by(user: current_user, episode: @episode)
     @saved_position = playback ? playback.position_seconds : 0
+    @saved_speed = playback ? playback.playback_speed : 1.0
   end
 end
