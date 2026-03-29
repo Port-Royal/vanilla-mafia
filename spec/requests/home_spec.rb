@@ -437,6 +437,10 @@ RSpec.describe HomeController do
       it "renders the player photo placeholder" do
         expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
       end
+
+      it "links player name to player profile" do
+        assert_select "a[href=?]", player_path(player), text: "Star Player"
+      end
     end
 
     context "when more than 6 awarded players exist" do

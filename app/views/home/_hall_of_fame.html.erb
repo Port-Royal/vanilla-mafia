@@ -13,7 +13,7 @@
                         alt: player.name,
                         class: "w-16 h-16 rounded-full object-cover mb-2" %>
         <% end %>
-        <p class="text-sm font-medium truncate w-full"><%= player.name %></p>
+        <p class="text-sm font-medium truncate w-full"><%= link_to player.name, player_path(player), class: "text-maroon hover:underline" %></p>
       </div>
     <% end %>
   </div>

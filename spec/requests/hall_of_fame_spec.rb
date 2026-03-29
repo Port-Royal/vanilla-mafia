@@ -30,6 +30,10 @@ RSpec.describe HallOfFameController do
         expect(response.body).to include("Лучший игрок")
       end
 
+      it "links player name to player profile" do
+        assert_select "a[href=?]", player_path(player), text: "Алексей"
+      end
+
       it "renders default photo for players without uploaded pictures" do
         expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
       end
