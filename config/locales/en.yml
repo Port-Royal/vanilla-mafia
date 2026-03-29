@@ -260,7 +260,7 @@ en:
       view_all: "View all"
   competitions:
     show:
-      by_children: "By series and games"
+      by_children: "Competitions"
       by_players: "By players"
       rank: "Rank"
       player: "Player"
@@ -274,7 +274,6 @@ en:
       date: "Date"
       season: "Season"
       series: "Series"
-      by_series: "By series and games"
       by_players: "By players"
       rank: "Rank"
       player: "Player"

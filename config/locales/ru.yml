@@ -103,7 +103,7 @@ ru:
       view_all: "Подробнее"
   competitions:
     show:
-      by_children: "По сериям и играм"
+      by_children: "Соревнования"
       by_players: "По игрокам"
       rank: "Место"
       player: "Игрок"
@@ -117,7 +117,6 @@ ru:
       date: "Дата"
       season: "Сезон"
       series: "Серия"
-      by_series: "По сериям и играм"
       by_players: "По игрокам"
       rank: "Место"
       player: "Игрок"
