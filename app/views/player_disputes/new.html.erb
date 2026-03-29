@@ -1,10 +1,17 @@
 <h1 class="text-3xl font-bold text-maroon mb-6"><%= t(".title", player_name: @player.name) %></h1>
 
+<div class="dispute-rules mb-6 rounded border border-maroon/20 p-4 text-sm text-neutral-700">
+  <ul class="list-disc pl-5 space-y-1">
+    <% t(".rules").each do |rule| %>
+      <li><%= rule %></li>
+    <% end %>
+  </ul>
+</div>
+
 <%= form_with url: player_dispute_path(@player), scope: :dispute, method: :post, class: "max-w-lg" do |f| %>
   <div class="mb-4">
     <%= f.label :evidence, t(".evidence_label"), class: "block text-sm font-medium text-gray-700 mb-1" %>
     <%= f.text_area :evidence,
-          placeholder: t(".evidence_placeholder"),
           required: true,
           rows: 5,
           class: "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-maroon" %>

@@ -27,6 +27,14 @@ RSpec.describe PlayerDisputesController do
       it "renders the title with the player nickname" do
         expect(response.body).to include(I18n.t("player_disputes.new.title", player_name: player.name))
       end
+
+      it "renders the dispute rules above the form" do
+        assert_select ".dispute-rules", text: /#{Regexp.escape(I18n.t("player_disputes.new.rules").first)}/
+      end
+
+      it "does not use the description as a placeholder" do
+        assert_select "textarea[placeholder]", count: 0
+      end
     end
   end
 
