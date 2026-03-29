@@ -196,7 +196,7 @@ ru:
         claim_already_exists: "Заявка на этого игрока уже существует."
   player_disputes:
     new:
-      title: "Оспаривание профиля %{player_name}"
+      title: "На самом деле игрок %{player_name} — это я"
       evidence_label: "Обоснование"
       evidence_placeholder: "Опишите, почему этот профиль принадлежит вам"
       submit: "Отправить"

@@ -352,7 +352,7 @@ en:
     award: {}
   player_disputes:
     new:
-      title: "Dispute profile %{player_name}"
+      title: "Player %{player_name} is actually me"
       evidence_label: "Evidence"
       evidence_placeholder: "Describe why this profile belongs to you"
       submit: "Submit"
