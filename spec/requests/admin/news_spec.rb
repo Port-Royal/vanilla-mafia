@@ -174,6 +174,10 @@ RSpec.describe "Admin::News" do
       it "does not render the game selector" do
         assert_select "select[name='news[game_id]']", count: 0
       end
+
+      it "renders a tall content editor" do
+        assert_select "trix-editor[style*='min-height']"
+      end
     end
 
     context "when user is regular user" do
