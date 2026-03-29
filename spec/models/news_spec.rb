@@ -27,6 +27,17 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe '.drafts_first' do
+    let_it_be(:author) { create(:user) }
+    let_it_be(:older) { create(:news, author:, published_at: 2.days.ago) }
+    let_it_be(:newer) { create(:news, author:, published_at: 1.day.ago) }
+    let_it_be(:draft) { create(:news, author:, published_at: nil) }
+
+    it 'orders drafts first, then by published_at descending' do
+      expect(described_class.drafts_first).to eq([ draft, newer, older ])
+    end
+  end
+
   describe '.for_game' do
     let_it_be(:game) { create(:game) }
     let_it_be(:author) { create(:user) }

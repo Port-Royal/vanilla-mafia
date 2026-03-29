@@ -15,6 +15,7 @@ class News < ApplicationRecord
   validates :status, presence: true
 
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
+  scope :drafts_first, -> { order(Arel.sql("published_at IS NOT NULL, published_at DESC, id DESC")) }
   scope :for_game, ->(game) { where(game:) }
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :by_author, ->(user) { where(author: user) }

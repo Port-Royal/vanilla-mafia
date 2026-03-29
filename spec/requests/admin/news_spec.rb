@@ -38,6 +38,12 @@ RSpec.describe "Admin::News" do
       it "does not render unpublish button for draft articles" do
         assert_select "form[action='#{unpublish_admin_news_path(draft_article)}'] button", text: I18n.t("admin_news.index.unpublish"), count: 0
       end
+
+      it "renders drafts before published articles" do
+        draft_pos = response.body.index(draft_article.title)
+        published_pos = response.body.index(published_article.title)
+        expect(draft_pos).to be < published_pos
+      end
     end
 
     context "when user is editor" do
