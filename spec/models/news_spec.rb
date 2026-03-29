@@ -120,4 +120,16 @@ RSpec.describe News, type: :model do
       expect(news.published_at).to be_within(1.second).of(Time.current)
     end
   end
+
+  describe '#unpublish!' do
+    let(:author) { create(:user) }
+    let(:news) { create(:news, :published, author:) }
+
+    it 'sets status to draft and clears published_at' do
+      news.unpublish!
+
+      expect(news.status).to eq("draft")
+      expect(news.published_at).to be_nil
+    end
+  end
 end

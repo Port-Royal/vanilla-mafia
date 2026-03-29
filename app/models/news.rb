@@ -29,4 +29,8 @@ class News < ApplicationRecord
   def publish!
     update!(status: :published, published_at: Time.current)
   end
+
+  def unpublish!
+    update!(status: :draft, published_at: nil)
+  end
 end

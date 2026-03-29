@@ -22,6 +22,22 @@ RSpec.describe "Admin::News" do
       it "shows all news including drafts" do
         expect(response.body).to include(published_article.title, draft_article.title)
       end
+
+      it "renders delete button for draft articles" do
+        assert_select "form[action='#{admin_news_path(draft_article)}'] button", text: I18n.t("admin_news.index.delete")
+      end
+
+      it "does not render delete button for published articles" do
+        assert_select "form[action='#{admin_news_path(published_article)}'] button", text: I18n.t("admin_news.index.delete"), count: 0
+      end
+
+      it "renders unpublish button for published articles" do
+        assert_select "form[action='#{unpublish_admin_news_path(published_article)}'] button", text: I18n.t("admin_news.index.unpublish")
+      end
+
+      it "does not render unpublish button for draft articles" do
+        assert_select "form[action='#{unpublish_admin_news_path(draft_article)}'] button", text: I18n.t("admin_news.index.unpublish"), count: 0
+      end
     end
 
     context "when user is editor" do
@@ -36,6 +52,14 @@ RSpec.describe "Admin::News" do
 
       it "shows all news including drafts" do
         expect(response.body).to include(published_article.title, draft_article.title)
+      end
+
+      it "does not render delete button" do
+        assert_select "button", text: I18n.t("admin_news.index.delete"), count: 0
+      end
+
+      it "renders unpublish button for published articles" do
+        assert_select "form[action='#{unpublish_admin_news_path(published_article)}'] button", text: I18n.t("admin_news.index.unpublish")
       end
     end
 
@@ -400,6 +424,60 @@ RSpec.describe "Admin::News" do
 
       it "redirects to sign in" do
         patch publish_admin_news_path(article)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
+  describe "PATCH /admin/news/:id/unpublish" do
+    context "when user is editor" do
+      before { sign_in editor }
+
+      context "when article is published" do
+        let(:article) { create(:news, :published) }
+
+        it "unpublishes the article" do
+          patch unpublish_admin_news_path(article)
+          expect(article.reload).to be_draft
+        end
+
+        it "clears published_at" do
+          patch unpublish_admin_news_path(article)
+          expect(article.reload.published_at).to be_nil
+        end
+
+        it "redirects to index" do
+          patch unpublish_admin_news_path(article)
+          expect(response).to redirect_to(admin_news_index_path)
+        end
+      end
+
+      context "when article is already a draft" do
+        let(:article) { create(:news) }
+
+        it "returns unprocessable entity" do
+          patch unpublish_admin_news_path(article)
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+      end
+    end
+
+    context "when user is regular user" do
+      let_it_be(:article) { create(:news, :published) }
+
+      before { sign_in regular_user }
+
+      it "returns not found" do
+        patch unpublish_admin_news_path(article)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      let_it_be(:article) { create(:news, :published) }
+
+      it "redirects to sign in" do
+        patch unpublish_admin_news_path(article)
         expect(response).to redirect_to(new_user_session_path)
       end
     end

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       resources :news, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
         member do
           patch :publish
+          patch :unpublish
         end
       end
     end
