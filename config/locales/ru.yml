@@ -113,6 +113,7 @@ ru:
       win_rate: "Процент побед"
       view: "Итог"
       total: "Итого"
+      news: "Новости"
   seasons:
     show:
       date: "Дата"

@@ -11,6 +11,7 @@ class CompetitionsController < ApplicationController
       @games = result.games
       @participations_by_player = result.participations_by_player
       @players_sorted = result.players_sorted
+      @news = result.news
     end
   end
 end
