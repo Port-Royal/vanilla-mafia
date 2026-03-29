@@ -58,8 +58,9 @@
 </div>
 
 <% if @player.bio.present? %>
-  <div id="player-bio" class="mb-6 text-sm text-neutral-700">
-    <p><%= @player.bio %></p>
+  <div id="player-bio" class="rounded border border-maroon/20 p-4 mb-6">
+    <h2 class="text-xl font-bold text-maroon mb-3"><%= t(".bio") %></h2>
+    <p class="text-sm text-neutral-700 whitespace-pre-line"><%= @player.bio %></p>
   </div>
 <% end %>
 

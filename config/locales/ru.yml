@@ -223,6 +223,7 @@ ru:
       dispute_player: "Оспорить профиль"
       dispute_pending: "Запрос на оспаривание на рассмотрении"
       edit_profile: "Редактировать профиль"
+      bio: "О себе"
       total_games: "Игр сыграно"
       win_rate: "Процент побед"
       role_stats: "По ролям"
