@@ -76,7 +76,7 @@
           <% participations = @participations_by_player[player] %>
           <% participations_by_game = participations.index_by(&:game_id) %>
           <tr>
-            <td><%= player.name %></td>
+            <td><%= link_to player.name, player_path(player) %></td>
             <% @games.each do |game| %>
               <td><%= participations_by_game[game.id]&.total %></td>
             <% end %>
