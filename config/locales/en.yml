@@ -354,7 +354,10 @@ en:
     new:
       title: "Player %{player_name} is actually me"
       evidence_label: "Evidence"
-      evidence_placeholder: "Describe why this profile belongs to you"
+      rules:
+        - "Describe why you believe this player profile belongs to you."
+        - "Provide any evidence that can help verify your identity (e.g., other players who can confirm)."
+        - "Your dispute will be reviewed by an administrator."
       submit: "Submit"
     create:
       pending: "Dispute submitted and awaiting review."
