@@ -55,6 +55,10 @@ RSpec.describe ProfilesController do
       it "does not render the comment field" do
         assert_select "textarea[name='player[comment]']", count: 0
       end
+
+      it "renders the bio field" do
+        assert_select "textarea[name='player[bio]']"
+      end
     end
 
     context "when admin has a claimed player" do
@@ -101,7 +105,7 @@ RSpec.describe ProfilesController do
       before { sign_in user }
 
       context "with valid params" do
-        before { patch profile_path, params: { player: { name: "Новое имя", comment: "Привет" } } }
+        before { patch profile_path, params: { player: { name: "Новое имя", comment: "Привет", bio: "Моя биография" } } }
 
         it "updates the player" do
           expect(player.reload.name).to eq("Новое имя")
@@ -109,6 +113,10 @@ RSpec.describe ProfilesController do
 
         it "does not update the comment for non-admin" do
           expect(player.reload.comment).to be_nil
+        end
+
+        it "updates the bio" do
+          expect(player.reload.bio).to eq("Моя биография")
         end
 
         it "redirects to player show page" do

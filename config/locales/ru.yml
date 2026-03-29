@@ -234,6 +234,7 @@ ru:
       save: "Сохранить"
       name_label: "Имя"
       name_hint: "Отображаемое имя игрока"
+      bio_label: "О себе"
       comment_label: "Комментарий"
       photo_label: "Фото"
     update:

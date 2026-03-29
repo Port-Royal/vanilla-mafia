@@ -383,6 +383,7 @@ en:
       save: "Save"
       name_label: "Name"
       name_hint: "Player display name"
+      bio_label: "Bio"
       comment_label: "Comment"
       photo_label: "Photo"
     update:
