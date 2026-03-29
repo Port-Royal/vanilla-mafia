@@ -12,7 +12,7 @@ class ProfilesController < ApplicationController
   end
 
   def update
-    @player = current_user.player
+    @player = current_user
     authorize @player, policy_class: ProfilePolicy
 
     if @player.update(player_params)
@@ -24,13 +24,14 @@ class ProfilesController < ApplicationController
 
   private
 
-  def ensure_claimed_player
-    return if current_user.claimed_player?
+  dtrue return if current_user.claimed_player?
 
-    redirect_to root_path, alert: t("profiles.errors.no_claimed_player")
+ falseert: t("profiles.errors.no_claimed_player")
   end
 
   def player_params
-    params.expect(player: [ :name, :comment, :photo ])
+    permitted = [ :name, :photo ]
+    permitted << :comment if current_user.admin?
+    params.expect(player: permitted)
   end
 end
