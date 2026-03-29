@@ -82,36 +82,41 @@
   <% end %>
 <% end %>
 
-<% @games_by_competition.each do |competition, games| %>
-  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= competition.name %></h2>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th><%= t(".date") %></th>
-          <th><%= t(".competition") %></th>
-          <th><%= t(".game") %></th>
-          <th><%= t(".role") %></th>
-          <th><%= t(".result") %></th>
-          <th><%= t(".score") %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% games.each do |game| %>
-          <% participation = game.game_participations.find { |gp| gp.player_id == @player.id } %>
+<% @competitions_with_games.each_with_index do |entry, i| %>
+  <details class="mt-4 border border-gray-200 rounded-lg" <%= "open" if i == 0 %>>
+    <summary class="px-4 py-3 cursor-pointer font-bold text-maroon hover:bg-gray-50">
+      <%= entry.competition.name %>
+      <span class="text-sm font-normal text-gray-500">(<%= entry.games.size %>)</span>
+    </summary>
+    <div class="scroll-wrapper">
+      <table class="data-table">
+        <thead>
           <tr>
-            <td><%= game.played_on %></td>
-            <td><%= link_to game.competition.name, competition_path(slug: game.competition.slug), class: "text-maroon hover:underline" %></td>
-            <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
-            <td><%= participation&.role&.name %></td>
-            <td><%= participation&.result %></td>
-            <td><%= participation&.total %></td>
+            <th><%= t(".date") %></th>
+            <th><%= t(".competition") %></th>
+            <th><%= t(".game") %></th>
+            <th><%= t(".role") %></th>
+            <th><%= t(".result") %></th>
+            <th><%= t(".score") %></th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% entry.games.each do |game| %>
+            <% participation = game.game_participations.find { |gp| gp.player_id == @player.id } %>
+            <tr>
+              <td><%= game.played_on %></td>
+              <td><%= link_to game.competition.name, competition_path(slug: game.competition.slug), class: "text-maroon hover:underline" %></td>
+              <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
+              <td><%= participation&.role&.name %></td>
+              <td><%= participation&.result %></td>
+              <td><%= participation&.total %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </details>
 <% end %>
-
-<%= render "shared/pagy_nav", pagy: @pagy %>
 
 <% if @news_articles.any? %>
   <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= t(".news") %></h2>
