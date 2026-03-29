@@ -92,6 +92,26 @@ RSpec.describe PlayersController do
       end
     end
 
+    context "when user is an admin viewing another player" do
+      let_it_be(:player) { create(:player, name: "Чужой") }
+      let_it_be(:game) { create(:game, game_number: 10) }
+      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
+      let(:admin) { create(:user, :admin) }
+
+      before do
+        sign_in admin
+        get player_path(player)
+      end
+
+      it "renders the edit profile link" do
+        expect(response.body).to include(I18n.t("players.show.edit_profile"))
+      end
+
+      it "links to the Avo edit page" do
+        expect(response.body).to include(avo.edit_resources_player_path(player))
+      end
+    end
+
     context "when player is unclaimed and user can claim" do
       let_it_be(:player) { create(:player, name: "Свободный") }
       let_it_be(:game) { create(:game, game_number: 3) }
