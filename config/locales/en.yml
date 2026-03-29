@@ -162,7 +162,7 @@ en:
     authors:
       title: "Author Whitelist"
       user_id: "Telegram ID"
-      username: "Username"
+      player: "Player"
       linked_user: "Linked user"
       remove: "Remove"
       remove_confirm: "Remove this author from the whitelist?"
