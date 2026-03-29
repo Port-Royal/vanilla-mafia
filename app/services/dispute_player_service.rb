@@ -52,10 +52,10 @@ class DisputePlayerService
         dispute: true,
         evidence: @evidence
       )
-
-      claim.selfie.attach(@selfie) if @selfie
-      claim.documents.attach(@documents) if @documents.present?
     end
+
+    claim.selfie.attach(@selfie) if @selfie
+    claim.documents.attach(@documents) if @documents.present?
 
     DisputeMailer.dispute_filed(claim).deliver_later
 
