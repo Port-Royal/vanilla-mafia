@@ -373,6 +373,10 @@ en:
       dispute_player: "Dispute profile"
       dispute_pending: "Dispute pending"
       edit_profile: "Edit profile"
+      total_games: "Games played"
+      win_rate: "Win rate"
+      role_stats: "By roles"
+      playing_since: "Playing since"
   profiles:
     edit:
       title: "Edit profile"

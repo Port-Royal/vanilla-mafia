@@ -1,7 +1,7 @@
 <h1 class="text-3xl font-bold text-maroon mb-6"><%= @player.name %></h1>
 
-<div class="rounded border border-maroon/20 p-4">
-  <div class="flex items-start gap-4">
+<div class="rounded border border-maroon/20 p-4 mb-6">
+  <div class="flex flex-col md:flex-row gap-6">
     <div id="player-photo" class="shrink-0">
       <% if @player.photo.attached? %>
         <%= image_tag @player.photo.variant(resize_to_limit: [300, 300]), alt: @player.name %>
@@ -9,13 +9,51 @@
         <%= image_tag Player::DEFAULT_PHOTO_PATH, alt: @player.name %>
       <% end %>
     </div>
-    <% if @player_awards.any? %>
-      <div id="player-awards" class="ml-auto flex w-full flex-wrap justify-end gap-2">
-        <% @player_awards.each do |pa| %>
-          <%= render partial: "hall_of_fame/award", locals: { player_award: pa } %>
+
+    <div class="flex-1 space-y-4">
+      <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+        <div>
+          <span class="text-gray-500"><%= t(".total_games") %></span>
+          <p class="text-lg font-semibold"><%= @stats.total_games %></p>
+        </div>
+        <div>
+          <span class="text-gray-500"><%= t(".win_rate") %></span>
+          <p class="text-lg font-semibold"><%= @stats.win_rate %>%</p>
+        </div>
+        <% if @stats.first_game_date %>
+          <div>
+            <span class="text-gray-500"><%= t(".playing_since") %></span>
+            <p class="text-lg font-semibold"><%= l(@stats.first_game_date, format: :short) %></p>
+          </div>
         <% end %>
       </div>
-    <% end %>
+
+      <% if @stats.role_stats.any? %>
+        <div>
+          <h3 class="text-sm text-gray-500 mb-2"><%= t(".role_stats") %></h3>
+          <div class="flex flex-wrap gap-3">
+            <% @stats.role_stats.each do |rs| %>
+              <div class="flex items-center gap-2 rounded bg-gray-50 px-3 py-1.5 text-sm">
+                <span class="font-medium"><%= rs.role_name %></span>
+                <span><%= rs.games %></span>
+                <span class="text-gray-400">|</span>
+                <span><%= rs.win_rate %>%</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @player_awards.any? %>
+        <div id="player-awards">
+          <div class="flex flex-wrap gap-2">
+            <% @player_awards.each do |pa| %>
+              <%= render partial: "hall_of_fame/award", locals: { player_award: pa } %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
 
