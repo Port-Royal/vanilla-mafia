@@ -278,6 +278,23 @@ RSpec.describe "Admin::News" do
       it "shows the article title" do
         expect(response.body).to include(article.title)
       end
+
+      it "renders unpublish button for published articles" do
+        assert_select "form[action='#{unpublish_admin_news_path(article)}'] button", text: I18n.t("admin_news.show.unpublish")
+      end
+    end
+
+    context "when article is a draft" do
+      let_it_be(:draft_article) { create(:news) }
+
+      before do
+        sign_in editor
+        get admin_news_path(draft_article)
+      end
+
+      it "does not render unpublish button" do
+        assert_select "form[action='#{unpublish_admin_news_path(draft_article)}'] button", count: 0
+      end
     end
 
     context "when user is regular user" do

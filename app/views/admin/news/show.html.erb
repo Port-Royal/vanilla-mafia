@@ -34,6 +34,12 @@
           method: :patch,
           class: "bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
   <% end %>
+  <% if @news.published? %>
+    <%= button_to t("admin_news.show.unpublish"), unpublish_admin_news_path(@news),
+          method: :patch,
+          data: { turbo_confirm: t("admin_news.show.unpublish_confirm") },
+          class: "bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+  <% end %>
   <% if policy(@news).destroy? %>
     <%= button_to t("admin_news.show.delete"), admin_news_path(@news),
           method: :delete,

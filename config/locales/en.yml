@@ -133,6 +133,8 @@ en:
       linked_game: "Game: %{game}"
       edit: "Edit"
       publish: "Publish"
+      unpublish: "Unpublish"
+      unpublish_confirm: "Are you sure you want to unpublish this article?"
       delete: "Delete"
       delete_confirm: "Are you sure you want to delete this article?"
     form:
