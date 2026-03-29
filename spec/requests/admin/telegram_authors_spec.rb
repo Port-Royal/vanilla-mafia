@@ -29,6 +29,26 @@ RSpec.describe "Admin::TelegramAuthors" do
         expect(TelegramAuthor.last.user).to eq(admin)
       end
 
+      it "grants editor role to the linked user when they lack it" do
+        user_without_editor = create(:user)
+
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999444, user_id: user_without_editor.id } }
+
+        expect(user_without_editor.reload).to be_editor
+      end
+
+      it "does not duplicate editor grant when user already has it" do
+        post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999555, user_id: editor.id } }
+
+        expect(editor.grants.where(code: "editor").count).to eq(1)
+      end
+
+      it "does not grant editor role when no user is linked" do
+        expect {
+          post admin_telegram_authors_path, params: { telegram_author: { telegram_user_id: 999666 } }
+        }.not_to change(UserGrant, :count)
+      end
+
       context "with invalid params" do
         it "redirects with alert when telegram_user_id is blank" do
           expect {
