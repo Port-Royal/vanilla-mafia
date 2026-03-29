@@ -42,10 +42,22 @@ RSpec.describe HallOfFameController do
         assert_select "img[title=?]", "Лучший игрок — Сезон 5"
       end
 
+      it "renders competition name as subtitle under award icon" do
+        assert_select ".award-competition", text: "Сезон 5"
+      end
+
       it "renders staff section" do
         expect(response.body).to include("Организаторы")
         expect(response.body).to include("Ведущий")
         expect(response.body).to include("Лучший ведущий")
+      end
+
+      it "renders staff award as title only" do
+        assert_select ".award-title", text: "Лучший ведущий"
+      end
+
+      it "does not render competition subtitle for staff awards" do
+        assert_select ".award-staff .award-competition", count: 0
       end
     end
 

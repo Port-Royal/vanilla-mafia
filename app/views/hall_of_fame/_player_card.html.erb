@@ -8,8 +8,8 @@
         <%= image_tag Player::DEFAULT_PHOTO_PATH, alt: player.name %>
       <% end %>
     </div>
-    <p class="font-medium"><%= link_to player.name, player_path(player), class: "text-maroon hover:underline" %></p>
-    <div class="flex flex-wrap gap-2">
+    <p class="text-lg font-semibold text-center mt-2"><%= link_to player.name, player_path(player), class: "text-maroon hover:underline" %></p>
+    <div class="flex flex-wrap gap-3 mt-2 justify-center">
       <% awards.each do |pa| %>
         <%= render partial: "hall_of_fame/award", locals: { player_award: pa } %>
       <% end %>

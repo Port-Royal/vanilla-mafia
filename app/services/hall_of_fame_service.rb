@@ -18,7 +18,8 @@ class HallOfFameService
     PlayerAward
       .includes(:competition, player: { photo_attachment: :blob }, award: { icon_attachment: :blob })
       .where(award: scope)
-      .ordered
+      .left_joins(:competition)
+      .order(Arel.sql("competitions.started_on DESC NULLS LAST"))
       .load
       .group_by(&:player)
   end
