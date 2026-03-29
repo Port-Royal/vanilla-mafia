@@ -429,6 +429,7 @@ ru:
       player: "Игрок"
       notes: "Примечания"
       competition: "Турнир"
+      new_stage: "Новый этап..."
       judge: "Ведущий"
       submit_create: "Создать"
       submit_update: "Сохранить"

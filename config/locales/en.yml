@@ -80,6 +80,7 @@ en:
       player: "Player"
       notes: "Notes"
       competition: "Competition"
+      new_stage: "New stage..."
       judge: "Judge"
       submit_create: "Create"
       submit_update: "Save"
