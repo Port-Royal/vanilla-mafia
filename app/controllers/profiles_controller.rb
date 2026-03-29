@@ -31,6 +31,8 @@ class ProfilesController < ApplicationController
   end
 
   def player_params
-    params.expect(player: [ :name, :comment, :photo ])
+    permitted = [ :name, :photo ]
+    permitted << :comment if current_user.admin?
+    params.expect(player: permitted)
   end
 end

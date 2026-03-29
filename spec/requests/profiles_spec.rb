@@ -51,6 +51,24 @@ RSpec.describe ProfilesController do
       it "renders default photo for player without uploaded picture" do
         expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
       end
+
+      it "does not render the comment field" do
+        assert_select "textarea[name='player[comment]']", count: 0
+      end
+    end
+
+    context "when admin has a claimed player" do
+      let_it_be(:player) { create(:player, name: "Админ") }
+      let_it_be(:admin) { create(:user, :admin, player: player) }
+
+      before do
+        sign_in admin
+        get edit_profile_path
+      end
+
+      it "renders the comment field" do
+        assert_select "textarea[name='player[comment]']"
+      end
     end
   end
 
@@ -89,8 +107,8 @@ RSpec.describe ProfilesController do
           expect(player.reload.name).to eq("Новое имя")
         end
 
-        it "updates the comment" do
-          expect(player.reload.comment).to eq("Привет")
+        it "does not update the comment for non-admin" do
+          expect(player.reload.comment).to be_nil
         end
 
         it "redirects to player show page" do
@@ -116,6 +134,18 @@ RSpec.describe ProfilesController do
         it "renders validation errors" do
           expect(response.body).to include(I18n.t("profiles.edit.title"))
         end
+      end
+    end
+
+    context "when admin has a claimed player" do
+      let(:player) { create(:player, name: "Админ") }
+      let(:admin) { create(:user, :admin, player: player) }
+
+      before { sign_in admin }
+
+      it "updates the comment" do
+        patch profile_path, params: { player: { comment: "Админский комментарий" } }
+        expect(player.reload.comment).to eq("Админский комментарий")
       end
     end
   end
