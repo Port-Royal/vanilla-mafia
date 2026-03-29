@@ -108,16 +108,30 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).to include(competition.name)
       end
 
-      it "excludes child competitions from the dropdown" do
-        child_comp = create(:competition, :series, parent: competition, name: "Child Series")
+      it "excludes child competitions from the competition dropdown" do
+        create(:competition, :series, parent: competition, name: "Child Series")
         get new_judge_protocol_path
-        expect(response.body).not_to include("Child Series")
+        assert_select "select[name='game[competition_id]'] option", text: "Child Series", count: 0
       end
 
       it "excludes finished competitions from the dropdown" do
         finished_comp = create(:competition, :series, name: "Finished Series", ended_on: 1.day.ago)
         get new_judge_protocol_path
         expect(response.body).not_to include("Finished Series")
+      end
+
+      it "renders the stage selector" do
+        assert_select "select[name='game[stage_id]']"
+      end
+
+      it "includes child competitions in the stage selector data" do
+        create(:competition, :series, parent: competition, name: "Серия 5")
+        get new_judge_protocol_path
+        expect(response.body).to include("Серия 5")
+      end
+
+      it "renders a new stage name input" do
+        assert_select "input[name='game[new_stage_name]']"
       end
     end
 
@@ -177,6 +191,32 @@ RSpec.describe "Judge::Protocols" do
           expect {
             post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
           }.to change(GameParticipation, :count).by(1)
+        end
+      end
+
+      context "with existing stage" do
+        let_it_be(:stage) { create(:competition, :series, parent: competition, name: "Серия 3") }
+        let(:game_params) { { game_number: 96, result: "peace_victory", competition_id: competition.id, stage_id: stage.id } }
+
+        it "sets the game competition to the selected stage" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.competition).to eq(stage)
+        end
+      end
+
+      context "with new stage name" do
+        let(:game_params) { { game_number: 94, result: "peace_victory", competition_id: competition.id, new_stage_name: "Серия 7" } }
+
+        it "creates a new child competition" do
+          expect {
+            post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          }.to change(Competition, :count).by(1)
+        end
+
+        it "sets the game competition to the new stage" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.competition.name).to eq("Серия 7")
+          expect(Game.last.competition.parent).to eq(competition)
         end
       end
 

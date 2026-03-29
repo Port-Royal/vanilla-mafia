@@ -16,9 +16,10 @@ class Judge::ProtocolsController < ApplicationController
 
   def create
     @game = Game.new
+    resolved_params = resolve_competition(game_params)
     result = SaveGameProtocolService.call(
       game: @game,
-      game_params: game_params,
+      game_params: resolved_params,
       participations_params: participations_params
     )
 
@@ -56,9 +57,10 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def update
+    resolved_params = resolve_competition(game_params)
     result = SaveGameProtocolService.call(
       game: @game,
-      game_params: game_params,
+      game_params: resolved_params,
       participations_params: participations_params
     )
 
@@ -94,12 +96,29 @@ class Judge::ProtocolsController < ApplicationController
 
   def load_form_data
     @competitions = Competition.where.not(kind: :season).roots.running.ordered
+    @stages_by_competition = Competition.where(parent_id: @competitions.select(:id)).ordered.group_by(&:parent_id)
     @roles = Role.all
     @players = Player.order(:name)
   end
 
   def game_params
-    params.require(:game).permit(:game_number, :played_on, :name, :result, :judge, :competition_id)
+    params.require(:game).permit(:game_number, :played_on, :name, :result, :judge, :competition_id, :stage_id, :new_stage_name)
+  end
+
+  def resolve_competition(gp)
+    resolved = gp.except(:stage_id, :new_stage_name)
+    new_stage_name = gp[:new_stage_name].presence
+    stage_id = gp[:stage_id].presence
+
+    if new_stage_name && gp[:competition_id].present?
+      parent = Competition.find(gp[:competition_id])
+      stage = parent.children.create!(name: new_stage_name, kind: parent.kind)
+      resolved[:competition_id] = stage.id
+    elsif stage_id
+      resolved[:competition_id] = stage_id
+    end
+
+    resolved
   end
 
   def participations_params
