@@ -90,6 +90,23 @@ RSpec.describe "Podcast::Feed" do
         get "/podcast/feed.rss?token=#{token.token}"
         expect(response.body).to include("A great episode")
       end
+
+      context "when episode has audio" do
+        let_it_be(:episode_with_audio) do
+          episode = create(:episode, title: "Audio Episode", status: "published", published_at: Time.current)
+          episode.audio.attach(
+            io: StringIO.new("fake-audio"),
+            filename: "episode.mp3",
+            content_type: "audio/mpeg"
+          )
+          episode
+        end
+
+        it "includes token-authenticated audio URL in enclosure" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          expect(response.body).to include("/podcast/episodes/#{episode_with_audio.id}/audio?token=#{token.token}")
+        end
+      end
     end
   end
 end

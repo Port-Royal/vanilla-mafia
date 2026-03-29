@@ -60,6 +60,7 @@ Rails.application.routes.draw do
     resource :feed, only: [ :show ], controller: "feed"
     resources :episodes, only: [ :index, :show ] do
       resource :position, only: [ :update ], controller: "playback_positions"
+      resource :audio, only: [ :show ], controller: "audio"
     end
     resources :playlists, only: [ :index, :show ]
   end
