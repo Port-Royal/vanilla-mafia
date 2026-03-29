@@ -173,6 +173,10 @@ ru:
       additional_score: "Доп. балл"
       best_move: "Лучший ход"
       total: "Итого"
+      result:
+        in_progress: "Игра в процессе"
+        peace_victory: "Победа мирных"
+        mafia_victory: "Победа мафии"
     overlay:
       seat: "Место"
       player: "Игрок"
