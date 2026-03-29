@@ -57,6 +57,7 @@ Rails.application.routes.draw do
   resources :announcement_dismissals, only: [ :create ], path: "announcements/dismiss"
 
   namespace :podcast do
+    resource :feed, only: [ :show ], controller: "feed"
     resources :episodes, only: [ :index, :show ] do
       resource :position, only: [ :update ], controller: "playback_positions"
     end
