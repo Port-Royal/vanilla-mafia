@@ -104,6 +104,7 @@ ru:
   competitions:
     show:
       by_children: "Соревнования"
+      name: "Название"
       by_players: "По игрокам"
       rank: "Место"
       player: "Игрок"

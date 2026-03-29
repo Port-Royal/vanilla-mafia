@@ -261,6 +261,7 @@ en:
   competitions:
     show:
       by_children: "Competitions"
+      name: "Name"
       by_players: "By players"
       rank: "Rank"
       player: "Player"
