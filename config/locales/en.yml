@@ -330,6 +330,10 @@ en:
       additional_score: "Bonus"
       best_move: "Best move"
       total: "Total"
+      result:
+        in_progress: "In progress"
+        peace_victory: "City wins"
+        mafia_victory: "Mafia wins"
     overlay:
       seat: "Seat"
       player: "Player"
