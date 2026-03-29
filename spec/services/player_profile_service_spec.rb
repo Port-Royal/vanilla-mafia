@@ -23,31 +23,59 @@ RSpec.describe PlayerProfileService do
       expect(result.player).to eq(player)
     end
 
-    it "returns all player games" do
-      expect(result.games).to match_array([ game1, game2, game3 ])
+    it "returns competitions_with_games grouped by root competition" do
+      root = game1.competition.root
+      expect(result.competitions_with_games).to be_an(Array)
+      expect(result.competitions_with_games.first).to be_a(described_class::CompetitionGames)
+      expect(result.competitions_with_games.map(&:competition)).to include(root)
     end
 
-    it "orders games by played_on, series, and game_number" do
-      expect(result.games.last).to eq(game2)
+    it "includes all games under their root competition" do
+      all_games = result.competitions_with_games.flat_map(&:games)
+      expect(all_games).to match_array([ game1, game2, game3 ])
     end
 
-    it "returns an ActiveRecord relation of games" do
-      expect(result.games).to be_an(ActiveRecord::Relation)
+    describe "grouping by root competition" do
+      let_it_be(:root_player) { create(:player, name: "Группировщик") }
+      let_it_be(:season) { create(:competition, :season) }
+      let_it_be(:series1) { create(:competition, :series, parent: season) }
+      let_it_be(:series2) { create(:competition, :series, parent: season) }
+      let_it_be(:root_game1) { create(:game, competition: series1, game_number: 1) }
+      let_it_be(:root_game2) { create(:game, competition: series2, game_number: 1) }
+
+      before do
+        create(:game_participation, game: root_game1, player: root_player)
+        create(:game_participation, game: root_game2, player: root_player)
+      end
+
+      it "groups games from child competitions under their root" do
+        root_result = described_class.call(player_id: root_player.id)
+        expect(root_result.competitions_with_games.size).to eq(1)
+        expect(root_result.competitions_with_games.first.competition).to eq(season)
+        expect(root_result.competitions_with_games.first.games).to match_array([ root_game1, root_game2 ])
+      end
+    end
+
+    describe "game ordering within competition" do
+      let_it_be(:shared_comp) { create(:competition, :series) }
+      let_it_be(:ordering_player) { create(:player, name: "Порядочный") }
+      let_it_be(:late_game) { create(:game, competition: shared_comp, game_number: 2, played_on: Date.new(2025, 2, 1)) }
+      let_it_be(:early_game) { create(:game, competition: shared_comp, game_number: 1, played_on: Date.new(2025, 1, 1)) }
+
+      before do
+        create(:game_participation, game: late_game, player: ordering_player)
+        create(:game_participation, game: early_game, player: ordering_player)
+      end
+
+      it "orders games by played_on and game_number" do
+        ordering_result = described_class.call(player_id: ordering_player.id)
+        entry = ordering_result.competitions_with_games.first
+        expect(entry.games).to eq([ early_game, late_game ])
+      end
     end
 
     it "returns player awards ordered by position" do
       expect(result.player_awards).to eq([ player_award2, player_award1 ])
-    end
-
-    it "eager loads competition association on games" do
-      loaded_games = result.games.load
-      expect(loaded_games.first.association(:competition)).to be_loaded
-    end
-
-    it "eager loads competition parent association on games" do
-      loaded_games = result.games.load
-      competition = loaded_games.first.competition
-      expect(competition.association(:parent)).to be_loaded
     end
 
     it "eager loads award association" do
@@ -169,8 +197,8 @@ RSpec.describe PlayerProfileService do
       let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
       let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
 
-      it "returns empty games" do
-        expect(lonely_result.games).to be_empty
+      it "returns empty competitions_with_games" do
+        expect(lonely_result.competitions_with_games).to be_empty
       end
 
       it "returns empty player_awards" do

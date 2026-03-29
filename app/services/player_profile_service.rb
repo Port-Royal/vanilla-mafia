@@ -1,7 +1,8 @@
 class PlayerProfileService
-  Result = Data.define(:player, :games, :player_awards, :news_articles, :stats)
+  Result = Data.define(:player, :competitions_with_games, :player_awards, :news_articles, :stats)
   Stats = Data.define(:total_games, :total_wins, :win_rate, :first_game_date, :role_stats)
   RoleStat = Data.define(:role_code, :role_name, :games, :wins, :win_rate)
+  CompetitionGames = Data.define(:competition, :games)
 
   def self.call(player_id:)
     new(player_id).call
@@ -17,7 +18,7 @@ class PlayerProfileService
 
     Result.new(
       player: player,
-      games: player.games.includes(competition: :parent).ordered,
+      competitions_with_games: build_competitions_with_games(player),
       player_awards: player.player_awards.ordered.includes(:award).load,
       news_articles: News.mentioning_player(player).includes({ author: :player }, :tags, :rich_text_content),
       stats: build_stats(participations)
@@ -25,6 +26,13 @@ class PlayerProfileService
   end
 
   private
+
+  def build_competitions_with_games(player)
+    games = player.games.includes(:game_participations, competition: :parent).ordered
+    games.group_by { |g| g.competition.root }.map do |root, root_games|
+      CompetitionGames.new(competition: root, games: root_games)
+    end
+  end
 
   def build_stats(participations)
     loaded = participations.to_a

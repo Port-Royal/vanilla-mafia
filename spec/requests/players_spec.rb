@@ -301,67 +301,27 @@ RSpec.describe PlayersController do
       end
     end
 
-    context "when player has more games than one page" do
+    context "when player has games in multiple competitions" do
       let_it_be(:player) { create(:player, name: "Многоигровой") }
-      let_it_be(:games) do
-        (1..26).map do |n|
-          game = create(:game, game_number: n)
-          create(:game_participation, game: game, player: player)
-          game
-        end
+      let_it_be(:comp1) { create(:competition, :series) }
+      let_it_be(:comp2) { create(:competition, :series) }
+      let_it_be(:game1) { create(:game, competition: comp1, game_number: 1) }
+      let_it_be(:game2) { create(:game, competition: comp2, game_number: 1) }
+
+      before do
+        create(:game_participation, game: game1, player: player)
+        create(:game_participation, game: game2, player: player)
+        get player_path(player)
       end
 
-      context "when requesting the first page" do
-        before { get player_path(player) }
-
-        it "returns success" do
-          expect(response).to have_http_status(:ok)
-        end
-
-        it "renders the first 25 games" do
-          (1..25).each do |n|
-            expect(response.body).to include(game_path(games[n - 1]))
-          end
-        end
-
-        it "does not render the 26th game" do
-          expect(response.body).not_to include(game_path(games[25]))
-        end
-
-        it "renders pagination nav" do
-          expect(response.body).to include("<nav")
-        end
+      it "renders expandable details for each competition" do
+        expect(response.body).to include("<details")
+        expect(response.body).to include("<summary")
       end
 
-      context "when requesting the second page" do
-        before { get player_path(player, page: 2) }
-
-        it "returns success" do
-          expect(response).to have_http_status(:ok)
-        end
-
-        it "renders the 26th game" do
-          expect(response.body).to include(game_path(games[25]))
-        end
-
-        it "does not render the first game" do
-          expect(response.body).not_to include(game_path(games[0]))
-        end
-
-        it "renders pagination nav" do
-          expect(response.body).to include("<nav")
-        end
-      end
-    end
-
-    context "when player has fewer games than one page" do
-      let_it_be(:player) { create(:player, name: "Малоигровой") }
-      let_it_be(:game) { create(:game, game_number: 1) }
-      let_it_be(:participation) { create(:game_participation, game: game, player: player) }
-
-      before { get player_path(player) }
-
-      it "does not render pagination nav" do
+      it "renders all games without pagination" do
+        expect(response.body).to include(game_path(game1))
+        expect(response.body).to include(game_path(game2))
         expect(response.body).not_to include("page=2")
       end
     end
