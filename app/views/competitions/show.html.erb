@@ -66,7 +66,7 @@
         <tr>
           <th><%= t(".player") %></th>
           <% @games.each do |game| %>
-            <th><%= t("common.game") %> <%= game.game_number %></th>
+            <th><%= link_to "#{t('common.game')} #{game.game_number}", game_path(game), class: "text-maroon hover:underline" %></th>
           <% end %>
           <th><%= t(".total") %></th>
         </tr>
