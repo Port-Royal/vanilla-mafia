@@ -107,6 +107,18 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).not_to include("Season Parent")
         expect(response.body).to include(competition.name)
       end
+
+      it "excludes child competitions from the dropdown" do
+        child_comp = create(:competition, :series, parent: competition, name: "Child Series")
+        get new_judge_protocol_path
+        expect(response.body).not_to include("Child Series")
+      end
+
+      it "excludes finished competitions from the dropdown" do
+        finished_comp = create(:competition, :series, name: "Finished Series", ended_on: 1.day.ago)
+        get new_judge_protocol_path
+        expect(response.body).not_to include("Finished Series")
+      end
     end
 
     context "when user is judge" do
