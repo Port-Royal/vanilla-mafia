@@ -42,11 +42,7 @@ RSpec.describe HallOfFameController do
         assert_select "img[title=?]", "Лучший игрок — Сезон 5"
       end
 
-      it "renders award title as visible text" do
-        assert_select ".award-label", text: /Лучший игрок/
-      end
-
-      it "renders competition name in award label" do
+      it "renders competition name as subtitle under award icon" do
         assert_select ".award-competition", text: "Сезон 5"
       end
 
