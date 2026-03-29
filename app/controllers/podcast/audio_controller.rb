@@ -4,8 +4,8 @@ class Podcast::AudioController < ApplicationController
 
   def show
     episode = Episode.published.find_by(id: params[:episode_id])
-    head :not_found and return unless episode
-    head :not_found and return unless episode.audio.attached?
+    return head(:not_found) unless episode
+    return head(:not_found) unless episode.audio.attached?
 
     redirect_to rails_blob_url(episode.audio, disposition: :inline), allow_other_host: true
   end
