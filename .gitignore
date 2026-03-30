@@ -49,3 +49,8 @@ coverage/*
 
 # Local artifacts (mutation testing feedback, etc.)
 .artifacts.local/
+
+# Beads local issue tracker
+.beads/
+
+.claude/projects/
