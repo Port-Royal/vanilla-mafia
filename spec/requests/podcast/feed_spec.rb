@@ -91,6 +91,26 @@ RSpec.describe "Podcast::Feed" do
         expect(response.body).to include("A great episode")
       end
 
+      context "when episode has duration" do
+        let_it_be(:episode_with_duration) do
+          create(:episode, title: "Duration Episode", status: "published",
+                 published_at: Time.current, duration_seconds: 3661)
+        end
+
+        it "includes itunes:duration tag" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          expect(response.body).to include("<itunes:duration>1:01:01</itunes:duration>")
+        end
+      end
+
+      context "when episode has no duration" do
+        it "does not include itunes:duration tag for episodes without duration" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          # published_episode has no duration_seconds set
+          expect(response.body).not_to include("<itunes:duration>")
+        end
+      end
+
       context "when episode has audio" do
         let_it_be(:episode_with_audio) do
           episode = create(:episode, title: "Audio Episode", status: "published", published_at: Time.current)
