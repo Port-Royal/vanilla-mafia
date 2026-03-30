@@ -26,7 +26,7 @@ xml.rss version: "2.0",
         xml.guid({ isPermaLink: "false" }, "episode-#{episode.id}")
 
         if episode.audio.attached?
-          xml.enclosure url: url_for(episode.audio),
+          xml.enclosure url: podcast_episode_audio_url(episode, token: @token),
                         length: episode.audio.byte_size,
                         type: episode.audio.content_type
         end
