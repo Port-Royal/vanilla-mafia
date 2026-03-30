@@ -51,5 +51,7 @@ coverage/*
 .artifacts.local/
 .evilution/
 
-.claude/projects/
+# Beads local issue tracker
+.beads/
 
+.claude/projects/
