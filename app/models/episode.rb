@@ -1,5 +1,6 @@
 class Episode < ApplicationRecord
   has_one_attached :audio
+  has_one_attached :image
 
   enum :status, { draft: "draft", published: "published" }
 
