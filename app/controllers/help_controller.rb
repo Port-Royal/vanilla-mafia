@@ -1,5 +1,5 @@
 class HelpController < ApplicationController
-  PAGES = %w[obs-overlay].freeze
+  PAGES = %w[obs-overlay podcast-feed].freeze
 
   def index
     @pages = PAGES

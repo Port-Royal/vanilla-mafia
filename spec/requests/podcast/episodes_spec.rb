@@ -76,6 +76,11 @@ RSpec.describe "Podcast::Episodes" do
         get "/podcast/episodes"
         expect(response.body).to include('data-controller="clipboard"')
       end
+
+      it "includes link to podcast feed help page" do
+        get "/podcast/episodes"
+        expect(response.body).to include(help_path(slug: "podcast-feed"))
+      end
     end
 
     context "when signed in as admin" do
