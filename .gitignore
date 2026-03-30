@@ -49,3 +49,7 @@ coverage/*
 
 # Local artifacts (mutation testing feedback, etc.)
 .artifacts.local/
+.evilution/
+
+.claude/projects/
+
