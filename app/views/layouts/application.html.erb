@@ -69,6 +69,12 @@
                     class: "block text-gray-300 hover:text-white transition-colors" %>
             </li>
           <% end %>
+          <% if current_user.can_view_help? %>
+            <li>
+              <%= link_to t("nav.help"), help_index_path,
+                    class: "block text-gray-300 hover:text-white transition-colors" %>
+            </li>
+          <% end %>
           <% if current_user.can_manage_news? %>
             <li>
               <%= link_to t("nav.manage_news"), admin_news_index_path,
@@ -143,6 +149,12 @@
                 <% if current_user.can_manage_protocols? %>
                   <li>
                     <%= link_to t("nav.protocols"), judge_protocols_path,
+                          class: "block hover:text-white transition-colors" %>
+                  </li>
+                <% end %>
+                <% if current_user.can_view_help? %>
+                  <li>
+                    <%= link_to t("nav.help"), help_index_path,
                           class: "block hover:text-white transition-colors" %>
                   </li>
                 <% end %>

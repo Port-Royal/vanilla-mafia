@@ -372,6 +372,7 @@ ru:
     notification_settings: "Уведомления"
     sign_in: "Войти"
     sign_out: "Выйти"
+    help: "Справка"
     admin: "Админка"
   notification_settings:
     edit:
