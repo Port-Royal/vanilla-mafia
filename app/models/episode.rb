@@ -7,6 +7,8 @@ class Episode < ApplicationRecord
   validates :status, presence: true
   validates :duration_seconds, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
+  after_save_commit :extract_duration_from_audio, if: -> { audio.attached? && duration_seconds.nil? }
+
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
 
   def formatted_duration
@@ -24,5 +26,18 @@ class Episode < ApplicationRecord
 
   def publish!
     update!(status: :published, published_at: Time.current)
+  end
+
+  def extract_duration_from_audio
+    return unless audio.attached?
+    return if duration_seconds.present?
+
+    audio.open do |tempfile|
+      tag = WahWah.open(tempfile.path)
+      duration = tag.duration.to_i
+      update_column(:duration_seconds, duration) if duration > 0
+    end
+  rescue WahWah::WahWahArgumentError
+    # Audio file format not supported or corrupted — skip duration extraction
   end
 end

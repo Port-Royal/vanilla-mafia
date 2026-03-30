@@ -620,6 +620,7 @@ GEM
       actionview (>= 7.1.0)
       activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
+    wahwah (1.6.7)
     warden (1.2.9)
       rack (>= 2.0.9)
     web-console (4.3.0)
@@ -686,6 +687,7 @@ DEPENDENCIES
   thruster
   turbo-rails
   tzinfo-data
+  wahwah
   web-console
 
 CHECKSUMS
@@ -913,6 +915,7 @@ CHECKSUMS
   useragent (0.16.11) sha256=700e6413ad4bb954bb63547fa098dddf7b0ebe75b40cc6f93b8d54255b173844
   version_gem (1.1.9) sha256=0c1a0962ae543c84a00889bb018d9f14d8f8af6029d26b295d98774e3d2eb9a4
   view_component (4.5.0) sha256=0d951360d830752da4d1daa5f6cb643f17c30f295fb779fd4de90a051537d9c1
+  wahwah (1.6.7) sha256=3272c847c19ac7d047ba2521734429bc99f03dff604c58a57b7e687d8dc2011d
   warden (1.2.9) sha256=46684f885d35a69dbb883deabf85a222c8e427a957804719e143005df7a1efd0
   web-console (4.3.0) sha256=e13b71301cdfc2093f155b5aa3a622db80b4672d1f2f713119cc7ec7ac6a6da4
   websocket (1.2.11) sha256=b7e7a74e2410b5e85c25858b26b3322f29161e300935f70a0e0d3c35e0462737
