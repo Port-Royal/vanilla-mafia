@@ -91,6 +91,130 @@ RSpec.describe Episode, type: :model do
     end
   end
 
+  describe "#extract_duration_from_audio" do
+    let(:episode) { create(:episode) }
+
+    context "when audio is attached" do
+      before do
+        episode.audio.attach(
+          io: StringIO.new("fake audio content"),
+          filename: "episode.mp3",
+          content_type: "audio/mpeg"
+        )
+      end
+
+      it "sets duration_seconds from audio metadata" do
+        tag = instance_double(WahWah::Mp3Tag, duration: 125.7)
+        allow(WahWah).to receive(:open).and_return(tag)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to eq(125)
+      end
+
+      it "does not overwrite manually set duration via guard" do
+        episode.update_column(:duration_seconds, 999)
+        allow(WahWah).to receive(:open)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to eq(999)
+        expect(WahWah).not_to have_received(:open)
+      end
+
+      it "does not overwrite concurrently set duration via conditional update" do
+        tag = instance_double(WahWah::Mp3Tag, duration: 125.7)
+        allow(WahWah).to receive(:open).and_return(tag)
+
+        # Simulate race: duration_seconds set in DB between guard and write
+        episode.update_column(:duration_seconds, 999)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to eq(999)
+      end
+
+      it "only updates the specific episode, not other episodes" do
+        other_episode = create(:episode)
+        tag = instance_double(WahWah::Mp3Tag, duration: 125.7)
+        allow(WahWah).to receive(:open).and_return(tag)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to eq(125)
+        expect(other_episode.reload.duration_seconds).to be_nil
+      end
+
+      it "sets duration for exactly one second" do
+        tag = instance_double(WahWah::Mp3Tag, duration: 1.0)
+        allow(WahWah).to receive(:open).and_return(tag)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to eq(1)
+      end
+
+      it "handles audio files with zero duration" do
+        tag = instance_double(WahWah::Mp3Tag, duration: 0.0)
+        allow(WahWah).to receive(:open).and_return(tag)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to be_nil
+      end
+
+      it "handles wahwah errors gracefully" do
+        allow(WahWah).to receive(:open).and_raise(WahWah::WahWahArgumentError)
+
+        expect { episode.extract_duration_from_audio }.not_to raise_error
+        expect(episode.reload.duration_seconds).to be_nil
+      end
+    end
+
+    context "when audio is not attached" do
+      it "does not attempt to read audio metadata" do
+        allow(WahWah).to receive(:open)
+
+        episode.extract_duration_from_audio
+
+        expect(episode.reload.duration_seconds).to be_nil
+        expect(WahWah).not_to have_received(:open)
+      end
+    end
+  end
+
+  describe "after_save_commit duration extraction" do
+    let(:episode) { create(:episode) }
+
+    it "enqueues extraction job when audio is attached and duration is nil" do
+      expect {
+        episode.audio.attach(
+          io: StringIO.new("fake audio"),
+          filename: "episode.mp3",
+          content_type: "audio/mpeg"
+        )
+      }.to have_enqueued_job(ExtractEpisodeDurationJob).with(episode)
+    end
+
+    it "does not enqueue extraction job when duration is already set" do
+      episode.update_column(:duration_seconds, 100)
+
+      expect {
+        episode.audio.attach(
+          io: StringIO.new("fake audio"),
+          filename: "episode.mp3",
+          content_type: "audio/mpeg"
+        )
+      }.not_to have_enqueued_job(ExtractEpisodeDurationJob)
+    end
+
+    it "does not enqueue extraction job when no audio is attached" do
+      expect {
+        episode.update!(title: "Updated title")
+      }.not_to have_enqueued_job(ExtractEpisodeDurationJob)
+    end
+  end
+
   describe "#publish!" do
     let(:episode) { create(:episode) }
 
