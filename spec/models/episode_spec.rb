@@ -31,6 +31,18 @@ RSpec.describe Episode, type: :model do
     end
   end
 
+  describe "image attachment" do
+    it "can attach an image" do
+      episode = create(:episode)
+      episode.image.attach(
+        io: StringIO.new("fake image"),
+        filename: "cover.jpg",
+        content_type: "image/jpeg"
+      )
+      expect(episode.image).to be_attached
+    end
+  end
+
   describe "scopes" do
     describe ".published" do
       let!(:draft_episode) { create(:episode, status: "draft") }

@@ -15,6 +15,7 @@ class Avo::Resources::Episode < Avo::BaseResource
     field :status, as: :select, enum: ::Episode.statuses
     field :published_at, as: :date_time, sortable: true
     field :duration_seconds, as: :number
+    field :image, as: :file
     field :audio, as: :file
   end
 end
