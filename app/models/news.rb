@@ -11,8 +11,11 @@ class News < ApplicationRecord
 
   enum :status, { draft: "draft", published: "published" }
 
+  MAX_CONTENT_LENGTH = 50_000
+
   validates :title, presence: true
   validates :status, presence: true
+  validate :content_length_within_limit
 
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
   scope :drafts_first, -> { order(Arel.sql("published_at IS NOT NULL, published_at DESC, id DESC")) }
@@ -33,5 +36,16 @@ class News < ApplicationRecord
 
   def unpublish!
     update!(status: :draft, published_at: nil)
+  end
+
+  private
+
+  def content_length_within_limit
+    return if content.blank?
+
+    plain_text_length = content.body.to_plain_text.length
+    if plain_text_length > MAX_CONTENT_LENGTH
+      errors.add(:content, :too_long, count: MAX_CONTENT_LENGTH)
+    end
   end
 end
