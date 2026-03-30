@@ -128,6 +128,13 @@ RSpec.describe "Podcast::Episodes" do
         expect(response.body).to include(published_episode.description)
       end
 
+      it "preserves line breaks in episode description" do
+        episode = create(:episode, title: "Multiline", description: "Line one\nLine two",
+                         status: "published", published_at: Time.current)
+        get "/podcast/episodes/#{episode.id}"
+        expect(response.body).to include("<br")
+      end
+
       it "displays published_at date" do
         get "/podcast/episodes/#{published_episode.id}"
         expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
