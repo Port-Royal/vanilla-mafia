@@ -32,10 +32,10 @@ RSpec.describe "Avo sidebar ordering" do
   it "groups podcast resources together" do
     podcast_labels = labels.select { |l| l.start_with?("Podcast") }
 
-    expect(podcast_labels.size).to eq(2)
+    expect(podcast_labels.size).to eq(3)
 
     indices = podcast_labels.map { |l| labels.index(l) }
-    expect(indices.max - indices.min).to eq(1)
+    expect(indices.max - indices.min).to eq(podcast_labels.size - 1)
   end
 
   it "puts settings at the end" do
