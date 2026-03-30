@@ -15,7 +15,10 @@
       <%= t(".copy") %>
     </button>
   </div>
-  <p class="text-xs text-neutral-500 mt-2"><%= t(".feed_url_hint") %></p>
+  <p class="text-xs text-neutral-500 mt-2">
+    <%= t(".feed_url_hint") %>
+    <%= link_to t(".feed_url_help"), help_path(slug: "podcast-feed"), class: "text-maroon hover:underline" %>
+  </p>
 </div>
 
 <% if @episodes.any? %>

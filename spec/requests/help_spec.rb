@@ -29,6 +29,26 @@ RSpec.describe HelpController do
       end
     end
 
+    context "when podcast feed help page is requested" do
+      it "renders the page" do
+        get help_path(slug: "podcast-feed")
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "renders podcast feed help content" do
+        get help_path(slug: "podcast-feed")
+
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.title"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.intro"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.apple_title"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.pocket_casts_title"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.castbox_title"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.generic_title"))
+        expect(response.body).to include(I18n.t("help.pages.podcast-feed.privacy_title"))
+      end
+    end
+
     context "when help page does not exist" do
       it "returns not found" do
         get help_path(slug: "nonexistent-page")
