@@ -55,7 +55,11 @@ raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys
   { version: "1.0.0", grant_code: nil, message_ru: "Теперь доступен Зал славы и архив игр.", message_en: "Hall of Fame and game archive are now available." },
   { version: "1.1.0", grant_code: "judge", message_ru: "Судьи: добавлены протоколы игр с автосохранением.", message_en: "Judges: game protocols with autosave added." },
   { version: "1.1.0", grant_code: "editor", message_ru: "Редакторы: добавлено управление новостями.", message_en: "Editors: news management added." },
-  { version: "1.2.0", grant_code: nil, message_ru: "Добавлена лента новостей клуба.", message_en: "Club news feed added." }
+  { version: "1.2.0", grant_code: nil, message_ru: "Добавлена лента новостей клуба.", message_en: "Club news feed added." },
+  { version: "0.29.0", grant_code: "subscriber", message_ru: "Подписчики: добавлен подкаст с RSS-лентой, личным токеном и автоматическим определением длительности эпизодов.", message_en: "Subscribers: podcast added with RSS feed, personal token, and automatic episode duration detection." },
+  { version: "0.29.0", grant_code: "judge", message_ru: "Судьи: в боковом меню добавлена ссылка на раздел справки.", message_en: "Judges: help section link added to the sidebar." },
+  { version: "0.29.0", grant_code: "admin", message_ru: "Администраторы: в боковом меню добавлена ссылка на раздел справки.", message_en: "Admins: help section link added to the sidebar." },
+  { version: "0.29.0", grant_code: nil, message_ru: "Улучшена валидация контента новостей.", message_en: "Improved news content validation." }
 ].each do |attrs|
   Announcement.find_or_create_by!(attrs)
 end
