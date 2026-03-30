@@ -214,6 +214,7 @@ en:
     notification_settings: "Notifications"
     sign_in: "Sign in"
     sign_out: "Sign out"
+    help: "Help"
     admin: "Admin"
   notification_settings:
     edit:

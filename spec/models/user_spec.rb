@@ -277,6 +277,56 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#can_view_help?" do
+    let(:user) { create(:user) }
+
+    context "when user has admin grant" do
+      let(:admin_grant) { Grant.find_or_create_by!(code: "admin") }
+
+      before { create(:user_grant, user: user, grant: admin_grant) }
+
+      it "returns true" do
+        expect(user.can_view_help?).to be true
+      end
+    end
+
+    context "when user has judge grant" do
+      let(:judge_grant) { Grant.find_or_create_by!(code: "judge") }
+
+      before { create(:user_grant, user: user, grant: judge_grant) }
+
+      it "returns true" do
+        expect(user.can_view_help?).to be true
+      end
+    end
+
+    context "when user has no grants" do
+      it "returns false" do
+        expect(user.can_view_help?).to be false
+      end
+    end
+
+    context "when user has editor grant" do
+      let(:editor_grant) { Grant.find_or_create_by!(code: "editor") }
+
+      before { create(:user_grant, user: user, grant: editor_grant) }
+
+      it "returns false" do
+        expect(user.can_view_help?).to be false
+      end
+    end
+
+    context "when user has subscriber grant" do
+      let(:subscriber_grant) { Grant.find_or_create_by!(code: "subscriber") }
+
+      before { create(:user_grant, user: user, grant: subscriber_grant) }
+
+      it "returns false" do
+        expect(user.can_view_help?).to be false
+      end
+    end
+  end
+
   describe "#claimed_player?" do
     context "when user has a claimed player" do
       let(:player) { create(:player) }

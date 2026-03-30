@@ -48,6 +48,10 @@ class User < ApplicationRecord
     admin? || editor?
   end
 
+  def can_view_help?
+    admin? || judge?
+  end
+
   def claimed_player?
     player_id.present?
   end
