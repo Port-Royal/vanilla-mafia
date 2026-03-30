@@ -14,6 +14,26 @@ RSpec.describe News, type: :model do
     it { is_expected.to validate_presence_of(:title) }
     it { is_expected.to validate_presence_of(:status) }
     it { is_expected.to define_enum_for(:status).with_values(draft: "draft", published: "published").backed_by_column_of_type(:string) }
+
+    describe "content length" do
+      let(:author) { create(:user) }
+
+      it "allows content within the limit" do
+        news = build(:news, author: author, content: "a" * 50_000)
+        expect(news).to be_valid
+      end
+
+      it "rejects content exceeding the limit" do
+        news = build(:news, author: author, content: "a" * 50_001)
+        expect(news).not_to be_valid
+        expect(news.errors.where(:content, :too_long)).to be_present
+      end
+
+      it "allows blank content" do
+        news = build(:news, author: author)
+        expect(news).to be_valid
+      end
+    end
   end
 
   describe '.recent' do
