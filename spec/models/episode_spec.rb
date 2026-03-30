@@ -52,6 +52,45 @@ RSpec.describe Episode, type: :model do
     end
   end
 
+  describe "duration_seconds validation" do
+    it "allows nil duration" do
+      episode = build(:episode, duration_seconds: nil)
+      expect(episode).to be_valid
+    end
+
+    it "rejects negative duration" do
+      episode = build(:episode, duration_seconds: -1)
+      expect(episode).not_to be_valid
+    end
+
+    it "rejects non-integer duration" do
+      episode = build(:episode, duration_seconds: 1.5)
+      expect(episode).not_to be_valid
+    end
+  end
+
+  describe "#formatted_duration" do
+    it "returns nil when duration_seconds is nil" do
+      episode = build(:episode, duration_seconds: nil)
+      expect(episode.formatted_duration).to be_nil
+    end
+
+    it "formats seconds only" do
+      episode = build(:episode, duration_seconds: 45)
+      expect(episode.formatted_duration).to eq("0:45")
+    end
+
+    it "formats minutes and seconds" do
+      episode = build(:episode, duration_seconds: 125)
+      expect(episode.formatted_duration).to eq("2:05")
+    end
+
+    it "formats hours, minutes and seconds" do
+      episode = build(:episode, duration_seconds: 3661)
+      expect(episode.formatted_duration).to eq("1:01:01")
+    end
+  end
+
   describe "#publish!" do
     let(:episode) { create(:episode) }
 

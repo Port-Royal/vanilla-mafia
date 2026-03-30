@@ -30,6 +30,10 @@ xml.rss version: "2.0",
                         length: episode.audio.byte_size,
                         type: episode.audio.content_type
         end
+
+        if episode.formatted_duration
+          xml.tag! "itunes:duration", episode.formatted_duration
+        end
       end
     end
   end
