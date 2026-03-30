@@ -3,6 +3,7 @@ class Podcast::EpisodesController < ApplicationController
 
   def index
     @pagy, @episodes = pagy(Episode.published.recent)
+    @feed_token = current_user.podcast_feed_token || current_user.create_podcast_feed_token!
   end
 
   def show

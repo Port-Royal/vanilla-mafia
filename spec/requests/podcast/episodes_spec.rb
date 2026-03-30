@@ -54,6 +54,28 @@ RSpec.describe "Podcast::Episodes" do
         get "/podcast/episodes"
         expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
       end
+
+      it "displays personal feed URL" do
+        get "/podcast/episodes"
+        token = subscriber.podcast_feed_token
+        expect(response.body).to include(podcast_feed_url(format: :rss, token: token.token))
+      end
+
+      it "creates a feed token if user does not have one" do
+        new_user = create(:user, :subscriber)
+        sign_in new_user
+        expect { get "/podcast/episodes" }.to change(PodcastFeedToken, :count).by(1)
+      end
+
+      it "reuses existing feed token" do
+        create(:podcast_feed_token, user: subscriber)
+        expect { get "/podcast/episodes" }.not_to change(PodcastFeedToken, :count)
+      end
+
+      it "includes copy button with clipboard controller" do
+        get "/podcast/episodes"
+        expect(response.body).to include('data-controller="clipboard"')
+      end
     end
 
     context "when signed in as admin" do

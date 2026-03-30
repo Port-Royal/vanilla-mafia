@@ -187,6 +187,9 @@ en:
       index:
         title: "Episodes"
         empty: "No episodes yet."
+        feed_url_title: "Your personal RSS feed"
+        copy: "Copy"
+        feed_url_hint: "Add this URL to your podcast app. Do not share — it is linked to your account."
       show:
         back: "← Back to episodes"
         audio_player_coming_soon: "Audio player coming soon"
