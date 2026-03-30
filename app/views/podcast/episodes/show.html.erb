@@ -79,6 +79,6 @@
 
 <% if @episode.description.present? %>
   <div class="prose max-w-none text-neutral-700">
-    <p><%= @episode.description %></p>
+    <%= simple_format(@episode.description) %>
   </div>
 <% end %>
