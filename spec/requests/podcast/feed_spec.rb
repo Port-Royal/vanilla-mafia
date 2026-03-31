@@ -81,6 +81,22 @@ RSpec.describe "Podcast::Feed" do
         expect(first_pos).to be < second_pos
       end
 
+      context "when podcast has a cover image" do
+        before do
+          podcast = Podcast.instance
+          podcast.cover.attach(
+            io: StringIO.new("fake-image"),
+            filename: "cover.jpg",
+            content_type: "image/jpeg"
+          )
+        end
+
+        it "includes absolute URL in itunes:image href" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          expect(response.body).to match(%r{<itunes:image href="https?://})
+        end
+      end
+
       it "includes episode pub dates" do
         get "/podcast/feed.rss?token=#{token.token}"
         expect(response.body).to include("<pubDate>")

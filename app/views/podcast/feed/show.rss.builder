@@ -15,7 +15,7 @@ xml.rss version: "2.0",
     end
 
     if @podcast.cover.attached?
-      xml.tag! "itunes:image", href: url_for(@podcast.cover)
+      xml.tag! "itunes:image", href: rails_blob_url(@podcast.cover)
     end
 
     @episodes.each do |episode|
