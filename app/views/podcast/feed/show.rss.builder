@@ -31,6 +31,10 @@ xml.rss version: "2.0",
                         type: episode.audio.content_type
         end
 
+        if episode.image.attached?
+          xml.tag! "itunes:image", href: rails_blob_url(episode.image)
+        end
+
         if episode.formatted_duration
           xml.tag! "itunes:duration", episode.formatted_duration
         end

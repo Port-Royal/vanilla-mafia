@@ -111,6 +111,34 @@ RSpec.describe "Podcast::Feed" do
         end
       end
 
+      context "when episode has a cover image" do
+        let_it_be(:episode_with_image) do
+          episode = create(:episode, title: "Image Episode", status: "published", published_at: Time.current)
+          episode.image.attach(
+            io: StringIO.new("fake-image"),
+            filename: "cover.jpg",
+            content_type: "image/jpeg"
+          )
+          episode
+        end
+
+        it "includes itunes:image tag with absolute URL" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          expect(response.body).to match(%r{<itunes:image href="https?://[^"]*cover\.jpg[^"]*"/>})
+        end
+      end
+
+      context "when episode has no cover image" do
+        it "does not include itunes:image tag in episode item" do
+          get "/podcast/feed.rss?token=#{token.token}"
+          # Extract just the item blocks (between <item> and </item>)
+          items = response.body.scan(%r{<item>.*?</item>}m)
+          items.each do |item|
+            expect(item).not_to include("itunes:image")
+          end
+        end
+      end
+
       context "when episode has audio" do
         let_it_be(:episode_with_audio) do
           episode = create(:episode, title: "Audio Episode", status: "published", published_at: Time.current)
