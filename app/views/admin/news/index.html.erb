@@ -22,7 +22,7 @@
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:title) %></th>
           <th class="px-4 py-3 font-semibold"><%= t("admin_news.index.author") %></th>
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:status) %></th>
-          <th class="px-4 py-3 font-semibold"><%= t("admin_news.index.tags") %></th>
+          <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:created_at) %></th>
           <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:published_at) %></th>
           <th class="px-4 py-3 font-semibold"></th>
         </tr>
@@ -45,11 +45,7 @@
                 <%= t("admin_news.status.#{article.status}") %>
               </span>
             </td>
-            <td class="px-4 py-3">
-              <% article.tags.each do |tag| %>
-                <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
-              <% end %>
-            </td>
+            <td class="px-4 py-3"><%= l(article.created_at, format: :short) %></td>
             <td class="px-4 py-3"><%= article.published_at && l(article.published_at, format: :short) %></td>
             <td class="px-4 py-3 text-right whitespace-nowrap">
               <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article),
