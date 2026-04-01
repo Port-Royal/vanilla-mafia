@@ -31,7 +31,7 @@
         <% @news.each do |article| %>
           <tr>
             <td class="px-4 py-3">
-              <%= link_to article.title, admin_news_path(article), class: "text-blue-600 hover:underline" %>
+              <%= link_to truncate(article.title, length: 100), admin_news_path(article), class: "text-blue-600 hover:underline" %>
             </td>
             <td class="px-4 py-3">
               <% if article.author.player %>
