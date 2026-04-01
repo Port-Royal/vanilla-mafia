@@ -6,7 +6,7 @@ RSpec.describe "telegram rake tasks" do
     Rails.application.load_tasks unless Rake::Task.task_defined?("telegram:set_webhook")
     Rake::Task["telegram:set_webhook"].reenable
     Rake::Task["telegram:delete_webhook"].reenable
-    Rake::Task["telegram:generate_import_migration"].reenable
+    Rake::Task["telegram:import_history"].reenable
   end
 
   describe "telegram:set_webhook" do
@@ -25,7 +25,7 @@ RSpec.describe "telegram rake tasks" do
     end
   end
 
-  describe "telegram:generate_import_migration" do
+  describe "telegram:import_history" do
     let(:export_dir) { Rails.root.join("tmp", "telegram_export_rake_test") }
     let(:from_id) { "user123456" }
     let_it_be(:user) { create(:user, email: "author@example.com") }
@@ -45,25 +45,26 @@ RSpec.describe "telegram rake tasks" do
 
     after do
       FileUtils.rm_rf(export_dir)
-      Dir.glob(Rails.root.join("db", "migrate", "*_import_telegram_news_drafts.rb")).each do |f|
-        FileUtils.rm_f(f)
-      end
     end
 
-    it "generates a migration file" do
-      Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, user.id.to_s)
+    it "creates News drafts from export" do
+      expect {
+        Rake::Task["telegram:import_history"].invoke(export_dir.to_s, from_id, user.id.to_s)
+      }.to change(News, :count).by(1)
 
-      migration_files = Dir.glob(Rails.root.join("db", "migrate", "*_import_telegram_news_drafts.rb"))
-      expect(migration_files.size).to eq(1)
+      news = News.last
+      expect(news.status).to eq("draft")
+      expect(news.author).to eq(user)
+      expect(news.created_at).to eq(Time.zone.parse("2023-01-15T10:00:00"))
     end
 
     it "aborts when arguments are missing" do
-      expect { Rake::Task["telegram:generate_import_migration"].invoke }.to raise_error(SystemExit)
+      expect { Rake::Task["telegram:import_history"].invoke }.to raise_error(SystemExit)
     end
 
     it "aborts when user is not found" do
       expect {
-        Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, "999999")
+        Rake::Task["telegram:import_history"].invoke(export_dir.to_s, from_id, "999999")
       }.to raise_error(SystemExit)
     end
   end

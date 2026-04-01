@@ -1,16 +1,17 @@
 require_relative "../telegram/export_parser"
-require_relative "../telegram/migration_generator"
 
 namespace :telegram do
-  desc "Parse Telegram Desktop export and generate a data migration with News drafts"
-  task :generate_import_migration, [ :export_path, :from_id, :user_id ] => :environment do |_t, args|
+  MAX_TITLE_LENGTH = 255
+
+  desc "Import Telegram Desktop export as News drafts"
+  task :import_history, [ :export_path, :from_id, :user_id ] => :environment do |_t, args|
     export_path = args[:export_path]
     from_id = args[:from_id]
     user_id = args[:user_id]
 
     if export_path.blank? || from_id.blank? || user_id.blank?
       abort <<~USAGE
-        Usage: rake telegram:generate_import_migration[/path/to/export,user123456,42]
+        Usage: rake telegram:import_history[/path/to/export,user123456,42]
 
         Arguments:
           export_path   - Path to the Telegram Desktop export directory (contains result.json)
@@ -30,13 +31,20 @@ namespace :telegram do
 
     puts "Found #{messages.size} messages (#{messages.count(&:photo)} with photos)"
 
-    timestamp = Time.current.strftime("%Y%m%d%H%M%S")
-    migration_path = Rails.root.join("db", "migrate", "#{timestamp}_import_telegram_news_drafts.rb")
+    created = 0
+    messages.each do |message|
+      news = News.create!(
+        title: message.plain_text.truncate(MAX_TITLE_LENGTH),
+        author: user,
+        status: :draft,
+        created_at: message.date,
+        updated_at: message.date
+      )
+      news.update!(content: message.html_content)
+      created += 1
+    end
 
-    migration_content = Telegram::MigrationGenerator.new(messages, user.id).call
-    File.write(migration_path, migration_content)
-
-    puts "Generated migration: #{migration_path}"
+    puts "Created #{created} News drafts"
   end
 
   desc "Register webhook URL with Telegram API (requires WEBHOOK_URL env var)"
