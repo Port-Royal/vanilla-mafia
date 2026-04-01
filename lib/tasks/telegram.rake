@@ -3,24 +3,24 @@ require_relative "../telegram/migration_generator"
 
 namespace :telegram do
   desc "Parse Telegram Desktop export and generate a data migration with News drafts"
-  task :generate_import_migration, [ :export_path, :from_id, :author_email ] => :environment do |_t, args|
+  task :generate_import_migration, [ :export_path, :from_id, :user_id ] => :environment do |_t, args|
     export_path = args[:export_path]
     from_id = args[:from_id]
-    author_email = args[:author_email]
+    user_id = args[:user_id]
 
-    if export_path.blank? || from_id.blank? || author_email.blank?
+    if export_path.blank? || from_id.blank? || user_id.blank?
       abort <<~USAGE
-        Usage: rake telegram:generate_import_migration[/path/to/export,user123456,author@example.com]
+        Usage: rake telegram:generate_import_migration[/path/to/export,user123456,42]
 
         Arguments:
           export_path   - Path to the Telegram Desktop export directory (contains result.json)
           from_id       - Telegram from_id to filter by (e.g. "user123456789")
-          author_email  - Email of the User who will be set as News author
+          user_id       - ID of the User who will be set as News author
       USAGE
     end
 
-    user = User.find_by(email: author_email)
-    abort "User with email '#{author_email}' not found" if user.nil?
+    user = User.find_by(id: user_id)
+    abort "User with id '#{user_id}' not found" if user.nil?
 
     messages = Telegram::ExportParser.new(export_path, from_id: from_id).call
 

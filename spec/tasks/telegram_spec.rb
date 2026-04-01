@@ -51,7 +51,7 @@ RSpec.describe "telegram rake tasks" do
     end
 
     it "generates a migration file" do
-      Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, "author@example.com")
+      Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, user.id.to_s)
 
       migration_files = Dir.glob(Rails.root.join("db", "migrate", "*_import_telegram_news_drafts.rb"))
       expect(migration_files.size).to eq(1)
@@ -63,7 +63,7 @@ RSpec.describe "telegram rake tasks" do
 
     it "aborts when user is not found" do
       expect {
-        Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, "nonexistent@example.com")
+        Rake::Task["telegram:generate_import_migration"].invoke(export_dir.to_s, from_id, "999999")
       }.to raise_error(SystemExit)
     end
   end
