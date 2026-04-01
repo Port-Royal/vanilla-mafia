@@ -345,9 +345,6 @@ ru:
       url: "URL"
       pending_updates: "Ожидающие обновления"
       error: "Ошибка: %{message}"
-    news_tag:
-      title: "Тег новостей"
-      current: "Текущий тег"
     authors:
       title: "Белый список авторов"
       user_id: "Telegram ID"

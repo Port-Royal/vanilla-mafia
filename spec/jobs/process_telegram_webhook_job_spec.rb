@@ -4,11 +4,13 @@ RSpec.describe ProcessTelegramWebhookJob do
   let_it_be(:user) { create(:user) }
   let_it_be(:telegram_author) { create(:telegram_author, telegram_user_id: 12345, user: user) }
 
+  let(:long_text) { "A" * 500 }
+
   let(:payload) do
     {
       "update_id" => 1,
       "message" => {
-        "text" => "#news Breaking: tournament results announced",
+        "text" => long_text,
         "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
         "chat" => { "id" => -100123 },
         "date" => 1710000000
@@ -17,21 +19,19 @@ RSpec.describe ProcessTelegramWebhookJob do
   end
 
   describe "#perform" do
-    context "when message has news tag and sender is whitelisted" do
+    context "when sender is whitelisted and message is long enough" do
       it "creates a draft news article" do
         expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
       end
 
       it "sets the news title from the message text" do
         described_class.new.perform(payload)
-        news = News.last
-        expect(news.title).to eq("Breaking: tournament results announced")
+        expect(News.last.title).to eq(long_text.truncate(255))
       end
 
       it "sets the news content as formatted HTML" do
         described_class.new.perform(payload)
-        news = News.last
-        expect(news.content.body.to_plain_text).to eq("Breaking: tournament results announced")
+        expect(News.last.content.body.to_plain_text).to eq(long_text)
       end
 
       it "sets the author to the linked user" do
@@ -60,7 +60,7 @@ RSpec.describe ProcessTelegramWebhookJob do
               { "file_id" => "small_id", "file_size" => 1024, "width" => 90, "height" => 90 },
               { "file_id" => "large_id", "file_size" => 51200, "width" => 800, "height" => 800 }
             ],
-            "caption" => "#news Photo news",
+            "caption" => long_text,
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 },
             "date" => 1710000000
@@ -113,7 +113,7 @@ RSpec.describe ProcessTelegramWebhookJob do
             "photo" => [
               { "file_id" => "bad_id", "file_size" => 1024, "width" => 90, "height" => 90 }
             ],
-            "caption" => "#news Photo news",
+            "caption" => long_text,
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 },
             "date" => 1710000000
@@ -139,12 +139,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
-    context "when message has news tag but sender is not whitelisted" do
+    context "when sender is not whitelisted" do
       let(:payload) do
         {
           "update_id" => 2,
           "message" => {
-            "text" => "#news Some news",
+            "text" => long_text,
             "from" => { "id" => 99999, "username" => "stranger", "first_name" => "Bob" },
             "chat" => { "id" => -100123 }
           }
@@ -156,12 +156,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
-    context "when sender is whitelisted but message has no news tag" do
+    context "when message is shorter than 500 characters" do
       let(:payload) do
         {
           "update_id" => 3,
           "message" => {
-            "text" => "Just a regular message",
+            "text" => "A" * 499,
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 }
           }
@@ -170,6 +170,46 @@ RSpec.describe ProcessTelegramWebhookJob do
 
       it "does not create a news article" do
         expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
+    context "when message is exactly 500 characters" do
+      let(:payload) do
+        {
+          "update_id" => 3,
+          "message" => {
+            "text" => "A" * 500,
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      it "creates a news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+    end
+
+    context "when message is >= 500 raw characters but shorter after squish" do
+      let(:text_with_newlines) { ("A" * 50 + "\n" * 10) * 9 }
+
+      let(:payload) do
+        {
+          "update_id" => 3,
+          "message" => {
+            "text" => text_with_newlines,
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      it "uses raw text length and creates a news article" do
+        expect(text_with_newlines.strip.length).to be >= 500
+        expect(text_with_newlines.squish.length).to be < 500
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
       end
     end
 
@@ -188,7 +228,7 @@ RSpec.describe ProcessTelegramWebhookJob do
         {
           "update_id" => 5,
           "message" => {
-            "text" => "#news Orphan news",
+            "text" => long_text,
             "from" => { "id" => 55555, "username" => "orphan", "first_name" => "Nobody" },
             "chat" => { "id" => -100123 }
           }
@@ -200,12 +240,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
-    context "when message text is only the news tag" do
+    context "when message text is blank" do
       let(:payload) do
         {
           "update_id" => 7,
           "message" => {
-            "text" => "#news",
+            "text" => "",
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 }
           }
@@ -217,12 +257,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
-    context "when message text is news tag with only whitespace" do
+    context "when message text is only whitespace" do
       let(:payload) do
         {
           "update_id" => 8,
           "message" => {
-            "text" => "#news   ",
+            "text" => " " * 600,
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 }
           }
@@ -235,14 +275,15 @@ RSpec.describe ProcessTelegramWebhookJob do
     end
 
     context "when message has formatting entities" do
+      let(:bold_text) { "Bold " + "x" * 495 }
+
       let(:payload) do
         {
           "update_id" => 10,
           "message" => {
-            "text" => "#news Bold announcement here",
+            "text" => bold_text,
             "entities" => [
-              { "type" => "hashtag", "offset" => 0, "length" => 5 },
-              { "type" => "bold", "offset" => 6, "length" => 4 }
+              { "type" => "bold", "offset" => 0, "length" => 4 }
             ],
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
             "chat" => { "id" => -100123 },
@@ -258,7 +299,7 @@ RSpec.describe ProcessTelegramWebhookJob do
 
       it "uses plain text for the title" do
         described_class.new.perform(payload)
-        expect(News.last.title).to eq("Bold announcement here")
+        expect(News.last.title).to eq(bold_text.truncate(255))
       end
     end
 
@@ -267,9 +308,10 @@ RSpec.describe ProcessTelegramWebhookJob do
         {
           "update_id" => 6,
           "message" => {
-            "text" => "#news " + "A" * 300,
+            "text" => "A" * 600,
             "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
-            "chat" => { "id" => -100123 }
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
           }
         }
       end
@@ -277,6 +319,14 @@ RSpec.describe ProcessTelegramWebhookJob do
       it "truncates the title to 255 characters" do
         described_class.new.perform(payload)
         expect(News.last.title.length).to be <= 255
+      end
+    end
+
+    context "when it creates a draft" do
+      it "notifies editors" do
+        allow(NotifyEditorsAboutDraftService).to receive(:call)
+        described_class.new.perform(payload)
+        expect(NotifyEditorsAboutDraftService).to have_received(:call).with(News.last)
       end
     end
   end
