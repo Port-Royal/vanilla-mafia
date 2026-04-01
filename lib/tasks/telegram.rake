@@ -31,7 +31,9 @@ namespace :telegram do
 
     puts "Found #{messages.size} messages (#{messages.count(&:photo)} with photos)"
 
+    export_path_dir = Pathname.new(export_path)
     created = 0
+    photos_attached = 0
     messages.each do |message|
       news = News.create!(
         title: message.plain_text.truncate(MAX_TITLE_LENGTH),
@@ -41,10 +43,25 @@ namespace :telegram do
         updated_at: message.date
       )
       news.update!(content: message.html_content)
+
+      if message.photo.present?
+        photo_path = export_path_dir.join(message.photo)
+        if photo_path.exist?
+          news.photos.attach(
+            io: photo_path.open,
+            filename: photo_path.basename.to_s,
+            content_type: Marcel::MimeType.for(photo_path)
+          )
+          photos_attached += 1
+        else
+          puts "Warning: photo not found at #{photo_path}"
+        end
+      end
+
       created += 1
     end
 
-    puts "Created #{created} News drafts"
+    puts "Created #{created} News drafts (#{photos_attached} with photos attached)"
   end
 
   desc "Register webhook URL with Telegram API (requires WEBHOOK_URL env var)"

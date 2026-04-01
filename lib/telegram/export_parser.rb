@@ -27,17 +27,11 @@ module Telegram
 
       plain_text = extract_plain_text(raw_text)
       html_content = build_html(raw_text)
-      photo = message["photo"]
-
-      if photo.present?
-        html_content = "[PHOTO: #{photo}]\n\n#{html_content}"
-      end
-
       Message.new(
         date: message["date"],
         plain_text: plain_text,
         html_content: html_content,
-        photo: photo
+        photo: message["photo"]
       )
     end
 
