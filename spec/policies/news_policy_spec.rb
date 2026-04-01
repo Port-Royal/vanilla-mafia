@@ -104,6 +104,14 @@ RSpec.describe NewsPolicy do
 
       it { is_expected.not_to be_show }
     end
+
+    context "with nil published_at" do
+      let(:nil_published_at_news) { build(:news, status: :published, published_at: nil) }
+
+      subject(:policy) { described_class.new(nil, nil_published_at_news) }
+
+      it { is_expected.not_to be_show }
+    end
   end
 
   describe NewsPolicy::Scope do

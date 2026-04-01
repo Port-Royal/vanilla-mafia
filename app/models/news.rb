@@ -31,6 +31,10 @@ class News < ApplicationRecord
       .recent
   }
 
+  def visible?
+    published? && published_at.present? && published_at <= Time.current
+  end
+
   def publish!
     update!(status: :published, published_at: Time.current)
   end

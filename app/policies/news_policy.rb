@@ -6,7 +6,7 @@ class NewsPolicy < ApplicationPolicy
   end
 
   def show?
-    visible? || managed?
+    record.visible? || managed?
   end
 
   def create?
@@ -22,10 +22,6 @@ class NewsPolicy < ApplicationPolicy
   end
 
   private
-
-  def visible?
-    record.published? && record.published_at.present? && record.published_at <= Time.current
-  end
 
   def managed?
     user.present? && user.can_manage_news?

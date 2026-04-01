@@ -169,6 +169,30 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe "#visible?" do
+    let(:author) { create(:user) }
+
+    it "returns true for published news with past published_at" do
+      news = build(:news, :published, author:, published_at: 1.day.ago)
+      expect(news).to be_visible
+    end
+
+    it "returns false for published news with future published_at" do
+      news = build(:news, :published, author:, published_at: 1.day.from_now)
+      expect(news).not_to be_visible
+    end
+
+    it "returns false for published news with nil published_at" do
+      news = build(:news, author:, status: :published, published_at: nil)
+      expect(news).not_to be_visible
+    end
+
+    it "returns false for draft news" do
+      news = build(:news, author:)
+      expect(news).not_to be_visible
+    end
+  end
+
   describe '#publish!' do
     let(:author) { create(:user) }
     let(:news) { create(:news, author:) }
