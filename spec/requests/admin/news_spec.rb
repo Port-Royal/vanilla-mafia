@@ -475,6 +475,21 @@ RSpec.describe "Admin::News" do
         end
       end
 
+      context "when article has a scheduled published_at" do
+        let(:scheduled_time) { 2.days.from_now }
+        let(:article) { create(:news, author: editor, published_at: scheduled_time) }
+
+        it "publishes the article" do
+          patch publish_admin_news_path(article)
+          expect(article.reload).to be_published
+        end
+
+        it "preserves the scheduled published_at" do
+          patch publish_admin_news_path(article)
+          expect(article.reload.published_at).to be_within(1.second).of(scheduled_time)
+        end
+      end
+
       context "when article is already published" do
         let_it_be(:article) { create(:news, :published) }
 
@@ -518,9 +533,10 @@ RSpec.describe "Admin::News" do
           expect(article.reload).to be_draft
         end
 
-        it "clears published_at" do
+        it "preserves published_at" do
+          original_published_at = article.published_at
           patch unpublish_admin_news_path(article)
-          expect(article.reload.published_at).to be_nil
+          expect(article.reload.published_at).to eq(original_published_at)
         end
 
         it "redirects to index" do
