@@ -45,36 +45,6 @@ RSpec.describe Telegram::MessageParser do
         result = described_class.call(payload)
         expect(result.photo_file_id).to be_nil
       end
-
-      it "is not a news message" do
-        result = described_class.call(payload)
-        expect(result).not_to be_news
-      end
-    end
-
-    context "with a #news hashtag in text" do
-      let(:payload) do
-        {
-          "update_id" => 124,
-          "message" => {
-            "message_id" => 2,
-            "from" => { "id" => 42, "first_name" => "Denis" },
-            "chat" => { "id" => 42, "type" => "private" },
-            "date" => 1_700_000_000,
-            "text" => "Breaking update #news"
-          }
-        }
-      end
-
-      it "detects as a news message" do
-        result = described_class.call(payload)
-        expect(result).to be_news
-      end
-
-      it "strips the #news tag from text" do
-        result = described_class.call(payload)
-        expect(result.text).to eq("Breaking update")
-      end
     end
 
     context "with a photo message" do
@@ -91,7 +61,7 @@ RSpec.describe Telegram::MessageParser do
               { "file_id" => "medium_id", "file_size" => 10240, "width" => 320, "height" => 320 },
               { "file_id" => "large_id", "file_size" => 51200, "width" => 800, "height" => 800 }
             ],
-            "caption" => "Photo caption #news"
+            "caption" => "Photo caption here"
           }
         }
       end
@@ -103,12 +73,7 @@ RSpec.describe Telegram::MessageParser do
 
       it "uses caption as text" do
         result = described_class.call(payload)
-        expect(result.text).to eq("Photo caption")
-      end
-
-      it "detects #news in caption" do
-        result = described_class.call(payload)
-        expect(result).to be_news
+        expect(result.text).to eq("Photo caption here")
       end
     end
 
@@ -188,26 +153,6 @@ RSpec.describe Telegram::MessageParser do
       end
     end
 
-    context "with multiple #news tags" do
-      let(:payload) do
-        {
-          "update_id" => 130,
-          "message" => {
-            "message_id" => 1,
-            "from" => { "id" => 42, "first_name" => "Denis" },
-            "chat" => { "id" => 42, "type" => "private" },
-            "date" => 1_700_000_000,
-            "text" => "#news Update #news"
-          }
-        }
-      end
-
-      it "strips all #news tags" do
-        result = described_class.call(payload)
-        expect(result.text).to eq("Update")
-      end
-    end
-
     context "with a plain text message for html_content" do
       let(:payload) do
         {
@@ -237,21 +182,20 @@ RSpec.describe Telegram::MessageParser do
             "from" => { "id" => 42, "first_name" => "Denis" },
             "chat" => { "id" => 42, "type" => "private" },
             "date" => 1_700_000_000,
-            "text" => "#news Bold update here",
+            "text" => "Bold update here",
             "entities" => [
-              { "type" => "hashtag", "offset" => 0, "length" => 5 },
-              { "type" => "bold", "offset" => 6, "length" => 4 }
+              { "type" => "bold", "offset" => 0, "length" => 4 }
             ]
           }
         }
       end
 
-      it "strips #news and adjusts entity offsets in html_content" do
+      it "applies entity formatting in html_content" do
         result = described_class.call(payload)
         expect(result.html_content).to eq("<strong>Bold</strong> update here")
       end
 
-      it "strips #news from plain text" do
+      it "returns plain text without formatting" do
         result = described_class.call(payload)
         expect(result.text).to eq("Bold update here")
       end
@@ -267,10 +211,9 @@ RSpec.describe Telegram::MessageParser do
             "chat" => { "id" => 42, "type" => "private" },
             "date" => 1_700_000_000,
             "photo" => [ { "file_id" => "abc", "file_size" => 1024, "width" => 90, "height" => 90 } ],
-            "caption" => "#news Photo caption",
+            "caption" => "Photo caption",
             "caption_entities" => [
-              { "type" => "hashtag", "offset" => 0, "length" => 5 },
-              { "type" => "italic", "offset" => 6, "length" => 5 }
+              { "type" => "italic", "offset" => 0, "length" => 5 }
             ]
           }
         }
@@ -291,7 +234,7 @@ RSpec.describe Telegram::MessageParser do
             "from" => { "id" => 42, "first_name" => "Denis" },
             "chat" => { "id" => 42, "type" => "private" },
             "date" => 1_700_000_000,
-            "text" => "#news Line one\nLine two"
+            "text" => "Line one\nLine two"
           }
         }
       end
@@ -304,31 +247,6 @@ RSpec.describe Telegram::MessageParser do
       it "squishes newlines in plain text" do
         result = described_class.call(payload)
         expect(result.text).to eq("Line one Line two")
-      end
-    end
-
-    context "with #news tag case-insensitivity" do
-      let(:payload) do
-        {
-          "update_id" => 129,
-          "message" => {
-            "message_id" => 1,
-            "from" => { "id" => 42, "first_name" => "Denis" },
-            "chat" => { "id" => 42, "type" => "private" },
-            "date" => 1_700_000_000,
-            "text" => "Update #News here"
-          }
-        }
-      end
-
-      it "detects #News as news" do
-        result = described_class.call(payload)
-        expect(result).to be_news
-      end
-
-      it "strips the tag regardless of case" do
-        result = described_class.call(payload)
-        expect(result.text).to eq("Update here")
       end
     end
   end
