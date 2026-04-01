@@ -97,6 +97,35 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe ".visible" do
+    let_it_be(:author) { create(:user) }
+    let_it_be(:published_past) { create(:news, author:, status: :published, published_at: 1.day.ago) }
+    let_it_be(:published_now) { create(:news, author:, status: :published, published_at: Time.current) }
+    let_it_be(:published_future) { create(:news, author:, status: :published, published_at: 1.day.from_now) }
+    let_it_be(:published_nil) { create(:news, author:, status: :published, published_at: nil) }
+    let_it_be(:draft) { create(:news, author:, status: :draft) }
+
+    it "includes published articles with published_at in the past" do
+      expect(described_class.visible).to include(published_past)
+    end
+
+    it "includes published articles with published_at at current time" do
+      expect(described_class.visible).to include(published_now)
+    end
+
+    it "excludes published articles with published_at in the future" do
+      expect(described_class.visible).not_to include(published_future)
+    end
+
+    it "excludes published articles with nil published_at" do
+      expect(described_class.visible).not_to include(published_nil)
+    end
+
+    it "excludes draft articles" do
+      expect(described_class.visible).not_to include(draft)
+    end
+  end
+
   describe '.mentioning_player' do
     let_it_be(:author) { create(:user) }
     let_it_be(:player) { create(:player) }
@@ -137,6 +166,30 @@ RSpec.describe News, type: :model do
 
     it 'does not return duplicates when player has multiple participations' do
       expect(described_class.mentioning_player(player).count).to eq(described_class.mentioning_player(player).distinct.count)
+    end
+  end
+
+  describe "#visible?" do
+    let(:author) { create(:user) }
+
+    it "returns true for published news with past published_at" do
+      news = build(:news, :published, author:, published_at: 1.day.ago)
+      expect(news).to be_visible
+    end
+
+    it "returns false for published news with future published_at" do
+      news = build(:news, :published, author:, published_at: 1.day.from_now)
+      expect(news).not_to be_visible
+    end
+
+    it "returns false for published news with nil published_at" do
+      news = build(:news, author:, status: :published, published_at: nil)
+      expect(news).not_to be_visible
+    end
+
+    it "returns false for draft news" do
+      news = build(:news, author:)
+      expect(news).not_to be_visible
     end
   end
 

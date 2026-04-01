@@ -17,18 +17,23 @@ class News < ApplicationRecord
   validates :status, presence: true
   validate :content_length_within_limit
 
+  scope :visible, -> { published.where(published_at: ..Time.current) }
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
   scope :drafts_first, -> { order(Arel.sql("published_at IS NOT NULL, published_at DESC, id DESC")) }
   scope :for_game, ->(game) { where(game:) }
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :by_author, ->(user) { where(author: user) }
   scope :mentioning_player, ->(player) {
-    published
+    visible
       .joins(game: :game_participations)
       .where(game_participations: { player_id: player.id })
       .distinct
       .recent
   }
+
+  def visible?
+    published? && published_at.present? && published_at <= Time.current
+  end
 
   def publish!
     update!(status: :published, published_at: Time.current)

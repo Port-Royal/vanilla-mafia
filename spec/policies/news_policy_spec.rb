@@ -62,6 +62,22 @@ RSpec.describe NewsPolicy do
 
       it { is_expected.not_to be_show }
     end
+
+    context "with future published_at" do
+      let(:future_news) { build(:news, :published, published_at: 1.day.from_now) }
+
+      subject(:policy) { described_class.new(regular_user, future_news) }
+
+      it { is_expected.not_to be_show }
+    end
+
+    context "with nil published_at" do
+      let(:nil_published_at_news) { build(:news, status: :published, published_at: nil) }
+
+      subject(:policy) { described_class.new(regular_user, nil_published_at_news) }
+
+      it { is_expected.not_to be_show }
+    end
   end
 
   describe "guest (nil user)" do
@@ -80,17 +96,34 @@ RSpec.describe NewsPolicy do
 
       it { is_expected.not_to be_show }
     end
+
+    context "with future published_at" do
+      let(:future_news) { build(:news, :published, published_at: 1.day.from_now) }
+
+      subject(:policy) { described_class.new(nil, future_news) }
+
+      it { is_expected.not_to be_show }
+    end
+
+    context "with nil published_at" do
+      let(:nil_published_at_news) { build(:news, status: :published, published_at: nil) }
+
+      subject(:policy) { described_class.new(nil, nil_published_at_news) }
+
+      it { is_expected.not_to be_show }
+    end
   end
 
   describe NewsPolicy::Scope do
     let_it_be(:published) { create(:news, :published) }
     let_it_be(:draft) { create(:news) }
+    let_it_be(:future_published) { create(:news, status: :published, published_at: 1.day.from_now) }
 
     context "when admin" do
       subject(:resolved) { described_class.new(admin, News).resolve }
 
       it "returns all news" do
-        expect(resolved).to include(published, draft)
+        expect(resolved).to include(published, draft, future_published)
       end
     end
 
@@ -98,7 +131,7 @@ RSpec.describe NewsPolicy do
       subject(:resolved) { described_class.new(editor, News).resolve }
 
       it "returns all news" do
-        expect(resolved).to include(published, draft)
+        expect(resolved).to include(published, draft, future_published)
       end
     end
 
@@ -112,6 +145,10 @@ RSpec.describe NewsPolicy do
       it "excludes draft news" do
         expect(resolved).not_to include(draft)
       end
+
+      it "excludes future-published news" do
+        expect(resolved).not_to include(future_published)
+      end
     end
 
     context "when regular user" do
@@ -123,6 +160,10 @@ RSpec.describe NewsPolicy do
 
       it "excludes draft news" do
         expect(resolved).not_to include(draft)
+      end
+
+      it "excludes future-published news" do
+        expect(resolved).not_to include(future_published)
       end
     end
   end
