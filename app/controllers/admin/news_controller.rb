@@ -9,7 +9,7 @@ class Admin::NewsController < ApplicationController
 
   def index
     scope = policy_scope(News).includes({ author: :player })
-                              .order(Arel.sql("status = 'published', CASE WHEN status = 'published' THEN created_at END DESC, created_at ASC"))
+                              .order(Arel.sql("status = 'published', CASE WHEN status = 'published' THEN created_at END DESC, created_at ASC, id ASC"))
     scope = scope.where(status: params[:status]) if params[:status].present? && News.statuses.key?(params[:status])
     @pagy, @news = pagy(scope)
   end
