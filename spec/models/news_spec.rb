@@ -97,6 +97,35 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe ".visible" do
+    let_it_be(:author) { create(:user) }
+    let_it_be(:published_past) { create(:news, author:, status: :published, published_at: 1.day.ago) }
+    let_it_be(:published_now) { create(:news, author:, status: :published, published_at: Time.current) }
+    let_it_be(:published_future) { create(:news, author:, status: :published, published_at: 1.day.from_now) }
+    let_it_be(:published_nil) { create(:news, author:, status: :published, published_at: nil) }
+    let_it_be(:draft) { create(:news, author:, status: :draft) }
+
+    it "includes published articles with published_at in the past" do
+      expect(described_class.visible).to include(published_past)
+    end
+
+    it "includes published articles with published_at at current time" do
+      expect(described_class.visible).to include(published_now)
+    end
+
+    it "excludes published articles with published_at in the future" do
+      expect(described_class.visible).not_to include(published_future)
+    end
+
+    it "excludes published articles with nil published_at" do
+      expect(described_class.visible).not_to include(published_nil)
+    end
+
+    it "excludes draft articles" do
+      expect(described_class.visible).not_to include(draft)
+    end
+  end
+
   describe '.mentioning_player' do
     let_it_be(:author) { create(:user) }
     let_it_be(:player) { create(:player) }

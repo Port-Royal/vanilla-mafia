@@ -6,7 +6,7 @@ class NewsPolicy < ApplicationPolicy
   end
 
   def show?
-    record.published? || managed?
+    visible? || managed?
   end
 
   def create?
@@ -23,6 +23,10 @@ class NewsPolicy < ApplicationPolicy
 
   private
 
+  def visible?
+    record.published? && record.published_at.present? && record.published_at <= Time.current
+  end
+
   def managed?
     user.present? && user.can_manage_news?
   end
@@ -38,7 +42,7 @@ class NewsPolicy < ApplicationPolicy
     private
 
     def default_scope
-      scope.where(status: :published)
+      scope.visible
     end
   end
 end
