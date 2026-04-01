@@ -7,7 +7,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
   def perform(payload)
     parsed = Telegram::MessageParser.call(payload)
     return if parsed.nil?
-    return if parsed.text.length < MIN_TEXT_LENGTH
+    return if parsed.raw_text_length < MIN_TEXT_LENGTH
 
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?

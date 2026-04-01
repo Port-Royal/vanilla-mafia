@@ -248,6 +248,31 @@ RSpec.describe Telegram::MessageParser do
         result = described_class.call(payload)
         expect(result.text).to eq("Line one Line two")
       end
+
+      it "returns raw_text_length based on stripped but unsquished text" do
+        result = described_class.call(payload)
+        expect(result.raw_text_length).to eq("Line one\nLine two".length)
+      end
+    end
+
+    context "with leading and trailing whitespace" do
+      let(:payload) do
+        {
+          "update_id" => 204,
+          "message" => {
+            "message_id" => 24,
+            "from" => { "id" => 42, "first_name" => "Denis" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "text" => "  Hello world  "
+          }
+        }
+      end
+
+      it "strips leading/trailing whitespace for raw_text_length" do
+        result = described_class.call(payload)
+        expect(result.raw_text_length).to eq("Hello world".length)
+      end
     end
   end
 end

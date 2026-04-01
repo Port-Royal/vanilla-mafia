@@ -191,6 +191,28 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
+    context "when message is >= 500 raw characters but shorter after squish" do
+      let(:text_with_newlines) { ("A" * 50 + "\n" * 10) * 9 }
+
+      let(:payload) do
+        {
+          "update_id" => 3,
+          "message" => {
+            "text" => text_with_newlines,
+            "from" => { "id" => 12345, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      it "uses raw text length and creates a news article" do
+        expect(text_with_newlines.strip.length).to be >= 500
+        expect(text_with_newlines.squish.length).to be < 500
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+    end
+
     context "when message is nil (no message or edited_message key)" do
       let(:payload) { { "update_id" => 4 } }
 

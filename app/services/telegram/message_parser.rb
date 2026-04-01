@@ -1,6 +1,6 @@
 module Telegram
   class MessageParser
-    Result = Data.define(:text, :html_content, :from_id, :from_username, :from_first_name, :chat_id, :photo_file_id)
+    Result = Data.define(:text, :html_content, :from_id, :from_username, :from_first_name, :chat_id, :photo_file_id, :raw_text_length)
 
     def self.call(payload)
       new(payload).call
@@ -28,7 +28,8 @@ module Telegram
         from_username: from&.dig("username"),
         from_first_name: from&.dig("first_name"),
         chat_id: @message.dig("chat", "id"),
-        photo_file_id: extract_largest_photo_id
+        photo_file_id: extract_largest_photo_id,
+        raw_text_length: raw_text.strip.length
       )
     end
 
