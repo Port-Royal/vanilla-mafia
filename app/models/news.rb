@@ -36,11 +36,13 @@ class News < ApplicationRecord
   end
 
   def publish!
-    update!(status: :published, published_at: Time.current)
+    attrs = { status: :published }
+    attrs[:published_at] = Time.current if published_at.blank?
+    update!(attrs)
   end
 
   def unpublish!
-    update!(status: :draft, published_at: nil)
+    update!(status: :draft)
   end
 
   private

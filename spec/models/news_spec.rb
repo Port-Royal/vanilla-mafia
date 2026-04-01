@@ -195,13 +195,38 @@ RSpec.describe News, type: :model do
 
   describe '#publish!' do
     let(:author) { create(:user) }
-    let(:news) { create(:news, author:) }
 
-    it 'sets status to published and published_at' do
-      news.publish!
+    context "when published_at is nil" do
+      let(:news) { create(:news, author:) }
 
-      expect(news.status).to eq("published")
-      expect(news.published_at).to be_within(1.second).of(Time.current)
+      it "sets status to published" do
+        news.publish!
+
+        expect(news.status).to eq("published")
+      end
+
+      it "sets published_at to current time" do
+        news.publish!
+
+        expect(news.published_at).to be_within(1.second).of(Time.current)
+      end
+    end
+
+    context "when published_at is already set" do
+      let(:scheduled_time) { 2.days.from_now }
+      let(:news) { create(:news, author:, published_at: scheduled_time) }
+
+      it "sets status to published" do
+        news.publish!
+
+        expect(news.status).to eq("published")
+      end
+
+      it "does not change published_at" do
+        news.publish!
+
+        expect(news.published_at).to be_within(1.second).of(scheduled_time)
+      end
     end
   end
 
@@ -209,11 +234,17 @@ RSpec.describe News, type: :model do
     let(:author) { create(:user) }
     let(:news) { create(:news, :published, author:) }
 
-    it 'sets status to draft and clears published_at' do
+    it "sets status to draft" do
       news.unpublish!
 
       expect(news.status).to eq("draft")
-      expect(news.published_at).to be_nil
+    end
+
+    it "does not change published_at" do
+      original_published_at = news.published_at
+      news.unpublish!
+
+      expect(news.published_at).to eq(original_published_at)
     end
   end
 end
