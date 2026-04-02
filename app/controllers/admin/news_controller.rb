@@ -100,8 +100,10 @@ class Admin::NewsController < ApplicationController
 
   def news_params
     permitted = params.require(:news).permit(:title, :content, :competition_id, photos: [])
-    permitted[:photos]&.reject!(&:blank?)
-    permitted.delete(:photos) if permitted[:photos]&.empty?
+    if permitted[:photos]
+      permitted[:photos].reject!(&:blank?)
+      permitted.delete(:photos) if permitted[:photos].empty?
+    end
     permitted
   end
 end

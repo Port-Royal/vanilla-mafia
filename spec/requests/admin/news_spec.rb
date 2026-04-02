@@ -440,7 +440,7 @@ RSpec.describe "Admin::News" do
           File.open(Rails.root.join("spec/fixtures/files/selfie.jpg"), "rb") do |file|
             article.photos.attach(io: file, filename: "photo.jpg", content_type: "image/jpeg")
           end
-          patch admin_news_path(article), params: { news: { title: "Updated Title", photos: [""] } }
+          patch admin_news_path(article), params: { news: { title: "Updated Title", photos: [ "" ] } }
           expect(article.reload.photos).to be_attached
         end
       end
