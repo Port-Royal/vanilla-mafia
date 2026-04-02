@@ -27,7 +27,9 @@
         <span class="w-40 font-semibold text-sm text-right pt-2"><%= t("admin_news.form.photos") %></span>
         <div class="flex flex-wrap gap-2">
           <% f.object.photos.each do |photo| %>
-            <%= image_tag photo.variant(resize_to_limit: [200, 200]), class: "rounded" %>
+            <% if photo.variable? %>
+              <%= image_tag photo.variant(resize_to_limit: [200, 200]), alt: f.object.title, class: "rounded" %>
+            <% end %>
           <% end %>
         </div>
       </div>

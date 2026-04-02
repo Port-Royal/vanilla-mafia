@@ -23,7 +23,9 @@
         <% if article.photos.attached? %>
           <div class="flex flex-wrap gap-2 mb-3">
             <% article.photos.each do |photo| %>
-              <%= image_tag photo.variant(resize_to_limit: [600, 400]), class: "rounded max-w-full" %>
+              <% if photo.variable? %>
+                <%= image_tag photo.variant(resize_to_limit: [600, 400]), alt: article.title, class: "rounded max-w-full" %>
+              <% end %>
             <% end %>
           </div>
         <% end %>
