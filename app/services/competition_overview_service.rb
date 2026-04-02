@@ -48,7 +48,7 @@ class CompetitionOverviewService
       games: games,
       participations_by_player: participations_by_player,
       players_sorted: players_sorted,
-      news: News.visible.for_competition(@competition).includes(:author, :tags, content_attachment: :blob).recent
+      news: News.visible.for_competition(@competition).includes(:author, :tags, :rich_text_content, photos_attachments: :blob).recent
     )
   end
 end

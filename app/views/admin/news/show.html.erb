@@ -21,6 +21,14 @@
     <% end %>
   </div>
 
+  <% if @news.photos.attached? %>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <% @news.photos.each do |photo| %>
+        <%= image_tag photo.variant(resize_to_limit: [600, 400]), class: "rounded max-w-full" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="prose max-w-none">
     <%= @news.content %>
   </div>

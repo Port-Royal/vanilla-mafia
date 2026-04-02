@@ -319,6 +319,8 @@ ru:
       delete: "Удалить"
       delete_confirm: "Вы уверены, что хотите удалить эту новость?"
     form:
+      photos: "Фото"
+      add_photos: "Добавить фото"
       season: "Сезон"
       series: "Серия"
       submit_create: "Создать"
