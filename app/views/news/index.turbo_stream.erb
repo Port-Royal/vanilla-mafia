@@ -1,0 +1,11 @@
+<%= turbo_stream.append "news-list" do %>
+  <%= render partial: "news/article", collection: @news, as: :article %>
+<% end %>
+
+<% if @pagy.next %>
+  <%= turbo_stream.append "news-list" do %>
+    <div data-infinite-scroll-target="sentinel"
+         data-next-url="<%= news_index_path(page: @pagy.next, format: :turbo_stream) %>">
+    </div>
+  <% end %>
+<% end %>
