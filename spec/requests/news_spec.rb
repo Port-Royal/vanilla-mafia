@@ -47,6 +47,35 @@ RSpec.describe NewsController do
       end
     end
 
+    context "when user is an editor" do
+      let_it_be(:editor) { create(:user, :editor) }
+
+      before { sign_in editor }
+
+      it "shows edit link" do
+        get news_index_path
+        expect(response.body).to include(edit_admin_news_path(published_article))
+      end
+    end
+
+    context "when user is not signed in" do
+      it "does not show edit link" do
+        get news_index_path
+        expect(response.body).not_to include(edit_admin_news_path(published_article))
+      end
+    end
+
+    context "when user has no editor grant" do
+      let_it_be(:regular_user) { create(:user) }
+
+      before { sign_in regular_user }
+
+      it "does not show edit link" do
+        get news_index_path
+        expect(response.body).not_to include(edit_admin_news_path(published_article))
+      end
+    end
+
     context "when there are no published articles" do
       before { News.update_all(status: :draft, published_at: nil) }
 

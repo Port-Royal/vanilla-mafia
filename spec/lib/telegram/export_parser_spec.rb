@@ -178,11 +178,17 @@ RSpec.describe Telegram::ExportParser do
         ])
       end
 
-      it "prepends photo placeholder to HTML content" do
+      it "stores the photo path" do
         results = parser.call
 
-        expect(results.first.html_content).to start_with("[PHOTO: photos/photo_1.jpg]")
         expect(results.first.photo).to eq("photos/photo_1.jpg")
+      end
+
+      it "does not include photo placeholder in html_content" do
+        results = parser.call
+
+        expect(results.first.html_content).not_to include("[PHOTO:")
+        expect(results.first.html_content).to eq("B" * 600)
       end
     end
 
@@ -193,10 +199,9 @@ RSpec.describe Telegram::ExportParser do
         write_export([ message(from_id: from_id, text: long_text) ])
       end
 
-      it "does not include photo placeholder" do
+      it "returns nil for photo" do
         results = parser.call
 
-        expect(results.first.html_content).not_to include("[PHOTO:")
         expect(results.first.photo).to be_nil
       end
     end
@@ -388,10 +393,11 @@ RSpec.describe Telegram::ExportParser do
         ])
       end
 
-      it "includes the message content after the photo placeholder" do
+      it "keeps html_content without photo placeholder" do
         results = parser.call
 
-        expect(results.first.html_content).to eq("[PHOTO: photos/img.jpg]\n\n" + ("E" * 600))
+        expect(results.first.html_content).to eq("E" * 600)
+        expect(results.first.photo).to eq("photos/img.jpg")
       end
     end
 

@@ -2,12 +2,12 @@ class ProcessTelegramWebhookJob < ApplicationJob
   queue_as :default
 
   MAX_TITLE_LENGTH = 255
+  MIN_TEXT_LENGTH = 500
 
   def perform(payload)
     parsed = Telegram::MessageParser.call(payload)
     return if parsed.nil?
-    return unless parsed.news?
-    return if parsed.text.blank?
+    return if parsed.raw_text_length < MIN_TEXT_LENGTH
 
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?
