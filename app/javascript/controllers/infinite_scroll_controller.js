@@ -35,7 +35,8 @@ export default class extends Controller {
     if (!nextUrl) return
 
     this.observer.unobserve(sentinel)
-    sentinel.innerHTML = '<p class="text-center text-neutral-400 py-4">Загрузка...</p>'
+    const loadingMessage = sentinel.dataset.loadingMessage || "Loading..."
+    sentinel.innerHTML = `<p class="text-center text-neutral-400 py-4">${loadingMessage}</p>`
 
     fetch(nextUrl, {
       headers: {
@@ -43,10 +44,21 @@ export default class extends Controller {
         "X-Requested-With": "XMLHttpRequest"
       }
     })
-      .then((response) => response.text())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`${response.status} ${response.statusText}`)
+        }
+        return response.text()
+      })
       .then((html) => {
         sentinel.remove()
         Turbo.renderStreamMessage(html)
+      })
+      .catch((error) => {
+        console.error("Infinite scroll error:", error)
+        const errorMessage = sentinel.dataset.errorMessage || "Failed to load. Scroll to retry."
+        sentinel.innerHTML = `<p class="text-center text-neutral-400 py-4">${errorMessage}</p>`
+        this.observer.observe(sentinel)
       })
   }
 

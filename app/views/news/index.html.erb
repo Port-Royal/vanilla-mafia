@@ -3,13 +3,15 @@
 <% if @news.any? %>
   <% if @pagination_mode == :infinite %>
     <div data-controller="infinite-scroll">
-      <turbo-frame id="news-list">
+      <turbo-frame id="news-list" class="space-y-8">
         <%= render partial: "news/article", collection: @news, as: :article %>
       </turbo-frame>
 
       <% if @pagy.next %>
         <div data-infinite-scroll-target="sentinel"
-             data-next-url="<%= news_index_path(page: @pagy.next, format: :turbo_stream) %>">
+             data-next-url="<%= news_index_path(page: @pagy.next, format: :turbo_stream) %>"
+             data-loading-message="<%= t('news.index.loading') %>"
+             data-error-message="<%= t('news.index.load_error') %>">
         </div>
       <% end %>
     </div>

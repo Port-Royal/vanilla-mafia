@@ -12,6 +12,11 @@ class NewsController < ApplicationController
       @news = scope.to_a
       @pagination_mode = :none
     end
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream if @pagination_mode == :infinite
+    end
   end
 
   private
