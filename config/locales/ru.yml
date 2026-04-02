@@ -286,6 +286,7 @@ ru:
     index:
       title: "Новости"
       empty: "Новостей пока нет."
+      edit: "Редактировать"
     show:
       back: "← К новостям"
       linked_game: "Игра %{game}"
