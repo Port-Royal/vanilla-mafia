@@ -16,6 +16,7 @@
     <% if @news.game %>
       · <%= t("admin_news.show.linked_game", game: @news.game.full_name) %>
     <% end %>
+    · <%= t("admin_news.show.created_at", date: l(@news.created_at.to_date)) %>
     <% if @news.published_at %>
       · <%= l(@news.published_at, format: :short) %>
     <% end %>

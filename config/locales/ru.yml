@@ -310,6 +310,7 @@ ru:
       title: "Редактирование новости"
     show:
       back: "← К списку новостей"
+      created_at: "Создано: %{date}"
       by_author: "Автор: %{author}"
       linked_game: "Игра: %{game}"
       edit: "Редактировать"
