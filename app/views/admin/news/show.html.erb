@@ -16,10 +16,21 @@
     <% if @news.game %>
       · <%= t("admin_news.show.linked_game", game: @news.game.full_name) %>
     <% end %>
+    · <%= t("admin_news.show.created_at", date: l(@news.created_at.to_date)) %>
     <% if @news.published_at %>
       · <%= l(@news.published_at, format: :short) %>
     <% end %>
   </div>
+
+  <% if @news.photos.attached? %>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <% @news.photos.each do |photo| %>
+        <% if photo.variable? %>
+          <%= image_tag photo.variant(resize_to_limit: [600, 400]), alt: @news.title, class: "rounded max-w-full" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
 
   <div class="prose max-w-none">
     <%= @news.content %>

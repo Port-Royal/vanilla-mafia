@@ -102,9 +102,24 @@
                 · <%= article.author.player.name %>
               <% end %>
             </div>
+            <% if article.photos.attached? %>
+              <div class="flex flex-wrap gap-2 mb-2">
+                <% article.photos.each do |photo| %>
+                  <% if photo.variable? %>
+                    <%= image_tag photo.variant(resize_to_limit: [600, 400]), alt: article.title, class: "rounded max-w-full" %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
             <div class="prose max-w-none text-neutral-700">
               <%= article.content %>
             </div>
+            <% if user_signed_in? && current_user.can_manage_news? %>
+              <div class="mt-2">
+                <%= link_to t("news.index.edit"), edit_admin_news_path(article),
+                      class: "text-sm text-blue-600 hover:underline" %>
+              </div>
+            <% end %>
           </article>
         <% end %>
       </div>

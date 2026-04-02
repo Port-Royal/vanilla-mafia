@@ -22,6 +22,24 @@
       </div>
     </div>
 
+    <% if f.object.photos.attached? %>
+      <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
+        <span class="w-40 font-semibold text-sm text-right pt-2"><%= t("admin_news.form.photos") %></span>
+        <div class="flex flex-wrap gap-2">
+          <% f.object.photos.each do |photo| %>
+            <% if photo.variable? %>
+              <%= image_tag photo.variant(resize_to_limit: [200, 200]), alt: f.object.title, class: "rounded" %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
+      <%= f.label :photos, t("admin_news.form.add_photos"), class: "w-40 font-semibold text-sm text-right pt-2" %>
+      <%= f.file_field :photos, multiple: true, class: "text-sm", accept: "image/*" %>
+    </div>
+
     <% selected_stage = f.object.competition %>
     <% selected_season_id = selected_stage ? selected_stage.parent_id : nil %>
     <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2"

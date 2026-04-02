@@ -284,6 +284,19 @@ RSpec.describe "Admin::News" do
       end
     end
 
+    context "when article has photos" do
+      let(:article_with_photo) { create(:news, :with_photo) }
+
+      before do
+        sign_in editor
+        get admin_news_path(article_with_photo)
+      end
+
+      it "renders the photo" do
+        assert_select "img[src*='photo.jpg']"
+      end
+    end
+
     context "when article is a draft" do
       let_it_be(:draft_article) { create(:news) }
 
@@ -332,6 +345,23 @@ RSpec.describe "Admin::News" do
 
       it "renders the edit form" do
         expect(response.body).to include(I18n.t("admin_news.edit.title"))
+      end
+
+      it "renders the photo upload field" do
+        assert_select "input[type='file'][name='news[photos][]']"
+      end
+    end
+
+    context "when article has photos" do
+      let(:article_with_photo) { create(:news, :with_photo) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(article_with_photo)
+      end
+
+      it "renders existing photos" do
+        assert_select "img[src*='photo.jpg']"
       end
     end
 

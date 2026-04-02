@@ -164,9 +164,6 @@ en:
       url: "URL"
       pending_updates: "Pending updates"
       error: "Error: %{message}"
-    news_tag:
-      title: "News Tag"
-      current: "Current tag"
     authors:
       title: "Author Whitelist"
       user_id: "Telegram ID"

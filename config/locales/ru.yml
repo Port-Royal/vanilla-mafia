@@ -286,6 +286,7 @@ ru:
     index:
       title: "Новости"
       empty: "Новостей пока нет."
+      edit: "Редактировать"
     show:
       back: "← К новостям"
       linked_game: "Игра %{game}"
@@ -310,6 +311,7 @@ ru:
       title: "Редактирование новости"
     show:
       back: "← К списку новостей"
+      created_at: "Создано: %{date}"
       by_author: "Автор: %{author}"
       linked_game: "Игра: %{game}"
       edit: "Редактировать"
@@ -319,6 +321,8 @@ ru:
       delete: "Удалить"
       delete_confirm: "Вы уверены, что хотите удалить эту новость?"
     form:
+      photos: "Фото"
+      add_photos: "Добавить фото"
       season: "Сезон"
       series: "Серия"
       submit_create: "Создать"
@@ -345,9 +349,6 @@ ru:
       url: "URL"
       pending_updates: "Ожидающие обновления"
       error: "Ошибка: %{message}"
-    news_tag:
-      title: "Тег новостей"
-      current: "Текущий тег"
     authors:
       title: "Белый список авторов"
       user_id: "Telegram ID"

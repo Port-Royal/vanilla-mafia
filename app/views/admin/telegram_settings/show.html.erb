@@ -24,12 +24,6 @@
     <% end %>
   </section>
 
-  <%# News Tag %>
-  <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-    <h2 class="text-lg font-semibold mb-4"><%= t("admin_telegram.news_tag.title") %></h2>
-    <p class="text-sm"><span class="font-medium"><%= t("admin_telegram.news_tag.current") %>:</span> <code class="bg-gray-100 px-1 rounded"><%= Telegram::MessageParser::NEWS_TAG_PATTERN %></code></p>
-  </section>
-
   <%# Author Whitelist %>
   <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
     <h2 class="text-lg font-semibold mb-4"><%= t("admin_telegram.authors.title") %></h2>
