@@ -99,6 +99,6 @@ class Admin::NewsController < ApplicationController
   end
 
   def news_params
-    params.require(:news).permit(:title, :content, :competition_id)
+    params.require(:news).permit(:title, :content, :competition_id, photos: [])
   end
 end

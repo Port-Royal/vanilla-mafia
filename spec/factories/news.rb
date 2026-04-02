@@ -11,5 +11,17 @@ FactoryBot.define do
     trait :with_game do
       game
     end
+
+    trait :with_photo do
+      after(:create) do |news|
+        File.open(Rails.root.join("spec/fixtures/files/selfie.jpg"), "rb") do |file|
+          news.photos.attach(
+            io: file,
+            filename: "photo.jpg",
+            content_type: "image/jpeg"
+          )
+        end
+      end
+    end
   end
 end

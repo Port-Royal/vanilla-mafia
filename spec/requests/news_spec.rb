@@ -37,6 +37,16 @@ RSpec.describe NewsController do
       assert_select "a[href=?]", "/news/#{published_article.id}", count: 0
     end
 
+    context "when article has photos" do
+      let(:article_with_photo) { create(:news, :published, :with_photo, author: author) }
+
+      it "renders the photo" do
+        article_with_photo
+        get news_index_path
+        assert_select "img[src*='photo.jpg']"
+      end
+    end
+
     context "when user is an editor" do
       let_it_be(:editor) { create(:user, :editor) }
 
