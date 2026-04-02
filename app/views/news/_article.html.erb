@@ -1,0 +1,36 @@
+<article class="border-b border-neutral-200 pb-6">
+  <h2 class="text-xl font-bold mb-1">
+    <%= article.title %>
+  </h2>
+  <div class="text-sm text-neutral-500 mb-3">
+    <% if article.published_at.present? %>
+      <%= l(article.published_at, format: :short) %>
+    <% end %>
+    <% if article.author.claimed_player? %>
+      · <%= article.author.player.name %>
+    <% end %>
+    <% if article.tags.any? %>
+      <% article.tags.each do |tag| %>
+        <span class="inline-block bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded"><%= tag.name %></span>
+      <% end %>
+    <% end %>
+  </div>
+  <% if article.photos.attached? %>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <% article.photos.each do |photo| %>
+        <% if photo.variable? %>
+          <%= image_tag photo.variant(resize_to_limit: [600, 400]), alt: article.title, class: "rounded max-w-full" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="prose max-w-none text-neutral-700">
+    <%= article.content %>
+  </div>
+  <% if user_signed_in? && current_user.can_manage_news? %>
+    <div class="mt-2">
+      <%= link_to t("news.index.edit"), edit_admin_news_path(article),
+            class: "text-sm text-blue-600 hover:underline" %>
+    </div>
+  <% end %>
+</article>

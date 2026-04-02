@@ -11,6 +11,8 @@ class FeatureToggle < ApplicationRecord
     home_documents
     home_whats_new
     toast_whats_new
+    news_classic_pagination
+    news_infinite_scroll
   ].freeze
   CACHE_TTL = 5.minutes
 

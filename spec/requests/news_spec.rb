@@ -76,6 +76,71 @@ RSpec.describe NewsController do
       end
     end
 
+    context "when classic pagination is enabled" do
+      before { FeatureToggle.create!(key: "news_classic_pagination", enabled: true) }
+      after { FeatureToggle.find_by(key: "news_classic_pagination").destroy }
+
+      it "renders pagy navigation" do
+        create_list(:news, 26, :published, author: author)
+        get news_index_path
+        assert_select "nav[aria-label]"
+      end
+    end
+
+    context "when infinite scroll is enabled" do
+      before { FeatureToggle.create!(key: "news_infinite_scroll", enabled: true) }
+      after { FeatureToggle.find_by(key: "news_infinite_scroll").destroy }
+
+      it "wraps articles in a turbo frame" do
+        get news_index_path
+        assert_select "turbo-frame#news-list"
+      end
+
+      it "renders a sentinel for loading more" do
+        create_list(:news, 25, :published, author: author)
+        get news_index_path
+        assert_select "[data-infinite-scroll-target='sentinel']"
+      end
+
+      it "does not render pagy navigation" do
+        get news_index_path
+        assert_select "nav[aria-label]", count: 0
+      end
+
+      context "when requesting a subsequent page as turbo stream" do
+        before { create_list(:news, 25, :published, author: author) }
+
+        it "returns turbo stream response" do
+          get news_index_path(page: 2, format: :turbo_stream)
+          expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        end
+      end
+    end
+
+    context "when both pagination flags are enabled" do
+      before do
+        FeatureToggle.create!(key: "news_classic_pagination", enabled: true)
+        FeatureToggle.create!(key: "news_infinite_scroll", enabled: true)
+      end
+      after do
+        FeatureToggle.where(key: %w[news_classic_pagination news_infinite_scroll]).destroy_all
+      end
+
+      it "uses classic pagination" do
+        get news_index_path
+        assert_select "turbo-frame#news-list", count: 0
+      end
+    end
+
+    context "when both pagination flags are off" do
+      it "loads all news without pagination" do
+        create_list(:news, 30, :published, author: author)
+        get news_index_path
+        assert_select "article", minimum: 30
+        assert_select "nav[aria-label]", count: 0
+      end
+    end
+
     context "when there are no published articles" do
       before { News.update_all(status: :draft, published_at: nil) }
 

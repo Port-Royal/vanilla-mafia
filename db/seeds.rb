@@ -35,7 +35,9 @@ toggle.save!
   { key: "home_stats", description: "Show stats block on main page" },
   { key: "home_documents", description: "Show documents section on main page" },
   { key: "home_whats_new", description: "Show What's New block on main page" },
-  { key: "toast_whats_new", description: "Show What's New toast notification" }
+  { key: "toast_whats_new", description: "Show What's New toast notification" },
+  { key: "news_classic_pagination", description: "Use classic pagination on news page" },
+  { key: "news_infinite_scroll", description: "Use infinite scroll on news page" }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
