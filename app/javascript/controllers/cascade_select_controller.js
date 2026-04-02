@@ -5,13 +5,14 @@ export default class extends Controller {
 
   connect() {
     this.optionsData = JSON.parse(this.element.dataset.cascadeSelectOptionsValue || "{}")
+    this.initialValue = this.childTarget.dataset.selectedValue || ""
     this.updateChild()
   }
 
   updateChild() {
     const parentId = this.parentTarget.value
     const options = this.optionsData[parentId] || []
-    const currentValue = this.childTarget.dataset.selectedValue || ""
+    const currentValue = this.initialValue
 
     this.childTarget.innerHTML = '<option value=""></option>'
 
@@ -24,5 +25,6 @@ export default class extends Controller {
     })
 
     this.childTarget.disabled = options.length === 0
+    this.initialValue = ""
   }
 }

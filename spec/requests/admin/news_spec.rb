@@ -365,6 +365,25 @@ RSpec.describe "Admin::News" do
       end
     end
 
+    context "when article has a competition" do
+      let_it_be(:season) { create(:competition, :season, name: "Сезон 5") }
+      let_it_be(:stage) { create(:competition, :series, parent: season, name: "Серия 3") }
+      let(:article_with_competition) { create(:news, competition: stage) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(article_with_competition)
+      end
+
+      it "pre-selects the season in the parent dropdown" do
+        assert_select "select[data-cascade-select-target='parent'] option[selected]", text: "Сезон 5"
+      end
+
+      it "sets the selected value on the child dropdown" do
+        assert_select "select[name='news[competition_id]'] option[selected]", text: "Серия 3"
+      end
+    end
+
     context "when user is regular user" do
       before do
         sign_in regular_user
@@ -400,6 +419,29 @@ RSpec.describe "Admin::News" do
         it "redirects to show" do
           patch admin_news_path(article), params: { news: { title: "Updated Title" } }
           expect(response).to redirect_to(admin_news_path(article))
+        end
+
+        it "preserves competition when not changed" do
+          competition = create(:competition, :series)
+          article.update!(competition: competition)
+          patch admin_news_path(article), params: { news: { title: "Updated Title" } }
+          expect(article.reload.competition).to eq(competition)
+        end
+
+        it "preserves photos when no new photos uploaded" do
+          File.open(Rails.root.join("spec/fixtures/files/selfie.jpg"), "rb") do |file|
+            article.photos.attach(io: file, filename: "photo.jpg", content_type: "image/jpeg")
+          end
+          patch admin_news_path(article), params: { news: { title: "Updated Title" } }
+          expect(article.reload.photos).to be_attached
+        end
+
+        it "preserves photos when empty file input submitted" do
+          File.open(Rails.root.join("spec/fixtures/files/selfie.jpg"), "rb") do |file|
+            article.photos.attach(io: file, filename: "photo.jpg", content_type: "image/jpeg")
+          end
+          patch admin_news_path(article), params: { news: { title: "Updated Title", photos: [ "" ] } }
+          expect(article.reload.photos).to be_attached
         end
       end
 
