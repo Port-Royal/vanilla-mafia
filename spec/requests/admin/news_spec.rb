@@ -229,6 +229,15 @@ RSpec.describe "Admin::News" do
         end
       end
 
+      context "with a season competition (no stage)" do
+        let_it_be(:season) { create(:competition, :season) }
+
+        it "saves the season as the competition" do
+          post admin_news_index_path, params: { news: { title: "Season News", content: "Content", competition_id: season.id } }
+          expect(News.last.competition).to eq(season)
+        end
+      end
+
       context "with invalid params" do
         let(:invalid_params) { { news: { title: "" } } }
 
@@ -381,6 +390,26 @@ RSpec.describe "Admin::News" do
 
       it "sets the selected value on the child dropdown" do
         assert_select "select[name='news[competition_id]'] option[selected]", text: "Серия 3"
+      end
+    end
+
+    context "when article is linked to a season directly" do
+      let_it_be(:season) { create(:competition, :season, name: "Сезон 7") }
+      let(:article_with_season) { create(:news, competition: season) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(article_with_season)
+      end
+
+      it "pre-selects the season in the parent dropdown" do
+        assert_select "select[data-cascade-select-target='parent'] option[selected]", text: "Сезон 7"
+      end
+
+      it "sets the selected value on the child dropdown to the season" do
+        assert_select "select[name='news[competition_id]']" do |select|
+          expect(select.first["data-selected-value"]).to eq(season.id.to_s)
+        end
       end
     end
 
