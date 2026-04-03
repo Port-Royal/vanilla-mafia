@@ -229,10 +229,11 @@ RSpec.describe "Admin::News" do
         end
       end
 
-      context "with a season competition (no stage)" do
+      context "with a season competition (no stage selected)" do
         let_it_be(:season) { create(:competition, :season) }
+        let_it_be(:stage) { create(:competition, :series, parent: season) }
 
-        it "saves the season as the competition" do
+        it "saves the season as the competition when season ID is submitted" do
           post admin_news_index_path, params: { news: { title: "Season News", content: "Content", competition_id: season.id } }
           expect(News.last.competition).to eq(season)
         end
@@ -404,6 +405,31 @@ RSpec.describe "Admin::News" do
 
       it "pre-selects the season in the parent dropdown" do
         assert_select "select[data-cascade-select-target='parent'] option[selected]", text: "Сезон 7"
+      end
+
+      it "sets the selected value on the child dropdown to the season" do
+        assert_select "select[name='news[competition_id]']" do |select|
+          expect(select.first["data-selected-value"]).to eq(season.id.to_s)
+        end
+      end
+    end
+
+    context "when article is linked to a season that has children" do
+      let_it_be(:season) { create(:competition, :season, name: "Сезон 8") }
+      let_it_be(:stage) { create(:competition, :series, parent: season, name: "Серия 1") }
+      let(:article_with_season) { create(:news, competition: season) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(article_with_season)
+      end
+
+      it "pre-selects the season in the parent dropdown" do
+        assert_select "select[data-cascade-select-target='parent'] option[selected]", text: "Сезон 8"
+      end
+
+      it "does not pre-select any child stage" do
+        assert_select "select[name='news[competition_id]'] option[selected]", count: 0
       end
 
       it "sets the selected value on the child dropdown to the season" do

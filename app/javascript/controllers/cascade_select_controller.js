@@ -22,15 +22,18 @@ export default class extends Controller {
       return
     }
 
+    const blank = document.createElement("option")
+    blank.value = parentId
+    blank.textContent = ""
+
     if (options.length === 0) {
       this.childTarget.innerHTML = ""
-      const fallback = document.createElement("option")
-      fallback.value = parentId
-      fallback.selected = true
-      this.childTarget.appendChild(fallback)
+      blank.selected = true
+      this.childTarget.appendChild(blank)
       this.childTarget.hidden = true
     } else {
-      this.childTarget.innerHTML = '<option value=""></option>'
+      this.childTarget.innerHTML = ""
+      this.childTarget.appendChild(blank)
 
       options.forEach(([name, id]) => {
         const option = document.createElement("option")
