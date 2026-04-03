@@ -1,4 +1,7 @@
 ru:
+  time:
+    formats:
+      full_date: "%-d %B %Y"
   activerecord:
     models:
       player: "Игрок"

@@ -27,6 +27,12 @@ RSpec.describe NewsController do
       expect(response.body).to include(content)
     end
 
+    it "displays published_at with day, month name, and year" do
+      get news_index_path
+      expected_date = I18n.l(published_article.published_at, format: :full_date)
+      expect(response.body).to include(expected_date)
+    end
+
     it "excludes draft articles" do
       get news_index_path
       expect(response.body).not_to include(draft_article.title)
