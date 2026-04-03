@@ -37,12 +37,14 @@ toggle.save!
   { key: "home_whats_new", description: "Show What's New block on main page" },
   { key: "toast_whats_new", description: "Show What's New toast notification" },
   { key: "news_classic_pagination", description: "Use classic pagination on news page" },
-  { key: "news_infinite_scroll", description: "Use infinite scroll on news page" }
+  { key: "news_infinite_scroll", description: "Use infinite scroll on news page" },
+  { key: "news_per_page", description: "Number of news articles per page", enabled: false }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
-    block_toggle.enabled = true
+    block_toggle.enabled = attrs.fetch(:enabled, true)
     block_toggle.description = attrs[:description]
+    block_toggle.value = attrs[:value] if attrs.key?(:value)
   end
   block_toggle.save!
 end
