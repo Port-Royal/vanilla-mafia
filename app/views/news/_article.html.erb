@@ -1,6 +1,8 @@
+<% max_length = FeatureToggle.value_for("news_max_article_length")&.to_i %>
+<% is_truncated = max_length && max_length > 0 && article.truncated?(max_length) %>
 <article class="border-b border-neutral-200 pb-6">
   <h2 class="text-xl font-bold mb-1">
-    <%= article.title %>
+    <%= link_to article.title, news_path(article), class: "hover:underline" %>
   </h2>
   <div class="text-sm text-neutral-500 mb-3">
     <% if article.published_at.present? %>
@@ -25,8 +27,18 @@
     </div>
   <% end %>
   <div class="prose max-w-none text-neutral-700">
-    <%= article.content %>
+    <% if is_truncated %>
+      <%= article.truncated_content(max_length) %>
+    <% else %>
+      <%= article.content %>
+    <% end %>
   </div>
+  <% if is_truncated %>
+    <div class="mt-2">
+      <%= link_to t("news.index.read_more"), news_path(article),
+            class: "text-sm text-blue-600 hover:underline" %>
+    </div>
+  <% end %>
   <% if user_signed_in? && current_user.can_manage_news? %>
     <div class="mt-2">
       <%= link_to t("news.index.edit"), edit_admin_news_path(article),

@@ -230,6 +230,70 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe "#truncated?" do
+    let(:author) { create(:user) }
+
+    it "returns false when content is blank" do
+      news = build(:news, author: author)
+      expect(news.truncated?(100)).to be false
+    end
+
+    it "returns false when content is within limit" do
+      news = build(:news, author: author, content: "Short text")
+      expect(news.truncated?(100)).to be false
+    end
+
+    it "returns true when content exceeds limit" do
+      news = build(:news, author: author, content: "A" * 200)
+      expect(news.truncated?(50)).to be true
+    end
+  end
+
+  describe "#truncated_content" do
+    let(:author) { create(:user) }
+
+    it "returns content when within limit" do
+      news = build(:news, author: author, content: "<p>Short.</p>")
+      result = news.truncated_content(100)
+      expect(result.to_plain_text).to include("Short.")
+    end
+
+    it "returns content when exactly at limit" do
+      text = "Exact."
+      news = build(:news, author: author, content: "<p>#{text}</p>")
+      result = news.truncated_content(text.length)
+      expect(result.to_plain_text).to include(text)
+    end
+
+    it "returns content when blank" do
+      news = build(:news, author: author)
+      expect(news.truncated_content(100)).to eq(news.content)
+    end
+
+    it "truncates at paragraph boundary" do
+      news = build(:news, author: author, content: "<p>First paragraph.</p><p>Second paragraph.</p><p>Third paragraph.</p>")
+      result = news.truncated_content(20)
+      html = result.to_html
+      expect(html).to include("First paragraph.")
+      expect(html).not_to include("Third paragraph.")
+    end
+
+    it "keeps at least one paragraph even if it exceeds limit" do
+      news = build(:news, author: author, content: "<p>This is a very long first paragraph that exceeds the limit.</p><p>Second.</p>")
+      result = news.truncated_content(5)
+      expect(result.to_html).to include("This is a very long first paragraph")
+      expect(result.to_html).not_to include("Second.")
+    end
+
+    it "includes paragraphs up to the limit" do
+      news = build(:news, author: author, content: "<p>AA</p><p>BB</p><p>CC</p>")
+      result = news.truncated_content(4)
+      expect(result.to_html).to include("AA")
+      expect(result.to_html).to include("BB")
+      expect(result.to_html).not_to include("CC")
+    end
+  end
+
   describe '#unpublish!' do
     let(:author) { create(:user) }
     let(:news) { create(:news, :published, author:) }
