@@ -16,6 +16,11 @@ RSpec.describe Telegram::MessageParser do
         }
       end
 
+      it "returns empty entities array" do
+        result = described_class.call(payload)
+        expect(result.entities).to eq([])
+      end
+
       it "extracts the message text" do
         result = described_class.call(payload)
         expect(result.text).to eq("Hello world")
@@ -190,6 +195,11 @@ RSpec.describe Telegram::MessageParser do
         }
       end
 
+      it "exposes raw entities array" do
+        result = described_class.call(payload)
+        expect(result.entities).to eq([ { "type" => "bold", "offset" => 0, "length" => 4 } ])
+      end
+
       it "applies entity formatting in html_content" do
         result = described_class.call(payload)
         expect(result.html_content).to eq("<strong>Bold</strong> update here")
@@ -217,6 +227,11 @@ RSpec.describe Telegram::MessageParser do
             ]
           }
         }
+      end
+
+      it "exposes caption entities array" do
+        result = described_class.call(payload)
+        expect(result.entities).to eq([ { "type" => "italic", "offset" => 0, "length" => 5 } ])
       end
 
       it "applies caption entities to html_content" do
