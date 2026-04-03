@@ -106,6 +106,7 @@ en:
     index:
       title: "News"
       empty: "No news yet."
+      read_more: "Read more"
     show:
       back: "← Back to news"
       linked_game: "Game %{game}"

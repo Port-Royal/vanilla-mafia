@@ -18,13 +18,9 @@ RSpec.describe NewsController do
       expect(response.body).to include(published_article.title)
     end
 
-    it "renders full article content" do
-      content = "A" * 4000
-      create(:news, :published, author: author, content: content)
-
+    it "links article titles to the show page" do
       get news_index_path
-
-      expect(response.body).to include(content)
+      assert_select "a[href='#{news_path(published_article)}']", text: published_article.title
     end
 
     it "displays published_at with day, month name, and year" do
@@ -38,9 +34,27 @@ RSpec.describe NewsController do
       expect(response.body).not_to include(draft_article.title)
     end
 
-    it "does not link article titles to a show page" do
-      get news_index_path
-      assert_select "a[href=?]", "/news/#{published_article.id}", count: 0
+    context "when article content exceeds max length setting" do
+      let(:long_content) { "<p>First paragraph.</p><p>Second paragraph with more text.</p><p>Third paragraph.</p>" }
+      let(:short_article) { create(:news, :published, author: author, content: long_content) }
+
+      before do
+        FeatureToggle.create!(key: "news_max_article_length", enabled: true, value: "30")
+        short_article
+      end
+
+      after { FeatureToggle.find_by(key: "news_max_article_length")&.destroy }
+
+      it "truncates at paragraph boundary" do
+        get news_index_path
+        expect(response.body).to include("First paragraph.")
+        expect(response.body).not_to include("Third paragraph.")
+      end
+
+      it "shows a Read more link" do
+        get news_index_path
+        assert_select "a[href='#{news_path(short_article)}']", text: I18n.t("news.index.read_more")
+      end
     end
 
     context "when article has photos" do
@@ -171,9 +185,24 @@ RSpec.describe NewsController do
   end
 
   describe "GET /news/:id" do
-    it "redirects to the news index" do
-      get "/news/#{published_article.id}"
-      expect(response).to redirect_to("/news")
+    it "returns success" do
+      get news_path(published_article)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "shows the full article content" do
+      get news_path(published_article)
+      expect(response.body).to include(published_article.title)
+    end
+
+    it "shows a back link to news index" do
+      get news_path(published_article)
+      assert_select "a[href='#{news_index_path}']", text: I18n.t("news.show.back")
+    end
+
+    it "returns not found for draft articles" do
+      get news_path(draft_article)
+      expect(response).to have_http_status(:not_found)
     end
   end
 end

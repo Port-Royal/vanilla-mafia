@@ -45,6 +45,34 @@ class News < ApplicationRecord
     update!(status: :draft)
   end
 
+  def truncated_content(max_length)
+    return content if content.blank?
+
+    plain_text = content.body.to_plain_text
+    return content if plain_text.length <= max_length
+
+    html = content.body.to_html
+    doc = Nokogiri::HTML.fragment(html)
+    result_length = 0
+    kept = []
+
+    doc.children.each do |node|
+      text_length = node.text.length
+      break if result_length + text_length > max_length && kept.any?
+
+      kept << node.to_html
+      result_length += text_length
+    end
+
+    ActionText::Content.new(kept.join)
+  end
+
+  def truncated?(max_length)
+    return false if content.blank?
+
+    content.body.to_plain_text.length > max_length
+  end
+
   private
 
   def content_length_within_limit

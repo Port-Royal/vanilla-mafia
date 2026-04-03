@@ -19,6 +19,12 @@ class NewsController < ApplicationController
     end
   end
 
+  def show
+    @news = News.visible.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    head :not_found
+  end
+
   private
 
   def classic_pagination?
