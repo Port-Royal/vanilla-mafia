@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_30_052010) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_03_044436) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -113,6 +113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_30_052010) do
     t.boolean "enabled", default: false, null: false
     t.string "key", null: false
     t.datetime "updated_at", null: false
+    t.string "value"
     t.index ["key"], name: "index_feature_toggles_on_key", unique: true
   end
 

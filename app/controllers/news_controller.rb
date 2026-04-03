@@ -3,10 +3,10 @@ class NewsController < ApplicationController
     scope = News.visible.recent.includes({ author: :player }, :tags, :rich_text_content, photos_attachments: :blob)
 
     if classic_pagination?
-      @pagy, @news = pagy(scope)
+      @pagy, @news = pagy(scope, limit: news_per_page)
       @pagination_mode = :classic
     elsif infinite_scroll?
-      @pagy, @news = pagy(scope)
+      @pagy, @news = pagy(scope, limit: news_per_page)
       @pagination_mode = :infinite
     else
       @news = scope.to_a
@@ -27,5 +27,9 @@ class NewsController < ApplicationController
 
   def infinite_scroll?
     FeatureToggle.enabled?("news_infinite_scroll")
+  end
+
+  def news_per_page
+    FeatureToggle.value_for("news_per_page", default: Pagy::DEFAULT[:limit]).to_i
   end
 end

@@ -91,6 +91,54 @@ RSpec.describe FeatureToggle, type: :model do
     end
   end
 
+  describe ".value_for" do
+    context "when toggle exists with a value" do
+      let!(:toggle) { create(:feature_toggle, key: "news_per_page", value: "10") }
+
+      it "returns the stored value" do
+        expect(described_class.value_for("news_per_page")).to eq("10")
+      end
+    end
+
+    context "when toggle exists without a value" do
+      let!(:toggle) { create(:feature_toggle, key: "news_per_page", value: nil) }
+
+      it "returns the default" do
+        expect(described_class.value_for("news_per_page", default: "25")).to eq("25")
+      end
+    end
+
+    context "when toggle exists with empty string value" do
+      let!(:toggle) { create(:feature_toggle, key: "news_per_page", value: "") }
+
+      it "returns the default" do
+        expect(described_class.value_for("news_per_page", default: "25")).to eq("25")
+      end
+    end
+
+    context "when toggle does not exist" do
+      before { Rails.cache.clear }
+
+      it "returns the default" do
+        expect(described_class.value_for("news_per_page", default: "25")).to eq("25")
+      end
+    end
+
+    it "uses Rails.cache.fetch with the correct key and TTL" do
+      cache = instance_double(ActiveSupport::Cache::Store)
+      allow(Rails).to receive(:cache).and_return(cache)
+      allow(cache).to receive(:fetch)
+        .with("feature_toggle/news_per_page_value", expires_in: 5.minutes)
+        .and_return("10")
+
+      result = described_class.value_for("news_per_page")
+
+      expect(cache).to have_received(:fetch)
+        .with("feature_toggle/news_per_page_value", expires_in: 5.minutes)
+      expect(result).to eq("10")
+    end
+  end
+
   describe ".cache_key_for" do
     it "returns a namespaced cache key" do
       expect(described_class.cache_key_for("require_approval")).to eq("feature_toggle/require_approval")
