@@ -15,7 +15,7 @@ class Avo::Resources::FeatureToggle < Avo::BaseResource
     field :id, as: :id
     field :key, as: :select, options: -> { ::FeatureToggle::KEYS.map { |k| [ k, k ] } }
     field :enabled, as: :boolean
-    field :value, as: :string
+    field :toggle_value, as: :text, for_attribute: :value, name: "Value"
     field :description, as: :textarea
     field :updated_at, as: :date_time, sortable: true
   end
