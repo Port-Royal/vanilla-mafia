@@ -389,6 +389,23 @@ RSpec.describe "Admin::News" do
       it "renders the photo upload field" do
         assert_select "input[type='file'][name='news[photos][]']"
       end
+
+      it "renders the Save & Publish button for draft articles" do
+        assert_select "button[type='submit'][name='publish']", text: I18n.t("admin_news.form.submit_save_and_publish")
+      end
+    end
+
+    context "when article is published" do
+      let_it_be(:published_article) { create(:news, :published) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(published_article)
+      end
+
+      it "does not render the Save & Publish button" do
+        assert_select "button[name='publish']", count: 0
+      end
     end
 
     context "when article has photos" do
@@ -526,6 +543,38 @@ RSpec.describe "Admin::News" do
           end
           patch admin_news_path(article), params: { news: { title: "Updated Title", photos: [ "" ] } }
           expect(article.reload.photos).to be_attached
+        end
+      end
+
+      context "with publish param" do
+        it "saves changes and publishes the article" do
+          patch admin_news_path(article), params: { news: { title: "Published Title" }, publish: "1" }
+          article.reload
+          expect(article.title).to eq("Published Title")
+          expect(article).to be_published
+          expect(article.published_at).to be_present
+        end
+
+        it "redirects to show" do
+          patch admin_news_path(article), params: { news: { title: "Published Title" }, publish: "1" }
+          expect(response).to redirect_to(admin_news_path(article))
+        end
+      end
+
+      context "with publish param on already published article" do
+        let!(:published_article) { create(:news, :published, author: editor) }
+
+        it "updates without error" do
+          patch admin_news_path(published_article), params: { news: { title: "Updated" }, publish: "1" }
+          expect(published_article.reload.title).to eq("Updated")
+          expect(published_article).to be_published
+        end
+      end
+
+      context "with publish param and invalid params" do
+        it "does not publish the article" do
+          patch admin_news_path(article), params: { news: { title: "" }, publish: "1" }
+          expect(article.reload).to be_draft
         end
       end
 

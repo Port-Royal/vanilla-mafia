@@ -64,7 +64,13 @@
   </div>
 </div>
 
-<div class="flex justify-end mt-4">
+<div class="flex justify-end gap-2 mt-4">
   <%= f.submit local_assigns[:submit_label] || (f.object.new_record? ? t("admin_news.form.submit_create") : t("admin_news.form.submit_update")),
         class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm cursor-pointer" %>
+  <% if f.object.persisted? && f.object.draft? %>
+    <button type="submit" name="publish" value="1"
+            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm cursor-pointer">
+      <%= t("admin_news.form.submit_save_and_publish") %>
+    </button>
+  <% end %>
 </div>

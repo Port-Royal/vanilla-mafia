@@ -143,6 +143,7 @@ en:
       game: "Game"
       submit_create: "Create"
       submit_update: "Save"
+      submit_save_and_publish: "Save & Publish"
     status:
       draft: "Draft"
       published: "Published"
