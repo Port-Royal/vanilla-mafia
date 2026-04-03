@@ -13,6 +13,7 @@ class FeatureToggle < ApplicationRecord
     toast_whats_new
     news_classic_pagination
     news_infinite_scroll
+    news_per_page
   ].freeze
   CACHE_TTL = 5.minutes
 
@@ -32,6 +33,13 @@ class FeatureToggle < ApplicationRecord
     Rails.cache.fetch(cache_key_for("#{key}_disabled"), expires_in: CACHE_TTL) do
       toggle = find_by(key: key)
       toggle.present? && !toggle.enabled
+    end
+  end
+
+  def self.value_for(key, default: nil)
+    Rails.cache.fetch(cache_key_for("#{key}_value"), expires_in: CACHE_TTL) do
+      toggle = find_by(key: key)
+      toggle&.value.presence || default
     end
   end
 
@@ -56,5 +64,6 @@ class FeatureToggle < ApplicationRecord
 
     self.class.cache_key_for(toggle_key).then { |k| Rails.cache.delete(k) }
     self.class.cache_key_for("#{toggle_key}_disabled").then { |k| Rails.cache.delete(k) }
+    self.class.cache_key_for("#{toggle_key}_value").then { |k| Rails.cache.delete(k) }
   end
 end

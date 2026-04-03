@@ -91,6 +91,17 @@ RSpec.describe NewsController do
         get news_index_path
         assert_select "nav[aria-label]"
       end
+
+      context "when news_per_page is configured" do
+        before { FeatureToggle.create!(key: "news_per_page", enabled: true, value: "5") }
+        after { FeatureToggle.find_by(key: "news_per_page").destroy }
+
+        it "paginates with the configured limit" do
+          create_list(:news, 6, :published, author: author)
+          get news_index_path
+          assert_select "article", count: 5
+        end
+      end
     end
 
     context "when infinite scroll is enabled" do
