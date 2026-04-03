@@ -315,6 +315,7 @@ ru:
       back: "← К списку новостей"
       created_at: "Создано: %{date}"
       by_author: "Автор: %{author}"
+      linked_competition: "Турнир: %{competition}"
       linked_game: "Игра: %{game}"
       edit: "Редактировать"
       publish: "Опубликовать"

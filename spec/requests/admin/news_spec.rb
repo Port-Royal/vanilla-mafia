@@ -294,6 +294,35 @@ RSpec.describe "Admin::News" do
       end
     end
 
+    context "when article has a competition (stage)" do
+      let_it_be(:season) { create(:competition, :season, name: "Сезон 5") }
+      let_it_be(:stage) { create(:competition, :series, parent: season, name: "Серия 2") }
+      let(:article_with_stage) { create(:news, :published, competition: stage) }
+
+      before do
+        sign_in editor
+        get admin_news_path(article_with_stage)
+      end
+
+      it "displays the competition name" do
+        expect(response.body).to include("Серия 2")
+      end
+    end
+
+    context "when article has a root competition (season)" do
+      let_it_be(:season) { create(:competition, :season, name: "Сезон 9") }
+      let(:article_with_season) { create(:news, :published, competition: season) }
+
+      before do
+        sign_in editor
+        get admin_news_path(article_with_season)
+      end
+
+      it "displays the competition name" do
+        expect(response.body).to include("Сезон 9")
+      end
+    end
+
     context "when article has photos" do
       let(:article_with_photo) { create(:news, :with_photo) }
 
