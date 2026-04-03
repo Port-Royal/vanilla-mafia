@@ -40,8 +40,8 @@
       <%= f.file_field :photos, multiple: true, class: "text-sm", accept: "image/*" %>
     </div>
 
-    <% selected_stage = f.object.competition %>
-    <% selected_season_id = selected_stage ? selected_stage.parent_id : nil %>
+    <% selected_competition = f.object.competition %>
+    <% selected_season_id = selected_competition ? (selected_competition.parent_id || selected_competition.id) : nil %>
     <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2"
          data-controller="cascade-select"
          data-cascade-select-options-value="<%= @stages_by_season.transform_values { |stages| stages.map { |s| [s.name, s.id] } }.to_json %>">
