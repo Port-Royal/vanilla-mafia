@@ -46,6 +46,7 @@ class Admin::NewsController < ApplicationController
     authorize @news
 
     if @news.update(news_params)
+      @news.publish! if params[:publish].present? && @news.draft?
       redirect_to admin_news_path(@news), notice: t("admin_news.update.success")
     else
       load_form_data

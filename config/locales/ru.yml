@@ -330,6 +330,7 @@ ru:
       series: "Серия"
       submit_create: "Создать"
       submit_update: "Сохранить"
+      submit_save_and_publish: "Сохранить и опубликовать"
     status:
       draft: "Черновик"
       published: "Опубликовано"
