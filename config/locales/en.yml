@@ -129,6 +129,7 @@ en:
       back: "← Back to news"
       by_author: "Author: %{author}"
       linked_series: "Season %{season}, Series %{series}"
+      linked_competition: "Competition: %{competition}"
       linked_game: "Game: %{game}"
       edit: "Edit"
       publish: "Publish"
