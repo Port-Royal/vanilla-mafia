@@ -28,6 +28,9 @@
 #       enabled: "ON"
 
 en:
+  time:
+    formats:
+      full_date: "%-d %B %Y"
   activerecord:
     attributes:
       user:
