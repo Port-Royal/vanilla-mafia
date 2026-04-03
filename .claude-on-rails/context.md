@@ -54,6 +54,17 @@ This project uses two mutation testing tools:
 - **Fail fast**: `--fail-fast` stops after first surviving mutant (or `--fail-fast=N` for N survivors)
 - **Override spec**: `--spec spec/models/foo_spec.rb` to override auto-detected spec file
 
+#### Additional Options (0.18.0)
+- **Incremental mode**: `--incremental` caches killed/timeout results, skips re-running on unchanged files
+- **Isolation strategy**: `--isolation auto|fork|in_process` (default: auto)
+- **Test suggestions**: `--suggest-tests` generates concrete RSpec test code for surviving mutants
+- **Sessions**: `--save-session` saves results; `session list|show|diff|gc` to manage
+- **Baseline comparison**: `--baseline-session PATH` compares against a prior session in HTML report
+- **HTML output**: `--format html` for visual reports
+- **Disable comments**: `# evilution:disable` in source; `--show-disabled` to report skipped mutations
+- **Stdin targets**: `--stdin` reads target file paths from stdin
+- **Extended targeting**: `--target descendants:Foo`, `--target source:**/*.rb`, `--target Foo*`
+
 #### Key Differences from Mutant
 - Uses Prism parser (Ruby's official parser) instead of the `parser` gem
 - Supports line-range targeting for fast PR-level feedback
@@ -73,18 +84,18 @@ This project uses two mutation testing tools:
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
-3. Run **mutant first** against the changed class(es) — fix any surviving mutants
-4. Run **evilution second** (via MCP tool or CLI) against the changed file(s) — fix any additional surviving mutants
+3. Run **evilution first** (via MCP tool or CLI) against the changed file(s) — fix any surviving mutants
+4. Run **mutant second** against the changed class(es) — fix any additional surviving mutants
 5. Compare results from both tools and append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
-6. In the PR description, note mutation testing results from both tools (mutant listed first)
+6. In the PR description, note mutation testing results from both tools (evilution listed first)
 7. Aim for zero surviving mutants on all new/modified code
 
 ### Data Collection (Mutant vs Evilution)
 
 In every PR, include mutation scores in the description:
 ```
-- Mutant: X% (Y/Z mutants killed)
 - Evilution: X% (Y/Z mutants killed)
+- Mutant: X% (Y/Z mutants killed)
 ```
 
 After each mutation testing run, append a detailed entry to `.artifacts.local/regular-evilution-feedback.log` including:
