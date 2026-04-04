@@ -7,6 +7,9 @@ module Telegram
     PARAGRAPH_POINTS = 3
     PARAGRAPH_CAP = 15
 
+    LINK_POINTS = 3
+    LINK_CAP = 15
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -16,7 +19,7 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score
+      formatting_score + paragraph_score + link_score
     end
 
     private
@@ -29,6 +32,11 @@ module Telegram
     def paragraph_score
       count = @parsed_result.raw_text.scan("\n\n").size
       [ count * PARAGRAPH_POINTS, PARAGRAPH_CAP ].min
+    end
+
+    def link_score
+      count = @parsed_result.entities.count { |e| e["type"] == "text_link" }
+      [ count * LINK_POINTS, LINK_CAP ].min
     end
   end
 end
