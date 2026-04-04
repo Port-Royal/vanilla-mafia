@@ -4,6 +4,9 @@ module Telegram
     FORMATTING_POINTS = 2
     FORMATTING_CAP = 20
 
+    PARAGRAPH_POINTS = 3
+    PARAGRAPH_CAP = 15
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -13,7 +16,7 @@ module Telegram
     end
 
     def call
-      formatting_score
+      formatting_score + paragraph_score
     end
 
     private
@@ -21,6 +24,11 @@ module Telegram
     def formatting_score
       count = @parsed_result.entities.count { |e| FORMATTING_TYPES.include?(e["type"]) }
       [ count * FORMATTING_POINTS, FORMATTING_CAP ].min
+    end
+
+    def paragraph_score
+      count = @parsed_result.raw_text.scan("\n\n").size
+      [ count * PARAGRAPH_POINTS, PARAGRAPH_CAP ].min
     end
   end
 end
