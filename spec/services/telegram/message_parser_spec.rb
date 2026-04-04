@@ -268,6 +268,11 @@ RSpec.describe Telegram::MessageParser do
         result = described_class.call(payload)
         expect(result.raw_text_length).to eq("Line one\nLine two".length)
       end
+
+      it "exposes raw_text with newlines preserved" do
+        result = described_class.call(payload)
+        expect(result.raw_text).to eq("Line one\nLine two")
+      end
     end
 
     context "with leading and trailing whitespace" do
