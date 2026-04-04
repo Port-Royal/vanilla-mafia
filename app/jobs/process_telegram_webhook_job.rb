@@ -12,6 +12,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?
     return if author.user.nil?
+    return if below_score_threshold?(parsed)
 
     news = News.create!(
       title: parsed.text.truncate(MAX_TITLE_LENGTH),
@@ -25,6 +26,17 @@ class ProcessTelegramWebhookJob < ApplicationJob
   end
 
   private
+
+  SCORE_THRESHOLD_SETTING = "news_score_threshold"
+  DEFAULT_SCORE_THRESHOLD = 10
+
+  def below_score_threshold?(parsed)
+    return false unless FeatureToggle.enabled?(SCORE_THRESHOLD_SETTING)
+
+    threshold = FeatureToggle.value_for(SCORE_THRESHOLD_SETTING, default: DEFAULT_SCORE_THRESHOLD).to_i
+    score = Telegram::NewsScorer.call(parsed)
+    score < threshold
+  end
 
   def attach_photo(news, file_id)
     result = Telegram::DownloadFileService.call(file_id)
