@@ -423,7 +423,9 @@ RSpec.describe Telegram::NewsScorer do
       it "logs the score breakdown at debug level" do
         allow(Rails.logger).to receive(:debug)
         described_class.call(parsed_result)
-        expect(Rails.logger).to have_received(:debug).with(/NewsScorer.*formatting=2.*paragraph=3.*total=5/)
+        expect(Rails.logger).to have_received(:debug).with(
+          /NewsScorer.*formatting=2.*paragraph=3.*link=0.*photo=0.*keyword=0.*first_person=0.*question=0.*total=5/
+        )
       end
     end
 
