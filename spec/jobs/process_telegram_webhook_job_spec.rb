@@ -343,6 +343,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       it "does not create a news article" do
         expect { described_class.new.perform(payload) }.not_to change(News, :count)
       end
+
+      it "logs the rejection at debug level" do
+        allow(Rails.logger).to receive(:debug)
+        described_class.new.perform(payload)
+        expect(Rails.logger).to have_received(:debug).with(/rejected.*score=0.*threshold=10.*from_id=12345/)
+      end
     end
 
     context "when news score meets threshold" do
@@ -362,6 +368,12 @@ RSpec.describe ProcessTelegramWebhookJob do
       it "passes the parsed result to the scorer" do
         described_class.new.perform(payload)
         expect(Telegram::NewsScorer).to have_received(:call).with(an_instance_of(Telegram::MessageParser::Result))
+      end
+
+      it "logs the acceptance at info level" do
+        allow(Rails.logger).to receive(:info)
+        described_class.new.perform(payload)
+        expect(Rails.logger).to have_received(:info).with(/accepted.*score=10.*threshold=10.*from_id=12345/)
       end
     end
 
