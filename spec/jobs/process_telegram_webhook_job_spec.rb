@@ -329,5 +329,86 @@ RSpec.describe ProcessTelegramWebhookJob do
         expect(NotifyEditorsAboutDraftService).to have_received(:call).with(News.last)
       end
     end
+
+    context "when news score is below threshold" do
+      before do
+        allow(Telegram::NewsScorer).to receive(:call).and_return(0)
+        FeatureToggle.find_or_create_by!(key: "news_score_threshold") do |ft|
+          ft.enabled = true
+          ft.value = "10"
+          ft.description = "Minimum news score"
+        end
+      end
+
+      it "does not create a news article" do
+        expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
+    context "when news score meets threshold" do
+      before do
+        allow(Telegram::NewsScorer).to receive(:call).and_return(10)
+        FeatureToggle.find_or_create_by!(key: "news_score_threshold") do |ft|
+          ft.enabled = true
+          ft.value = "10"
+          ft.description = "Minimum news score"
+        end
+      end
+
+      it "creates a news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+
+      it "passes the parsed result to the scorer" do
+        described_class.new.perform(payload)
+        expect(Telegram::NewsScorer).to have_received(:call).with(an_instance_of(Telegram::MessageParser::Result))
+      end
+    end
+
+    context "when news score threshold has a custom value" do
+      before do
+        allow(Telegram::NewsScorer).to receive(:call).and_return(7)
+        FeatureToggle.find_or_create_by!(key: "news_score_threshold") do |ft|
+          ft.enabled = true
+          ft.value = "5"
+          ft.description = "Minimum news score"
+        end
+      end
+
+      it "creates a news article when score meets the custom threshold" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+    end
+
+    context "when news score threshold toggle has blank value" do
+      before do
+        allow(Telegram::NewsScorer).to receive(:call).and_return(5)
+        FeatureToggle.find_or_create_by!(key: "news_score_threshold") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "Minimum news score"
+        end
+      end
+
+      it "uses the default threshold and does not create a news article" do
+        expect { described_class.new.perform(payload) }.not_to change(News, :count)
+      end
+    end
+
+    context "when news score threshold toggle is disabled" do
+      before do
+        allow(Telegram::NewsScorer).to receive(:call).and_return(0)
+        FeatureToggle.find_or_create_by!(key: "news_score_threshold") do |ft|
+          ft.enabled = false
+          ft.value = "10"
+          ft.description = "Minimum news score"
+        end
+      end
+
+      it "skips scoring and creates a news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+        expect(Telegram::NewsScorer).not_to have_received(:call)
+      end
+    end
   end
 end
