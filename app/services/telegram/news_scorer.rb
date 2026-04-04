@@ -20,6 +20,9 @@ module Telegram
     FIRST_PERSON_THRESHOLD = 0.08
     FIRST_PERSON_PENALTY = -10
 
+    QUESTION_THRESHOLD = 0.5
+    QUESTION_PENALTY = -8
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -29,7 +32,7 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score + link_score + photo_score + keyword_score + first_person_penalty
+      formatting_score + paragraph_score + link_score + photo_score + keyword_score + first_person_penalty + question_penalty
     end
 
     private
@@ -60,6 +63,15 @@ module Telegram
       pronoun_count = words.count { |w| FIRST_PERSON_PRONOUNS.include?(w) }
       ratio = pronoun_count.to_f / words.size
       ratio > FIRST_PERSON_THRESHOLD ? FIRST_PERSON_PENALTY : 0
+    end
+
+    def question_penalty
+      sentences = @parsed_result.raw_text.split(/[.!?]+/).reject { |s| s.strip.empty? }
+      return 0 if sentences.empty?
+
+      question_count = @parsed_result.raw_text.count("?")
+      ratio = question_count.to_f / sentences.size
+      ratio >= QUESTION_THRESHOLD ? QUESTION_PENALTY : 0
     end
 
     def keyword_score

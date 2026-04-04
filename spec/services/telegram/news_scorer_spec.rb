@@ -373,5 +373,57 @@ RSpec.describe Telegram::NewsScorer do
         expect(score).to be < positive
       end
     end
+
+    context "with high question density" do
+      let(:raw_text) { "Кто играл? Что случилось? Когда начало? Где проходит?" }
+
+      it "applies the question penalty" do
+        expect(score).to eq(described_class::QUESTION_PENALTY)
+      end
+    end
+
+    context "with low question density" do
+      let(:raw_text) { "Турнир завершился. Победила команда Альфа. Результаты опубликованы. Где посмотреть?" }
+
+      it "does not penalize" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with question ratio exactly at threshold" do
+      let(:raw_text) { "Кто победил? Результаты опубликованы." }
+
+      it "applies penalty at exactly 50% ratio" do
+        expect(score).to eq(described_class::QUESTION_PENALTY)
+      end
+    end
+
+    context "with question ratio just below threshold" do
+      let(:raw_text) { "Кто победил? Результаты опубликованы. Все довольны." }
+
+      it "does not penalize below 50%" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with no questions" do
+      let(:raw_text) { "Турнир завершился победой команды Альфа. Результаты опубликованы на сайте." }
+
+      it "does not penalize" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with questions and positive signals" do
+      let(:raw_text) { "Кто победил? Что думаете? Как оценить?\n\nОбзор сезона." }
+      let(:entities) do
+        [ { "type" => "bold", "offset" => 0, "length" => 3 } ]
+      end
+
+      it "sums penalty with positive signals" do
+        expected = described_class::FORMATTING_POINTS + described_class::PARAGRAPH_POINTS + described_class::QUESTION_PENALTY
+        expect(score).to eq(expected)
+      end
+    end
   end
 end
