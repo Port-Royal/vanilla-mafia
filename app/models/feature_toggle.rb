@@ -16,6 +16,7 @@ class FeatureToggle < ApplicationRecord
     news_per_page
     news_max_article_length
     news_score_keywords
+    news_score_threshold
   ].freeze
   CACHE_TTL = 5.minutes
 
