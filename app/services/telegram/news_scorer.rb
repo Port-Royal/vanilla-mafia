@@ -32,7 +32,19 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score + link_score + photo_score + keyword_score + first_person_penalty + question_penalty
+      scores = {
+        formatting: formatting_score,
+        paragraph: paragraph_score,
+        link: link_score,
+        photo: photo_score,
+        keyword: keyword_score,
+        first_person: first_person_penalty,
+        question: question_penalty
+      }
+      total = scores.values.sum
+      breakdown = scores.map { |k, v| "#{k}=#{v}" }.join(" ")
+      Rails.logger.debug("[NewsScorer] #{breakdown} total=#{total}")
+      total
     end
 
     private

@@ -35,7 +35,13 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     threshold = FeatureToggle.value_for(SCORE_THRESHOLD_SETTING, default: DEFAULT_SCORE_THRESHOLD).to_i
     score = Telegram::NewsScorer.call(parsed)
-    score < threshold
+    if score < threshold
+      Rails.logger.debug("[TelegramWebhook] rejected: score=#{score} threshold=#{threshold} from_id=#{parsed.from_id}")
+      true
+    else
+      Rails.logger.info("[TelegramWebhook] accepted: score=#{score} threshold=#{threshold} from_id=#{parsed.from_id}")
+      false
+    end
   end
 
   def attach_photo(news, file_id)
