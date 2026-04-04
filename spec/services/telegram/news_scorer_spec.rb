@@ -180,5 +180,32 @@ RSpec.describe Telegram::NewsScorer do
         expect(score).to eq(expected)
       end
     end
+
+    context "with a photo attached" do
+      let(:parsed_result) do
+        Telegram::MessageParser::Result.new(
+          text: text,
+          html_content: "",
+          from_id: 42,
+          from_username: "testuser",
+          from_first_name: "Denis",
+          chat_id: 42,
+          photo_file_id: "some_photo_id",
+          raw_text_length: raw_text.length,
+          entities: entities,
+          raw_text: raw_text
+        )
+      end
+
+      it "adds photo bonus points" do
+        expect(score).to eq(described_class::PHOTO_POINTS)
+      end
+    end
+
+    context "without a photo" do
+      it "does not add photo points" do
+        expect(score).to eq(0)
+      end
+    end
   end
 end

@@ -10,6 +10,8 @@ module Telegram
     LINK_POINTS = 3
     LINK_CAP = 15
 
+    PHOTO_POINTS = 5
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -19,7 +21,7 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score + link_score
+      formatting_score + paragraph_score + link_score + photo_score
     end
 
     private
@@ -37,6 +39,10 @@ module Telegram
     def link_score
       count = @parsed_result.entities.count { |e| e["type"] == "text_link" }
       [ count * LINK_POINTS, LINK_CAP ].min
+    end
+
+    def photo_score
+      @parsed_result.photo_file_id.present? ? PHOTO_POINTS : 0
     end
   end
 end
