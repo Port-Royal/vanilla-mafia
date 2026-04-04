@@ -329,5 +329,49 @@ RSpec.describe Telegram::NewsScorer do
         expect(score).to eq(0)
       end
     end
+
+    context "with high first-person pronoun ratio" do
+      let(:raw_text) { "Я пошёл на игру и мне очень понравилось. Я думаю что мой уровень вырос. Меня это радует." }
+
+      it "applies the penalty" do
+        expect(score).to eq(described_class::FIRST_PERSON_PENALTY)
+      end
+    end
+
+    context "with uppercase first-person pronouns" do
+      let(:raw_text) { "Я написал. Я сделал. Я решил. Я понял. Мне нравится." }
+
+      it "matches case-insensitively" do
+        expect(score).to eq(described_class::FIRST_PERSON_PENALTY)
+      end
+    end
+
+    context "with low first-person pronoun ratio" do
+      let(:raw_text) { "Турнир завершился победой команды Альфа. Участники показали отличную игру. Результаты опубликованы на сайте клуба." }
+
+      it "does not apply a penalty" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with first-person pronouns below threshold" do
+      let(:raw_text) { "Обзор сезона показал интересные результаты. Я считаю что команда выступила достойно. Все участники заслужили уважение за проявленный характер." }
+
+      it "does not penalize when ratio is below threshold" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with penalty combined with positive signals" do
+      let(:raw_text) { "Я написал обзор.\n\nЯ думаю мне понравилось. Я считаю мой уровень вырос. Меня это радует." }
+      let(:entities) do
+        [ { "type" => "bold", "offset" => 0, "length" => 2 } ]
+      end
+
+      it "reduces total score but does not go below penalty floor" do
+        positive = described_class::FORMATTING_POINTS + described_class::PARAGRAPH_POINTS
+        expect(score).to be < positive
+      end
+    end
   end
 end

@@ -16,6 +16,10 @@ module Telegram
     KEYWORD_CAP = 10
     KEYWORD_SETTING = "news_score_keywords"
 
+    FIRST_PERSON_PRONOUNS = %w[я мне мной меня мой моя моё мои моего моей моему моим моих моими].freeze
+    FIRST_PERSON_THRESHOLD = 0.08
+    FIRST_PERSON_PENALTY = -10
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -25,7 +29,7 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score + link_score + photo_score + keyword_score
+      formatting_score + paragraph_score + link_score + photo_score + keyword_score + first_person_penalty
     end
 
     private
@@ -47,6 +51,15 @@ module Telegram
 
     def photo_score
       @parsed_result.photo_file_id.present? ? PHOTO_POINTS : 0
+    end
+
+    def first_person_penalty
+      words = @parsed_result.raw_text.downcase.split(/\s+/)
+      return 0 if words.empty?
+
+      pronoun_count = words.count { |w| FIRST_PERSON_PRONOUNS.include?(w) }
+      ratio = pronoun_count.to_f / words.size
+      ratio > FIRST_PERSON_THRESHOLD ? FIRST_PERSON_PENALTY : 0
     end
 
     def keyword_score
