@@ -129,5 +129,56 @@ RSpec.describe Telegram::NewsScorer do
         expect(score).to eq(expected)
       end
     end
+
+    context "with text_link entities" do
+      let(:entities) do
+        [
+          { "type" => "text_link", "offset" => 0, "length" => 10, "url" => "https://example.com" },
+          { "type" => "text_link", "offset" => 20, "length" => 8, "url" => "https://example.org" }
+        ]
+      end
+
+      it "adds points per link" do
+        expect(score).to eq(2 * described_class::LINK_POINTS)
+      end
+    end
+
+    context "with url entities" do
+      let(:entities) do
+        [
+          { "type" => "url", "offset" => 0, "length" => 20 }
+        ]
+      end
+
+      it "does not score plain url entities" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with links exceeding the cap" do
+      let(:entities) do
+        15.times.map do |i|
+          { "type" => "text_link", "offset" => i * 15, "length" => 10, "url" => "https://example.com/#{i}" }
+        end
+      end
+
+      it "caps the link score" do
+        expect(score).to eq(described_class::LINK_CAP)
+      end
+    end
+
+    context "with links and formatting entities" do
+      let(:entities) do
+        [
+          { "type" => "bold", "offset" => 0, "length" => 4 },
+          { "type" => "text_link", "offset" => 5, "length" => 10, "url" => "https://example.com" }
+        ]
+      end
+
+      it "sums both signals" do
+        expected = described_class::FORMATTING_POINTS + described_class::LINK_POINTS
+        expect(score).to eq(expected)
+      end
+    end
   end
 end
