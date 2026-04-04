@@ -207,5 +207,127 @@ RSpec.describe Telegram::NewsScorer do
         expect(score).to eq(0)
       end
     end
+
+    context "with matching keywords" do
+      let(:raw_text) { "Результаты игра в третьем сезоне на турнире" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = "игра,сезон,турнир"
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "adds points per matched keyword" do
+        expect(score).to eq(3 * described_class::KEYWORD_POINTS)
+      end
+    end
+
+    context "with duplicate keyword matches in text" do
+      let(:raw_text) { "Игра за игрой, игра продолжается" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = "игра"
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "counts each keyword only once" do
+        expect(score).to eq(described_class::KEYWORD_POINTS)
+      end
+    end
+
+    context "with keywords exceeding the cap" do
+      let(:raw_text) { "игра сезон турнир рейтинг мафия ведущий тур результат протокол финал" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = "игра,сезон,турнир,рейтинг,мафия,ведущий,тур,результат,протокол,финал"
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "caps the keyword score" do
+        expect(score).to eq(described_class::KEYWORD_CAP)
+      end
+    end
+
+    context "with no keywords configured" do
+      before do
+        FeatureToggle.find_by(key: "news_score_keywords")&.destroy
+      end
+
+      it "returns zero keyword score" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with spaces around keywords in setting" do
+      let(:raw_text) { "Результаты игра в сезоне" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = " игра , сезон "
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "strips whitespace and matches" do
+        expect(score).to eq(2 * described_class::KEYWORD_POINTS)
+      end
+    end
+
+    context "with keywords in different case" do
+      let(:raw_text) { "ИГРА в этом СЕЗОНЕ" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = "игра,сезон"
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "matches case-insensitively" do
+        expect(score).to eq(2 * described_class::KEYWORD_POINTS)
+      end
+    end
+
+    context "with enabled toggle but empty value" do
+      let(:raw_text) { "Результаты игра в сезоне" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "returns zero keyword score" do
+        expect(score).to eq(0)
+      end
+    end
+
+    context "with keywords toggle disabled" do
+      let(:raw_text) { "Результаты игры третьего сезона" }
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "news_score_keywords") do |ft|
+          ft.enabled = false
+          ft.value = "игра,сезон"
+          ft.description = "Keywords for news scoring"
+        end
+      end
+
+      it "returns zero keyword score" do
+        expect(score).to eq(0)
+      end
+    end
   end
 end

@@ -12,6 +12,10 @@ module Telegram
 
     PHOTO_POINTS = 5
 
+    KEYWORD_POINTS = 2
+    KEYWORD_CAP = 10
+    KEYWORD_SETTING = "news_score_keywords"
+
     def self.call(parsed_result)
       new(parsed_result).call
     end
@@ -21,7 +25,7 @@ module Telegram
     end
 
     def call
-      formatting_score + paragraph_score + link_score + photo_score
+      formatting_score + paragraph_score + link_score + photo_score + keyword_score
     end
 
     private
@@ -43,6 +47,18 @@ module Telegram
 
     def photo_score
       @parsed_result.photo_file_id.present? ? PHOTO_POINTS : 0
+    end
+
+    def keyword_score
+      return 0 unless FeatureToggle.enabled?(KEYWORD_SETTING)
+
+      keywords_csv = FeatureToggle.value_for(KEYWORD_SETTING, default: "")
+      return 0 if keywords_csv.blank?
+
+      keywords = keywords_csv.split(",").map(&:strip).reject(&:blank?)
+      text_downcase = @parsed_result.raw_text.downcase
+      count = keywords.count { |kw| text_downcase.include?(kw.downcase) }
+      [ count * KEYWORD_POINTS, KEYWORD_CAP ].min
     end
   end
 end

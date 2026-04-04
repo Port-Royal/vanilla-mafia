@@ -39,7 +39,8 @@ toggle.save!
   { key: "news_classic_pagination", description: "Use classic pagination on news page" },
   { key: "news_infinite_scroll", description: "Use infinite scroll on news page" },
   { key: "news_per_page", description: "Number of news articles per page", enabled: false },
-  { key: "news_max_article_length", description: "Max article length (chars) on news index before truncation", enabled: false }
+  { key: "news_max_article_length", description: "Max article length (chars) on news index before truncation", enabled: false },
+  { key: "news_score_keywords", description: "Comma-separated keywords for news scoring (e.g. игра,сезон,турнир)", enabled: true, value: "игра,сезон,турнир,рейтинг,мафия" }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
