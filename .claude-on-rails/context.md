@@ -65,6 +65,27 @@ This project uses two mutation testing tools:
 - **Stdin targets**: `--stdin` reads target file paths from stdin
 - **Extended targeting**: `--target descendants:Foo`, `--target source:**/*.rb`, `--target Foo*`
 
+#### New in 0.22.0
+
+##### Inspection Commands (no mutation run needed)
+- **List subjects**: `bundle exec evilution subjects app/models/foo.rb` — shows all mutation subjects (methods), line numbers, and mutation counts
+- **List test mappings**: `bundle exec evilution tests list app/models/foo.rb` — shows auto-detected spec file for each source
+- **Preview mutations**: `bundle exec evilution util mutation -e 'def foo; x > 0; end'` — preview mutations for a code snippet without running tests
+- **Show environment**: `bundle exec evilution environment show` — display current settings, config file, and versions
+
+##### MCP Integration
+Evilution ships an MCP server (`evilution mcp`) with 4 tools:
+- **evilution-mutate**: Run mutations with `verbosity` (full/summary/minimal) and `suggest_tests` params
+- **evilution-session-list**: List past sessions with `--limit` and `--results-dir`
+- **evilution-session-show**: Show full session details including survived mutation diffs
+- **evilution-session-diff**: Compare two sessions — shows regressions, fixes, and persistent survivors
+
+##### Additional CLI Flags
+- **Skip heredoc literals**: `--skip-heredoc-literals` — skip string literal mutations inside heredocs
+- **No progress bar**: `--no-progress` — disable progress bar (useful for CI/scripting)
+- **Custom results dir**: `--results-dir DIR` — override session results directory
+- **Session filtering**: `--since DATE` (YYYY-MM-DD), `--older-than DURATION` (e.g., 30d, 1w), `--limit N`
+
 #### Key Differences from Mutant
 - Uses Prism parser (Ruby's official parser) instead of the `parser` gem
 - Supports line-range targeting for fast PR-level feedback
