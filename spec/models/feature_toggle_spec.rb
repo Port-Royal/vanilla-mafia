@@ -13,6 +13,10 @@ RSpec.describe FeatureToggle, type: :model do
     it "includes announcement toggle keys" do
       expect(described_class::KEYS).to include("home_whats_new", "toast_whats_new")
     end
+
+    it "includes news autolink players toggle key" do
+      expect(described_class::KEYS).to include("news_autolink_players")
+    end
   end
 
   describe ".enabled?" do

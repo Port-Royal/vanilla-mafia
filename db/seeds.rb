@@ -41,7 +41,8 @@ toggle.save!
   { key: "news_per_page", description: "Number of news articles per page", enabled: false },
   { key: "news_max_article_length", description: "Max article length (chars) on news index before truncation", enabled: false },
   { key: "news_score_keywords", description: "Comma-separated keywords for news scoring (e.g. игра,сезон,турнир)", enabled: true, value: "игра,сезон,турнир,рейтинг,мафия" },
-  { key: "news_score_threshold", description: "Minimum news score to create a draft from Telegram message", enabled: true, value: "10" }
+  { key: "news_score_threshold", description: "Minimum news score to create a draft from Telegram message", enabled: true, value: "10" },
+  { key: "news_autolink_players", description: "Auto-link player nicknames in news drafts from Telegram" }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
