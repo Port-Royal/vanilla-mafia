@@ -1,6 +1,6 @@
 class PlayerNameRegex
   ADJ_FEMININE_ENDINGS = %w[ая яя ой ою ую ей].freeze
-  ADJ_MASCULINE_ENDINGS = %w[ый ий ого его ому ему ым им ом ем ой].freeze
+  ADJ_MASCULINE_ENDINGS = %w[ый ий ого его ому ему ым им ом ем].freeze
   ADJ_NEUTER_ENDINGS = %w[ое ее ого его ому ему ым им ом ем].freeze
   ADJ_PLURAL_ENDINGS = %w[ые ие ых их ым им ыми ими].freeze
   NOUN_PLURAL_ENDINGS = %w[и ы ов ев ей ам ям ами ями ах ях].freeze

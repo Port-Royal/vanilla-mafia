@@ -154,6 +154,10 @@ RSpec.describe PlayerNameRegex do
       it "does not match an unrelated word sharing the stem" do
         expect(match?("Хитрый", "Хитрости не помогли")).to be false
       end
+
+      it "does not match the feminine form Хитрой" do
+        expect(match?("Хитрый", "гол Хитрой был красивым")).to be false
+      end
     end
 
     context "Cyrillic neuter adjective -ое/-ее (Синее)" do
@@ -231,13 +235,13 @@ RSpec.describe PlayerNameRegex do
         expect(match?("Ян", "Ян забил")).to be true
       end
 
-      it "does not declense a 2-char name" do
+      it "does not decline a 2-char name" do
         expect(match?("Ян", "Яна забила")).to be false
       end
     end
 
     context "boundary and input handling" do
-      it "declinses a 3-char Cyrillic name (boundary of stem fallback)" do
+      it "declines a 3-char Cyrillic name (boundary of stem fallback)" do
         expect(match?("Яна", "гол Яны был красивым")).to be true
       end
 
