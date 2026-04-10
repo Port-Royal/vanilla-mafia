@@ -1,3 +1,5 @@
+require "set"
+
 class AutolinkPlayersInNewsService
   FEATURE_KEY = "news_autolink_players".freeze
 
@@ -26,7 +28,7 @@ class AutolinkPlayersInNewsService
     return html if players.empty?
 
     fragment = Nokogiri::HTML.fragment(html)
-    linked_ids = []
+    linked_ids = Set.new
     fragment.traverse do |node|
       next unless node.text?
       next if inside_anchor?(node)
@@ -60,7 +62,7 @@ class AutolinkPlayersInNewsService
 
       [ match.begin(0), match.end(0), id, match[0] ]
     end
-    drop_overlaps(raw.sort_by { |start, _finish, _id, _matched| start })
+    drop_overlaps(raw.sort_by { |start, finish, _id, _matched| [ start, -(finish - start) ] })
   end
 
   def drop_overlaps(matches)
