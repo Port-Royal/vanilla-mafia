@@ -22,6 +22,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     )
 
     attach_photo(news, parsed.photo_file_id) if parsed.photo_file_id.present?
+    AutolinkPlayersInNewsService.call(news)
     NotifyEditorsAboutDraftService.call(news)
   end
 

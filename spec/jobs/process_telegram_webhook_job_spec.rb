@@ -328,6 +328,12 @@ RSpec.describe ProcessTelegramWebhookJob do
         described_class.new.perform(payload)
         expect(NotifyEditorsAboutDraftService).to have_received(:call).with(News.last)
       end
+
+      it "runs the player autolink service on the created news" do
+        allow(AutolinkPlayersInNewsService).to receive(:call)
+        described_class.new.perform(payload)
+        expect(AutolinkPlayersInNewsService).to have_received(:call).with(News.last)
+      end
     end
 
     context "when news score is below threshold" do
