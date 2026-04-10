@@ -41,7 +41,7 @@ class AutolinkPlayersInNewsService
   def players_by_length_desc
     Player.pluck(:id, :name)
           .sort_by { |_id, name| -name.length }
-          .map { |id, name| [ id, Regexp.new("(?<!\\p{L})#{Regexp.escape(name)}(?!\\p{L})", Regexp::IGNORECASE) ] }
+          .map { |id, name| [ id, PlayerNameRegex.build(name) ] }
   end
 
   def link_matches_in_node(text_node, players, linked_ids)

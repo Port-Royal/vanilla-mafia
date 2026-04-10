@@ -160,5 +160,54 @@ RSpec.describe AutolinkPlayersInNewsService do
       expect(html.scan("Alex").size).to eq(1)
       expect(html.scan("scored a goal").size).to eq(1)
     end
+
+    context "Russian morphology" do
+      it "links Ивана (genitive) back to Иван preserving the matched form" do
+        news = build_news("<div>пас от Ивана был точным</div>")
+        expect(rewritten_html(news)).to include(%(<a href="/players/#{ivan.id}">Ивана</a>))
+      end
+
+      it "links Иваном (instrumental)" do
+        news = build_news("<div>игра с Иваном удалась</div>")
+        expect(rewritten_html(news)).to include(%(<a href="/players/#{ivan.id}">Иваном</a>))
+      end
+
+      it "does not match the surname Иванов" do
+        news = build_news("<div>Иванов забил гол</div>")
+        expect(rewritten_html(news)).not_to include(%(<a href="/players/#{ivan.id}">))
+      end
+
+      it "links a multi-word feminine nickname across all cases" do
+        pot = create(:player, name: "Свирепая Кастрюля")
+        news = build_news("<div>встретил Свирепую Кастрюлю на поле</div>")
+        expect(rewritten_html(news)).to include(
+          %(<a href="/players/#{pot.id}">Свирепую Кастрюлю</a>)
+        )
+      end
+
+      it "links a multi-word feminine nickname in genitive" do
+        pot = create(:player, name: "Свирепая Кастрюля")
+        news = build_news("<div>гол Свирепой Кастрюли был красивым</div>")
+        expect(rewritten_html(news)).to include(
+          %(<a href="/players/#{pot.id}">Свирепой Кастрюли</a>)
+        )
+      end
+
+      it "links a plural-originated nickname in genitive plural" do
+        team = create(:player, name: "Грибочки")
+        news = build_news("<div>победа Грибочков была заслуженной</div>")
+        expect(rewritten_html(news)).to include(
+          %(<a href="/players/#{team.id}">Грибочков</a>)
+        )
+      end
+
+      it "links a plural-originated nickname in instrumental plural" do
+        team = create(:player, name: "Вдохи")
+        news = build_news("<div>играли с Вдохами в финале</div>")
+        expect(rewritten_html(news)).to include(
+          %(<a href="/players/#{team.id}">Вдохами</a>)
+        )
+      end
+    end
   end
 end
