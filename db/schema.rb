@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_03_044436) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_170043) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -170,6 +170,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_03_044436) do
     t.index ["competition_id"], name: "index_news_on_competition_id"
     t.index ["game_id"], name: "index_news_on_game_id"
     t.index ["published_at"], name: "index_news_on_published_at"
+  end
+
+  create_table "news_player_mentions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "news_id", null: false
+    t.integer "player_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["news_id", "player_id"], name: "index_news_player_mentions_on_news_id_and_player_id", unique: true
+    t.index ["news_id"], name: "index_news_player_mentions_on_news_id"
+    t.index ["player_id"], name: "index_news_player_mentions_on_player_id"
   end
 
   create_table "playback_positions", force: :cascade do |t|
@@ -339,6 +349,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_03_044436) do
   add_foreign_key "news", "competitions"
   add_foreign_key "news", "games"
   add_foreign_key "news", "users", column: "author_id"
+  add_foreign_key "news_player_mentions", "news"
+  add_foreign_key "news_player_mentions", "players"
   add_foreign_key "playback_positions", "episodes"
   add_foreign_key "playback_positions", "users"
   add_foreign_key "player_awards", "awards"
