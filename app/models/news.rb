@@ -6,6 +6,9 @@ class News < ApplicationRecord
   has_many :taggings, as: :taggable, dependent: :destroy
   has_many :tags, through: :taggings
 
+  has_many :player_mentions, class_name: "NewsPlayerMention", dependent: :destroy
+  has_many :mentioned_players, through: :player_mentions, source: :player
+
   has_many_attached :photos
   has_rich_text :content
 
@@ -24,11 +27,9 @@ class News < ApplicationRecord
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :by_author, ->(user) { where(author: user) }
   scope :mentioning_player, ->(player) {
-    visible
-      .joins(game: :game_participations)
-      .where(game_participations: { player_id: player.id })
-      .distinct
-      .recent
+    via_game = visible.joins(game: :game_participations).where(game_participations: { player_id: player.id })
+    via_mention = visible.joins(:player_mentions).where(news_player_mentions: { player_id: player.id })
+    visible.where(id: via_game).or(visible.where(id: via_mention)).distinct.recent
   }
 
   def visible?

@@ -167,6 +167,34 @@ RSpec.describe News, type: :model do
     it 'does not return duplicates when player has multiple participations' do
       expect(described_class.mentioning_player(player).count).to eq(described_class.mentioning_player(player).distinct.count)
     end
+
+    context 'with direct player mentions' do
+      let_it_be(:directly_mentioned) { create(:news, author: author, status: :published, published_at: 4.days.ago) }
+
+      before { NewsPlayerMention.find_or_create_by!(news: directly_mentioned, player: player) }
+
+      it 'returns news articles with a direct mention even when they have no game' do
+        expect(described_class.mentioning_player(player)).to include(directly_mentioned)
+      end
+
+      it 'excludes draft articles with direct mentions' do
+        draft = create(:news, author: author, status: :draft)
+        NewsPlayerMention.create!(news: draft, player: player)
+        expect(described_class.mentioning_player(player)).not_to include(draft)
+      end
+
+      it 'does not duplicate articles that are both linked via game and directly mentioned' do
+        NewsPlayerMention.create!(news: published_linked, player: player)
+        result = described_class.mentioning_player(player)
+        expect(result.count { |n| n == published_linked }).to eq(1)
+      end
+
+      it 'does not return articles that mention a different player' do
+        other_mention = create(:news, author: author, status: :published, published_at: 6.days.ago)
+        NewsPlayerMention.create!(news: other_mention, player: other_player)
+        expect(described_class.mentioning_player(player)).not_to include(other_mention)
+      end
+    end
   end
 
   describe "#visible?" do

@@ -209,5 +209,42 @@ RSpec.describe AutolinkPlayersInNewsService do
         )
       end
     end
+
+    context "news-player mentions" do
+      it "records a mention for each linked player" do
+        news = build_news("<div>Alex passed to Иван</div>")
+        described_class.call(news)
+        expect(news.reload.mentioned_players).to contain_exactly(alex, ivan)
+      end
+
+      it "does not create mentions when no players match" do
+        news = build_news("<div>Nobody relevant here</div>")
+        expect { described_class.call(news) }.not_to change(NewsPlayerMention, :count)
+      end
+
+      it "does not create duplicate mentions when the service is run twice" do
+        news = build_news("<div>Alex scored a goal</div>")
+        described_class.call(news)
+        expect { described_class.call(news) }.not_to change(NewsPlayerMention, :count)
+      end
+
+      it "records only one mention per player even when the name appears multiple times" do
+        news = build_news("<div>Alex passed to Alex again</div>")
+        described_class.call(news)
+        expect(news.reload.mentioned_players).to contain_exactly(alex)
+      end
+
+      it "records the longer player when overlapping names exist" do
+        news = build_news("<div>Alex Smith played well</div>")
+        described_class.call(news)
+        expect(news.reload.mentioned_players).to contain_exactly(alex_smith)
+      end
+
+      it "does not record mentions when the feature toggle is disabled" do
+        FeatureToggle.find_by!(key: "news_autolink_players").update!(enabled: false)
+        news = build_news("<div>Alex scored a goal</div>")
+        expect { described_class.call(news) }.not_to change(NewsPlayerMention, :count)
+      end
+    end
   end
 end

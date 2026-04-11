@@ -15,17 +15,20 @@ class AutolinkPlayersInNewsService
     return unless FeatureToggle.enabled?(FEATURE_KEY)
 
     original_html = @news.content.body.to_html
-    new_html = rewrite_html(original_html)
+    new_html, linked_ids = rewrite_html(original_html)
     return if new_html == original_html
 
-    @news.update!(content: new_html)
+    ActiveRecord::Base.transaction do
+      @news.update!(content: new_html)
+      sync_mentions(linked_ids)
+    end
   end
 
   private
 
   def rewrite_html(html)
     players = players_by_length_desc
-    return html if players.empty?
+    return [ html, Set.new ] if players.empty?
 
     fragment = Nokogiri::HTML.fragment(html)
     linked_ids = Set.new
@@ -35,7 +38,13 @@ class AutolinkPlayersInNewsService
 
       link_matches_in_node(node, players, linked_ids)
     end
-    fragment.to_html
+    [ fragment.to_html, linked_ids ]
+  end
+
+  def sync_mentions(player_ids)
+    player_ids.each do |player_id|
+      NewsPlayerMention.create_or_find_by!(news: @news, player_id: player_id)
+    end
   end
 
   def players_by_length_desc

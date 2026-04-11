@@ -4,6 +4,8 @@ class Player < ApplicationRecord
   has_many :player_awards, dependent: :destroy
   has_many :awards, through: :player_awards
   has_many :player_claims, dependent: :destroy
+  has_many :news_player_mentions, dependent: :destroy
+  has_many :mentioning_news, through: :news_player_mentions, source: :news
   has_one :user, dependent: :nullify
   has_one_attached :photo
 
