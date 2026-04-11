@@ -24,6 +24,29 @@ RSpec.describe Sluggable do
     ActiveRecord::Base.connection.drop_table(:sluggable_test_records)
   end
 
+  before(:all) do
+    ActiveRecord::Base.connection.create_table(:sluggable_conditional_records, force: true) do |t|
+      t.string :name
+      t.string :slug
+      t.boolean :ready, default: false
+      t.timestamps
+    end
+
+    conditional_class = Class.new(ApplicationRecord) do
+      self.table_name = "sluggable_conditional_records"
+      include Sluggable
+      slug_source :name, if: -> { ready? }
+    end
+    Object.const_set(:SluggableConditionalRecord, conditional_class)
+  end
+
+  after(:all) do
+    if Object.const_defined?(:SluggableConditionalRecord)
+      Object.send(:remove_const, :SluggableConditionalRecord)
+    end
+    ActiveRecord::Base.connection.drop_table(:sluggable_conditional_records)
+  end
+
   def build_record(attrs = {})
     SluggableTestRecord.new({ name: "Ivan" }.merge(attrs))
   end
@@ -123,6 +146,30 @@ RSpec.describe Sluggable do
       duplicate = SluggableTestRecord.new(name: "seed", slug: "alex")
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:slug]).to be_present
+    end
+  end
+
+  describe "conditional generation via :if option" do
+    it "skips slug generation when the condition returns false" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: false)
+      record.valid?
+      expect(record.slug).to be_blank
+    end
+
+    it "generates the slug when the condition returns true" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: true)
+      record.valid?
+      expect(record.slug).to eq("alex")
+    end
+
+    it "does not overwrite an existing slug even after the condition flips" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: true)
+      record.save!
+      original = record.slug
+
+      record.update_columns(name: "Bob")
+      record.valid?
+      expect(record.slug).to eq(original)
     end
   end
 end
