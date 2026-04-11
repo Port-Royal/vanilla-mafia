@@ -96,4 +96,33 @@ RSpec.describe Sluggable do
       expect { record.update!(updated_at: Time.current) }.not_to change(record, :slug)
     end
   end
+
+  describe "fallback when source is blank after transliteration" do
+    it "generates a random hex slug when the source attribute is empty" do
+      record = build_record(name: "")
+      record.save!
+      expect(record.slug).to match(/\A[0-9a-f]{4}\z/)
+    end
+
+    it "generates a random hex slug when the source yields an empty parameterize result" do
+      # Soft sign alone transliterates to the empty string
+      record = build_record(name: "ь")
+      record.save!
+      expect(record.slug).to match(/\A[0-9a-f]{4}\z/)
+    end
+  end
+
+  describe "validations" do
+    it "is valid when a slug is present" do
+      record = build_record(name: "Alex")
+      expect(record).to be_valid
+    end
+
+    it "rejects two records that somehow end up with the same slug" do
+      SluggableTestRecord.create!(name: "Alex")
+      duplicate = SluggableTestRecord.new(name: "seed", slug: "alex")
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:slug]).to be_present
+    end
+  end
 end
