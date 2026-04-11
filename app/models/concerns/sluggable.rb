@@ -1,0 +1,47 @@
+module Sluggable
+  extend ActiveSupport::Concern
+
+  TAIL_BYTES = 2 # => 4 hex characters
+
+  class_methods do
+    attr_reader :slug_source_attribute, :slug_source_condition
+
+    def slug_source(attribute, if: nil)
+      @slug_source_attribute = attribute
+      @slug_source_condition = binding.local_variable_get(:if)
+    end
+  end
+
+  included do
+    validates :slug, presence: true, uniqueness: true
+    before_validation :generate_slug, if: :should_generate_slug?
+  end
+
+  def to_param
+    slug
+  end
+
+  private
+
+  def should_generate_slug?
+    return false if slug.present?
+
+    condition = self.class.slug_source_condition
+    condition.nil? || instance_exec(&condition)
+  end
+
+  def generate_slug
+    base = slug_base
+    candidate = base
+    while self.class.where.not(id: id).exists?(slug: candidate)
+      candidate = "#{base}-#{SecureRandom.hex(Sluggable::TAIL_BYTES)}"
+    end
+    self.slug = candidate
+  end
+
+  def slug_base
+    raw = public_send(self.class.slug_source_attribute).to_s
+    CyrillicTransliterator.call(raw).parameterize.presence ||
+      SecureRandom.hex(Sluggable::TAIL_BYTES)
+  end
+end
