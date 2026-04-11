@@ -47,6 +47,35 @@ RSpec.describe Sluggable do
     ActiveRecord::Base.connection.drop_table(:sluggable_conditional_records)
   end
 
+  before(:all) do
+    ActiveRecord::Base.connection.create_table(:sluggable_prefixed_records, force: true) do |t|
+      t.string :title
+      t.string :slug
+      t.date :publish_date
+      t.timestamps
+    end
+
+    prefixed_class = Class.new(ApplicationRecord) do
+      self.table_name = "sluggable_prefixed_records"
+      include Sluggable
+      slug_source :title
+
+      private
+
+      def slug_base
+        "#{publish_date.iso8601}-#{CyrillicTransliterator.call(title.to_s).parameterize}"
+      end
+    end
+    Object.const_set(:SluggablePrefixedRecord, prefixed_class)
+  end
+
+  after(:all) do
+    if Object.const_defined?(:SluggablePrefixedRecord)
+      Object.send(:remove_const, :SluggablePrefixedRecord)
+    end
+    ActiveRecord::Base.connection.drop_table(:sluggable_prefixed_records)
+  end
+
   def build_record(attrs = {})
     SluggableTestRecord.new({ name: "Ivan" }.merge(attrs))
   end
@@ -170,6 +199,21 @@ RSpec.describe Sluggable do
       record.update_columns(name: "Bob")
       record.valid?
       expect(record.slug).to eq(original)
+    end
+  end
+
+  describe "subclass overriding slug_base" do
+    it "uses the overridden base for slug generation" do
+      record = SluggablePrefixedRecord.new(title: "Голевой пас", publish_date: Date.new(2026, 4, 11))
+      record.save!
+      expect(record.slug).to eq("2026-04-11-golevoy-pas")
+    end
+
+    it "still applies collision handling to the overridden base" do
+      SluggablePrefixedRecord.create!(title: "Pas", publish_date: Date.new(2026, 4, 11))
+      second = SluggablePrefixedRecord.new(title: "Pas", publish_date: Date.new(2026, 4, 11))
+      second.save!
+      expect(second.slug).to match(/\A2026-04-11-pas-[0-9a-f]{4}\z/)
     end
   end
 end
