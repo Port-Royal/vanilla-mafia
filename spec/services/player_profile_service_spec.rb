@@ -13,7 +13,7 @@ RSpec.describe PlayerProfileService do
     let_it_be(:award2) { create(:award, title: "Лучший стратег") }
     let_it_be(:player_award1) { create(:player_award, player: player, award: award1, position: 2) }
     let_it_be(:player_award2) { create(:player_award, player: player, award: award2, position: 1) }
-    let(:result) { described_class.call(player_id: player.id) }
+    let(:result) { described_class.call(player_slug: player.slug) }
 
     it "returns a Result" do
       expect(result).to be_a(described_class::Result)
@@ -49,7 +49,7 @@ RSpec.describe PlayerProfileService do
       end
 
       it "groups games from child competitions under their root" do
-        root_result = described_class.call(player_id: root_player.id)
+        root_result = described_class.call(player_slug: root_player.slug)
         expect(root_result.competitions_with_games.size).to eq(1)
         expect(root_result.competitions_with_games.first.competition).to eq(season)
         expect(root_result.competitions_with_games.first.games).to match_array([ root_game1, root_game2 ])
@@ -69,7 +69,7 @@ RSpec.describe PlayerProfileService do
       end
 
       it "orders competitions by started_on descending" do
-        order_result = described_class.call(player_id: order_player.id)
+        order_result = described_class.call(player_slug: order_player.slug)
         competitions = order_result.competitions_with_games.map(&:competition)
         expect(competitions).to eq([ new_comp, old_comp ])
       end
@@ -87,7 +87,7 @@ RSpec.describe PlayerProfileService do
       end
 
       it "orders games by played_on and game_number" do
-        ordering_result = described_class.call(player_id: ordering_player.id)
+        ordering_result = described_class.call(player_slug: ordering_player.slug)
         entry = ordering_result.competitions_with_games.first
         expect(entry.games).to eq([ early_game, late_game ])
       end
@@ -161,7 +161,7 @@ RSpec.describe PlayerProfileService do
         create(:game_participation, game: stats_game3, player: stats_player, role: peace_role, win: false)
       end
 
-      let(:stats) { described_class.call(player_id: stats_player.id).stats }
+      let(:stats) { described_class.call(player_slug: stats_player.slug).stats }
 
       it "returns total games count" do
         expect(stats.total_games).to eq(3)
@@ -192,7 +192,7 @@ RSpec.describe PlayerProfileService do
 
       context "when player has no games" do
         let_it_be(:no_games_player) { create(:player, name: "Новичок") }
-        let(:empty_stats) { described_class.call(player_id: no_games_player.id).stats }
+        let(:empty_stats) { described_class.call(player_slug: no_games_player.slug).stats }
 
         it "returns zero total games" do
           expect(empty_stats.total_games).to eq(0)
@@ -214,7 +214,7 @@ RSpec.describe PlayerProfileService do
 
     context "when player has no games or awards" do
       let_it_be(:lonely_player) { create(:player, name: "Одинокий") }
-      let(:lonely_result) { described_class.call(player_id: lonely_player.id) }
+      let(:lonely_result) { described_class.call(player_slug: lonely_player.slug) }
 
       it "returns empty competitions_with_games" do
         expect(lonely_result.competitions_with_games).to be_empty
@@ -231,7 +231,7 @@ RSpec.describe PlayerProfileService do
 
     context "when player does not exist" do
       it "raises ActiveRecord::RecordNotFound" do
-        expect { described_class.call(player_id: -1) }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { described_class.call(player_slug: "nonexistent") }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
   end
