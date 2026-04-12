@@ -1,0 +1,242 @@
+require "rails_helper"
+
+RSpec.describe Sluggable do
+  # Build an in-memory AR model backed by a temp table so we can exercise
+  # Sluggable without coupling the spec to any real model.
+  before(:all) do
+    ActiveRecord::Base.connection.create_table(:sluggable_test_records, force: true) do |t|
+      t.string :name
+      t.string :slug
+      t.boolean :published, default: false
+      t.timestamps
+    end
+
+    test_class = Class.new(ApplicationRecord) do
+      self.table_name = "sluggable_test_records"
+      include Sluggable
+      slug_source :name
+    end
+    Object.const_set(:SluggableTestRecord, test_class)
+  end
+
+  after(:all) do
+    Object.send(:remove_const, :SluggableTestRecord) if Object.const_defined?(:SluggableTestRecord)
+    ActiveRecord::Base.connection.drop_table(:sluggable_test_records)
+  end
+
+  before(:all) do
+    ActiveRecord::Base.connection.create_table(:sluggable_conditional_records, force: true) do |t|
+      t.string :name
+      t.string :slug
+      t.boolean :ready, default: false
+      t.timestamps
+    end
+
+    conditional_class = Class.new(ApplicationRecord) do
+      self.table_name = "sluggable_conditional_records"
+      include Sluggable
+      slug_source :name, if: -> { ready? }
+    end
+    Object.const_set(:SluggableConditionalRecord, conditional_class)
+  end
+
+  after(:all) do
+    if Object.const_defined?(:SluggableConditionalRecord)
+      Object.send(:remove_const, :SluggableConditionalRecord)
+    end
+    ActiveRecord::Base.connection.drop_table(:sluggable_conditional_records)
+  end
+
+  before(:all) do
+    ActiveRecord::Base.connection.create_table(:sluggable_prefixed_records, force: true) do |t|
+      t.string :title
+      t.string :slug
+      t.date :publish_date
+      t.timestamps
+    end
+
+    prefixed_class = Class.new(ApplicationRecord) do
+      self.table_name = "sluggable_prefixed_records"
+      include Sluggable
+      slug_source :title
+
+      private
+
+      def slug_base
+        "#{publish_date.iso8601}-#{CyrillicTransliterator.call(title.to_s).parameterize}"
+      end
+    end
+    Object.const_set(:SluggablePrefixedRecord, prefixed_class)
+  end
+
+  after(:all) do
+    if Object.const_defined?(:SluggablePrefixedRecord)
+      Object.send(:remove_const, :SluggablePrefixedRecord)
+    end
+    ActiveRecord::Base.connection.drop_table(:sluggable_prefixed_records)
+  end
+
+  def build_record(attrs = {})
+    SluggableTestRecord.new({ name: "Ivan" }.merge(attrs))
+  end
+
+  describe "slug generation" do
+    it "sets slug from the source attribute on create" do
+      record = build_record(name: "Alex")
+      record.save!
+      expect(record.slug).to eq("alex")
+    end
+
+    it "transliterates Cyrillic source via CyrillicTransliterator" do
+      record = build_record(name: "Иван Петров")
+      record.save!
+      expect(record.slug).to eq("ivan-petrov")
+    end
+
+    it "downcases and parameterizes" do
+      record = build_record(name: "Alex Smith")
+      record.save!
+      expect(record.slug).to eq("alex-smith")
+    end
+
+    it "does not regenerate the slug on subsequent saves with a different source" do
+      record = build_record(name: "Alex")
+      record.save!
+      original_slug = record.slug
+
+      record.update!(name: "Bob")
+      expect(record.slug).to eq(original_slug)
+    end
+  end
+
+  describe "#to_param" do
+    it "returns the slug" do
+      record = build_record(name: "Alex")
+      record.save!
+      expect(record.to_param).to eq("alex")
+    end
+  end
+
+  describe "collision handling" do
+    it "appends a hex tail when a conflicting slug already exists" do
+      first = build_record(name: "Alex")
+      first.save!
+
+      second = build_record(name: "Alex")
+      second.save!
+
+      expect(second.slug).to match(/\Aalex-[0-9a-f]{4}\z/)
+      expect(second.slug).not_to eq(first.slug)
+    end
+
+    it "keeps adding new tails if the first tail collides" do
+      taken = %w[alex alex-aaaa alex-bbbb]
+      taken.each { |slug| SluggableTestRecord.create!(name: "seed-#{slug}", slug: slug) }
+
+      allow(SecureRandom).to receive(:hex).with(Sluggable::TAIL_BYTES)
+                                          .and_return("aaaa", "bbbb", "cccc")
+
+      record = build_record(name: "Alex")
+      record.save!
+
+      expect(record.slug).to eq("alex-cccc")
+    end
+
+    it "stops after MAX_SLUG_ATTEMPTS and assigns the last candidate" do
+      # Fill all hex tails that will be generated
+      stubs = Array.new(Sluggable::MAX_SLUG_ATTEMPTS) { |i| format("%04x", i) }
+      stubs.each { |hex| SluggableTestRecord.create!(name: "seed", slug: "alex-#{hex}") }
+      SluggableTestRecord.create!(name: "seed", slug: "alex")
+
+      allow(SecureRandom).to receive(:hex).with(Sluggable::TAIL_BYTES)
+                                          .and_return(*stubs)
+
+      record = build_record(name: "Alex")
+      record.valid?
+      expect(record.slug).to eq("alex-#{stubs.last}")
+    end
+
+    it "does not count the current record as a collision when re-saving" do
+      record = build_record(name: "Alex")
+      record.save!
+      expect { record.update!(updated_at: Time.current) }.not_to change(record, :slug)
+    end
+  end
+
+  describe "slug regeneration for blank slugs" do
+    it "regenerates when slug is an empty string" do
+      record = build_record(name: "Alex")
+      record.slug = ""
+      record.valid?
+      expect(record.slug).to eq("alex")
+    end
+  end
+
+  describe "fallback when source is blank after transliteration" do
+    it "generates a random hex slug when the source attribute is empty" do
+      record = build_record(name: "")
+      record.save!
+      expect(record.slug).to match(/\A[0-9a-f]{4}\z/)
+    end
+
+    it "generates a random hex slug when the source yields an empty parameterize result" do
+      # Soft sign alone transliterates to the empty string
+      record = build_record(name: "ь")
+      record.save!
+      expect(record.slug).to match(/\A[0-9a-f]{4}\z/)
+    end
+  end
+
+  describe "validations" do
+    it "is valid when a slug is present" do
+      record = build_record(name: "Alex")
+      expect(record).to be_valid
+    end
+
+    it "rejects two records that somehow end up with the same slug" do
+      SluggableTestRecord.create!(name: "Alex")
+      duplicate = SluggableTestRecord.new(name: "seed", slug: "alex")
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:slug]).to be_present
+    end
+  end
+
+  describe "conditional generation via :if option" do
+    it "skips slug generation and allows saving when the condition returns false" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: false)
+      expect(record).to be_valid
+      expect(record.slug).to be_nil
+    end
+
+    it "generates the slug when the condition returns true" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: true)
+      record.valid?
+      expect(record.slug).to eq("alex")
+    end
+
+    it "does not overwrite an existing slug even after the condition flips" do
+      record = SluggableConditionalRecord.new(name: "Alex", ready: true)
+      record.save!
+      original = record.slug
+
+      record.update_columns(name: "Bob")
+      record.valid?
+      expect(record.slug).to eq(original)
+    end
+  end
+
+  describe "subclass overriding slug_base" do
+    it "uses the overridden base for slug generation" do
+      record = SluggablePrefixedRecord.new(title: "Голевой пас", publish_date: Date.new(2026, 4, 11))
+      record.save!
+      expect(record.slug).to eq("2026-04-11-golevoy-pas")
+    end
+
+    it "still applies collision handling to the overridden base" do
+      SluggablePrefixedRecord.create!(title: "Pas", publish_date: Date.new(2026, 4, 11))
+      second = SluggablePrefixedRecord.new(title: "Pas", publish_date: Date.new(2026, 4, 11))
+      second.save!
+      expect(second.slug).to match(/\A2026-04-11-pas-[0-9a-f]{4}\z/)
+    end
+  end
+end
