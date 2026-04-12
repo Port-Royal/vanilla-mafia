@@ -54,7 +54,7 @@ RSpec.describe "Games#overlay" do
     end
 
     it "returns not found for non-existent game" do
-      get overlay_game_path(id: -1)
+      get overlay_game_path(slug: "nonexistent-slug")
 
       expect(response).to have_http_status(:not_found)
     end

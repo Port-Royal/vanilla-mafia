@@ -91,7 +91,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def set_game
-    @game = Game.find(params[:id])
+    @game = Game.find_by!(slug: params[:id])
   end
 
   def load_form_data
