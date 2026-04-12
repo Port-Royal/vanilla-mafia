@@ -142,6 +142,20 @@ RSpec.describe Sluggable do
       expect(record.slug).to eq("alex-cccc")
     end
 
+    it "stops after MAX_SLUG_ATTEMPTS and assigns the last candidate" do
+      # Fill all hex tails that will be generated
+      stubs = Array.new(Sluggable::MAX_SLUG_ATTEMPTS) { |i| format("%04x", i) }
+      stubs.each { |hex| SluggableTestRecord.create!(name: "seed", slug: "alex-#{hex}") }
+      SluggableTestRecord.create!(name: "seed", slug: "alex")
+
+      allow(SecureRandom).to receive(:hex).with(Sluggable::TAIL_BYTES)
+                                          .and_return(*stubs)
+
+      record = build_record(name: "Alex")
+      record.valid?
+      expect(record.slug).to eq("alex-#{stubs.last}")
+    end
+
     it "does not count the current record as a collision when re-saving" do
       record = build_record(name: "Alex")
       record.save!
@@ -188,10 +202,10 @@ RSpec.describe Sluggable do
   end
 
   describe "conditional generation via :if option" do
-    it "skips slug generation when the condition returns false" do
+    it "skips slug generation and allows saving when the condition returns false" do
       record = SluggableConditionalRecord.new(name: "Alex", ready: false)
-      record.valid?
-      expect(record.slug).to be_blank
+      expect(record).to be_valid
+      expect(record.slug).to be_nil
     end
 
     it "generates the slug when the condition returns true" do

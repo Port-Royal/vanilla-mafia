@@ -2,6 +2,7 @@ module Sluggable
   extend ActiveSupport::Concern
 
   TAIL_BYTES = 2 # => 4 hex characters
+  MAX_SLUG_ATTEMPTS = 10
 
   class_methods do
     attr_reader :slug_source_attribute, :slug_source_condition
@@ -13,7 +14,8 @@ module Sluggable
   end
 
   included do
-    validates :slug, presence: true, uniqueness: true
+    validates :slug, uniqueness: true, allow_nil: true
+    validates :slug, presence: true, if: :slug_required?
     before_validation :generate_slug, if: :should_generate_slug?
   end
 
@@ -23,18 +25,26 @@ module Sluggable
 
   private
 
+  def slug_required?
+    condition = self.class.slug_source_condition
+    condition.nil? || instance_exec(&condition)
+  end
+
   def should_generate_slug?
     return false if slug.present?
 
-    condition = self.class.slug_source_condition
-    condition.nil? || instance_exec(&condition)
+    slug_required?
   end
 
   def generate_slug
     base = slug_base
     candidate = base
-    while self.class.where.not(id: id).exists?(slug: candidate)
-      candidate = "#{base}-#{SecureRandom.hex(Sluggable::TAIL_BYTES)}"
+    MAX_SLUG_ATTEMPTS.times do
+      unless self.class.where.not(id: id).exists?(slug: candidate)
+        self.slug = candidate
+        return
+      end
+      candidate = "#{base}-#{SecureRandom.hex(TAIL_BYTES)}"
     end
     self.slug = candidate
   end

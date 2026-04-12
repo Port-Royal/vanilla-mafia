@@ -10,6 +10,6 @@ class CyrillicTransliterator
   }.freeze
 
   def self.call(string)
-    string.to_s.each_char.map { |char| TABLE[char.downcase] || char.downcase }.join
+    string.to_s.each_char.map { |char| TABLE[char.downcase] || char }.join
   end
 end

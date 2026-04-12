@@ -16,7 +16,7 @@ Two shared pieces of infrastructure built once, then each of the five affected e
 
 ### Shared infrastructure (vm-t11)
 
-**`CyrillicTransliterator`** — PORO in `app/services/cyrillic_transliterator.rb`. Single class method `.call(string)` returning an ASCII string via a lookup table covering all Russian letters (upper and lower case). Non-Cyrillic characters pass through unchanged. Empty or whitespace-only input returns an empty string.
+**`CyrillicTransliterator`** — PORO in `app/services/cyrillic_transliterator.rb`. Single class method `.call(string)` returning an ASCII string via a lookup table covering all Russian letters (upper and lower case). Non-Cyrillic characters (including case and whitespace) pass through unchanged. Nil is treated as empty string.
 
 ```ruby
 class CyrillicTransliterator

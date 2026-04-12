@@ -55,8 +55,12 @@ RSpec.describe CyrillicTransliterator do
     end
 
     context "non-Cyrillic passthrough" do
-      it "passes Latin letters through unchanged" do
+      it "passes lowercase Latin letters through unchanged" do
         expect(tr("hello")).to eq("hello")
+      end
+
+      it "preserves uppercase Latin letters" do
+        expect(tr("HeLLo")).to eq("HeLLo")
       end
 
       it "passes digits through unchanged" do
@@ -74,7 +78,7 @@ RSpec.describe CyrillicTransliterator do
 
     context "mixed input" do
       it "handles Cyrillic and Latin together" do
-        expect(tr("Kirill Х")).to eq("kirill kh")
+        expect(tr("Kirill Х")).to eq("Kirill kh")
       end
 
       it "handles Cyrillic with digits" do
