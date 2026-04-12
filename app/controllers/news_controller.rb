@@ -20,7 +20,7 @@ class NewsController < ApplicationController
   end
 
   def show
-    @news = News.visible.find(params[:id])
+    @news = News.visible.find_by!(slug: params[:slug])
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

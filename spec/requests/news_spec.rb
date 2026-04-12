@@ -204,5 +204,10 @@ RSpec.describe NewsController do
       get news_path(draft_article)
       expect(response).to have_http_status(:not_found)
     end
+
+    it "returns not found for nonexistent slug" do
+      get news_path(slug: "nonexistent-slug")
+      expect(response).to have_http_status(:not_found)
+    end
   end
 end
