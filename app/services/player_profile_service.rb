@@ -4,16 +4,16 @@ class PlayerProfileService
   RoleStat = Data.define(:role_code, :role_name, :games, :wins, :win_rate)
   CompetitionGames = Data.define(:competition, :games)
 
-  def self.call(player_id:)
-    new(player_id).call
+  def self.call(player_slug:)
+    new(player_slug).call
   end
 
-  def initialize(player_id)
-    @player_id = player_id
+  def initialize(player_slug)
+    @player_slug = player_slug
   end
 
   def call
-    player = Player.find(@player_id)
+    player = Player.find_by!(slug: @player_slug)
     participations = player.game_participations.includes(:role, :game)
 
     Result.new(

@@ -11,7 +11,7 @@ RSpec.describe Player, type: :model do
   end
 
   describe 'validations' do
-    subject { build(:player) }
+    subject { create(:player) }
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name) }
@@ -242,6 +242,42 @@ RSpec.describe Player, type: :model do
         result = Player.with_stats_for_competition(competition).find(player.id)
 
         expect(result.total_rating).to eq(1.5)
+      end
+    end
+  end
+
+  describe "slug" do
+    describe "generation" do
+      it "generates a slug from Cyrillic name on create" do
+        player = create(:player, name: "Алексей")
+        expect(player.slug).to eq("aleksey")
+      end
+
+      it "generates a slug from Latin name on create" do
+        player = create(:player, name: "John Doe")
+        expect(player.slug).to eq("john-doe")
+      end
+
+      it "appends hex tail on collision" do
+        create(:player, name: "Алексей", slug: "aleksey")
+        collider = build(:player, name: "Алексей")
+        collider.valid?
+        expect(collider.slug).to start_with("aleksey-")
+        expect(collider.slug.length).to eq("aleksey-".length + 4)
+      end
+
+      it "does not change slug when name is updated" do
+        player = create(:player, name: "Алексей")
+        original_slug = player.slug
+        player.update!(name: "Борис")
+        expect(player.slug).to eq(original_slug)
+      end
+    end
+
+    describe "#to_param" do
+      it "returns the slug" do
+        player = create(:player, name: "Алексей Петров")
+        expect(player.to_param).to eq("aleksey-petrov")
       end
     end
   end
