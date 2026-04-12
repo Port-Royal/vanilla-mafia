@@ -118,4 +118,41 @@ RSpec.describe Game, type: :model do
       end
     end
   end
+
+  describe "slug" do
+    describe "generation" do
+      let_it_be(:season) { create(:competition, :season, slug: "season-3") }
+      let_it_be(:series) { create(:competition, :series, slug: "season-3-series-1", parent: season) }
+
+      it "generates slug from competition slug and game number" do
+        game = create(:game, competition: series, game_number: 7)
+        expect(game.slug).to eq("season-3-series-1-game-7")
+      end
+
+      it "appends hex tail on collision" do
+        create(:game, competition: series, game_number: 10, slug: "season-3-series-1-game-11")
+        game = build(:game, competition: series, game_number: 11)
+        game.valid?
+        expect(game.slug).to start_with("season-3-series-1-game-11-")
+        expect(game.slug.length).to eq("season-3-series-1-game-11-".length + 4)
+      end
+
+      it "does not change slug when game_number is updated" do
+        game = create(:game, competition: series, game_number: 8)
+        original_slug = game.slug
+        game.update!(game_number: 99)
+        expect(game.slug).to eq(original_slug)
+      end
+    end
+
+    describe "#to_param" do
+      let_it_be(:season) { create(:competition, :season, slug: "season-4") }
+      let_it_be(:series) { create(:competition, :series, slug: "season-4-series-2", parent: season) }
+
+      it "returns the slug" do
+        game = create(:game, competition: series, game_number: 5)
+        expect(game.to_param).to eq("season-4-series-2-game-5")
+      end
+    end
+  end
 end
