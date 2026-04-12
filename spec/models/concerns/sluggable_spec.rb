@@ -149,6 +149,15 @@ RSpec.describe Sluggable do
     end
   end
 
+  describe "slug regeneration for blank slugs" do
+    it "regenerates when slug is an empty string" do
+      record = build_record(name: "Alex")
+      record.slug = ""
+      record.valid?
+      expect(record.slug).to eq("alex")
+    end
+  end
+
   describe "fallback when source is blank after transliteration" do
     it "generates a random hex slug when the source attribute is empty" do
       record = build_record(name: "")
