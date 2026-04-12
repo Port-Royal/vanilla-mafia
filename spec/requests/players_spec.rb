@@ -338,7 +338,7 @@ RSpec.describe PlayersController do
     end
 
     context "when player does not exist" do
-      before { get player_path(id: -1) }
+      before { get player_path(slug: "nonexistent-slug") }
 
       it "returns not found" do
         expect(response).to have_http_status(:not_found)

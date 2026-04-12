@@ -48,9 +48,9 @@ class AutolinkPlayersInNewsService
   end
 
   def players_by_length_desc
-    Player.pluck(:id, :name)
-          .sort_by { |_id, name| -name.length }
-          .map { |id, name| [ id, PlayerNameRegex.build(name) ] }
+    Player.pluck(:id, :name, :slug)
+          .sort_by { |_id, name, _slug| -name.length }
+          .map { |id, name, slug| [ id, slug, PlayerNameRegex.build(name) ] }
   end
 
   def link_matches_in_node(text_node, players, linked_ids)
@@ -59,17 +59,17 @@ class AutolinkPlayersInNewsService
     return if matches.empty?
 
     replace_node_with_matches(text_node, text, matches)
-    matches.each { |_start, _finish, id, _matched| linked_ids << id }
+    matches.each { |_start, _finish, id, _slug, _matched| linked_ids << id }
   end
 
   def collect_matches(text, players, linked_ids)
-    raw = players.filter_map do |id, regex|
+    raw = players.filter_map do |id, slug, regex|
       next if linked_ids.include?(id)
 
       match = regex.match(text)
       next unless match
 
-      [ match.begin(0), match.end(0), id, match[0] ]
+      [ match.begin(0), match.end(0), id, slug, match[0] ]
     end
     drop_overlaps(raw.sort_by { |start, finish, _id, _matched| [ start, -(finish - start) ] })
   end
@@ -78,7 +78,7 @@ class AutolinkPlayersInNewsService
     result = []
     last_end = 0
     matches.each do |match|
-      start, finish, _id, _matched = match
+      start, finish, _id, _slug, _matched = match
       next if start < last_end
 
       result << match
@@ -89,18 +89,18 @@ class AutolinkPlayersInNewsService
 
   def replace_node_with_matches(text_node, text, matches)
     doc = text_node.document
-    cursor = matches.reduce(0) do |pos, (start, finish, id, matched)|
+    cursor = matches.reduce(0) do |pos, (start, finish, _id, slug, matched)|
       text_node.add_previous_sibling(doc.create_text_node(text[pos...start]))
-      text_node.add_previous_sibling(build_anchor(doc, id, matched))
+      text_node.add_previous_sibling(build_anchor(doc, slug, matched))
       finish
     end
     text_node.add_previous_sibling(doc.create_text_node(text[cursor..]))
     text_node.remove
   end
 
-  def build_anchor(doc, id, matched)
+  def build_anchor(doc, slug, matched)
     anchor = Nokogiri::XML::Node.new("a", doc)
-    anchor["href"] = "/players/#{id}"
+    anchor["href"] = "/players/#{slug}"
     anchor.add_child(doc.create_text_node(matched))
     anchor
   end

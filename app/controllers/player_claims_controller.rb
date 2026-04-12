@@ -4,7 +4,7 @@ class PlayerClaimsController < ApplicationController
   before_action :authenticate_user!
 
   def create
-    player = Player.find(params[:player_id])
+    player = Player.find_by!(slug: params[:player_slug])
     result = ClaimPlayerService.call(user: current_user, player:)
 
     if result.success

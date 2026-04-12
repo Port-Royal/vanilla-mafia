@@ -1,4 +1,7 @@
 class Player < ApplicationRecord
+  include Sluggable
+  slug_source :name
+
   has_many :game_participations, dependent: :restrict_with_error
   has_many :games, through: :game_participations
   has_many :player_awards, dependent: :destroy

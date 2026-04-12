@@ -46,7 +46,7 @@ Rails.application.routes.draw do
       get :overlay
     end
   end
-  resources :players, only: [ :show ] do
+  resources :players, only: [ :show ], param: :slug do
     resource :claim, only: [ :create ], controller: "player_claims"
     resource :dispute, only: [ :new, :create ], controller: "player_disputes"
   end
