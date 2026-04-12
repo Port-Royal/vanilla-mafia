@@ -11,9 +11,14 @@ class BackfillGameSlugs < ActiveRecord::Migration[8.1]
   end
 
   def up
-    MigrationGame.where(slug: nil).find_each do |game|
-      competition = MigrationCompetition.find(game.competition_id)
-      game.update_column(:slug, unique_slug_for(game, competition))
+    MigrationGame.where(slug: nil).in_batches do |batch|
+      competition_ids = batch.pluck(:competition_id).uniq
+      competitions_by_id = MigrationCompetition.where(id: competition_ids).index_by(&:id)
+
+      batch.each do |game|
+        competition = competitions_by_id.fetch(game.competition_id)
+        game.update_column(:slug, unique_slug_for(game, competition))
+      end
     end
   end
 
