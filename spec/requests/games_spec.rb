@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe GamesController do
-  describe "GET /games/:id" do
+  describe "GET /games/:slug" do
     let_it_be(:season) { create(:competition, :season, name: "Сезон 1") }
     let_it_be(:series) { create(:competition, :series, name: "Серия 1", parent: season) }
     let_it_be(:game) { create(:game, competition: series, game_number: 1) }
@@ -56,7 +56,7 @@ RSpec.describe GamesController do
     end
 
     context "when game does not exist" do
-      before { get game_path(id: -1) }
+      before { get game_path(slug: "nonexistent-slug") }
 
       it "returns not found" do
         expect(response).to have_http_status(:not_found)

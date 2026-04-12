@@ -1,4 +1,7 @@
 class Game < ApplicationRecord
+  include Sluggable
+  slug_source :game_number
+
   RESULTS = {
     in_progress: "in_progress",
     peace_victory: "peace_victory",
@@ -28,5 +31,13 @@ class Game < ApplicationRecord
 
   def in_season_name
     "#{competition.name} #{I18n.t('common.game')} #{game_number}"
+  end
+
+  private
+
+  def slug_base
+    return SecureRandom.hex(Sluggable::TAIL_BYTES) unless competition
+
+    "#{competition.slug}-game-#{game_number}"
   end
 end
