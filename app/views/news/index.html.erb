@@ -3,7 +3,7 @@
 <% if @news.any? %>
   <% if @pagination_mode == :infinite %>
     <div data-controller="infinite-scroll">
-      <turbo-frame id="news-list" class="space-y-8">
+      <turbo-frame id="news-list" target="_top" class="space-y-8">
         <%= render partial: "news/article", collection: @news, as: :article %>
       </turbo-frame>
 

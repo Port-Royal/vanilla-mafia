@@ -127,6 +127,11 @@ RSpec.describe NewsController do
         assert_select "turbo-frame#news-list"
       end
 
+      it "targets _top on the turbo frame so article links escape it" do
+        get news_index_path
+        assert_select "turbo-frame#news-list[target='_top']"
+      end
+
       it "renders a sentinel for loading more" do
         create_list(:news, 25, :published, author: author)
         get news_index_path
