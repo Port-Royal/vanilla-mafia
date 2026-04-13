@@ -35,6 +35,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 gem "sentry-rails"
 
+# Ship logs to Better Stack (Logtail) when BETTER_STACK_SOURCE_TOKEN is set.
+gem "logtail-rails"
+
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"

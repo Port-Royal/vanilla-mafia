@@ -42,8 +42,7 @@ module Telegram
         question: question_penalty
       }
       total = scores.values.sum
-      breakdown = scores.map { |k, v| "#{k}=#{v}" }.join(" ")
-      Rails.logger.debug("[NewsScorer] #{breakdown} total=#{total}")
+      Rails.logger.debug({ event: "news_scorer.scored", total: total, **scores }.to_json)
       total
     end
 
