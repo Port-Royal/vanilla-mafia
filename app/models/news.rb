@@ -57,20 +57,9 @@ class News < ApplicationRecord
     plain_text = content.body.to_plain_text
     return content if plain_text.length <= max_length
 
-    html = content.body.to_html
-    doc = Nokogiri::HTML.fragment(html)
-    result_length = 0
-    kept = []
-
-    doc.children.each do |node|
-      text_length = node.text.length
-      break if result_length + text_length > max_length && kept.any?
-
-      kept << node.to_html
-      result_length += text_length
-    end
-
-    ActionText::Content.new(kept.join)
+    truncated_plain = plain_text.truncate(max_length, separator: /\s/, omission: "…")
+    html = truncated_plain.split(/\n+/).map { |line| "<p>#{ERB::Util.html_escape(line)}</p>" }.join
+    ActionText::Content.new(html)
   end
 
   def truncated?(max_length)
