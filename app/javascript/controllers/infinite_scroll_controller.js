@@ -3,7 +3,11 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["sentinel"]
 
-  connect() {
+  initialize() {
+    // Create the observer in initialize() (not connect()) because Stimulus
+    // fires sentinelTargetConnected synchronously while starting the target
+    // observer, *before* the user's connect() runs. If the observer isn't
+    // ready yet, the target callback throws and connect() never completes.
     this.observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -14,8 +18,6 @@ export default class extends Controller {
       },
       { rootMargin: "200px" }
     )
-
-    this.observeSentinels()
   }
 
   disconnect() {
@@ -60,11 +62,5 @@ export default class extends Controller {
         sentinel.innerHTML = `<p class="text-center text-neutral-400 py-4">${errorMessage}</p>`
         this.observer.observe(sentinel)
       })
-  }
-
-  observeSentinels() {
-    this.sentinelTargets.forEach((sentinel) => {
-      this.observer.observe(sentinel)
-    })
   }
 }
