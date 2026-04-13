@@ -86,35 +86,35 @@
       </tbody>
     </table>
   </div>
+<% end %>
 
-  <% if @news.any? %>
-    <section class="mt-10">
-      <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".news") %></h2>
-      <div class="space-y-6">
-        <% @news.each do |article| %>
-          <article class="border-b border-neutral-200 pb-4">
-            <h3 class="text-lg font-bold mb-1"><%= article.title %></h3>
-            <div class="text-sm text-neutral-500 mb-2">
-              <% if article.published_at.present? %>
-                <%= l(article.published_at, format: :short) %>
-              <% end %>
-              <% if article.author.claimed_player? %>
-                · <%= article.author.player.name %>
-              <% end %>
-            </div>
-            <%= render "news/photos", photos: article.photos, alt: article.title, size: :thumbnail %>
-            <div class="prose max-w-none text-neutral-700">
-              <%= article.content %>
-            </div>
-            <% if user_signed_in? && current_user.can_manage_news? %>
-              <div class="mt-2">
-                <%= link_to t("news.index.edit"), edit_admin_news_path(article),
-                      class: "text-sm text-blue-600 hover:underline" %>
-              </div>
+<% if @news.any? %>
+  <section class="mt-10">
+    <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".news") %></h2>
+    <div class="space-y-6">
+      <% @news.each do |article| %>
+        <article class="border-b border-neutral-200 pb-4">
+          <h3 class="text-lg font-bold mb-1"><%= article.title %></h3>
+          <div class="text-sm text-neutral-500 mb-2">
+            <% if article.published_at.present? %>
+              <%= l(article.published_at, format: :short) %>
             <% end %>
-          </article>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
+            <% if article.author.claimed_player? %>
+              · <%= article.author.player.name %>
+            <% end %>
+          </div>
+          <%= render "news/photos", photos: article.photos, alt: article.title, size: :thumbnail %>
+          <div class="prose max-w-none text-neutral-700">
+            <%= article.content %>
+          </div>
+          <% if user_signed_in? && current_user.can_manage_news? %>
+            <div class="mt-2">
+              <%= link_to t("news.index.edit"), edit_admin_news_path(article),
+                    class: "text-sm text-blue-600 hover:underline" %>
+            </div>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  </section>
 <% end %>
