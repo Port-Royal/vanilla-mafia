@@ -56,3 +56,6 @@ coverage/*
 
 .claude/projects/
 .mutant/
+
+# Brakeman SARIF output (generated in CI)
+/brakeman.sarif
