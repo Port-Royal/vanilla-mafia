@@ -16,8 +16,11 @@ class BackfillNewsSlugs < ActiveRecord::Migration[8.1]
   end
 
   def up
+    existing_slugs = MigrationNews.where.not(slug: nil).pluck(:slug).to_set
     MigrationNews.where(slug: nil).find_each do |news|
-      MigrationNews.where(id: news.id).update_all(slug: unique_slug_for(news))
+      slug = unique_slug_for(news, existing_slugs)
+      MigrationNews.where(id: news.id).update_all(slug: slug)
+      existing_slugs << slug
     end
   end
 
@@ -42,12 +45,12 @@ class BackfillNewsSlugs < ActiveRecord::Migration[8.1]
     "#{date.strftime('%Y-%m-%d')}-#{title_part_for(news.title)}"
   end
 
-  def unique_slug_for(news)
+  def unique_slug_for(news, existing_slugs)
     base = base_slug_for(news)
     candidate = base
 
     MAX_ATTEMPTS.times do
-      return candidate unless MigrationNews.where.not(id: news.id).exists?(slug: candidate)
+      return candidate unless existing_slugs.include?(candidate)
 
       candidate = "#{base}-#{SecureRandom.hex(TAIL_BYTES)}"
     end
