@@ -65,6 +65,12 @@ RSpec.describe NewsController do
         get news_index_path
         assert_select "img[src*='photo.jpg']"
       end
+
+      it "wraps the photo in a lightbox trigger" do
+        article_with_photo
+        get news_index_path
+        assert_select "a[data-controller='lightbox'][data-action*='lightbox#open'] img"
+      end
     end
 
     context "when user is an editor" do

@@ -1,0 +1,17 @@
+<% photos = local_assigns.fetch(:photos) %>
+<% alt = local_assigns.fetch(:alt) %>
+<% size = local_assigns.fetch(:size, :thumbnail) %>
+<% if photos.attached? %>
+  <div class="flex flex-wrap gap-2 mb-3">
+    <% photos.each do |photo| %>
+      <% if photo.variable? %>
+        <%= link_to rails_representation_path(news_photo_variant(photo, :zoom)),
+              class: "inline-block cursor-zoom-in",
+              aria: { label: alt },
+              data: { controller: "lightbox", action: "click->lightbox#open" } do %>
+          <%= image_tag news_photo_variant(photo, size), alt: alt, class: "rounded max-w-full sm:max-w-md" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

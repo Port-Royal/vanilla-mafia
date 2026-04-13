@@ -28,7 +28,7 @@
         <div class="flex flex-wrap gap-2">
           <% f.object.photos.each do |photo| %>
             <% if photo.variable? %>
-              <%= image_tag photo.variant(resize_to_limit: [200, 200]), alt: f.object.title, class: "rounded" %>
+              <%= image_tag news_photo_variant(photo, :admin_form), alt: f.object.title, class: "rounded" %>
             <% end %>
           <% end %>
         </div>
