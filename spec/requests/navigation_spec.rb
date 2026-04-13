@@ -78,4 +78,12 @@ RSpec.describe "Navigation" do
       end
     end
   end
+
+  describe "desktop sidebar background" do
+    it "tiles the background image instead of stretching to cover" do
+      get "/news"
+      assert_select "aside[style*='back.jpg'].bg-repeat"
+      assert_select "aside[style*='back.jpg'].bg-cover", false
+    end
+  end
 end
