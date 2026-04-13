@@ -306,19 +306,63 @@ RSpec.describe News, type: :model do
       expect(html).not_to include("Third paragraph.")
     end
 
-    it "keeps at least one paragraph even if it exceeds limit" do
-      news = build(:news, author: author, content: "<p>This is a very long first paragraph that exceeds the limit.</p><p>Second.</p>")
-      result = news.truncated_content(5)
-      expect(result.to_html).to include("This is a very long first paragraph")
-      expect(result.to_html).not_to include("Second.")
+    it "truncates a long single paragraph mid-sentence at a word boundary" do
+      news = build(:news, author: author, content: "<p>This is a very long first paragraph that exceeds the limit.</p>")
+      result = news.truncated_content(20)
+      plain = result.to_plain_text
+      expect(plain.length).to be <= 20
+      expect(plain).to end_with("…")
+      expect(plain).not_to include("exceeds")
     end
 
-    it "includes paragraphs up to the limit" do
-      news = build(:news, author: author, content: "<p>AA</p><p>BB</p><p>CC</p>")
-      result = news.truncated_content(4)
-      expect(result.to_html).to include("AA")
-      expect(result.to_html).to include("BB")
-      expect(result.to_html).not_to include("CC")
+    it "truncates a long single-block plain-text content" do
+      news = build(:news, author: author, content: "This is a really long plain text with no explicit block tags at all")
+      result = news.truncated_content(20)
+      plain = result.to_plain_text
+      expect(plain.length).to be <= 20
+      expect(plain).to end_with("…")
+    end
+
+    it "preserves paragraph breaks in the truncated preview" do
+      news = build(:news, author: author, content: "<p>First paragraph.</p><p>Second paragraph with more text.</p>")
+      result = news.truncated_content(30)
+      html = result.to_html
+      expect(html.scan("<p>").size).to be >= 2
+      expect(html).to include("First paragraph.")
+      expect(html).to include("Second")
+      expect(html).not_to include("<p></p>")
+    end
+
+    it "cuts at a word boundary rather than mid-word" do
+      news = build(:news, author: author, content: "hello world foo bar baz qux")
+      result = news.truncated_content(10)
+      expect(result.to_plain_text).to eq("hello…")
+    end
+
+    it "preserves inline formatting when content is within limit" do
+      news = build(:news, author: author, content: "<p>Short <strong>bold</strong> text.</p>")
+      result = news.truncated_content(100)
+      expect(result.body.to_html).to include("<strong>")
+    end
+
+    it "preserves inline formatting when content length is one less than the limit" do
+      news = build(:news, author: author, content: "<p><strong>x</strong></p>")
+      result = news.truncated_content(2)
+      expect(result.body.to_html).to include("<strong>")
+    end
+
+    it "preserves inline formatting when content length equals the limit" do
+      news = build(:news, author: author, content: "<p><strong>ab</strong></p>")
+      result = news.truncated_content(2)
+      expect(result.body.to_html).to include("<strong>")
+    end
+
+    it "escapes HTML special characters in the truncated plain text" do
+      news = build(:news, author: author, content: "<p>&lt;script&gt;alert(1)&lt;/script&gt; plus more text</p>")
+      result = news.truncated_content(20)
+      html = result.to_html
+      expect(html).not_to include("<script>")
+      expect(html).to include("&lt;script&gt;")
     end
   end
 
