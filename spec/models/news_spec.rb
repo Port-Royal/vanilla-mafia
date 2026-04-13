@@ -327,8 +327,10 @@ RSpec.describe News, type: :model do
       news = build(:news, author: author, content: "<p>First paragraph.</p><p>Second paragraph with more text.</p>")
       result = news.truncated_content(30)
       html = result.to_html
-      expect(html.scan("<p>").size).to be >= 1
+      expect(html.scan("<p>").size).to be >= 2
       expect(html).to include("First paragraph.")
+      expect(html).to include("Second")
+      expect(html).not_to include("<p></p>")
     end
 
     it "cuts at a word boundary rather than mid-word" do
@@ -347,6 +349,20 @@ RSpec.describe News, type: :model do
       news = build(:news, author: author, content: "<p><strong>x</strong></p>")
       result = news.truncated_content(2)
       expect(result.body.to_html).to include("<strong>")
+    end
+
+    it "preserves inline formatting when content length equals the limit" do
+      news = build(:news, author: author, content: "<p><strong>ab</strong></p>")
+      result = news.truncated_content(2)
+      expect(result.body.to_html).to include("<strong>")
+    end
+
+    it "escapes HTML special characters in the truncated plain text" do
+      news = build(:news, author: author, content: "<p>&lt;script&gt;alert(1)&lt;/script&gt; plus more text</p>")
+      result = news.truncated_content(20)
+      html = result.to_html
+      expect(html).not_to include("<script>")
+      expect(html).to include("&lt;script&gt;")
     end
   end
 
