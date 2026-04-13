@@ -58,8 +58,6 @@ RSpec.describe CompetitionsController do
         let_it_be(:child_article) { create(:news, :published, author: author, competition: child1, title: "Child series news") }
         let_it_be(:draft_article) { create(:news, author: author, competition: parent, title: "Draft parent news") }
 
-        before { get competition_path(slug: parent.slug) }
-
         it "shows news linked directly to the parent competition" do
           expect(response.body).to include("Parent season news")
         end
