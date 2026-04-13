@@ -8,7 +8,7 @@
         <%= link_to rails_representation_url(news_photo_variant(photo, :zoom)),
               class: "inline-block cursor-zoom-in",
               data: { controller: "lightbox", action: "click->lightbox#open" } do %>
-          <%= image_tag news_photo_variant(photo, size), alt: alt, class: "rounded max-w-full" %>
+          <%= image_tag news_photo_variant(photo, size), alt: alt, class: "rounded max-w-full sm:max-w-sm" %>
         <% end %>
       <% end %>
     <% end %>
