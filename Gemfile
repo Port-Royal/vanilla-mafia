@@ -35,7 +35,8 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 gem "sentry-rails"
 
-# Ship logs to Better Stack (Logtail) when BETTER_STACK_SOURCE_TOKEN is set.
+# Ship logs to Better Stack (Logtail) in production when both
+# BETTER_STACK_SOURCE_TOKEN and BETTER_STACK_INGESTING_HOST are set.
 gem "logtail-rails"
 
 
