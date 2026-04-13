@@ -32,7 +32,7 @@ class CompetitionOverviewService
       games: Game.none,
       participations_by_player: {},
       players_sorted: [],
-      news: []
+      news: news_for_competition
     )
   end
 
@@ -48,7 +48,11 @@ class CompetitionOverviewService
       games: games,
       participations_by_player: participations_by_player,
       players_sorted: players_sorted,
-      news: News.visible.for_competition(@competition).includes({ author: :player }, :tags, :rich_text_content, photos_attachments: :blob).recent
+      news: news_for_competition
     )
+  end
+
+  def news_for_competition
+    News.visible.for_competition(@competition).includes({ author: :player }, :tags, :rich_text_content, photos_attachments: :blob).recent
   end
 end

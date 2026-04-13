@@ -66,6 +66,30 @@ RSpec.describe CompetitionOverviewService do
       it "reports as parent" do
         expect(result.parent_view).to be true
       end
+
+      describe "news" do
+        let_it_be(:author) { create(:user) }
+        let_it_be(:parent_news) { create(:news, :published, author: author, competition: parent) }
+        let_it_be(:child_news) { create(:news, :published, author: author, competition: child1) }
+        let_it_be(:draft_parent_news) { create(:news, author: author, competition: parent) }
+        let_it_be(:other_news) { create(:news, :published, author: author, competition: other_comp) }
+
+        it "includes published news linked directly to the parent competition" do
+          expect(result.news).to include(parent_news)
+        end
+
+        it "excludes news linked to child competitions" do
+          expect(result.news).not_to include(child_news)
+        end
+
+        it "excludes draft news" do
+          expect(result.news).not_to include(draft_parent_news)
+        end
+
+        it "excludes news linked to unrelated competitions" do
+          expect(result.news).not_to include(other_news)
+        end
+      end
     end
 
     context "when competition is a leaf (no children)" do

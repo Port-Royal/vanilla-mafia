@@ -51,6 +51,27 @@ RSpec.describe CompetitionsController do
       it "links player names to profiles" do
         expect(response.body).to include(player_path(player1))
       end
+
+      context "with linked news" do
+        let_it_be(:author) { create(:user) }
+        let_it_be(:parent_article) { create(:news, :published, author: author, competition: parent, title: "Parent season news") }
+        let_it_be(:child_article) { create(:news, :published, author: author, competition: child1, title: "Child series news") }
+        let_it_be(:draft_article) { create(:news, author: author, competition: parent, title: "Draft parent news") }
+
+        before { get competition_path(slug: parent.slug) }
+
+        it "shows news linked directly to the parent competition" do
+          expect(response.body).to include("Parent season news")
+        end
+
+        it "does not show news linked only to child competitions" do
+          expect(response.body).not_to include("Child series news")
+        end
+
+        it "does not show draft news" do
+          expect(response.body).not_to include("Draft parent news")
+        end
+      end
     end
 
     context "when competition is a leaf" do
