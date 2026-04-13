@@ -322,6 +322,65 @@ RSpec.describe News, type: :model do
     end
   end
 
+  describe "slug" do
+    let_it_be(:author) { create(:user) }
+
+    describe "generation" do
+      it "generates slug from published_at date and parameterized title" do
+        news = create(:news, author:, title: "Breaking news about the game", status: :published, published_at: Time.zone.local(2026, 4, 12, 10, 0))
+        expect(news.slug).to eq("2026-04-12-breaking-news-about-the-game")
+      end
+
+      it "transliterates cyrillic title to ascii" do
+        news = create(:news, author:, title: "Важные новости о серии", status: :published, published_at: Time.zone.local(2026, 4, 12))
+        expect(news.slug).to eq("2026-04-12-vazhnye-novosti-o-serii")
+      end
+
+      it "uses created_at when published_at is nil" do
+        travel_to Time.zone.local(2026, 4, 10, 9, 30) do
+          news = create(:news, author:, title: "Draft article", published_at: nil)
+          expect(news.slug).to eq("2026-04-10-draft-article")
+        end
+      end
+
+      it "truncates long titles to keep slug compact" do
+        long_title = "word " * 40
+        news = create(:news, author:, title: long_title, status: :published, published_at: Time.zone.local(2026, 4, 12))
+        slug = news.slug
+        title_part = slug.delete_prefix("2026-04-12-")
+        expect(title_part.length).to be <= News::SLUG_TITLE_LIMIT
+        expect(title_part).not_to end_with("-")
+      end
+
+      it "falls back to random hex when title has no latin/cyrillic characters" do
+        news = create(:news, author:, title: "!!! ??? ...", status: :published, published_at: Time.zone.local(2026, 4, 12))
+        expect(news.slug).to match(/\A2026-04-12-[a-f0-9]{4}\z/)
+      end
+
+      it "appends hex tail on collision" do
+        create(:news, author:, title: "Duplicate title", status: :published, published_at: Time.zone.local(2026, 4, 12), slug: "2026-04-12-duplicate-title")
+        news = build(:news, author:, title: "Duplicate title", status: :published, published_at: Time.zone.local(2026, 4, 12))
+        news.valid?
+        expect(news.slug).to start_with("2026-04-12-duplicate-title-")
+        expect(news.slug.length).to eq("2026-04-12-duplicate-title-".length + 4)
+      end
+
+      it "does not change slug when title is updated" do
+        news = create(:news, author:, title: "Original title", status: :published, published_at: Time.zone.local(2026, 4, 12))
+        original_slug = news.slug
+        news.update!(title: "Completely different title")
+        expect(news.slug).to eq(original_slug)
+      end
+    end
+
+    describe "#to_param" do
+      it "returns the slug" do
+        news = create(:news, author:, title: "Hello world", status: :published, published_at: Time.zone.local(2026, 4, 12))
+        expect(news.to_param).to eq("2026-04-12-hello-world")
+      end
+    end
+  end
+
   describe '#unpublish!' do
     let(:author) { create(:user) }
     let(:news) { create(:news, :published, author:) }

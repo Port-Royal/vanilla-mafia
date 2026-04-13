@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_150545) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_13_000437) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -165,6 +165,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_150545) do
     t.datetime "created_at", null: false
     t.integer "game_id"
     t.datetime "published_at"
+    t.string "slug", null: false
     t.string "status", default: "draft", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
@@ -172,6 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_150545) do
     t.index ["competition_id"], name: "index_news_on_competition_id"
     t.index ["game_id"], name: "index_news_on_game_id"
     t.index ["published_at"], name: "index_news_on_published_at"
+    t.index ["slug"], name: "index_news_on_slug", unique: true
   end
 
   create_table "news_player_mentions", force: :cascade do |t|

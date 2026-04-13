@@ -40,7 +40,7 @@ Rails.application.routes.draw do
   get "seasons/:number", to: "legacy_redirects#season", as: :season
   get "seasons/:season_number/series/:number", to: "legacy_redirects#series", as: :season_series
 
-  resources :news, only: [ :index, :show ]
+  resources :news, only: [ :index, :show ], param: :slug
   resources :games, only: [ :show ], param: :slug do
     member do
       get :overlay

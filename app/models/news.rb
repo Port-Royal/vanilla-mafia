@@ -1,4 +1,9 @@
 class News < ApplicationRecord
+  include Sluggable
+  slug_source :title
+
+  SLUG_TITLE_LIMIT = 80
+
   belongs_to :author, class_name: "User"
   belongs_to :competition, optional: true
   belongs_to :game, optional: true
@@ -75,6 +80,20 @@ class News < ApplicationRecord
   end
 
   private
+
+  def slug_base
+    "#{slug_date.strftime('%Y-%m-%d')}-#{slug_title_part}"
+  end
+
+  def slug_date
+    published_at || created_at || Time.current
+  end
+
+  def slug_title_part
+    transliterated = CyrillicTransliterator.call(title.to_s).parameterize
+    truncated = transliterated.truncate(SLUG_TITLE_LIMIT, separator: "-", omission: "").delete_suffix("-")
+    truncated.presence || SecureRandom.hex(Sluggable::TAIL_BYTES)
+  end
 
   def content_length_within_limit
     return if content.blank?

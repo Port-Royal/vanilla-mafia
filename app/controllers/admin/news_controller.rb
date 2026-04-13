@@ -91,7 +91,7 @@ class Admin::NewsController < ApplicationController
   end
 
   def set_news
-    @news = News.includes(competition: :parent).find(params[:id])
+    @news = News.includes(competition: :parent).find_by!(slug: params[:id])
   end
 
   def load_form_data
