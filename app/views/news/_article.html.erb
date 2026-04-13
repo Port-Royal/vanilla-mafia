@@ -17,15 +17,7 @@
       <% end %>
     <% end %>
   </div>
-  <% if article.photos.attached? %>
-    <div class="flex flex-wrap gap-2 mb-3">
-      <% article.photos.each do |photo| %>
-        <% if photo.variable? %>
-          <%= image_tag photo.variant(resize_to_limit: [600, 400]), alt: article.title, class: "rounded max-w-full" %>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
+  <%= render "news/photos", photos: article.photos, alt: article.title, size: :thumbnail %>
   <div class="prose max-w-none text-neutral-700">
     <% if is_truncated %>
       <%= article.truncated_content(max_length) %>
