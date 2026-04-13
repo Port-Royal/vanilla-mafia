@@ -420,11 +420,11 @@ RSpec.describe Telegram::NewsScorer do
         [ { "type" => "bold", "offset" => 0, "length" => 12 } ]
       end
 
-      it "logs the score breakdown at debug level" do
+      it "logs the score breakdown as structured JSON at debug level" do
         allow(Rails.logger).to receive(:debug)
         described_class.call(parsed_result)
         expect(Rails.logger).to have_received(:debug).with(
-          /NewsScorer.*formatting=2.*paragraph=3.*link=0.*photo=0.*keyword=0.*first_person=0.*question=0.*total=5/
+          a_string_matching(/"event":"news_scorer\.scored".*"total":5.*"formatting":2.*"paragraph":3.*"link":0.*"photo":0.*"keyword":0.*"first_person":0.*"question":0/)
         )
       end
     end
