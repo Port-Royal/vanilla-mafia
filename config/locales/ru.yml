@@ -332,6 +332,7 @@ ru:
       add_photos: "Добавить фото"
       season: "Сезон"
       series: "Серия"
+      published_at: "Дата публикации"
       submit_create: "Создать"
       submit_update: "Сохранить"
       submit_save_and_publish: "Сохранить и опубликовать"

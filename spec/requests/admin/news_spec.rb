@@ -503,6 +503,26 @@ RSpec.describe "Admin::News" do
         expect(response).to redirect_to(new_user_session_path)
       end
     end
+
+    context "published_at field" do
+      let(:scheduled_time) { Time.zone.local(2025, 6, 15, 14, 30) }
+      let(:scheduled_article) { create(:news, author: editor, published_at: scheduled_time) }
+
+      before do
+        sign_in editor
+        get edit_admin_news_path(scheduled_article)
+      end
+
+      it "renders a datetime-local input for published_at" do
+        assert_select "input[type='datetime-local'][name='news[published_at]']"
+      end
+
+      it "pre-fills the current published_at value" do
+        assert_select "input[name='news[published_at]']" do |inputs|
+          expect(inputs.first["value"]).to eq("2025-06-15T14:30:00")
+        end
+      end
+    end
   end
 
   describe "PATCH /admin/news/:id" do
@@ -543,6 +563,28 @@ RSpec.describe "Admin::News" do
           end
           patch admin_news_path(article), params: { news: { title: "Updated Title", photos: [ "" ] } }
           expect(article.reload.photos).to be_attached
+        end
+
+        it "updates published_at when provided" do
+          backdated = Time.zone.local(2024, 1, 15, 10, 0)
+          patch admin_news_path(article), params: { news: { published_at: backdated.to_s } }
+          expect(article.reload.published_at).to be_within(1.second).of(backdated)
+        end
+
+        it "clears published_at when submitted blank" do
+          article.update!(published_at: 1.day.ago)
+          patch admin_news_path(article), params: { news: { published_at: "" } }
+          expect(article.reload.published_at).to be_nil
+        end
+      end
+
+      context "with publish param and manual published_at" do
+        it "respects the provided published_at when publishing" do
+          backdated = Time.zone.local(2024, 3, 1, 12, 0)
+          patch admin_news_path(article), params: { news: { published_at: backdated.to_s }, publish: "1" }
+          article.reload
+          expect(article).to be_published
+          expect(article.published_at).to be_within(1.second).of(backdated)
         end
       end
 
