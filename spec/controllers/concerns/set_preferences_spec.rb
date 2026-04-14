@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe SetLocale, type: :request do
+RSpec.describe SetPreferences, type: :request do
   let_it_be(:competition) { create(:competition, :season, slug: "locale-test") }
   let(:test_path) { competition_path(slug: competition.slug) }
 

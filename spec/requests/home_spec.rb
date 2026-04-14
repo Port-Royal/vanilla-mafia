@@ -276,7 +276,7 @@ RSpec.describe HomeController do
       end
 
       it "renders the played_on date" do
-        expect(response.body).to include(I18n.l(game.played_on, format: :short))
+        expect(response.body).to include(DatetimeFormatter.call(game.played_on, type: :date))
       end
     end
 
@@ -366,7 +366,7 @@ RSpec.describe HomeController do
       end
 
       it "renders the published date" do
-        expect(response.body).to include(I18n.l(article.published_at.to_date, format: :short))
+        expect(response.body).to include(DatetimeFormatter.call(article.published_at, type: :date))
       end
 
       it "renders a link to the news index" do

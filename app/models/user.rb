@@ -10,6 +10,12 @@ class User < ApplicationRecord
   has_many :announcement_dismissals, dependent: :destroy
   has_one :podcast_feed_token, dependent: :destroy
 
+  enum :datetime_format, {
+    european_24h: "european_24h",
+    iso: "iso",
+    us_12h: "us_12h"
+  }, default: "european_24h"
+
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :password, password_strength: true, if: :password_required?
   validates :player_id, uniqueness: true, allow_nil: true

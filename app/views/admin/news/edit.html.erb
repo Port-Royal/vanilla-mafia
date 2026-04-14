@@ -1,5 +1,5 @@
 <h1 class="text-2xl font-bold mb-2"><%= t("admin_news.edit.title") %></h1>
-<p class="text-sm text-gray-500 mb-6"><%= t("admin_news.show.created_at", date: l(@news.created_at.to_date)) %></p>
+<p class="text-sm text-gray-500 mb-6"><%= t("admin_news.show.created_at", date: format_date(@news.created_at)) %></p>
 
 <%= form_with model: @news, url: admin_news_path(@news), method: :patch do |f| %>
   <%= render "form", f: f %>

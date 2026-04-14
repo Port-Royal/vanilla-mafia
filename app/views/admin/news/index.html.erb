@@ -45,8 +45,8 @@
                 <%= t("admin_news.status.#{article.status}") %>
               </span>
             </td>
-            <td class="px-4 py-3"><%= l(article.created_at.to_date) %></td>
-            <td class="px-4 py-3"><%= article.published_at && l(article.published_at, format: :short) %></td>
+            <td class="px-4 py-3"><%= format_date(article.created_at) %></td>
+            <td class="px-4 py-3"><%= format_datetime(article.published_at) %></td>
             <td class="px-4 py-3 text-right whitespace-nowrap">
               <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article),
                     class: "text-blue-600 hover:underline text-sm" %>

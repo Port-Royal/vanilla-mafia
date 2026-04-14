@@ -9,7 +9,7 @@
         </h3>
         <% if article.published_at %>
           <p class="text-sm text-neutral-500 mt-1">
-            <%= l(article.published_at.to_date, format: :short) %>
+            <%= format_date(article.published_at) %>
           </p>
         <% end %>
       </div>

@@ -10,7 +10,7 @@
           </h3>
           <p class="text-sm text-neutral-500">
             <% if game.played_on %>
-              <%= l(game.played_on, format: :short) %> ·
+              <%= format_date(game.played_on) %> ·
             <% end %>
             <% if game.judge.present? %>
               <%= t(".judge") %>: <%= game.judge %>

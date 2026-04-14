@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     resource :dispute, only: [ :new, :create ], controller: "player_disputes"
   end
   resource :locale, only: [ :update ]
+  resource :datetime_format, only: [ :update ]
   resource :profile, only: [ :edit, :update ]
   resource :notification_settings, only: [ :edit, :update ]
   resources :announcement_dismissals, only: [ :create ], path: "announcements/dismiss"

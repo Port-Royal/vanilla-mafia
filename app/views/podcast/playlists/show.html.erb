@@ -16,7 +16,7 @@
             <%= link_to episode.title, podcast_episode_path(episode), class: "text-maroon hover:underline" %>
           </h2>
           <% if episode.published_at.present? %>
-            <div class="text-sm text-neutral-500"><%= l(episode.published_at, format: :short) %></div>
+            <div class="text-sm text-neutral-500"><%= format_datetime(episode.published_at) %></div>
           <% end %>
         </div>
       </li>
