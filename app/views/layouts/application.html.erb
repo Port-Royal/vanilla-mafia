@@ -25,7 +25,7 @@
     <%= Sentry.get_trace_propagation_meta.html_safe %>
   </head>
 
-  <body class="min-h-screen bg-white font-sans" data-controller="menu">
+  <body class="min-h-screen bg-white font-sans" data-controller="menu time-zone">
     <%# Mobile top bar %>
     <header class="lg:hidden flex items-center justify-between bg-neutral-900 px-4 py-3">
       <%= link_to root_path do %>
@@ -111,6 +111,9 @@
         <li class="border-t border-neutral-700 pt-2">
           <%= render "layouts/locale_switcher" %>
         </li>
+        <li>
+          <%= render "layouts/datetime_format_switcher" %>
+        </li>
       </ul>
     </nav>
 
@@ -193,6 +196,9 @@
               <% end %>
               <li class="border-t border-neutral-700 pt-3">
                 <%= render "layouts/locale_switcher" %>
+              </li>
+              <li>
+                <%= render "layouts/datetime_format_switcher" %>
               </li>
             </ul>
           </nav>

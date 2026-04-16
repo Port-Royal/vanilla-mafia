@@ -489,3 +489,7 @@ ru:
     series: "Серия"
     game: "Игра"
     coming_soon: "Скоро! Следите за обновлениями"
+  datetime_formats:
+    european_24h: "ДД.ММ.ГГГГ"
+    iso: "ISO"
+    us_12h: "US 12ч"

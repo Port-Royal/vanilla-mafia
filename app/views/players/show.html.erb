@@ -23,7 +23,7 @@
         <% if @stats.first_game_date %>
           <div>
             <span class="text-gray-500"><%= t(".playing_since") %></span>
-            <p class="text-lg font-semibold"><%= l(@stats.first_game_date, format: :short) %></p>
+            <p class="text-lg font-semibold"><%= format_date(@stats.first_game_date) %></p>
           </div>
         <% end %>
       </div>

@@ -102,6 +102,10 @@ en:
     series: "Series"
     game: "Game"
     coming_soon: "Coming soon! Stay tuned"
+  datetime_formats:
+    european_24h: "DD.MM.YYYY"
+    iso: "ISO"
+    us_12h: "US 12h"
   news:
     index:
       title: "News"

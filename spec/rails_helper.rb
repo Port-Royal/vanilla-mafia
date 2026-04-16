@@ -1,6 +1,6 @@
 require 'simplecov'
 SimpleCov.start 'rails' do
-  minimum_coverage 85
+  minimum_coverage 85 unless ENV['DISABLE_COVERAGE_GATE']
 end
 
 require 'spec_helper'

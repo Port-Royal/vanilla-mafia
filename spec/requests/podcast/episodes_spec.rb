@@ -52,7 +52,7 @@ RSpec.describe "Podcast::Episodes" do
 
       it "displays published_at date" do
         get "/podcast/episodes"
-        expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
+        expect(response.body).to include(DatetimeFormatter.call(published_episode.published_at, type: :datetime))
       end
 
       it "displays personal feed URL" do
@@ -137,7 +137,7 @@ RSpec.describe "Podcast::Episodes" do
 
       it "displays published_at date" do
         get "/podcast/episodes/#{published_episode.id}"
-        expect(response.body).to include(I18n.l(published_episode.published_at, format: :short))
+        expect(response.body).to include(DatetimeFormatter.call(published_episode.published_at, type: :datetime))
       end
 
       it "shows placeholder when no audio attached" do

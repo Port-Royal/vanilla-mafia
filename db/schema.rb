@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_13_000437) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_14_171053) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -326,6 +326,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_000437) do
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "datetime_format", default: "european_24h", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "locale", default: "ru", null: false

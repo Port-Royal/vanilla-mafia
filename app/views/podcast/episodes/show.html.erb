@@ -7,7 +7,7 @@
 
 <div class="text-sm text-neutral-500 mb-6">
   <% if @episode.published_at.present? %>
-    <%= l(@episode.published_at, format: :short) %>
+    <%= format_datetime(@episode.published_at) %>
   <% end %>
 </div>
 

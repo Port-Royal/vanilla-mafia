@@ -10,7 +10,7 @@
         </h3>
 
         <p class="text-sm text-neutral-500 mb-3">
-          <%= t(".ended_on") %>: <%= l(competition.ended_on, format: :short) %>
+          <%= t(".ended_on") %>: <%= format_date(competition.ended_on) %>
         </p>
 
         <% winner = winners[competition] %>
