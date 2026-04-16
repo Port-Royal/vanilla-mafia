@@ -91,15 +91,15 @@ Invalid cookie tz values are dropped silently (no flash, no error) to keep the u
 
 ### `app/services/datetime_formatter.rb` (new)
 
-Pure service. Input: a `Time`/`Date`/`DateTime`/`ActiveSupport::TimeWithZone`/`nil`, a `style` symbol (`:short` or `:long`), and optionally an explicit format key (defaults to `Current.datetime_format`). Output: formatted `String`.
+Pure service. Input: a `Time`/`Date`/`DateTime`/`ActiveSupport::TimeWithZone`/`nil` and a `type` symbol (`:date` or `:datetime`). The format key is resolved from `Current.datetime_format` (falling back to `DEFAULT_FORMAT`). Output: formatted `String`.
 
 Format strings live in a single nested constant:
 
 ```ruby
 FORMATS = {
-  european_24h: { short_date: "%d.%m.%Y", short_datetime: "%d.%m.%Y %H:%M", ... },
-  iso:          { short_date: "%Y-%m-%d", short_datetime: "%Y-%m-%d %H:%M", ... },
-  us_12h:       { short_date: "%m/%d/%Y", short_datetime: "%m/%d/%Y %-I:%M %p", ... }
+  "european_24h" => { date: "%d.%m.%Y", datetime: "%d.%m.%Y %H:%M" },
+  "iso"          => { date: "%Y-%m-%d", datetime: "%Y-%m-%d %H:%M" },
+  "us_12h"       => { date: "%m/%d/%Y", datetime: "%m/%d/%Y %-I:%M %p" }
 }.freeze
 ```
 
@@ -110,12 +110,12 @@ The service does not call `I18n.l`. It converts the input to `Current.time_zone`
 Two thin wrappers for view code:
 
 ```ruby
-def format_datetime(value, style: :short)
-  DatetimeFormatter.call(value, style: style, type: :datetime)
+def format_datetime(value)
+  DatetimeFormatter.call(value, type: :datetime)
 end
 
-def format_date(value, style: :short)
-  DatetimeFormatter.call(value, style: style, type: :date)
+def format_date(value)
+  DatetimeFormatter.call(value, type: :date)
 end
 ```
 

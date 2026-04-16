@@ -13,7 +13,7 @@ class DatetimeFormatter
     },
     "us_12h" => {
       date: "%m/%d/%Y",
-      datetime: "%m/%d/%Y %-l:%M %p"
+      datetime: "%m/%d/%Y %-I:%M %p"
     }
   }.freeze
 
