@@ -275,6 +275,8 @@ ru:
       bio_label: "О себе"
       comment_label: "Комментарий"
       photo_label: "Фото"
+      datetime_format_label: "Формат даты и времени"
+      save_datetime_format: "Сохранить формат"
     update:
       success: "Профиль успешно обновлён."
     errors:

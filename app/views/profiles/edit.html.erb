@@ -54,4 +54,24 @@
       </div>
     </div>
   <% end %>
+
+  <%= form_with(url: datetime_format_path, method: :patch, class: "mt-8 pt-6 border-t border-neutral-200") do |f| %>
+    <fieldset>
+      <legend class="block text-sm font-medium text-neutral-700 mb-2"><%= t(".datetime_format_label") %></legend>
+      <div class="space-y-2">
+        <% User.datetime_formats.keys.each do |fmt| %>
+          <label class="flex items-center gap-2 text-sm text-neutral-700">
+            <%= f.radio_button :datetime_format, fmt,
+                  checked: fmt == Current.datetime_format,
+                  class: "text-maroon focus:ring-maroon" %>
+            <span><%= t("datetime_formats.#{fmt}") %></span>
+          </label>
+        <% end %>
+      </div>
+      <div class="mt-4">
+        <%= f.submit t(".save_datetime_format"),
+              class: "w-full rounded-md bg-neutral-900 px-6 py-2 text-white text-sm font-medium hover:bg-neutral-700 transition-colors cursor-pointer" %>
+      </div>
+    </fieldset>
+  <% end %>
 </div>

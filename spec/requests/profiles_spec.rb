@@ -59,6 +59,14 @@ RSpec.describe ProfilesController do
       it "renders the bio field" do
         assert_select "textarea[name='player[bio]']"
       end
+
+      it "renders the datetime format selector with all three options" do
+        assert_select "input[type='radio'][name='datetime_format']", count: User.datetime_formats.size
+      end
+
+      it "marks the user's current datetime format as checked" do
+        assert_select "input[type='radio'][name='datetime_format'][value='european_24h'][checked]"
+      end
     end
 
     context "when admin has a claimed player" do
