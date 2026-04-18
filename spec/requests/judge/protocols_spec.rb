@@ -267,6 +267,20 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with invalid game params and invalid status" do
+        let(:invalid_game_params) { { game_number: 1 } }
+
+        it "re-renders without raising on unknown status" do
+          bad_params = valid_participations_params.deep_dup
+          bad_params["1"][:status] = "vaporized"
+
+          expect {
+            post judge_protocols_path, params: { game: invalid_game_params, participations: bad_params }
+          }.not_to raise_error
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+      end
+
       context "with invalid game params" do
         let(:invalid_game_params) { { game_number: 1 } }
 

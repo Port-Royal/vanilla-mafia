@@ -160,7 +160,7 @@ class Judge::ProtocolsController < ApplicationController
       gp.best_move = attrs[:best_move].presence
       gp.first_shoot = attrs[:first_shoot] == "1"
       gp.notes = attrs[:notes].presence
-      gp.status = attrs[:status] if attrs[:status].present?
+      gp.status = attrs[:status] if GameParticipation.statuses.key?(attrs[:status].to_s)
       gp
     end
   end

@@ -82,6 +82,10 @@ class AutosaveGameProtocolService
     participation = @game.game_participations.find_by(seat: @seat)
     return Result.new(success: false, errors: [ "No participation at seat #{@seat}" ]) unless participation
 
+    if @field == "status" && !GameParticipation.statuses.key?(@value.to_s)
+      return Result.new(success: false, errors: [ "Invalid status: #{@value}" ])
+    end
+
     participation.assign_attributes(@field => @value)
     if participation.save
       Result.new(success: true, errors: [])

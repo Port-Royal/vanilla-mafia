@@ -58,7 +58,7 @@ export default class extends Controller {
 
     const statusTarget = this.findTarget("status", seat)
     if (statusTarget) {
-      statusTarget.textContent = ""
+      this.updateStatusDisplay(statusTarget, null)
     }
   }
 

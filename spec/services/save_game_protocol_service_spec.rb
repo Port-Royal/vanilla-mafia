@@ -147,6 +147,19 @@ RSpec.describe SaveGameProtocolService do
         )
         expect(old_participation.reload.status).to eq("voted_out")
       end
+
+      it "ignores an invalid status value without raising" do
+        params = { "1" => { player_name: "Алексей", role_code: "don", plus: "2", minus: "0", best_move: "", first_shoot: "0", notes: "", status: "vaporized" } }
+        (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
+        expect {
+          described_class.call(
+            game: game_to_update,
+            game_params: update_game_params,
+            participations_params: ActionController::Parameters.new(params).permit!
+          )
+        }.not_to raise_error
+        expect(old_participation.reload.status).to eq("alive")
+      end
     end
 
     context "when clearing a previously filled seat" do

@@ -202,6 +202,16 @@ RSpec.describe AutosaveGameProtocolService do
           expect(result.success).to be true
           expect(participation.reload.status).to eq("killed_by_mafia")
         end
+
+        it "rejects an unknown status value without raising" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "status", value: "vaporized", seat: 4
+          )
+
+          expect(result.success).to be false
+          expect(result.errors).to include(a_string_matching(/Invalid status/))
+          expect(participation.reload.status).to eq("alive")
+        end
       end
 
       context "when field is disallowed" do
