@@ -4,45 +4,57 @@
      data-controller="game-overlay"
      data-game-overlay-game-id-value="<%= @game.id %>"
      data-game-overlay-role-icon-template-value="<%= asset_path('roles/peace.png').sub('peace', '%ROLE_CODE%') %>"
+     class="flex gap-2 px-2 text-white"
      <% if custom_style.present? %>style="<%= custom_style %>"<% end %>>
-  <table class="w-full text-white text-sm">
-    <thead>
-      <tr class="text-left text-gray-400 border-b border-gray-700">
-        <% unless @overlay_config[:hide_seats] %>
-          <th class="px-2 py-1"><%= t(".seat") %></th>
-        <% end %>
-        <th class="px-2 py-1"><%= t(".player") %></th>
-        <% unless @overlay_config[:hide_roles] %>
-          <th class="px-2 py-1"><%= t(".role") %></th>
-        <% end %>
-        <% unless @overlay_config[:hide_best_move] %>
-          <th class="px-2 py-1"><%= t(".best_move") %></th>
-        <% end %>
-      </tr>
-    </thead>
-    <tbody>
-      <% (1..10).each do |seat| %>
-        <% participation = @participations_by_seat[seat] %>
-        <tr id="seat-<%= seat %>" class="border-b border-gray-800">
-          <% unless @overlay_config[:hide_seats] %>
-            <td class="px-2 py-1"><%= seat %></td>
-          <% end %>
-          <td class="px-2 py-1" data-game-overlay-target="playerName" data-seat="<%= seat %>"><%= participation&.player&.name %></td>
-          <% unless @overlay_config[:hide_roles] %>
-            <td class="px-2 py-1" data-game-overlay-target="roleCode" data-seat="<%= seat %>">
-              <% if participation&.role_code.present? %>
-                <%= image_tag "roles/#{participation.role_code}.png",
-                      alt: participation.role&.name.presence || participation.role_code,
-                      class: "inline-block h-5 w-5",
-                      title: participation.role&.name.presence || participation.role_code %>
-              <% end %>
-            </td>
-          <% end %>
-          <% unless @overlay_config[:hide_best_move] %>
-            <td class="px-2 py-1" data-game-overlay-target="bestMove" data-seat="<%= seat %>"><%= participation&.best_move %></td>
-          <% end %>
-        </tr>
+  <% (1..10).each do |seat| %>
+    <% participation = @participations_by_seat[seat] %>
+    <% player = participation ? participation.player : nil %>
+    <% role = participation ? participation.role : nil %>
+    <% status = overlay_player_status(participation) %>
+    <div id="seat-<%= seat %>" class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded bg-black/40 p-2">
+      <% unless @overlay_config[:hide_seats] %>
+        <div class="self-start text-xs text-gray-400">#<%= seat %></div>
       <% end %>
-    </tbody>
-  </table>
+
+      <div class="w-full aspect-square overflow-hidden rounded">
+        <% if player && player.photo.attached? %>
+          <%= image_tag player.photo.variant(resize_to_fill: [ 200, 200 ]),
+                        alt: player.name,
+                        class: "w-full h-full object-cover" %>
+        <% else %>
+          <%= image_tag Player::DEFAULT_PHOTO_PATH,
+                        alt: player ? player.name : "",
+                        class: "w-full h-full object-cover" %>
+        <% end %>
+      </div>
+
+      <div class="w-full text-center font-semibold truncate"
+           data-game-overlay-target="playerName"
+           data-seat="<%= seat %>">
+        <%= player ? player.name : "" %>
+      </div>
+
+      <% unless @overlay_config[:hide_roles] %>
+        <div class="flex items-center gap-1 text-xs"
+             data-game-overlay-target="roleCode"
+             data-seat="<%= seat %>">
+          <% if participation && participation.role_code.present? %>
+            <%= image_tag "roles/#{participation.role_code}.png",
+                          alt: role && role.name.present? ? role.name : participation.role_code,
+                          class: "inline-block h-4 w-4",
+                          title: role && role.name.present? ? role.name : participation.role_code %>
+            <span><%= role && role.name.present? ? role.name : participation.role_code %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% unless @overlay_config[:hide_status] %>
+        <div class="text-xs px-2 py-0.5 rounded <%= overlay_status_class(status) %>"
+             data-game-overlay-target="status"
+             data-seat="<%= seat %>">
+          <%= status ? t("games.overlay.status.#{status}") : "" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 </div>

@@ -156,9 +156,9 @@ ru:
         param_description: "Описание"
         param_font_size: "Размер шрифта в пикселях (8–72). По умолчанию определяется браузером."
         param_color: "Цвет текста в формате hex без #. Например, ffffff для белого."
-        param_hide_seats: "Скрыть колонку с номером места."
-        param_hide_roles: "Скрыть колонку с ролью."
-        param_hide_best_move: "Скрыть колонку лучшего хода."
+        param_hide_seats: "Скрыть номера мест."
+        param_hide_roles: "Скрыть отображение роли."
+        param_hide_status: "Скрыть плашку статуса игрока."
         params_example_full: "Полный пример со всеми параметрами:"
         params_example_url: "https://vanilla-mafia.ru/games/123/overlay?font_size=20&color=ffffff&hide_seats=1"
         judge_title: "Руководство для ведущего"
@@ -208,10 +208,11 @@ ru:
         peace_victory: "Победа мирных"
         mafia_victory: "Победа мафии"
     overlay:
-      seat: "Место"
-      player: "Игрок"
-      role: "Роль"
-      best_move: "Лучший ход"
+      status:
+        alive: "Жив"
+        killed_by_mafia: "Убит"
+        voted_out: "Повешен"
+        banned: "ППК"
   player_claims:
     create:
       pending: "Заявка отправлена и ожидает подтверждения."

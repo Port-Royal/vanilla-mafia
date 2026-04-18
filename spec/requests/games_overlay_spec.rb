@@ -33,7 +33,15 @@ RSpec.describe "Games#overlay" do
       expect(response.body).to include("game-overlay")
     end
 
-    it "displays player names with seat numbers" do
+    it "renders a card per seat (10 cards)" do
+      get overlay_game_path(game)
+
+      (1..10).each do |seat|
+        expect(response.body).to include(%(id="seat-#{seat}"))
+      end
+    end
+
+    it "displays player names inside their cards" do
       get overlay_game_path(game)
 
       expect(response.body).to include("Алексей")
@@ -45,6 +53,18 @@ RSpec.describe "Games#overlay" do
 
       expect(response.body).to include("sheriff")
       expect(response.body).to include("don")
+    end
+
+    it "renders a default photo placeholder for players without an attached photo" do
+      get overlay_game_path(game)
+
+      expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
+    end
+
+    it "renders a status pill with the default :alive status for every taken seat" do
+      get overlay_game_path(game)
+
+      expect(response.body.scan(I18n.t("games.overlay.status.alive")).size).to be >= 2
     end
 
     it "includes ActionCable subscription data for the game" do
@@ -116,22 +136,22 @@ RSpec.describe "Games#overlay" do
         expect(response.body).not_to include("color:")
       end
 
-      it "hides roles column when hide_roles param is set" do
+      it "hides role display when hide_roles param is set" do
         get overlay_game_path(game, hide_roles: "1")
 
         expect(response.body).not_to include("sheriff")
       end
 
-      it "hides best_move column when hide_best_move param is set" do
-        get overlay_game_path(game, hide_best_move: "1")
-
-        expect(response.body).not_to include(I18n.t("games.overlay.best_move"))
-      end
-
       it "hides seat numbers when hide_seats param is set" do
         get overlay_game_path(game, hide_seats: "1")
 
-        expect(response.body).not_to include(I18n.t("games.overlay.seat"))
+        expect(response.body).not_to include("#1")
+      end
+
+      it "hides status pill when hide_status param is set" do
+        get overlay_game_path(game, hide_status: "1")
+
+        expect(response.body).not_to include(I18n.t("games.overlay.status.alive"))
       end
     end
   end

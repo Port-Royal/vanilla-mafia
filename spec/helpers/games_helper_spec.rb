@@ -26,4 +26,38 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_custom_style(config)).to eq("font-size: 16px; color: #00ff00")
     end
   end
+
+  describe "#overlay_player_status" do
+    it "returns nil when no participation is given" do
+      expect(helper.overlay_player_status(nil)).to be_nil
+    end
+
+    it "returns :alive for an existing participation (stubbed pending vm-e4b)" do
+      participation = instance_double(GameParticipation)
+
+      expect(helper.overlay_player_status(participation)).to eq(:alive)
+    end
+  end
+
+  describe "#overlay_status_class" do
+    it "returns a non-empty class string for alive" do
+      expect(helper.overlay_status_class(:alive)).to include("green")
+    end
+
+    it "returns a non-empty class string for killed_by_mafia" do
+      expect(helper.overlay_status_class(:killed_by_mafia)).to include("red")
+    end
+
+    it "returns a non-empty class string for voted_out" do
+      expect(helper.overlay_status_class(:voted_out)).to include("orange")
+    end
+
+    it "returns a non-empty class string for banned" do
+      expect(helper.overlay_status_class(:banned)).to include("gray")
+    end
+
+    it "returns an empty string for unknown status" do
+      expect(helper.overlay_status_class(:unknown)).to eq("")
+    end
+  end
 end

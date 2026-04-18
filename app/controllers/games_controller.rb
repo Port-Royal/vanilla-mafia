@@ -18,8 +18,8 @@ class GamesController < ApplicationController
     config[:font_size] = clamp_font_size(params[:font_size])
     config[:color] = sanitize_hex_color(params[:color])
     config[:hide_roles] = params[:hide_roles] == "1"
-    config[:hide_best_move] = params[:hide_best_move] == "1"
     config[:hide_seats] = params[:hide_seats] == "1"
+    config[:hide_status] = params[:hide_status] == "1"
     config
   end
 
