@@ -3,6 +3,8 @@ class GameParticipation < ApplicationRecord
   belongs_to :player
   belongs_to :role, foreign_key: :role_code, primary_key: :code, optional: true
 
+  enum :status, { alive: 0, killed_by_mafia: 1, voted_out: 2, banned: 3 }, default: :alive
+
   normalizes :role_code, with: ->(v) { v.presence }
 
   validates :game, :player, presence: true

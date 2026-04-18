@@ -79,6 +79,7 @@
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:minus) %></th>
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move) %></th>
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:first_shoot) %></th>
+          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:status) %></th>
           <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.notes") %></th>
         </tr>
       </thead>
@@ -131,6 +132,13 @@
             <td class="px-3 py-2 text-center">
               <input type="hidden" name="participations[<%= seat %>][first_shoot]" value="0" />
               <input type="checkbox" name="participations[<%= seat %>][first_shoot]" value="1" <%= "checked" if participation.first_shoot %> class="rounded" />
+            </td>
+            <td class="px-3 py-2">
+              <select name="participations[<%= seat %>][status]" class="w-auto max-w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
+                <% GameParticipation.statuses.each_key do |status_key| %>
+                  <option value="<%= status_key %>" <%= "selected" if participation.status == status_key %>><%= t("games.overlay.status.#{status_key}") %></option>
+                <% end %>
+              </select>
             </td>
             <td class="px-3 py-2">
               <input type="text" name="participations[<%= seat %>][notes]" value="<%= participation.notes %>" class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm" />

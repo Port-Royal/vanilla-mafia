@@ -206,6 +206,17 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(participation.reload.notes).to eq("Хороший ход")
         end
 
+        it "updates status" do
+          participation = create(:game_participation, game: game, player: player, seat: 8)
+
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "participation", seat: 8, field: "status", value: "voted_out"
+          }, as: :json
+
+          expect(response).to have_http_status(:ok)
+          expect(participation.reload.status).to eq("voted_out")
+        end
+
         it "removes participation when player_name is cleared" do
           create(:game_participation, game: game, player: player, seat: 7)
 

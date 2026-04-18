@@ -2,7 +2,7 @@ class AutosaveGameProtocolService
   Result = Data.define(:success, :errors)
 
   GAME_FIELDS = %w[game_number played_on name result judge competition_id table_number].freeze
-  PARTICIPATION_FIELDS = %w[player_name role_code plus minus best_move first_shoot notes].freeze
+  PARTICIPATION_FIELDS = %w[player_name role_code plus minus best_move first_shoot notes status].freeze
 
   def self.call(game:, scope:, field:, value:, seat: nil)
     new(game, scope, field, value, seat).call
@@ -81,6 +81,10 @@ class AutosaveGameProtocolService
   def update_existing_participation
     participation = @game.game_participations.find_by(seat: @seat)
     return Result.new(success: false, errors: [ "No participation at seat #{@seat}" ]) unless participation
+
+    if @field == "status" && !GameParticipation.statuses.key?(@value.to_s)
+      return Result.new(success: false, errors: [ "Invalid status: #{@value}" ])
+    end
 
     participation.assign_attributes(@field => @value)
     if participation.save

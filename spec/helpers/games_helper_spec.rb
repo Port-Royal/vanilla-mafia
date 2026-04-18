@@ -32,10 +32,28 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_player_status(nil)).to be_nil
     end
 
-    it "returns :alive for an existing participation (stubbed pending vm-e4b)" do
-      participation = instance_double(GameParticipation)
+    it "returns the participation status as a symbol" do
+      participation = instance_double(GameParticipation, status: "killed_by_mafia")
+
+      expect(helper.overlay_player_status(participation)).to eq(:killed_by_mafia)
+    end
+
+    it "returns :alive for a freshly built participation" do
+      participation = GameParticipation.new
 
       expect(helper.overlay_player_status(participation)).to eq(:alive)
+    end
+
+    it "reflects a voted_out participation" do
+      participation = GameParticipation.new(status: :voted_out)
+
+      expect(helper.overlay_player_status(participation)).to eq(:voted_out)
+    end
+
+    it "reflects a banned participation" do
+      participation = GameParticipation.new(status: :banned)
+
+      expect(helper.overlay_player_status(participation)).to eq(:banned)
     end
   end
 

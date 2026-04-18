@@ -13,11 +13,10 @@ module GamesHelper
     parts.join("; ")
   end
 
-  # Stubbed pending real status tracking — see vm-e4b / GH #812.
   def overlay_player_status(participation)
     return nil unless participation
 
-    :alive
+    participation.status.to_sym
   end
 
   def overlay_status_class(status)

@@ -41,6 +41,7 @@ class SaveGameProtocolService
       participation.best_move = attrs[:best_move].presence
       participation.first_shoot = attrs[:first_shoot] == "1"
       participation.notes = attrs[:notes].presence
+      participation.status = attrs[:status] if GameParticipation.statuses.key?(attrs[:status].to_s)
       participation.save!
     end
 
