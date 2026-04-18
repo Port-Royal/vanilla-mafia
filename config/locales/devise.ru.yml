@@ -88,6 +88,10 @@ ru:
         subject: "Инструкции по сбросу пароля"
       unlock_instructions:
         subject: "Инструкции по разблокировке аккаунта"
+      email_changed:
+        subject: "Email был изменён"
+      password_change:
+        subject: "Пароль был изменён"
   errors:
     messages:
       not_saved:
