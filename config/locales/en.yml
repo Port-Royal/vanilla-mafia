@@ -50,6 +50,7 @@ en:
           group: "Group"
           fun_session: "Fun Session"
       game:
+        table_number: "Table number"
         results:
           in_progress: "In progress"
           peace_victory: "Peace victory"
@@ -377,6 +378,7 @@ en:
       best_move: "Best move"
       total: "Total"
       judge: "Judge: %{name}"
+      table_number: "Table: %{number}"
       result:
         in_progress: "In progress"
         peace_victory: "City wins"

@@ -31,6 +31,7 @@ ru:
         name: "Название"
         result: "Результат"
         judge: "Ведущий"
+        table_number: "Номер стола"
         results:
           in_progress: "В процессе"
           peace_victory: "Победа мирных"
@@ -203,6 +204,7 @@ ru:
       best_move: "Лучший ход"
       total: "Итого"
       judge: "Ведущий: %{name}"
+      table_number: "Стол: %{number}"
       result:
         in_progress: "Игра в процессе"
         peace_victory: "Победа мирных"

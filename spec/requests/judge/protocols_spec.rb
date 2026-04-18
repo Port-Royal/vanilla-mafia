@@ -229,6 +229,24 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with table_number" do
+        let(:game_params) { { game_number: 88, result: "peace_victory", competition_id: competition.id, table_number: "3" } }
+
+        it "persists the submitted table_number" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.table_number).to eq(3)
+        end
+      end
+
+      context "with blank table_number" do
+        let(:game_params) { { game_number: 87, result: "peace_victory", competition_id: competition.id, table_number: "" } }
+
+        it "stores nil table_number" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.table_number).to be_nil
+        end
+      end
+
       context "with in_progress result" do
         let(:game_params) { { game_number: 95, result: "in_progress", competition_id: competition.id } }
 
