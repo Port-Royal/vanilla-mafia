@@ -69,6 +69,12 @@ ru:
       not_found_in_database: "Неверный %{authentication_keys} или пароль."
       timeout: "Сессия истекла. Войдите снова."
       unauthenticated: "Необходимо войти в систему."
+      locked: "Ваш аккаунт заблокирован."
+      last_attempt: "У вас остаётся одна попытка до блокировки аккаунта."
+    unlocks:
+      send_instructions: "Через несколько минут вы получите письмо с инструкциями по разблокировке аккаунта."
+      send_paranoid_instructions: "Если ваш аккаунт существует, через несколько минут вы получите письмо с инструкциями по разблокировке."
+      unlocked: "Аккаунт успешно разблокирован. Войдите, чтобы продолжить."
     shared:
       links:
         sign_in: "Войти"
@@ -80,6 +86,8 @@ ru:
     mailer:
       reset_password_instructions:
         subject: "Инструкции по сбросу пароля"
+      unlock_instructions:
+        subject: "Инструкции по разблокировке аккаунта"
   errors:
     messages:
       not_saved:

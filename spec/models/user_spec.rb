@@ -16,12 +16,51 @@ RSpec.describe User, type: :model do
     it "configures google_oauth2 as omniauth provider" do
       expect(User.omniauth_providers).to include(:google_oauth2)
     end
+
+    it "includes lockable" do
+      expect(User.devise_modules).to include(:lockable)
+    end
   end
 
   describe "database columns" do
     it { is_expected.to have_db_column(:provider).of_type(:string) }
     it { is_expected.to have_db_column(:uid).of_type(:string) }
     it { is_expected.to have_db_index(%i[provider uid]).unique }
+    it { is_expected.to have_db_column(:failed_attempts).of_type(:integer).with_options(default: 0, null: false) }
+    it { is_expected.to have_db_column(:unlock_token).of_type(:string) }
+    it { is_expected.to have_db_column(:locked_at).of_type(:datetime) }
+    it { is_expected.to have_db_index(:unlock_token).unique }
+  end
+
+  describe "lockable behavior" do
+    let(:user) { create(:user) }
+
+    it "locks the account after 5 failed attempts" do
+      5.times { user.valid_for_authentication? { false } }
+      expect(user.reload.access_locked?).to be true
+    end
+
+    it "does not lock after 4 failed attempts" do
+      4.times { user.valid_for_authentication? { false } }
+      expect(user.reload.access_locked?).to be false
+    end
+
+    it "auto-unlocks after the configured unlock_in window has passed" do
+      5.times { user.valid_for_authentication? { false } }
+      user.update!(locked_at: 16.minutes.ago)
+      expect(user.access_locked?).to be false
+    end
+
+    it "stays locked while still inside the unlock_in window" do
+      5.times { user.valid_for_authentication? { false } }
+      user.update!(locked_at: 14.minutes.ago)
+      expect(user.access_locked?).to be true
+    end
+
+    it "generates an unlock token when locking via :both unlock strategy" do
+      5.times { user.valid_for_authentication? { false } }
+      expect(user.reload.unlock_token).to be_present
+    end
   end
 
   describe "validations" do
