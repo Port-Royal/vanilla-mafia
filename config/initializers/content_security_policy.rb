@@ -4,9 +4,12 @@
 #
 # Currently shipping in REPORT-ONLY mode (sets Content-Security-Policy-Report-Only).
 # Browsers will log violations to the devtools console without blocking anything.
-# Once we have ~1–2 weeks of clean reports from production, flip
-# `content_security_policy_report_only` to false to enforce. See follow-up
-# issue for the enforcement step.
+#
+# There is no centralized CSP report stream yet because this policy does not
+# configure `report-uri` / `report-to` — the report-endpoint follow-up issue
+# (vm-zgx) must land first. Once it's deployed and producing clean reports
+# from production for ~1–2 weeks, the enforcement follow-up (vm-1rb) flips
+# `content_security_policy_report_only` to false.
 
 Rails.application.configure do
   config.content_security_policy do |policy|

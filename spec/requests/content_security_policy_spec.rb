@@ -33,8 +33,37 @@ RSpec.describe "Content-Security-Policy header" do
       expect(csp).to include("form-action 'self' https://accounts.google.com")
     end
 
-    it "issues a per-request nonce on script-src" do
-      expect(csp).to match(/script-src[^;]*'nonce-[A-Za-z0-9+\/=_-]+'/)
+    it "restricts script-src to self + https with a nonce" do
+      expect(csp).to match(/script-src 'self' https: 'nonce-[A-Za-z0-9+\/=_-]+'/)
+    end
+
+    it "permits style-src self + https + unsafe-inline (Avo)" do
+      expect(csp).to include("style-src 'self' https: 'unsafe-inline'")
+    end
+
+    it "permits img-src self + https + data" do
+      expect(csp).to include("img-src 'self' https: data:")
+    end
+
+    it "permits font-src self + https + data" do
+      expect(csp).to include("font-src 'self' https: data:")
+    end
+
+    it "permits connect-src self + https" do
+      expect(csp).to include("connect-src 'self' https:")
+    end
+  end
+
+  describe "rendered page" do
+    it "stamps the script-src nonce onto inline <script> tags" do
+      get root_path
+
+      csp = response.headers["Content-Security-Policy-Report-Only"]
+      nonce_match = csp.match(/script-src[^;]*'nonce-([A-Za-z0-9+\/=_-]+)'/)
+      expect(nonce_match).to be_present, "expected script-src nonce in CSP header, got: #{csp}"
+
+      nonce = nonce_match[1]
+      expect(response.body).to match(/<script\b[^>]*\bnonce="#{Regexp.escape(nonce)}"/)
     end
   end
 end
