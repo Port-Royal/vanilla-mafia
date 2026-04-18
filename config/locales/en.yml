@@ -330,9 +330,9 @@ en:
         param_description: "Description"
         param_font_size: "Font size in pixels (8–72). Default is determined by the browser."
         param_color: "Text color as a hex code without #. For example, ffffff for white."
-        param_hide_seats: "Hide the seat number column."
-        param_hide_roles: "Hide the role column."
-        param_hide_best_move: "Hide the best move column."
+        param_hide_seats: "Hide seat numbers."
+        param_hide_roles: "Hide the role display."
+        param_hide_status: "Hide the player status pill."
         params_example_full: "Full example with all parameters:"
         params_example_url: "https://vanilla-mafia.ru/games/123/overlay?font_size=20&color=ffffff&hide_seats=1"
         judge_title: "Guide for Judges"
@@ -382,10 +382,11 @@ en:
         peace_victory: "City wins"
         mafia_victory: "Mafia wins"
     overlay:
-      seat: "Seat"
-      player: "Player"
-      role: "Role"
-      best_move: "Best move"
+      status:
+        alive: "Alive"
+        killed_by_mafia: "Killed"
+        voted_out: "Voted out"
+        banned: "Banned"
   series:
     show:
       player: "Player"

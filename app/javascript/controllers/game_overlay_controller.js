@@ -3,7 +3,7 @@ import { createConsumer } from "@rails/actioncable"
 
 export default class extends Controller {
   static values = { gameId: Number, roleIconTemplate: String }
-  static targets = ["playerName", "roleCode", "bestMove"]
+  static targets = ["playerName", "roleCode", "status"]
 
   connect() {
     this.subscription = createConsumer().subscriptions.create(
@@ -49,9 +49,9 @@ export default class extends Controller {
       this.updateRoleDisplay(roleTarget, null)
     }
 
-    const bestMoveTarget = this.findTarget("best_move", seat)
-    if (bestMoveTarget) {
-      bestMoveTarget.textContent = ""
+    const statusTarget = this.findTarget("status", seat)
+    if (statusTarget) {
+      statusTarget.textContent = ""
     }
   }
 
@@ -67,7 +67,7 @@ export default class extends Controller {
     const mapping = {
       player_name: "playerName",
       role_code: "roleCode",
-      best_move: "bestMove"
+      status: "status"
     }
     return mapping[field]
   }
@@ -81,7 +81,7 @@ export default class extends Controller {
       img.src = src
       img.alt = roleCode
       img.title = roleCode
-      img.className = "inline-block h-5 w-5"
+      img.className = "inline-block h-4 w-4"
       target.appendChild(img)
     }
   }
