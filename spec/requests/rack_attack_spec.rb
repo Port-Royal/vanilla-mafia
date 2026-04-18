@@ -2,33 +2,22 @@ require "rails_helper"
 
 RSpec.describe "Rack::Attack throttling", type: :request do
   before(:all) do
-    Rails.application.config.middleware.use(Rack::Attack) unless Rails.application.middleware.include?(Rack::Attack)
-    Rails.application.reload_routes!
+    @middleware_was_installed = Rails.application.middleware.include?(Rack::Attack)
+    Rails.application.config.middleware.use(Rack::Attack) unless @middleware_was_installed
+
     @original_store = Rack::Attack.cache.store
     Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
 
+    @original_throttles = Rack::Attack.throttles.dup
     Rack::Attack.throttles.clear
-    Rack::Attack.throttle("req/ip", limit: 500, period: 5.minutes) { |req| req.ip }
-    Rack::Attack.throttle("logins/ip", limit: 5, period: 1.minute) do |req|
-      req.ip if req.path == "/users/sign_in" && req.post?
-    end
-    Rack::Attack.throttle("password_resets/email", limit: 3, period: 1.hour) do |req|
-      next unless req.path == "/users/password" && req.post?
-
-      email = req.params.dig("user", "email").to_s.downcase.strip
-      email.presence
-    end
-    Rack::Attack.throttle("password_resets/ip", limit: 10, period: 1.hour) do |req|
-      req.ip if req.path == "/users/password" && req.post?
-    end
-    Rack::Attack.throttle("registrations/ip", limit: 5, period: 1.hour) do |req|
-      req.ip if req.path == "/users" && req.post?
-    end
+    RackAttackConfig.install_throttles!
   end
 
   after(:all) do
     Rack::Attack.cache.store = @original_store
     Rack::Attack.throttles.clear
+    @original_throttles.each { |name, throttle| Rack::Attack.throttles[name] = throttle }
+    Rails.application.config.middleware.delete(Rack::Attack) unless @middleware_was_installed
   end
 
   before { Rack::Attack.cache.store.clear }
@@ -115,7 +104,7 @@ RSpec.describe "Rack::Attack throttling", type: :request do
   describe "global per-IP throttle (500 / 5 min)" do
     it "eventually blocks on sustained traffic from a single IP" do
       Rack::Attack.throttles.delete("req/ip")
-      Rack::Attack.throttle("req/ip", limit: 3, period: 5.minutes) { |req| req.ip }
+      Rack::Attack.throttle("req/ip", limit: 3, period: 5.minutes) { |req| RackAttackConfig.client_ip(req) }
 
       3.times { get root_path, headers: ip_header("4.4.4.4") }
       get root_path, headers: ip_header("4.4.4.4")
@@ -123,7 +112,7 @@ RSpec.describe "Rack::Attack throttling", type: :request do
       expect(response).to have_http_status(:too_many_requests)
     ensure
       Rack::Attack.throttles.delete("req/ip")
-      Rack::Attack.throttle("req/ip", limit: 500, period: 5.minutes) { |req| req.ip }
+      Rack::Attack.throttle("req/ip", limit: 500, period: 5.minutes) { |req| RackAttackConfig.client_ip(req) }
     end
   end
 end
