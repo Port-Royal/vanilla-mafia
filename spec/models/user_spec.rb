@@ -20,6 +20,14 @@ RSpec.describe User, type: :model do
     it "includes lockable" do
       expect(User.devise_modules).to include(:lockable)
     end
+
+    it "includes timeoutable" do
+      expect(User.devise_modules).to include(:timeoutable)
+    end
+
+    it "configures timeout_in to 2 weeks" do
+      expect(Devise.timeout_in).to eq(2.weeks)
+    end
   end
 
   describe "database columns" do
@@ -436,6 +444,16 @@ RSpec.describe User, type: :model do
 
     context "when user has only non-pending dispute claims" do
       before { create(:player_claim, :dispute, user: user, player: player, status: "rejected") }
+
+      it "returns false" do
+        expect(user.pending_dispute?).to be false
+      end
+    end
+
+    context "when user has a pending non-dispute claim" do
+      let(:other_player) { create(:player) }
+
+      before { create(:player_claim, user: user, player: other_player, status: "pending") }
 
       it "returns false" do
         expect(user.pending_dispute?).to be false
