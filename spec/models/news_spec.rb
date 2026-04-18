@@ -34,6 +34,65 @@ RSpec.describe News, type: :model do
         expect(news).to be_valid
       end
     end
+
+    describe "photos attachment" do
+      let(:news) { build(:news) }
+
+      context "with allowed content types" do
+        before do
+          news.photos.attach(io: StringIO.new("p"), filename: "p.jpg", content_type: "image/jpeg")
+        end
+
+        it "is valid" do
+          expect(news).to be_valid
+        end
+      end
+
+      context "with a disallowed content type" do
+        before do
+          news.photos.attach(io: StringIO.new("p"), filename: "p.exe", content_type: "application/octet-stream")
+        end
+
+        it "is invalid" do
+          expect(news).not_to be_valid
+          expect(news.errors[:photos]).to include(I18n.t("errors.messages.content_type"))
+        end
+      end
+
+      context "when over the per-photo size limit" do
+        before do
+          blob = ActiveStorage::Blob.create_and_upload!(
+            io: StringIO.new("x"),
+            filename: "big.jpg",
+            content_type: "image/jpeg"
+          )
+          blob.update_columns(byte_size: News::MAX_PHOTO_SIZE + 1)
+          news.photos.attach(blob)
+        end
+
+        it "is invalid" do
+          expect(news).not_to be_valid
+          expect(news.errors[:photos]).to include(
+            I18n.t("errors.messages.file_size", count: News::MAX_PHOTO_SIZE / 1.megabyte)
+          )
+        end
+      end
+
+      context "with too many photos" do
+        before do
+          (News::MAX_PHOTOS + 1).times do |i|
+            news.photos.attach(io: StringIO.new("p#{i}"), filename: "p#{i}.jpg", content_type: "image/jpeg")
+          end
+        end
+
+        it "is invalid" do
+          expect(news).not_to be_valid
+          expect(news.errors[:photos]).to include(
+            I18n.t("errors.messages.too_many", count: News::MAX_PHOTOS)
+          )
+        end
+      end
+    end
   end
 
   describe '.recent' do

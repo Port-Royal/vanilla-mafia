@@ -70,13 +70,13 @@ class PlayerClaim < ApplicationRecord
     end
 
     if selfie.byte_size > MAX_FILE_SIZE
-      errors.add(:selfie, :file_size)
+      errors.add(:selfie, :file_size, count: MAX_FILE_SIZE / 1.megabyte)
     end
   end
 
   def validate_documents
     if documents.count > MAX_DOCUMENTS
-      errors.add(:documents, :too_many)
+      errors.add(:documents, :too_many, count: MAX_DOCUMENTS)
     end
 
     documents.each do |doc|
@@ -86,7 +86,7 @@ class PlayerClaim < ApplicationRecord
       end
 
       if doc.byte_size > MAX_FILE_SIZE
-        errors.add(:documents, :file_size)
+        errors.add(:documents, :file_size, count: MAX_FILE_SIZE / 1.megabyte)
         break
       end
     end

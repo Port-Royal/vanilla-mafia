@@ -1,4 +1,9 @@
 class Episode < ApplicationRecord
+  AUDIO_CONTENT_TYPES = %w[audio/mpeg audio/mp4 audio/x-m4a audio/wav].freeze
+  IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp].freeze
+  MAX_AUDIO_SIZE = 200.megabytes
+  MAX_IMAGE_SIZE = 5.megabytes
+
   has_one_attached :audio
   has_one_attached :image
 
@@ -7,6 +12,8 @@ class Episode < ApplicationRecord
   validates :title, presence: true
   validates :status, presence: true
   validates :duration_seconds, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validate :validate_audio, if: -> { audio.attached? }
+  validate :validate_image, if: -> { image.attached? }
 
   after_save_commit :enqueue_duration_extraction, if: -> { audio.attached? && duration_seconds.nil? }
 
@@ -49,5 +56,25 @@ class Episode < ApplicationRecord
 
   def enqueue_duration_extraction
     ExtractEpisodeDurationJob.perform_later(self)
+  end
+
+  def validate_audio
+    unless audio.content_type.in?(AUDIO_CONTENT_TYPES)
+      errors.add(:audio, :content_type)
+    end
+
+    if audio.byte_size > MAX_AUDIO_SIZE
+      errors.add(:audio, :file_size, count: MAX_AUDIO_SIZE / 1.megabyte)
+    end
+  end
+
+  def validate_image
+    unless image.content_type.in?(IMAGE_CONTENT_TYPES)
+      errors.add(:image, :content_type)
+    end
+
+    if image.byte_size > MAX_IMAGE_SIZE
+      errors.add(:image, :file_size, count: MAX_IMAGE_SIZE / 1.megabyte)
+    end
   end
 end
