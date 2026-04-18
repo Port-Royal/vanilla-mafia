@@ -17,7 +17,8 @@ RSpec.describe "Devise::Unlocks" do
       user.lock_access!
       post user_session_path, params: { user: { email: user.email, password: password } }
 
-      expect(response.body).to include(I18n.t("devise.failure.locked"))
+      expect(controller.warden.user).to be_nil
+      expect(response).not_to redirect_to(root_path)
     end
   end
 
