@@ -20,10 +20,14 @@ class News < ApplicationRecord
   enum :status, { draft: "draft", published: "published" }
 
   MAX_CONTENT_LENGTH = 50_000
+  PHOTO_CONTENT_TYPES = %w[image/jpeg image/png image/webp].freeze
+  MAX_PHOTO_SIZE = 10.megabytes
+  MAX_PHOTOS = 20
 
   validates :title, presence: true
   validates :status, presence: true
   validate :content_length_within_limit
+  validate :validate_photos, if: -> { photos.attached? }
 
   scope :visible, -> { published.where(published_at: ..Time.current) }
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
@@ -90,6 +94,24 @@ class News < ApplicationRecord
     plain_text_length = content.body.to_plain_text.length
     if plain_text_length > MAX_CONTENT_LENGTH
       errors.add(:content, :too_long, count: MAX_CONTENT_LENGTH)
+    end
+  end
+
+  def validate_photos
+    if photos.count > MAX_PHOTOS
+      errors.add(:photos, :too_many, count: MAX_PHOTOS)
+    end
+
+    photos.each do |photo|
+      unless photo.content_type.in?(PHOTO_CONTENT_TYPES)
+        errors.add(:photos, :content_type)
+        break
+      end
+
+      if photo.byte_size > MAX_PHOTO_SIZE
+        errors.add(:photos, :file_size, count: MAX_PHOTO_SIZE / 1.megabyte)
+        break
+      end
     end
   end
 end

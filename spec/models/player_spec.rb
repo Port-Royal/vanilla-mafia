@@ -17,6 +17,50 @@ RSpec.describe Player, type: :model do
     it { is_expected.to validate_uniqueness_of(:name) }
   end
 
+  describe "photo attachment" do
+    let(:player) { build(:player) }
+
+    context "with an allowed content type" do
+      before do
+        player.photo.attach(io: StringIO.new("p"), filename: "p.jpg", content_type: "image/jpeg")
+      end
+
+      it "is valid" do
+        expect(player).to be_valid
+      end
+    end
+
+    context "with a disallowed content type" do
+      before do
+        player.photo.attach(io: StringIO.new("p"), filename: "p.gif", content_type: "image/gif")
+      end
+
+      it "is invalid" do
+        expect(player).not_to be_valid
+        expect(player.errors[:photo]).to include(I18n.t("errors.messages.content_type"))
+      end
+    end
+
+    context "when over the size limit" do
+      before do
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("x"),
+          filename: "big.jpg",
+          content_type: "image/jpeg"
+        )
+        blob.update_columns(byte_size: Player::MAX_PHOTO_SIZE + 1)
+        player.photo.attach(blob)
+      end
+
+      it "is invalid" do
+        expect(player).not_to be_valid
+        expect(player.errors[:photo]).to include(
+          I18n.t("errors.messages.file_size", count: Player::MAX_PHOTO_SIZE / 1.megabyte)
+        )
+      end
+    end
+  end
+
   describe '#claimed?' do
     context 'when player has a user' do
       let(:player) { create(:player) }

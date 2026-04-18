@@ -184,7 +184,7 @@ RSpec.describe PlayerClaim, type: :model do
 
         it 'is invalid' do
           expect(claim).not_to be_valid
-          expect(claim.errors[:documents]).to include(I18n.t("errors.messages.too_many"))
+          expect(claim.errors[:documents]).to include(I18n.t("errors.messages.too_many", count: PlayerClaim::MAX_DOCUMENTS))
         end
       end
     end

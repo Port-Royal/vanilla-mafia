@@ -12,7 +12,11 @@ class Player < ApplicationRecord
   has_one :user, dependent: :nullify
   has_one_attached :photo
 
+  PHOTO_CONTENT_TYPES = %w[image/jpeg image/png image/webp].freeze
+  MAX_PHOTO_SIZE = 5.megabytes
+
   validates :name, presence: true, uniqueness: true
+  validate :validate_photo, if: -> { photo.attached? }
 
   def claimed?
     user.present?
@@ -47,4 +51,16 @@ class Player < ApplicationRecord
         "ROUND(SUM(COALESCE(game_participations.plus, 0) - COALESCE(game_participations.minus, 0) + COALESCE(game_participations.best_move, 0)), 2) AS total_rating"
       )
   }
+
+  private
+
+  def validate_photo
+    unless photo.content_type.in?(PHOTO_CONTENT_TYPES)
+      errors.add(:photo, :content_type)
+    end
+
+    if photo.byte_size > MAX_PHOTO_SIZE
+      errors.add(:photo, :file_size, count: MAX_PHOTO_SIZE / 1.megabyte)
+    end
+  end
 end

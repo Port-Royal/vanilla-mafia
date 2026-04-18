@@ -20,8 +20,9 @@ RSpec.describe Episode, type: :model do
   end
 
   describe "audio attachment" do
+    let(:episode) { build(:episode) }
+
     it "can attach an audio file" do
-      episode = create(:episode)
       episode.audio.attach(
         io: StringIO.new("fake audio"),
         filename: "episode.mp3",
@@ -29,17 +30,98 @@ RSpec.describe Episode, type: :model do
       )
       expect(episode.audio).to be_attached
     end
+
+    context "with an allowed content type" do
+      before do
+        episode.audio.attach(io: StringIO.new("a"), filename: "e.mp3", content_type: "audio/mpeg")
+      end
+
+      it "is valid" do
+        expect(episode).to be_valid
+      end
+    end
+
+    context "with a disallowed content type" do
+      before do
+        episode.audio.attach(io: StringIO.new("a"), filename: "e.exe", content_type: "application/octet-stream")
+      end
+
+      it "is invalid" do
+        expect(episode).not_to be_valid
+        expect(episode.errors[:audio]).to include(I18n.t("errors.messages.content_type"))
+      end
+    end
+
+    context "when over the size limit" do
+      before do
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("x"),
+          filename: "big.mp3",
+          content_type: "audio/mpeg"
+        )
+        blob.update_columns(byte_size: Episode::MAX_AUDIO_SIZE + 1)
+        episode.audio.attach(blob)
+      end
+
+      it "is invalid" do
+        expect(episode).not_to be_valid
+        expect(episode.errors[:audio]).to include(
+          I18n.t("errors.messages.file_size", count: Episode::MAX_AUDIO_SIZE / 1.megabyte)
+        )
+      end
+    end
   end
 
   describe "image attachment" do
+    let(:episode) { build(:episode) }
+
     it "can attach an image" do
-      episode = create(:episode)
       episode.image.attach(
         io: StringIO.new("fake image"),
         filename: "cover.jpg",
         content_type: "image/jpeg"
       )
       expect(episode.image).to be_attached
+    end
+
+    context "with an allowed content type" do
+      before do
+        episode.image.attach(io: StringIO.new("i"), filename: "c.jpg", content_type: "image/jpeg")
+      end
+
+      it "is valid" do
+        expect(episode).to be_valid
+      end
+    end
+
+    context "with a disallowed content type" do
+      before do
+        episode.image.attach(io: StringIO.new("i"), filename: "c.gif", content_type: "image/gif")
+      end
+
+      it "is invalid" do
+        expect(episode).not_to be_valid
+        expect(episode.errors[:image]).to include(I18n.t("errors.messages.content_type"))
+      end
+    end
+
+    context "when over the size limit" do
+      before do
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("x"),
+          filename: "big.jpg",
+          content_type: "image/jpeg"
+        )
+        blob.update_columns(byte_size: Episode::MAX_IMAGE_SIZE + 1)
+        episode.image.attach(blob)
+      end
+
+      it "is invalid" do
+        expect(episode).not_to be_valid
+        expect(episode.errors[:image]).to include(
+          I18n.t("errors.messages.file_size", count: Episode::MAX_IMAGE_SIZE / 1.megabyte)
+        )
+      end
     end
   end
 

@@ -468,8 +468,8 @@ en:
       already_claimed: "is already claimed"
       not_claimed: "is not claimed by anyone"
       content_type: "has an unsupported file type"
-      file_size: "is too large (maximum is 10 MB)"
-      too_many: "are too many (maximum is 5)"
+      file_size: "is too large (maximum is %{count} MB)"
+      too_many: "are too many (maximum is %{count})"
     "404":
       title: "Page not found"
       message: "The page you requested does not exist or has been moved."
