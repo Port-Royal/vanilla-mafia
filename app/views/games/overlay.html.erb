@@ -4,6 +4,8 @@
      data-controller="game-overlay"
      data-game-overlay-game-id-value="<%= @game.id %>"
      data-game-overlay-role-icon-template-value="<%= asset_path('roles/peace.png').sub('peace', '%ROLE_CODE%') %>"
+     data-game-overlay-status-classes-value="<%= GamesHelper::OVERLAY_STATUS_CLASSES.transform_keys(&:to_s).to_json %>"
+     data-game-overlay-status-labels-value="<%= GameParticipation.statuses.keys.index_with { |k| t("games.overlay.status.#{k}") }.to_json %>"
      class="flex gap-2 px-2 text-white"
      <% if custom_style.present? %>style="<%= custom_style %>"<% end %>>
   <% (1..10).each do |seat| %>

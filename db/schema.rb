@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_123038) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_18_123039) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -128,12 +128,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_123038) do
     t.decimal "plus", precision: 5, scale: 2, default: "0.0"
     t.string "role_code"
     t.integer "seat"
+    t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.boolean "win", default: false
     t.index ["game_id", "player_id"], name: "index_game_participations_on_game_id_and_player_id", unique: true
     t.index ["game_id", "seat"], name: "index_game_participations_on_game_id_and_seat", unique: true
     t.index ["game_id"], name: "index_game_participations_on_game_id"
     t.index ["player_id"], name: "index_game_participations_on_player_id"
+    t.index ["status"], name: "index_game_participations_on_status"
   end
 
   create_table "games", force: :cascade do |t|

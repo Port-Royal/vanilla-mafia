@@ -9,8 +9,8 @@ RSpec.describe "Judge::Protocols" do
 
   def valid_participations_params
     params = {}
-    params["1"] = { player_name: "Тестовый", role_code: "don", plus: "1", minus: "0", best_move: "", first_shoot: "0", notes: "" }
-    (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", first_shoot: "0", notes: "" } }
+    params["1"] = { player_name: "Тестовый", role_code: "don", plus: "1", minus: "0", best_move: "", first_shoot: "0", notes: "", status: "alive" }
+    (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", first_shoot: "0", notes: "", status: "alive" } }
     params
   end
 

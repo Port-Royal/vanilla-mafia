@@ -46,6 +46,7 @@ ru:
         total: "Итого"
         seat: "Место"
         notes: "Примечания"
+        status: "Статус"
       user:
         role: "Роль"
         roles:

@@ -67,6 +67,20 @@ RSpec.describe "Games#overlay" do
       expect(response.body.scan(I18n.t("games.overlay.status.alive")).size).to be >= 2
     end
 
+    it "reflects each participation's persisted status label" do
+      participation_two.update!(status: :voted_out)
+      get overlay_game_path(game)
+
+      expect(response.body).to include(I18n.t("games.overlay.status.voted_out"))
+    end
+
+    it "exposes status class and label maps for the overlay controller" do
+      get overlay_game_path(game)
+
+      expect(response.body).to include("data-game-overlay-status-classes-value")
+      expect(response.body).to include("data-game-overlay-status-labels-value")
+    end
+
     it "includes ActionCable subscription data for the game" do
       get overlay_game_path(game)
 
@@ -151,7 +165,7 @@ RSpec.describe "Games#overlay" do
       it "hides status pill when hide_status param is set" do
         get overlay_game_path(game, hide_status: "1")
 
-        expect(response.body).not_to include(I18n.t("games.overlay.status.alive"))
+        expect(response.body).not_to include('data-game-overlay-target="status"')
       end
     end
   end

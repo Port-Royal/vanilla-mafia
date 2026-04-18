@@ -193,6 +193,15 @@ RSpec.describe AutosaveGameProtocolService do
           expect(result.success).to be true
           expect(participation.reload.notes).to eq("Комментарий")
         end
+
+        it "updates status" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "status", value: "killed_by_mafia", seat: 4
+          )
+
+          expect(result.success).to be true
+          expect(participation.reload.status).to eq("killed_by_mafia")
+        end
       end
 
       context "when field is disallowed" do

@@ -46,6 +46,31 @@ RSpec.describe GameParticipation, type: :model do
     end
   end
 
+  describe "status enum" do
+    it "defines the expected mapping" do
+      expect(described_class.statuses).to eq(
+        "alive" => 0,
+        "killed_by_mafia" => 1,
+        "voted_out" => 2,
+        "banned" => 3
+      )
+    end
+
+    it "defaults new records to alive" do
+      expect(described_class.new.status).to eq("alive")
+    end
+
+    it "exposes predicate methods" do
+      participation = described_class.new(status: :killed_by_mafia)
+      expect(participation).to be_killed_by_mafia
+      expect(participation).not_to be_alive
+    end
+
+    it "raises on unknown statuses" do
+      expect { described_class.new(status: :vaporized) }.to raise_error(ArgumentError)
+    end
+  end
+
   describe '#total' do
     context 'when plus and minus are present' do
       let(:participation) { build(:game_participation, plus: 3, minus: 1) }

@@ -136,6 +136,17 @@ RSpec.describe SaveGameProtocolService do
         described_class.call(game: game_to_update, game_params: update_game_params, participations_params: participations_params)
         expect(old_participation.reload.win).to be true
       end
+
+      it "persists status when provided" do
+        params = { "1" => { player_name: "Алексей", role_code: "don", plus: "2", minus: "0", best_move: "", first_shoot: "0", notes: "", status: "voted_out" } }
+        (2..10).each { |i| params[i.to_s] = { player_name: "", role_code: "" } }
+        described_class.call(
+          game: game_to_update,
+          game_params: update_game_params,
+          participations_params: ActionController::Parameters.new(params).permit!
+        )
+        expect(old_participation.reload.status).to eq("voted_out")
+      end
     end
 
     context "when clearing a previously filled seat" do

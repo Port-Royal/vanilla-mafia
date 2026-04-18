@@ -2,7 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 import { createConsumer } from "@rails/actioncable"
 
 export default class extends Controller {
-  static values = { gameId: Number, roleIconTemplate: String }
+  static values = {
+    gameId: Number,
+    roleIconTemplate: String,
+    statusClasses: Object,
+    statusLabels: Object
+  }
   static targets = ["playerName", "roleCode", "status"]
 
   connect() {
@@ -33,6 +38,8 @@ export default class extends Controller {
     if (target) {
       if (field === "role_code") {
         this.updateRoleDisplay(target, value)
+      } else if (field === "status") {
+        this.updateStatusDisplay(target, value)
       } else {
         target.textContent = value || ""
       }
@@ -70,6 +77,21 @@ export default class extends Controller {
       status: "status"
     }
     return mapping[field]
+  }
+
+  updateStatusDisplay(target, statusKey) {
+    const classMap = this.hasStatusClassesValue ? this.statusClassesValue : {}
+    const labelMap = this.hasStatusLabelsValue ? this.statusLabelsValue : {}
+
+    Object.values(classMap).forEach((classes) => {
+      classes.split(/\s+/).filter(Boolean).forEach((c) => target.classList.remove(c))
+    })
+
+    if (statusKey && classMap[statusKey]) {
+      classMap[statusKey].split(/\s+/).filter(Boolean).forEach((c) => target.classList.add(c))
+    }
+
+    target.textContent = statusKey && labelMap[statusKey] ? labelMap[statusKey] : ""
   }
 
   updateRoleDisplay(target, roleCode) {
