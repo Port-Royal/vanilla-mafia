@@ -97,6 +97,26 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(game.reload.game_number).to eq(42)
         end
 
+        it "updates table_number" do
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "game", field: "table_number", value: "5"
+          }, as: :json
+
+          expect(response).to have_http_status(:ok)
+          expect(game.reload.table_number).to eq(5)
+        end
+
+        it "clears table_number when given an empty value" do
+          game.update!(table_number: 2)
+
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "game", field: "table_number", value: ""
+          }, as: :json
+
+          expect(response).to have_http_status(:ok)
+          expect(game.reload.table_number).to be_nil
+        end
+
         it "rejects disallowed fields" do
           patch autosave_judge_protocol_path(game), params: {
             scope: "game", field: "id", value: "999"

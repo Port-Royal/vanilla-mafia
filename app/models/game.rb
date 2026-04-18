@@ -18,6 +18,7 @@ class Game < ApplicationRecord
   validates :game_number, presence: true, numericality: { only_integer: true }
   validates :result, presence: true
   validates :game_number, uniqueness: { scope: :competition_id }
+  validates :table_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
 
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :ordered, -> { order(played_on: :asc, game_number: :asc) }

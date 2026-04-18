@@ -14,8 +14,12 @@
 </div>
 
 <p class="text-lg text-gray-600 mb-2"><%= t(".result.#{@game.result}") %></p>
+<% last_meta = @game.table_number.present? ? :table_number : (@game.judge.present? ? :judge : nil) %>
 <% if @game.judge.present? %>
-  <p class="text-sm text-gray-500 mb-6"><%= t(".judge", name: @game.judge) %></p>
+  <p class="text-sm text-gray-500 <%= last_meta == :judge ? 'mb-6' : 'mb-2' %>"><%= t(".judge", name: @game.judge) %></p>
+<% end %>
+<% if @game.table_number.present? %>
+  <p class="text-sm text-gray-500 mb-6"><%= t(".table_number", number: @game.table_number) %></p>
 <% end %>
 
 <div class="scroll-wrapper">

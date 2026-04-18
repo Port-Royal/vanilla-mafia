@@ -14,6 +14,29 @@ RSpec.describe Game, type: :model do
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
     it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:competition_id) }
     it { is_expected.to define_enum_for(:result).with_values(described_class::RESULTS).backed_by_column_of_type(:string) }
+    it { is_expected.to validate_numericality_of(:table_number).only_integer.is_greater_than(0).allow_nil }
+
+    it "allows nil table_number" do
+      game = build(:game, table_number: nil)
+      expect(game).to be_valid
+    end
+
+    it "accepts positive integer table_number" do
+      game = build(:game, table_number: 3)
+      expect(game).to be_valid
+    end
+
+    it "rejects zero table_number" do
+      game = build(:game, table_number: 0)
+      expect(game).not_to be_valid
+      expect(game.errors[:table_number]).to be_present
+    end
+
+    it "rejects negative table_number" do
+      game = build(:game, table_number: -1)
+      expect(game).not_to be_valid
+      expect(game.errors[:table_number]).to be_present
+    end
 
     it 'rejects invalid result values' do
       game = build(:game)
