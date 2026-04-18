@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_023325) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_18_123038) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -330,7 +330,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_023325) do
     t.string "datetime_format", default: "european_24h", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.integer "failed_attempts", default: 0, null: false
     t.string "locale", default: "ru", null: false
+    t.datetime "locked_at"
     t.boolean "notify_on_news_draft", default: true, null: false
     t.integer "player_id"
     t.string "provider"
@@ -338,11 +340,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_023325) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.string "uid"
+    t.string "unlock_token"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["player_id"], name: "index_users_on_player_id", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

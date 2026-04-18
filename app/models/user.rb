@@ -1,6 +1,6 @@
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable,
-         :omniauthable, omniauth_providers: [ :google_oauth2 ]
+         :lockable, :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   belongs_to :player, optional: true
   has_many :player_claims, dependent: :destroy
