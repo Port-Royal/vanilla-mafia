@@ -59,3 +59,4 @@ coverage/*
 
 # Brakeman SARIF output (generated in CI)
 /brakeman.sarif
+.claude/scheduled_tasks.lock
