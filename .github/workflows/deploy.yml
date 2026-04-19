@@ -29,6 +29,7 @@ jobs:
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       BETTER_STACK_SOURCE_TOKEN: ${{ secrets.BETTER_STACK_SOURCE_TOKEN }}
       BETTER_STACK_INGESTING_HOST: ${{ secrets.BETTER_STACK_INGESTING_HOST }}
+      APPLICATION_HOST: ${{ secrets.APPLICATION_HOST }}
 
     steps:
       - name: Checkout code
