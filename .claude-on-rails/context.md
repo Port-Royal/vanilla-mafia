@@ -77,6 +77,7 @@ Evilution ships an MCP server (`evilution mcp`) with 4 tools:
 - **evilution-session-list**: List past sessions with `--limit` and `--results-dir`
 - **evilution-session-show**: Show full session details including survived mutation diffs
 - **evilution-session-diff**: Compare two sessions — shows regressions, fixes, and persistent survivors
+- **info statuses** (0.25.0): glossary of mutation result statuses (survived/killed/timeout/error/neutral/equivalent/unresolved/unparseable)
 
 #### Additional CLI Flags
 - **Skip heredoc literals**: `--skip-heredoc-literals` — skip string literal mutations inside heredocs
@@ -86,12 +87,21 @@ Evilution ships an MCP server (`evilution mcp`) with 4 tools:
 - **Fallback to full suite**: `--fallback-full-suite` (0.24.0) — when a mutation has no resolved spec, run the whole suite instead of marking it `:unresolved` and skipping (opt-in; default behavior remains fast-skip)
 - **Related specs heuristic**: `--related-specs-heuristic` — append related request/integration/feature/system specs for `includes()` mutations
 - **Parent-process preload**: `--preload FILE` / `--no-preload` (0.22.2) — preload a file (e.g. `spec/rails_helper.rb`) in the parent process so forked children inherit the loaded framework via copy-on-write; auto-detects `spec/rails_helper.rb` on Rails projects
+- **Example targeting** (0.25.0): enabled by default — per-mutation, filters resolved spec file to only examples whose body references symbols from mutated method. Flags: `--no-example-targeting` (disable), `--example-targeting-fallback full_file|unresolved` (no-match behavior, default `full_file`), `--spec-pattern GLOB` (restrict spec candidates)
+- **Worker recycling** (0.25.0): `worker_max_items: N` config key — spawns fresh worker every N mutations to bound RSS on long parallel runs
+
+#### `compare` Command (0.25.0)
+- `bundle exec evilution compare --against OLD.json --current NEW.json [--format text|json]` (or positional paths) — categorizes mutations into fixed / new / persistent / flaky / reintroduced buckets across two saved runs
+- Useful as CI regression gate alongside `--min-score`
+
+#### `evil` Alias (0.25.0)
+Short executable alias — `bundle exec evil run app/models/foo.rb` works identical to `bundle exec evilution run ...`
 
 #### Rails Behavior (0.22.2+)
 - **Auto fork isolation on Rails**: `--isolation auto` (default) detects Rails projects and resolves to `fork` instead of `in_process` — avoids indefinite hangs caused by Rails' `Thread.handle_interrupt(Exception => :never)` masking `Timeout.timeout`. Explicit `--isolation in_process` on a Rails project emits a warning.
 - **Zero-boot mutations**: parent-process preload of `spec/rails_helper.rb` is automatic; children inherit via copy-on-write. Disable with `--no-preload` if needed.
 
-#### Compatibility Fixes Worth Knowing (0.22.1 → 0.24.0)
+#### Compatibility Fixes Worth Knowing (0.22.1 → 0.25.0)
 - **Rails 8 `enum` models** (0.22.7): constants are now dropped before re-loading a mutated file, so `detect_enum_conflict!` no longer errors every mutation.
 - **`ActiveSupport::Concern`** (0.22.5): `MultipleIncludedBlocks` errors on mutated concerns are fixed.
 - **Zeitwerk re-autoload** (0.22.6): autoloader no longer re-triggers during mutation load.
@@ -99,6 +109,17 @@ Evilution ships an MCP server (`evilution mcp`) with 4 tools:
 - **`spec_helper` LoadError** (0.22.3 / 0.22.4): projects with `--require spec_helper` in `.rspec` no longer fail on every mutation.
 - **Multi-byte characters** (0.22.0): Prism byte offsets now use `byteslice` — Cyrillic / CJK source files are no longer garbled. Relevant since this project contains Russian strings.
 - **Error diagnostics** (0.22.1): `--verbose` now logs error class + backtrace; JSON output includes `error_class` / `error_backtrace` under `errors[]`.
+- **Trap-context ThreadError** (0.25.0): `TempDirTracker.cleanup_all` no longer raises `ThreadError: can't be called from trap context` when cleanup runs under a signal handler.
+- **UTF-8 transcode in parallel pipes** (0.25.0): `Parallel::WorkQueue` pipes are now `binmode`, fixing `Encoding::UndefinedConversionError` under Rails apps that set `Encoding.default_internal = UTF-8`.
+- **Zombie worker reaping** (0.25.0): parallel runs now reap child PIDs on every error path instead of leaving zombies until main process exits.
+
+#### New Statuses (0.25.0)
+- **`:unparseable`**: mutation whose generated source fails to parse (e.g. dangling heredoc after `method_body_replacement`). Short-circuited before test execution, excluded from score like `:unresolved`.
+- **`:neutral` reclassification**: infra failures (`LoadError`/`NameError` from `spec_helper.rb`/`rails_helper.rb`/`spec/support/`; `ActiveRecord::StatementTimeout`, `Deadlocked`, `ConnectionTimeoutError`, `LockWaitTimeout`, `Timeout::Error`, `SQLite3::BusyException`) reclassified as `:neutral` instead of polluting score under parallel DB contention.
+- **Per-worker SQLite isolation** (0.25.0): `Parallel::WorkQueue` sets `TEST_ENV_NUMBER` per forked worker (`""`/`"2"`/`"3"`...) following `parallel_tests` convention. Rails apps whose `config/database.yml` interpolates `TEST_ENV_NUMBER` get one SQLite file per worker automatically.
+
+#### Unified Diff Output (0.25.0)
+Survived mutants now include unified diffs in CLI output, JSON reports, and `util mutation` — matches inline-patch format used by reviewers.
 
 #### New Operators Since 0.18.0
 - **0.22.0**: `index_to_at` (`arr[0]` → `arr.at(0)`), `regex_simplification`, `block_pass_removal`

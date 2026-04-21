@@ -52,6 +52,10 @@ RSpec.describe "Content-Security-Policy header" do
     it "permits connect-src self + https" do
       expect(csp).to include("connect-src 'self' https:")
     end
+
+    it "configures report-uri to the CSP violation endpoint" do
+      expect(csp).to include("report-uri /csp_violation_reports")
+    end
   end
 
   describe "rendered page" do
