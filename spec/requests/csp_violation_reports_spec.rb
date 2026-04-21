@@ -57,6 +57,28 @@ RSpec.describe CspViolationReportsController, type: :request do
              params: csp_report_payload.to_json,
              headers: { "CONTENT_TYPE" => "application/csp-report" }
       end
+
+      it "accepts content type with parameters (charset)" do
+        post csp_violation_reports_path,
+             params: csp_report_payload.to_json,
+             headers: { "CONTENT_TYPE" => "application/csp-report; charset=utf-8" }
+
+        expect(response).to have_http_status(:no_content)
+      end
+
+      context "when effective-directive and violated-directive are both missing" do
+        let(:csp_report_payload) do
+          { "csp-report" => { "document-uri" => "https://example.com/", "blocked-uri" => "inline" } }
+        end
+
+        it "falls back to 'unknown' in the Sentry title" do
+          expect(Sentry).to receive(:capture_message).with("CSP violation: unknown", anything)
+
+          post csp_violation_reports_path,
+               params: csp_report_payload.to_json,
+               headers: { "CONTENT_TYPE" => "application/csp-report" }
+        end
+      end
     end
 
     context "with application/reports+json body" do
@@ -97,6 +119,18 @@ RSpec.describe CspViolationReportsController, type: :request do
 
         post csp_violation_reports_path,
              params: "not json{",
+             headers: { "CONTENT_TYPE" => "application/csp-report" }
+
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+
+    context "with invalid byte sequence in body" do
+      it "returns 204 without raising" do
+        expect(Sentry).not_to receive(:capture_message)
+
+        post csp_violation_reports_path,
+             params: "\xFF\xFE".b,
              headers: { "CONTENT_TYPE" => "application/csp-report" }
 
         expect(response).to have_http_status(:no_content)
