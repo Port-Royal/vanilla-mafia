@@ -78,5 +78,7 @@ Rails.application.routes.draw do
     post "telegram", to: "telegram#create", as: :telegram
   end
 
+  post "csp_violation_reports", to: "csp_violation_reports#create", as: :csp_violation_reports
+
   get "up" => "rails/health#show", as: :rails_health_check
 end

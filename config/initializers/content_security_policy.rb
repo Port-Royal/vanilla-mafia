@@ -3,13 +3,11 @@
 # Application-wide Content-Security-Policy.
 #
 # Currently shipping in REPORT-ONLY mode (sets Content-Security-Policy-Report-Only).
-# Browsers will log violations to the devtools console without blocking anything.
-#
-# There is no centralized CSP report stream yet because this policy does not
-# configure `report-uri` / `report-to` — the report-endpoint follow-up issue
-# (vm-zgx) must land first. Once it's deployed and producing clean reports
-# from production for ~1–2 weeks, the enforcement follow-up (vm-1rb) flips
-# `content_security_policy_report_only` to false.
+# Browsers will log violations to the devtools console and POST JSON reports to
+# `report-uri` (CspViolationReportsController#create) without blocking anything.
+# Once we've been collecting clean reports from production for ~1–2 weeks, the
+# enforcement follow-up (vm-1rb) flips `content_security_policy_report_only` to
+# false.
 
 Rails.application.configure do
   config.content_security_policy do |policy|
@@ -23,6 +21,7 @@ Rails.application.configure do
     policy.base_uri        :self
     policy.frame_ancestors :none
     policy.form_action     :self, "https://accounts.google.com"
+    policy.report_uri      "/csp_violation_reports"
   end
 
   config.content_security_policy_nonce_generator = ->(_request) { SecureRandom.base64(16) }
