@@ -12,6 +12,14 @@ RSpec.describe "Podcast::Feed" do
            status: "published", published_at: Time.current)
   end
   let_it_be(:draft_episode) { create(:episode, status: "draft") }
+  let_it_be(:scheduled_future_episode) do
+    create(:episode, title: "Future Scheduled Episode", description: "scheduled",
+           status: "published", published_at: 1.day.from_now)
+  end
+  let_it_be(:published_without_timestamp_episode) do
+    create(:episode, title: "No Timestamp Episode", description: "no ts",
+           status: "published", published_at: nil)
+  end
 
   describe "GET /podcast/feed.rss" do
     context "when token is missing" do
@@ -72,6 +80,16 @@ RSpec.describe "Podcast::Feed" do
       it "excludes draft episodes" do
         get "/podcast/feed.rss?token=#{token.token}"
         expect(response.body).not_to include(draft_episode.title)
+      end
+
+      it "excludes episodes scheduled in the future" do
+        get "/podcast/feed.rss?token=#{token.token}"
+        expect(response.body).not_to include(scheduled_future_episode.title)
+      end
+
+      it "excludes published episodes with nil published_at" do
+        get "/podcast/feed.rss?token=#{token.token}"
+        expect(response.body).not_to include(published_without_timestamp_episode.title)
       end
 
       it "orders episodes by published_at descending" do

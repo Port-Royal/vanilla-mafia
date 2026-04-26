@@ -4,7 +4,7 @@ class Podcast::FeedController < ApplicationController
 
   def show
     @podcast = Podcast.instance
-    @episodes = Episode.published.recent.includes(:audio_attachment, :image_attachment)
+    @episodes = Episode.visible.recent.includes(:audio_attachment, :image_attachment)
     @token = params[:token]
     render formats: :rss
   end

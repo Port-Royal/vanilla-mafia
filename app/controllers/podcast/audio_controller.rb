@@ -3,7 +3,7 @@ class Podcast::AudioController < ApplicationController
   before_action :authenticate_via_token!
 
   def show
-    episode = Episode.published.find_by(id: params[:episode_id])
+    episode = Episode.visible.find_by(id: params[:episode_id])
     return head(:not_found) unless episode
     return head(:not_found) unless episode.audio.attached?
 

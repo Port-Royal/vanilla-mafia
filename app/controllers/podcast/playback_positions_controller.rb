@@ -2,7 +2,7 @@ class Podcast::PlaybackPositionsController < ApplicationController
   include RequireSubscriber
 
   def update
-    episode = Episode.published.find(params[:episode_id])
+    episode = Episode.visible.find(params[:episode_id])
     position = PlaybackPosition.find_or_initialize_by(
       user: current_user,
       episode: episode

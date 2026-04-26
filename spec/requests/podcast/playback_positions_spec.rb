@@ -6,6 +6,12 @@ RSpec.describe "Podcast::PlaybackPositions" do
   let_it_be(:user) { create(:user) }
   let_it_be(:episode) { create(:episode, status: "published", published_at: Time.current) }
   let_it_be(:draft_episode) { create(:episode, status: "draft") }
+  let_it_be(:scheduled_future_episode) do
+    create(:episode, status: "published", published_at: 1.day.from_now)
+  end
+  let_it_be(:published_without_timestamp_episode) do
+    create(:episode, status: "published", published_at: nil)
+  end
 
   describe "PATCH /podcast/episodes/:episode_id/position" do
     let(:params) { { position_seconds: 120 } }
@@ -92,6 +98,16 @@ RSpec.describe "Podcast::PlaybackPositions" do
 
       it "returns not found for draft episode" do
         patch "/podcast/episodes/#{draft_episode.id}/position", params: params
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for episode scheduled in the future" do
+        patch "/podcast/episodes/#{scheduled_future_episode.id}/position", params: params
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for published episode with nil published_at" do
+        patch "/podcast/episodes/#{published_without_timestamp_episode.id}/position", params: params
         expect(response).to have_http_status(:not_found)
       end
     end
