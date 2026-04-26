@@ -16,6 +16,16 @@ RSpec.describe "Podcast::Audio" do
     create(:episode, title: "No Audio", status: "published", published_at: Time.current)
   end
   let_it_be(:draft_episode) { create(:episode, status: "draft") }
+  let_it_be(:scheduled_future_episode) do
+    episode = create(:episode, title: "Future Scheduled", status: "published", published_at: 1.day.from_now)
+    episode.audio.attach(io: StringIO.new("a"), filename: "f.mp3", content_type: "audio/mpeg")
+    episode
+  end
+  let_it_be(:published_without_timestamp_episode) do
+    episode = create(:episode, title: "No Timestamp", status: "published", published_at: nil)
+    episode.audio.attach(io: StringIO.new("a"), filename: "n.mp3", content_type: "audio/mpeg")
+    episode
+  end
 
   describe "GET /podcast/episodes/:id/audio" do
     context "when token is missing" do
@@ -55,6 +65,16 @@ RSpec.describe "Podcast::Audio" do
 
       it "returns not found for draft episode" do
         get "/podcast/episodes/#{draft_episode.id}/audio?token=#{token.token}"
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for episode scheduled in the future" do
+        get "/podcast/episodes/#{scheduled_future_episode.id}/audio?token=#{token.token}"
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for published episode with nil published_at" do
+        get "/podcast/episodes/#{published_without_timestamp_episode.id}/audio?token=#{token.token}"
         expect(response).to have_http_status(:not_found)
       end
 

@@ -18,6 +18,7 @@ class Episode < ApplicationRecord
   after_save_commit :enqueue_duration_extraction, if: -> { audio.attached? && duration_seconds.nil? }
 
   scope :recent, -> { order(Arel.sql("published_at IS NULL, published_at DESC, id DESC")) }
+  scope :visible, -> { published.where(published_at: ..Time.current) }
 
   def formatted_duration
     return nil unless duration_seconds

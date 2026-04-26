@@ -9,6 +9,12 @@ RSpec.describe "Podcast::Episodes" do
            status: "published", published_at: Time.current)
   end
   let_it_be(:draft_episode) { create(:episode, status: "draft") }
+  let_it_be(:scheduled_future_episode) do
+    create(:episode, title: "Future Episode", status: "published", published_at: 1.day.from_now)
+  end
+  let_it_be(:published_without_timestamp_episode) do
+    create(:episode, title: "No Timestamp Episode", status: "published", published_at: nil)
+  end
 
   describe "GET /podcast/episodes" do
     context "when not signed in" do
@@ -43,6 +49,16 @@ RSpec.describe "Podcast::Episodes" do
       it "does not display draft episodes" do
         get "/podcast/episodes"
         expect(response.body).not_to include(draft_episode.title)
+      end
+
+      it "does not display episodes scheduled in the future" do
+        get "/podcast/episodes"
+        expect(response.body).not_to include(scheduled_future_episode.title)
+      end
+
+      it "does not display published episodes with nil published_at" do
+        get "/podcast/episodes"
+        expect(response.body).not_to include(published_without_timestamp_episode.title)
       end
 
       it "links to episode show page" do
@@ -116,6 +132,16 @@ RSpec.describe "Podcast::Episodes" do
       it "returns success for published episode" do
         get "/podcast/episodes/#{published_episode.id}"
         expect(response).to have_http_status(:ok)
+      end
+
+      it "returns not found for episode scheduled in the future" do
+        get "/podcast/episodes/#{scheduled_future_episode.id}"
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns not found for published episode with nil published_at" do
+        get "/podcast/episodes/#{published_without_timestamp_episode.id}"
+        expect(response).to have_http_status(:not_found)
       end
 
       it "displays the episode title" do

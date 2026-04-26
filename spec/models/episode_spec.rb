@@ -135,6 +135,34 @@ RSpec.describe Episode, type: :model do
       end
     end
 
+    describe ".visible" do
+      let!(:draft_episode) { create(:episode, status: "draft") }
+      let!(:published_now) { create(:episode, status: "published", published_at: Time.current) }
+      let!(:published_past) { create(:episode, status: "published", published_at: 1.day.ago) }
+      let!(:scheduled_future) { create(:episode, status: "published", published_at: 1.day.from_now) }
+      let!(:published_without_timestamp) { create(:episode, status: "published", published_at: nil) }
+
+      it "includes published episodes whose published_at is in the past" do
+        expect(described_class.visible).to include(published_past)
+      end
+
+      it "includes published episodes whose published_at is the current moment" do
+        expect(described_class.visible).to include(published_now)
+      end
+
+      it "excludes draft episodes" do
+        expect(described_class.visible).not_to include(draft_episode)
+      end
+
+      it "excludes published episodes scheduled in the future" do
+        expect(described_class.visible).not_to include(scheduled_future)
+      end
+
+      it "excludes published episodes with nil published_at" do
+        expect(described_class.visible).not_to include(published_without_timestamp)
+      end
+    end
+
     describe ".recent" do
       let!(:older) { create(:episode, status: "published", published_at: 2.days.ago) }
       let!(:newer) { create(:episode, status: "published", published_at: 1.day.ago) }
