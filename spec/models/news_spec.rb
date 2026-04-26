@@ -357,7 +357,15 @@ RSpec.describe News, type: :model do
       expect(news.truncated_content(100)).to eq(news.content)
     end
 
-    it "truncates at paragraph boundary" do
+    it "wraps each kept paragraph in its own <p> tag without producing empty <p> tags" do
+      news = build(:news, author: author,
+        content: "<p>First.</p><p>Second.</p><p>Third paragraph that is much longer than the rest.</p>")
+      html = news.truncated_content(25).to_html
+      expect(html).not_to include("<p></p>")
+      expect(html.scan("<p>").count).to eq(2)
+    end
+
+    it "keeps only whole paragraphs when multiple paragraphs exceed the limit" do
       news = build(:news, author: author, content: "<p>First paragraph.</p><p>Second paragraph.</p><p>Third paragraph.</p>")
       result = news.truncated_content(20)
       html = result.to_html
@@ -365,8 +373,26 @@ RSpec.describe News, type: :model do
       expect(html).not_to include("Third paragraph.")
     end
 
-    it "truncates a long single paragraph mid-sentence at a word boundary" do
-      news = build(:news, author: author, content: "<p>This is a very long first paragraph that exceeds the limit.</p>")
+    it "does not break a paragraph in half when a later paragraph would push past the limit" do
+      news = build(:news, author: author,
+        content: "<p>First paragraph.</p><p>Second paragraph with much more text in it.</p><p>Third paragraph.</p>")
+      result = news.truncated_content(40)
+      plain = result.to_plain_text
+      expect(plain).not_to include("Second paragraph with")
+    end
+
+    it "ends on a sentence boundary when a single paragraph exceeds the limit" do
+      news = build(:news, author: author,
+        content: "<p>One. Two sentence is very long here in this paragraph that goes on. Three.</p>")
+      result = news.truncated_content(50)
+      plain = result.to_plain_text
+      expect(plain).to start_with("One.")
+      expect(plain).to match(/[.!?]…?\z/)
+    end
+
+    it "falls back to a word boundary when the first sentence already exceeds the limit" do
+      news = build(:news, author: author,
+        content: "<p>This is a very long first paragraph that exceeds the limit.</p>")
       result = news.truncated_content(20)
       plain = result.to_plain_text
       expect(plain.length).to be <= 20
@@ -382,17 +408,7 @@ RSpec.describe News, type: :model do
       expect(plain).to end_with("…")
     end
 
-    it "preserves paragraph breaks in the truncated preview" do
-      news = build(:news, author: author, content: "<p>First paragraph.</p><p>Second paragraph with more text.</p>")
-      result = news.truncated_content(30)
-      html = result.to_html
-      expect(html.scan("<p>").size).to be >= 2
-      expect(html).to include("First paragraph.")
-      expect(html).to include("Second")
-      expect(html).not_to include("<p></p>")
-    end
-
-    it "cuts at a word boundary rather than mid-word" do
+    it "cuts at a word boundary rather than mid-word when the first sentence has no terminator" do
       news = build(:news, author: author, content: "hello world foo bar baz qux")
       result = news.truncated_content(10)
       expect(result.to_plain_text).to eq("hello…")

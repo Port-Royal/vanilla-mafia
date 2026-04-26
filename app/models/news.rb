@@ -61,7 +61,7 @@ class News < ApplicationRecord
     plain_text = content.body.to_plain_text
     return content if plain_text.length <= max_length
 
-    truncated_plain = plain_text.truncate(max_length, separator: /\s/, omission: "…")
+    truncated_plain = truncate_to_paragraph(plain_text, max_length)
     html = truncated_plain.split(/\n+/).map { |line| "<p>#{ERB::Util.html_escape(line)}</p>" }.join
     ActionText::Content.new(html)
   end
@@ -73,6 +73,34 @@ class News < ApplicationRecord
   end
 
   private
+
+  def truncate_to_paragraph(plain_text, max_length)
+    paragraphs = plain_text.split(/\n+/)
+    selected = take_fitting(paragraphs, max_length, separator: "\n\n")
+    return selected.join("\n\n") + "…" if selected.any?
+
+    truncate_to_sentence(paragraphs.first, max_length)
+  end
+
+  def truncate_to_sentence(paragraph, max_length)
+    sentences = paragraph.split(/(?<=[.!?…])\s+/)
+    selected = take_fitting(sentences, max_length, separator: " ")
+    return selected.join(" ") + "…" if selected.any?
+
+    paragraph.truncate(max_length, separator: /\s/, omission: "…")
+  end
+
+  def take_fitting(parts, max_length, separator:)
+    selected = []
+    total = 0
+    parts.each_with_index do |part, index|
+      addition = index.zero? ? part.length : separator.length + part.length
+      break if total + addition > max_length
+      selected << part
+      total += addition
+    end
+    selected
+  end
 
   def slug_base
     "#{slug_date.strftime('%Y-%m-%d')}-#{slug_title_part}"
