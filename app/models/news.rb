@@ -74,20 +74,27 @@ class News < ApplicationRecord
 
   private
 
+  TRUNCATION_OMISSION = "…"
+  private_constant :TRUNCATION_OMISSION
+
   def truncate_to_paragraph(plain_text, max_length)
     paragraphs = plain_text.split(/\n+/)
-    selected = take_fitting(paragraphs, max_length, separator: "\n\n")
-    return selected.join("\n\n") + "…" if selected.any?
+    selected = take_fitting(paragraphs, budget_for(max_length), separator: "\n\n")
+    return selected.join("\n\n") + TRUNCATION_OMISSION if selected.any?
 
     truncate_to_sentence(paragraphs.first, max_length)
   end
 
   def truncate_to_sentence(paragraph, max_length)
     sentences = paragraph.split(/(?<=[.!?…])\s+/)
-    selected = take_fitting(sentences, max_length, separator: " ")
-    return selected.join(" ") + "…" if selected.any?
+    selected = take_fitting(sentences, budget_for(max_length), separator: " ")
+    return selected.join(" ") + TRUNCATION_OMISSION if selected.any?
 
-    paragraph.truncate(max_length, separator: /\s/, omission: "…")
+    paragraph.truncate(max_length, separator: /\s/, omission: TRUNCATION_OMISSION)
+  end
+
+  def budget_for(max_length)
+    [ max_length - TRUNCATION_OMISSION.length, 0 ].max
   end
 
   def take_fitting(parts, max_length, separator:)

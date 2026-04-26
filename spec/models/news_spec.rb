@@ -357,6 +357,18 @@ RSpec.describe News, type: :model do
       expect(news.truncated_content(100)).to eq(news.content)
     end
 
+    it "never returns plain text longer than the limit even when the kept paragraph length equals the limit" do
+      news = build(:news, author: author, content: "<p>abcd</p><p>xyz</p>")
+      result = news.truncated_content(4)
+      expect(result.to_plain_text.length).to be <= 4
+    end
+
+    it "never returns plain text longer than the limit even when the kept sentence length equals the limit" do
+      news = build(:news, author: author, content: "<p>aaaa. bbbb.</p>")
+      result = news.truncated_content(5)
+      expect(result.to_plain_text.length).to be <= 5
+    end
+
     it "wraps each kept paragraph in its own <p> tag without producing empty <p> tags" do
       news = build(:news, author: author,
         content: "<p>First.</p><p>Second.</p><p>Third paragraph that is much longer than the rest.</p>")
