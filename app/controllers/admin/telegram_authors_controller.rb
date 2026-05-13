@@ -13,6 +13,17 @@ class Admin::TelegramAuthorsController < ApplicationController
     end
   end
 
+  def update
+    @telegram_author = TelegramAuthor.find(params[:id])
+
+    if @telegram_author.update(telegram_author_params)
+      ensure_editor_grant(@telegram_author.user) if @telegram_author.user_id
+      redirect_to admin_telegram_settings_path, notice: t("admin_telegram.authors.update.success")
+    else
+      redirect_to admin_telegram_settings_path, alert: @telegram_author.errors.full_messages.join(", ")
+    end
+  end
+
   def destroy
     @telegram_author = TelegramAuthor.find(params[:id])
     @telegram_author.destroy!

@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   authenticate :user, ->(u) { u.admin? } do
     namespace :admin do
       resource :telegram_settings, only: [ :show ], path: "telegram"
-      resources :telegram_authors, only: [ :create, :destroy ], path: "telegram/authors"
+      resources :telegram_authors, only: [ :create, :update, :destroy ], path: "telegram/authors"
     end
   end
 

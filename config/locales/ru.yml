@@ -374,8 +374,11 @@ ru:
       empty: "Белый список пуст."
       add: "Добавить автора"
       add_submit: "Добавить"
+      save: "Сохранить"
       create:
         success: "Автор добавлен в белый список."
+      update:
+        success: "Автор обновлён."
       destroy:
         success: "Автор удалён из белого списка."
   podcast:

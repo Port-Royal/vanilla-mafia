@@ -523,6 +523,35 @@ RSpec.describe User, type: :model do
       it "does not create another record" do
         expect { described_class.find_or_create_telegram_stub!(player) }.not_to change(described_class, :count)
       end
+
+      it "skips the create path entirely" do
+        expect(described_class).not_to receive(:create_telegram_stub!)
+        described_class.find_or_create_telegram_stub!(player)
+      end
+    end
+
+    context "when a concurrent process inserts the stub between find and create (race)" do
+      it "rescues RecordNotUnique and returns the racing stub" do
+        racing_stub = nil
+        allow(described_class).to receive(:create_telegram_stub!) do |p|
+          racing_stub = described_class.new(
+            player: p,
+            stub_source: "telegram",
+            email: "telegram-#{p.id}@stub.invalid",
+            password: SecureRandom.hex(32)
+          )
+          racing_stub.save!(validate: false)
+          raise ActiveRecord::RecordNotUnique, "users.player_id"
+        end
+
+        result = described_class.find_or_create_telegram_stub!(player)
+        expect(result).to eq(racing_stub)
+      end
+    end
+
+    it "does not send Devise unlock instructions when creating a stub" do
+      expect_any_instance_of(described_class).not_to receive(:send_unlock_instructions)
+      described_class.find_or_create_telegram_stub!(player)
     end
   end
 

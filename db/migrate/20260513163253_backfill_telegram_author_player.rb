@@ -20,6 +20,6 @@ class BackfillTelegramAuthorPlayer < ActiveRecord::Migration[8.1]
   end
 
   def down
-    MigrationTelegramAuthor.update_all(player_id: nil)
+    raise ActiveRecord::IrreversibleMigration
   end
 end

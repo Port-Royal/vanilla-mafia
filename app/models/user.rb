@@ -24,6 +24,8 @@ class User < ApplicationRecord
 
   def self.find_or_create_telegram_stub!(player)
     telegram_stubs.find_by(player_id: player.id) || create_telegram_stub!(player)
+  rescue ActiveRecord::RecordNotUnique
+    telegram_stubs.find_by!(player_id: player.id)
   end
 
   def self.create_telegram_stub!(player)
@@ -33,7 +35,7 @@ class User < ApplicationRecord
       email: "telegram-#{player.id}@stub.invalid",
       password: SecureRandom.hex(32)
     )
-    user.lock_access!
+    user.lock_access!(send_instructions: false)
     user
   end
   private_class_method :create_telegram_stub!
