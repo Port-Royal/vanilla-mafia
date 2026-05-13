@@ -11,7 +11,12 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?
-    return if author.user.nil?
+
+    if author.user.nil?
+      log_no_linked_user(author, parsed)
+      return
+    end
+
     return if below_score_threshold?(parsed)
 
     news = News.create!(
@@ -27,6 +32,12 @@ class ProcessTelegramWebhookJob < ApplicationJob
   end
 
   private
+
+  def log_no_linked_user(author, parsed)
+    Rails.logger.warn(
+      { event: "telegram_webhook.no_linked_user", from_id: parsed.from_id, telegram_author_id: author.id }.to_json
+    )
+  end
 
   SCORE_THRESHOLD_SETTING = "news_score_threshold"
   DEFAULT_SCORE_THRESHOLD = 10
