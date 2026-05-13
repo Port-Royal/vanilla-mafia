@@ -20,6 +20,32 @@ class User < ApplicationRecord
   validates :password, password_strength: true, if: :password_required?
   validates :player_id, uniqueness: true, allow_nil: true
 
+  scope :telegram_stubs, -> { where(stub_source: "telegram") }
+
+  def self.find_or_create_telegram_stub!(player)
+    telegram_stubs.find_by(player_id: player.id) || create_telegram_stub!(player)
+  end
+
+  def self.create_telegram_stub!(player)
+    user = new(
+      player: player,
+      stub_source: "telegram",
+      email: "telegram-#{player.id}@stub.invalid",
+      password: SecureRandom.hex(32)
+    )
+    user.lock_access!
+    user
+  end
+  private_class_method :create_telegram_stub!
+
+  def telegram_stub?
+    stub_source == "telegram"
+  end
+
+  def active_for_authentication?
+    super && !telegram_stub?
+  end
+
   def display_name
     return email unless claimed_player?
 

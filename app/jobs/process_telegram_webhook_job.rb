@@ -12,7 +12,8 @@ class ProcessTelegramWebhookJob < ApplicationJob
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?
 
-    if author.user.nil?
+    news_author = author.ensure_user!
+    if news_author.nil?
       log_no_linked_user(author, parsed)
       return
     end
@@ -22,7 +23,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     news = News.create!(
       title: parsed.text.truncate(MAX_TITLE_LENGTH),
       content: parsed.html_content,
-      author: author.user,
+      author: news_author,
       status: :draft
     )
 

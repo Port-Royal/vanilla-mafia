@@ -487,4 +487,81 @@ RSpec.describe User, type: :model do
       end
     end
   end
+
+  describe ".find_or_create_telegram_stub!" do
+    let(:player) { create(:player) }
+
+    context "when no stub exists for the player" do
+      it "creates a new user record" do
+        expect { described_class.find_or_create_telegram_stub!(player) }.to change(described_class, :count).by(1)
+      end
+
+      it "links the stub to the player" do
+        expect(described_class.find_or_create_telegram_stub!(player).player).to eq(player)
+      end
+
+      it "marks stub_source as telegram" do
+        expect(described_class.find_or_create_telegram_stub!(player).stub_source).to eq("telegram")
+      end
+
+      it "locks access immediately" do
+        expect(described_class.find_or_create_telegram_stub!(player)).to be_access_locked
+      end
+
+      it "uses a deterministic stub email" do
+        expect(described_class.find_or_create_telegram_stub!(player).email).to eq("telegram-#{player.id}@stub.invalid")
+      end
+    end
+
+    context "when a stub already exists for the player" do
+      let!(:existing) { described_class.find_or_create_telegram_stub!(player) }
+
+      it "returns the existing stub" do
+        expect(described_class.find_or_create_telegram_stub!(player)).to eq(existing)
+      end
+
+      it "does not create another record" do
+        expect { described_class.find_or_create_telegram_stub!(player) }.not_to change(described_class, :count)
+      end
+    end
+  end
+
+  describe "#telegram_stub?" do
+    it "returns true when stub_source is 'telegram'" do
+      expect(build(:user, stub_source: "telegram").telegram_stub?).to be true
+    end
+
+    it "returns false when stub_source is nil" do
+      expect(build(:user, stub_source: nil).telegram_stub?).to be false
+    end
+
+    it "returns false when stub_source is some other string" do
+      expect(build(:user, stub_source: "other").telegram_stub?).to be false
+    end
+  end
+
+  describe "#active_for_authentication?" do
+    let(:player) { create(:player) }
+
+    it "returns true for a regular unlocked user" do
+      expect(create(:user)).to be_active_for_authentication
+    end
+
+    it "returns false for a locked telegram stub" do
+      stub = described_class.find_or_create_telegram_stub!(player)
+      expect(stub).not_to be_active_for_authentication
+    end
+
+    it "returns false for an unlocked telegram stub" do
+      stub = described_class.find_or_create_telegram_stub!(player)
+      stub.unlock_access!
+      expect(stub).not_to be_active_for_authentication
+    end
+
+    it "returns false for a locked regular user" do
+      user = create(:user)
+      user.lock_access!
+      expect(user).not_to be_active_for_authentication
+    end
+  end
 end
