@@ -238,6 +238,17 @@ RSpec.describe ProcessTelegramWebhookJob do
       it "does not create a news article" do
         expect { described_class.new.perform(payload) }.not_to change(News, :count)
       end
+
+      it "logs the silent drop as structured JSON at warn level" do
+        logged = nil
+        allow(Rails.logger).to receive(:warn) { |msg| logged = msg }
+        described_class.new.perform(payload)
+        expect(JSON.parse(logged)).to eq(
+          "event" => "telegram_webhook.no_linked_user",
+          "from_id" => 55555,
+          "telegram_author_id" => unlinked_author.id
+        )
+      end
     end
 
     context "when message text is blank" do
