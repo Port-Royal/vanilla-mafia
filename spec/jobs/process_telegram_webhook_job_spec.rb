@@ -555,6 +555,18 @@ RSpec.describe ProcessTelegramWebhookJob do
           expect(thread_draft.reload.content.body.to_plain_text).to include("tiny")
         end
 
+        it "re-runs the player autolink service on the updated draft" do
+          allow(AutolinkPlayersInNewsService).to receive(:call)
+          described_class.new.perform(payload_with(text: "tiny", update_id: 304))
+          expect(AutolinkPlayersInNewsService).to have_received(:call).with(thread_draft)
+        end
+
+        it "does not re-notify editors about the existing draft" do
+          allow(NotifyEditorsAboutDraftService).to receive(:call)
+          described_class.new.perform(payload_with(text: "tiny", update_id: 305))
+          expect(NotifyEditorsAboutDraftService).not_to have_received(:call)
+        end
+
         it "embeds inline photos in body and does not attach to gallery" do
           download_result = Telegram::DownloadFileService::SuccessResult.new(
             io: StringIO.new("fake image"),

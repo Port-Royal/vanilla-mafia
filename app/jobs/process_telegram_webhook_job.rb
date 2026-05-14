@@ -63,7 +63,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
   def append_to_thread(news, parsed)
     parts = [ news.content.body.to_html ]
-    parts << embedded_photo_html(news, parsed.photo_file_id) if parsed.photo_file_id.present?
+    parts << embedded_photo_html(parsed.photo_file_id) if parsed.photo_file_id.present?
     parts << parsed.html_content if parsed.text.present?
 
     news.update!(
@@ -92,7 +92,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     if parsed.photo_file_id.present?
       if thread_window_enabled?
-        news.update!(content: news.content.body.to_html + embedded_photo_html(news, parsed.photo_file_id))
+        news.update!(content: news.content.body.to_html + embedded_photo_html(parsed.photo_file_id))
       else
         attach_photo_to_gallery(news, parsed.photo_file_id)
       end
@@ -102,7 +102,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     NotifyEditorsAboutDraftService.call(news)
   end
 
-  def embedded_photo_html(_news, file_id)
+  def embedded_photo_html(file_id)
     result = Telegram::DownloadFileService.call(file_id)
     return "" unless result.success?
 
