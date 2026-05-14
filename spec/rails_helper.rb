@@ -32,6 +32,8 @@ RSpec.configure do |config|
   config.around do |example|
     I18n.with_locale(I18n.default_locale) { example.run }
   end
+
+  config.before { Rails.cache.clear }
 end
 
 Shoulda::Matchers.configure do |config|

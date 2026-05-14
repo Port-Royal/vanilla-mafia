@@ -18,6 +18,9 @@ class FeatureToggle < ApplicationRecord
     news_score_keywords
     news_score_threshold
     news_autolink_players
+    telegram_thread_window
+    telegram_thread_window_seconds
+    telegram_thread_window_strategy
   ].freeze
   CACHE_TTL = 5.minutes
 
