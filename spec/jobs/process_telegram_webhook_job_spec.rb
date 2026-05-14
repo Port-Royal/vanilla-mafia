@@ -481,5 +481,224 @@ RSpec.describe ProcessTelegramWebhookJob do
         expect(Telegram::NewsScorer).not_to have_received(:call)
       end
     end
+
+    context "with thread-window feature toggle enabled" do
+      def enable_thread_window(strategy: "sliding", seconds: 900)
+        upsert_toggle("telegram_thread_window", enabled: true, value: "")
+        upsert_toggle("telegram_thread_window_seconds", enabled: true, value: seconds.to_s)
+        upsert_toggle("telegram_thread_window_strategy", enabled: true, value: strategy)
+      end
+
+      def upsert_toggle(key, enabled:, value:)
+        toggle = FeatureToggle.find_or_initialize_by(key: key)
+        toggle.assign_attributes(enabled: enabled, value: value, description: key)
+        toggle.save!
+      end
+
+      def payload_with(text: long_text, from_id: 12345, update_id: 100, photo: nil)
+        msg = { "from" => { "id" => from_id, "username" => "x", "first_name" => "X" }, "chat" => { "id" => -1 }, "date" => 1710000000 }
+        msg["text"] = text if text
+        msg["photo"] = photo if photo
+        { "update_id" => update_id, "message" => msg }
+      end
+
+      before { enable_thread_window }
+
+      context "when no open thread exists" do
+        it "creates a new draft and marks thread timestamps" do
+          freeze_time do
+            described_class.new.perform(payload_with(update_id: 200))
+            news = News.last
+            expect(news.telegram_thread_started_at).to eq(Time.current)
+            expect(news.telegram_thread_last_message_at).to eq(Time.current)
+          end
+        end
+
+        it "still enforces the MIN_TEXT_LENGTH gate for the opener" do
+          expect {
+            described_class.new.perform(payload_with(text: "short", update_id: 201))
+          }.not_to change(News, :count)
+        end
+      end
+
+      context "when an open thread exists for the same author" do
+        let_it_be(:second_text) { "B" * 50 }
+
+        let!(:thread_draft) do
+          news = News.create!(
+            title: "first",
+            content: "<p>First message body</p>",
+            author: user,
+            status: :draft,
+            telegram_thread_started_at: 2.minutes.ago,
+            telegram_thread_last_message_at: 2.minutes.ago
+          )
+          news
+        end
+
+        it "appends the new text to the existing draft instead of creating one" do
+          expect {
+            described_class.new.perform(payload_with(text: second_text, update_id: 300))
+          }.not_to change(News, :count)
+          expect(thread_draft.reload.content.body.to_html).to include("First message body").and include(second_text)
+        end
+
+        it "updates telegram_thread_last_message_at to now" do
+          freeze_time do
+            described_class.new.perform(payload_with(text: second_text, update_id: 301))
+            expect(thread_draft.reload.telegram_thread_last_message_at).to eq(Time.current)
+          end
+        end
+
+        it "appends short text that would otherwise be rejected by MIN_TEXT_LENGTH" do
+          described_class.new.perform(payload_with(text: "tiny", update_id: 302))
+          expect(thread_draft.reload.content.body.to_plain_text).to include("tiny")
+        end
+
+        it "embeds inline photos in body and does not attach to gallery" do
+          download_result = Telegram::DownloadFileService::SuccessResult.new(
+            io: StringIO.new("fake image"),
+            filename: "p.jpg",
+            content_type: "image/jpeg"
+          )
+          allow(Telegram::DownloadFileService).to receive(:call).and_return(download_result)
+
+          described_class.new.perform(payload_with(
+            text: nil,
+            update_id: 303,
+            photo: [ { "file_id" => "big", "file_size" => 100, "width" => 10, "height" => 10 } ]
+          ))
+
+          thread_draft.reload
+          expect(thread_draft.content.body.to_html).to include("action-text-attachment")
+          expect(thread_draft.photos).not_to be_attached
+        end
+      end
+
+      context "when the most recent thread is past the sliding window" do
+        let!(:stale_draft) do
+          News.create!(
+            title: "old",
+            content: "<p>old</p>",
+            author: user,
+            status: :draft,
+            telegram_thread_started_at: 2.hours.ago,
+            telegram_thread_last_message_at: 30.minutes.ago
+          )
+        end
+
+        before { enable_thread_window(strategy: "sliding", seconds: 900) }
+
+        it "creates a new draft and does not touch the stale one" do
+          expect {
+            described_class.new.perform(payload_with(update_id: 400))
+          }.to change(News, :count).by(1)
+          expect(stale_draft.reload.content.body.to_plain_text).to eq("old")
+        end
+      end
+
+      context "with fixed-window strategy" do
+        before { enable_thread_window(strategy: "fixed", seconds: 600) }
+
+        context "when first message is within the fixed window" do
+          let!(:thread_draft) do
+            News.create!(
+              title: "first",
+              content: "<p>F</p>",
+              author: user,
+              status: :draft,
+              telegram_thread_started_at: 5.minutes.ago,
+              telegram_thread_last_message_at: 1.minute.ago
+            )
+          end
+
+          it "appends to the thread" do
+            expect {
+              described_class.new.perform(payload_with(update_id: 500))
+            }.not_to change(News, :count)
+            expect(thread_draft.reload.content.body.to_html).to include("F")
+          end
+        end
+
+        context "when first message is older than the fixed window" do
+          let!(:thread_draft) do
+            News.create!(
+              title: "stale fixed",
+              content: "<p>S</p>",
+              author: user,
+              status: :draft,
+              telegram_thread_started_at: 20.minutes.ago,
+              telegram_thread_last_message_at: 30.seconds.ago
+            )
+          end
+
+          it "creates a new draft (fixed window does not extend with activity)" do
+            expect {
+              described_class.new.perform(payload_with(update_id: 501))
+            }.to change(News, :count).by(1)
+          end
+        end
+      end
+
+      context "when threaded news belongs to a different author" do
+        let_it_be(:other_user) { create(:user) }
+        let!(:other_draft) do
+          News.create!(
+            title: "other",
+            content: "<p>O</p>",
+            author: other_user,
+            status: :draft,
+            telegram_thread_started_at: 1.minute.ago,
+            telegram_thread_last_message_at: 1.minute.ago
+          )
+        end
+
+        it "creates a new draft for the current author" do
+          expect {
+            described_class.new.perform(payload_with(update_id: 600))
+          }.to change(News, :count).by(1)
+          expect(News.last.author).to eq(user)
+        end
+      end
+
+      context "when the only matching draft was already published" do
+        let!(:published) do
+          News.create!(
+            title: "pub",
+            content: "<p>P</p>",
+            author: user,
+            status: :published,
+            published_at: Time.current,
+            telegram_thread_started_at: 1.minute.ago,
+            telegram_thread_last_message_at: 1.minute.ago
+          )
+        end
+
+        it "creates a new draft and leaves the published article alone" do
+          expect {
+            described_class.new.perform(payload_with(update_id: 700))
+          }.to change(News, :count).by(1)
+          expect(published.reload.content.body.to_plain_text).to eq("P")
+        end
+      end
+    end
+
+    context "with thread-window feature toggle disabled (default)" do
+      it "creates a fresh draft on every qualifying message (no append)" do
+        expect {
+          2.times { |i|
+            described_class.new.perform({
+              "update_id" => 900 + i,
+              "message" => {
+                "text" => long_text,
+                "from" => { "id" => 12345, "username" => "r", "first_name" => "A" },
+                "chat" => { "id" => -1 },
+                "date" => 1710000000
+              }
+            })
+          }
+        }.to change(News, :count).by(2)
+      end
+    end
   end
 end

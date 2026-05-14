@@ -17,6 +17,14 @@ RSpec.describe FeatureToggle, type: :model do
     it "includes news autolink players toggle key" do
       expect(described_class::KEYS).to include("news_autolink_players")
     end
+
+    it "includes telegram thread window toggle keys" do
+      expect(described_class::KEYS).to include(
+        "telegram_thread_window",
+        "telegram_thread_window_seconds",
+        "telegram_thread_window_strategy"
+      )
+    end
   end
 
   describe ".enabled?" do

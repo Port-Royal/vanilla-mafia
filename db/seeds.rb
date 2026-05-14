@@ -42,7 +42,10 @@ toggle.save!
   { key: "news_max_article_length", description: "Max article length (chars) on news index before truncation", enabled: false },
   { key: "news_score_keywords", description: "Comma-separated keywords for news scoring (e.g. игра,сезон,турнир)", enabled: true, value: "игра,сезон,турнир,рейтинг,мафия" },
   { key: "news_score_threshold", description: "Minimum news score to create a draft from Telegram message", enabled: true, value: "10" },
-  { key: "news_autolink_players", description: "Auto-link player nicknames in news drafts from Telegram" }
+  { key: "news_autolink_players", description: "Auto-link player nicknames in news drafts from Telegram" },
+  { key: "telegram_thread_window", description: "Combine consecutive Telegram messages from the same author into one news draft", enabled: false },
+  { key: "telegram_thread_window_seconds", description: "Window size in seconds for the Telegram message thread", enabled: false, value: "900" },
+  { key: "telegram_thread_window_strategy", description: "Window strategy: 'sliding' (resets on each new message) or 'fixed' (from first message)", enabled: false, value: "sliding" }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?
