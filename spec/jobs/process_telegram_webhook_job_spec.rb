@@ -221,8 +221,8 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
-    context "when telegram author has no linked user" do
-      let_it_be(:unlinked_author) { create(:telegram_author, telegram_user_id: 55555, user: nil) }
+    context "when telegram author has no linked user and no player" do
+      let_it_be(:unlinked_author) { create(:telegram_author, telegram_user_id: 55555, user: nil, player: nil) }
 
       let(:payload) do
         {
@@ -248,6 +248,44 @@ RSpec.describe ProcessTelegramWebhookJob do
           "from_id" => 55555,
           "telegram_author_id" => unlinked_author.id
         )
+      end
+    end
+
+    context "when telegram author has a linked player but no user (stub path)" do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:telegram_author_with_player) do
+        create(:telegram_author, telegram_user_id: 77777, user: nil, player: player)
+      end
+
+      let(:payload) do
+        {
+          "update_id" => 9,
+          "message" => {
+            "text" => long_text,
+            "from" => { "id" => 77777, "username" => "tg_only", "first_name" => "Player" },
+            "chat" => { "id" => -100123 },
+            "date" => 1710000000
+          }
+        }
+      end
+
+      it "creates a news article" do
+        expect { described_class.new.perform(payload) }.to change(News, :count).by(1)
+      end
+
+      it "authors the news with a stub user linked to the player" do
+        described_class.new.perform(payload)
+        expect(News.last.author.player).to eq(player)
+      end
+
+      it "marks the author as a telegram stub" do
+        described_class.new.perform(payload)
+        expect(News.last.author).to be_telegram_stub
+      end
+
+      it "caches the stub user on the telegram author" do
+        described_class.new.perform(payload)
+        expect(telegram_author_with_player.reload.user).to eq(News.last.author)
       end
     end
 

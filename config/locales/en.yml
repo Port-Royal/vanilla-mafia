@@ -185,8 +185,11 @@ en:
       empty: "Whitelist is empty."
       add: "Add author"
       add_submit: "Add"
+      save: "Save"
       create:
         success: "Author added to whitelist."
+      update:
+        success: "Author updated."
       destroy:
         success: "Author removed from whitelist."
   podcast:

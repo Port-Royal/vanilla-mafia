@@ -43,7 +43,12 @@
             <% @telegram_authors.each do |author| %>
               <tr>
                 <td class="px-4 py-3"><%= author.telegram_user_id %></td>
-                <td class="px-4 py-3"><%= author.user&.player&.name %></td>
+                <td class="px-4 py-3">
+                  <%= form_with model: author, url: admin_telegram_author_path(author), method: :patch, class: "flex gap-2 items-center" do |f| %>
+                    <%= f.select :player_id, options_for_select(@players.map { |p| [p.name, p.id] }, author.player_id), { include_blank: true }, class: "border border-gray-300 rounded px-2 py-1 text-sm" %>
+                    <%= f.submit t("admin_telegram.authors.save"), class: "bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-xs cursor-pointer" %>
+                  <% end %>
+                </td>
                 <td class="px-4 py-3"><%= author.user&.email %></td>
                 <td class="px-4 py-3 text-right">
                   <%= button_to t("admin_telegram.authors.remove"),
@@ -70,6 +75,10 @@
       <div>
         <%= f.label :user_id, t("admin_telegram.authors.linked_user"), class: "block text-xs text-gray-600 mb-1" %>
         <%= f.select :user_id, options_for_select(@users.map { |u| [u.player.name, u.id] }, f.object.user_id), { include_blank: true }, class: "border border-gray-300 rounded px-3 py-1.5 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :player_id, t("admin_telegram.authors.player"), class: "block text-xs text-gray-600 mb-1" %>
+        <%= f.select :player_id, options_for_select(@players.map { |p| [p.name, p.id] }, f.object.player_id), { include_blank: true }, class: "border border-gray-300 rounded px-3 py-1.5 text-sm" %>
       </div>
       <%= f.submit t("admin_telegram.authors.add_submit"), class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded text-sm cursor-pointer" %>
     <% end %>

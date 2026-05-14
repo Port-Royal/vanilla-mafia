@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_26_152805) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_13_163253) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -311,9 +311,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_152805) do
 
   create_table "telegram_authors", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "player_id"
     t.integer "telegram_user_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.index ["player_id"], name: "index_telegram_authors_on_player_id"
     t.index ["telegram_user_id"], name: "index_telegram_authors_on_telegram_user_id", unique: true
     t.index ["user_id"], name: "index_telegram_authors_on_user_id"
   end
@@ -342,6 +344,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_152805) do
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.string "stub_source"
     t.string "uid"
     t.string "unlock_token"
     t.datetime "updated_at", null: false
@@ -378,6 +381,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_152805) do
   add_foreign_key "playlist_episodes", "playlists"
   add_foreign_key "podcast_feed_tokens", "users"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "telegram_authors", "players"
   add_foreign_key "telegram_authors", "users"
   add_foreign_key "user_grants", "grants"
   add_foreign_key "user_grants", "users"

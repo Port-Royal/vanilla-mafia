@@ -80,6 +80,47 @@ RSpec.describe "Admin::TelegramAuthors" do
     end
   end
 
+  describe "PATCH /admin/telegram/authors/:id" do
+    let!(:author) { create(:telegram_author, telegram_user_id: 777000) }
+    let_it_be(:player) { create(:player) }
+
+    context "when user is admin" do
+      before { sign_in admin }
+
+      it "updates the player_id and redirects" do
+        patch admin_telegram_author_path(author), params: { telegram_author: { player_id: player.id } }
+
+        expect(author.reload.player).to eq(player)
+        expect(response).to redirect_to(admin_telegram_settings_path)
+      end
+
+      it "clears the player_id when blank is submitted" do
+        author.update!(player: player)
+
+        patch admin_telegram_author_path(author), params: { telegram_author: { player_id: "" } }
+
+        expect(author.reload.player).to be_nil
+      end
+
+      it "grants editor role to the linked user when updating user_id" do
+        user_without_editor = create(:user)
+
+        patch admin_telegram_author_path(author), params: { telegram_author: { user_id: user_without_editor.id } }
+
+        expect(user_without_editor.reload).to be_editor
+      end
+    end
+
+    context "when user is editor" do
+      before { sign_in editor }
+
+      it "returns not found" do
+        patch admin_telegram_author_path(author), params: { telegram_author: { player_id: player.id } }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
   describe "DELETE /admin/telegram/authors/:id" do
     context "when user is admin" do
       let!(:author) { create(:telegram_author) }
