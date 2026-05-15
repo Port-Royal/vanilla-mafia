@@ -695,6 +695,91 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
 
+    context "with a force-import DM" do
+      let(:operator_id) { 12345 }
+      let(:operator_chat_id) { 12345 }
+
+      let(:dm_payload) do
+        {
+          "update_id" => 5000,
+          "message" => {
+            "text" => "https://t.me/c/1111111111/678",
+            "from" => { "id" => operator_id, "username" => "reporter", "first_name" => "Alex" },
+            "chat" => { "id" => operator_chat_id, "type" => "private" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        allow(Telegram::ForceImportService).to receive(:call)
+      end
+
+      it "dispatches to ForceImportService" do
+        described_class.new.perform(dm_payload)
+        expect(Telegram::ForceImportService).to have_received(:call).with(
+          parsed_link: an_instance_of(Telegram::MessageLinkParser::Result),
+          operator_chat_id: operator_chat_id,
+          operator_user: user
+        )
+      end
+
+      it "does not run the normal news-draft pipeline" do
+        expect { described_class.new.perform(dm_payload) }.not_to change(News, :count)
+      end
+
+      context "when DM text is not a recognized link" do
+        let(:dm_payload) do
+          {
+            "update_id" => 5001,
+            "message" => {
+              "text" => "hello bot",
+              "from" => { "id" => operator_id, "username" => "reporter", "first_name" => "Alex" },
+              "chat" => { "id" => operator_chat_id, "type" => "private" },
+              "date" => 1_710_000_000
+            }
+          }
+        end
+
+        it "DMs help text" do
+          allow(Telegram::BotDmService).to receive(:call).and_return(true)
+          described_class.new.perform(dm_payload)
+          expect(Telegram::BotDmService).to have_received(:call).with(
+            chat_id: operator_chat_id, text: I18n.t("telegram.force_import.bad_link")
+          )
+        end
+
+        it "does not dispatch to ForceImportService" do
+          described_class.new.perform(dm_payload)
+          expect(Telegram::ForceImportService).not_to have_received(:call)
+        end
+      end
+
+      context "when DM is from a non-whitelisted sender" do
+        let(:dm_payload) do
+          {
+            "update_id" => 5002,
+            "message" => {
+              "text" => "https://t.me/c/1111111111/678",
+              "from" => { "id" => 99999, "username" => "stranger", "first_name" => "Bob" },
+              "chat" => { "id" => 99999, "type" => "private" },
+              "date" => 1_710_000_000
+            }
+          }
+        end
+
+        it "does not dispatch to ForceImportService and does not create a draft" do
+          expect { described_class.new.perform(dm_payload) }.not_to change(News, :count)
+          expect(Telegram::ForceImportService).not_to have_received(:call)
+        end
+      end
+    end
+
     context "with thread-window feature toggle disabled (default)" do
       it "creates a fresh draft on every qualifying message (no append)" do
         expect {

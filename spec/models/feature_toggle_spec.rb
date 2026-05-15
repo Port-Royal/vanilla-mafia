@@ -25,6 +25,13 @@ RSpec.describe FeatureToggle, type: :model do
         "telegram_thread_window_strategy"
       )
     end
+
+    it "includes telegram force import toggle keys" do
+      expect(described_class::KEYS).to include(
+        "telegram_force_import_enabled",
+        "telegram_force_import_max_range"
+      )
+    end
   end
 
   describe ".enabled?" do

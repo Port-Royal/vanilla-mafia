@@ -1,0 +1,186 @@
+module Telegram
+  class ForceImportService
+    MAX_TITLE_LENGTH = 255
+    PHOTO_ONLY_TITLE = "[медиа]".freeze
+    DEFAULT_MAX_RANGE = 50
+    ENABLED_TOGGLE = "telegram_force_import_enabled".freeze
+    MAX_RANGE_TOGGLE = "telegram_force_import_max_range".freeze
+
+    def self.call(parsed_link:, operator_chat_id:, operator_user:)
+      new(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user).call
+    end
+
+    def initialize(parsed_link:, operator_chat_id:, operator_user:)
+      @parsed_link = parsed_link
+      @operator_chat_id = operator_chat_id
+      @operator_user = operator_user
+    end
+
+    def call
+      return dm_disabled unless FeatureToggle.enabled?(ENABLED_TOGGLE)
+      return dm_count_too_large if @parsed_link.count > max_range
+
+      results = fetch_results
+      successful = results.select(&:success).map(&:message)
+
+      return dm_no_access if successful.empty? && results.any? { |r| r.error_code == 403 }
+      return dm_no_messages if successful.empty?
+
+      first = successful.first
+      sender_id = original_sender_id(first)
+      same_sender = successful.select { |m| original_sender_id(m) == sender_id }
+
+      author, fell_back = resolve_author(sender_id)
+      news = build_draft(same_sender, author)
+      return dm_too_long unless news.save
+
+      AutolinkPlayersInNewsService.call(news)
+      NotifyEditorsAboutDraftService.call(news)
+
+      dm_no_author if fell_back
+      dm_success(news, imported: same_sender.size, total: successful.size)
+    end
+
+    private
+
+    def max_range
+      FeatureToggle.value_for(MAX_RANGE_TOGGLE, default: DEFAULT_MAX_RANGE).to_i
+    end
+
+    def fetch_results
+      (@parsed_link.message_id..@parsed_link.message_id + @parsed_link.count).map do |id|
+        Telegram::ForwardMessageService.call(
+          from_chat_id: @parsed_link.source_chat,
+          message_id: id,
+          to_chat_id: @operator_chat_id
+        )
+      end
+    end
+
+    def original_sender_id(forwarded_msg)
+      origin = forwarded_msg["forward_origin"]
+      return origin["sender_user"]["id"] if origin.is_a?(Hash) && origin["sender_user"].is_a?(Hash)
+
+      forwarded_msg.dig("forward_from", "id")
+    end
+
+    def original_date(forwarded_msg)
+      origin = forwarded_msg["forward_origin"]
+      return Time.at(origin["date"]) if origin.is_a?(Hash) && origin["date"].present?
+
+      Time.at(forwarded_msg["forward_date"]) if forwarded_msg["forward_date"]
+    end
+
+    def resolve_author(sender_id)
+      author = TelegramAuthor.find_by_telegram_user_id(sender_id)
+      user = author&.ensure_user!
+      return [ user, false ] if user.present?
+
+      [ @operator_user, true ]
+    end
+
+    def build_draft(messages, author)
+      first = messages.first
+      first_text = first["text"].presence || first["caption"].presence
+      title = first_text.present? ? first_text.truncate(MAX_TITLE_LENGTH) : PHOTO_ONLY_TITLE
+      first_date = original_date(first) || Time.current
+      last_date  = original_date(messages.last) || first_date
+
+      News.new(
+        title: title,
+        content: assemble_content(messages),
+        author: author,
+        status: :draft,
+        created_at: first_date,
+        telegram_thread_started_at: first_date,
+        telegram_thread_last_message_at: last_date
+      )
+    end
+
+    MESSAGE_SEPARATOR = "<br><br>".freeze
+
+    def assemble_content(messages)
+      messages.map { |m| html_parts_for(m).join }.reject(&:blank?).join(MESSAGE_SEPARATOR)
+    end
+
+    def html_parts_for(message)
+      parts = []
+      parts << embedded_photo_html(extract_largest_photo_id(message)) if message["photo"].present?
+      text = message["text"].presence || message["caption"].presence
+      parts << format_html(text, message["entities"] || message["caption_entities"] || []) if text.present?
+      parts
+    end
+
+    def format_html(text, entities)
+      Telegram::EntitiesFormatter.call(text, entities)
+    end
+
+    def extract_largest_photo_id(message)
+      photos = message["photo"]
+      return nil if photos.blank?
+
+      photos.max_by { |p| p["file_size"].to_i }["file_id"]
+    end
+
+    def embedded_photo_html(file_id)
+      return "" if file_id.blank?
+
+      result = Telegram::DownloadFileService.call(file_id)
+      return "" unless result.success?
+
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: result.io, filename: result.filename, content_type: result.content_type
+      )
+      ActionText::Attachment.from_attachable(blob).to_html
+    end
+
+    def dm_success(news, imported:, total:)
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.success", id: news.id, imported: imported, total: total, skipped: total - imported)
+      )
+    end
+
+    def dm_no_messages
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.no_messages")
+      )
+    end
+
+    def dm_no_author
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.no_author")
+      )
+    end
+
+    def dm_disabled
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.disabled")
+      )
+    end
+
+    def dm_count_too_large
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.count_too_large", max: max_range, count: @parsed_link.count)
+      )
+    end
+
+    def dm_no_access
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.no_access")
+      )
+    end
+
+    def dm_too_long
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.too_long", max: News::MAX_CONTENT_LENGTH)
+      )
+    end
+  end
+end
