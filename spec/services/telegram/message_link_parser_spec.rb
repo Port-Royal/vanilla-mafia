@@ -67,6 +67,26 @@ RSpec.describe Telegram::MessageLinkParser do
       end
     end
 
+    context "with a query string on the link" do
+      it "parses a private link with a ?single suffix" do
+        result = described_class.call("https://t.me/c/1234567890/678?single")
+        expect(result.source_chat).to eq(-1001234567890)
+        expect(result.message_id).to eq(678)
+      end
+
+      it "parses a public link with a query string" do
+        result = described_class.call("https://t.me/channelname/678?comment=42")
+        expect(result.source_chat).to eq("@channelname")
+        expect(result.message_id).to eq(678)
+      end
+
+      it "parses a query-string link with a range suffix" do
+        result = described_class.call("https://t.me/c/1234567890/678?single +3")
+        expect(result.count).to eq(3)
+        expect(result.message_id).to eq(678)
+      end
+    end
+
     context "with malformed input" do
       it "returns nil for blank text" do
         expect(described_class.call("")).to be_nil

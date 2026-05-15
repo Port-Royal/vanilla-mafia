@@ -20,7 +20,7 @@ The feature must avoid posting technical control messages into the source group 
 - The bot must already be a member of the source chat (otherwise `forwardMessage` returns 403).
 - `forwardMessage` requires a destination chat. The destination is the **operator's private chat with the bot** — the operator triggered the import and sees the forwarded copy briefly; no noise leaks into the source group.
 - Authorization reuses the existing `TelegramAuthor` whitelist (whitelisted authors may trigger).
-- Senders of force-imported messages do **not** have to be whitelisted. If the sender isn't registered, the draft is created with a stub `User` via the vm-196 path, and the bot DMs a warning to the operator.
+- Senders of force-imported messages do **not** have to be whitelisted. If the sender resolves to no usable `User` (no `TelegramAuthor` row, or a row that yields neither a linked user nor a stub via the vm-196 path), the draft falls back to the **operator** as author and the bot DMs a warning. See [Author Resolution](#author-resolution).
 
 ## Trigger Interface
 
@@ -105,7 +105,9 @@ After save:
 
 - `AutolinkPlayersInNewsService.call(news)`
 - `NotifyEditorsAboutDraftService.call(news)`
-- Bot DMs ack including the draft's admin URL.
+- Bot DMs ack with the new draft's id and import counts (`imported/total`, skipped). No admin URL — the draft is found by id in the admin News list.
+
+If `news.save` fails validation (the assembled content exceeds `News::MAX_CONTENT_LENGTH` — a large range of long messages can blow past the 50k plain-text cap), no draft is created and the bot DMs the `too_long` error instead.
 
 ## Components
 
@@ -135,8 +137,9 @@ No new models. No migrations.
 | Feature disabled | "Force-import выключен" |
 | Bot not in source chat (Bot API 403) | "Бот не имеет доступа к чату источнику" |
 | All forwards failed (no successful 200s) | "Не удалось получить сообщения" |
-| Sender not whitelisted (warning, proceeds) | "Автор не в whitelist — создан черновик с заглушкой" |
-| Success | "Черновик #<id> создан (импортировано X/Y, Z пропущено — другой автор). URL: …" |
+| Sender not resolvable to a user (warning, proceeds with operator as author) | "Автор сообщения не привязан к пользователю — черновик создан под вашим авторством, переназначьте в админке." |
+| Assembled content exceeds `News::MAX_CONTENT_LENGTH` (draft not created) | "Импортированный текст превышает лимит N символов. Уменьшите диапазон." |
+| Success | "Черновик #<id> создан (импортировано X/Y, Z пропущено — другой автор)." |
 
 All operator DMs are Russian per existing project i18n conventions; exact strings finalized during implementation via `config/locales/ru.yml`.
 

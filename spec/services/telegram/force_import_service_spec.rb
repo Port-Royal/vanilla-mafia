@@ -404,6 +404,11 @@ RSpec.describe Telegram::ForceImportService do
       expect(body.index("BBB")).to be < body.index("CCC")
     end
 
+    it "does not glue consecutive messages together" do
+      described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+      expect(News.last.content.body.to_plain_text).not_to include("AAABBB")
+    end
+
     it "uses the first message's date for telegram_thread_started_at" do
       described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
       expect(News.last.telegram_thread_started_at).to eq(Time.at(1_710_000_000))
@@ -864,6 +869,45 @@ RSpec.describe Telegram::ForceImportService do
         described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
         expect(Telegram::BotDmService).to have_received(:call).with(
           chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_messages")
+        )
+      end
+    end
+
+    context "when the assembled content exceeds the News content limit" do
+      let(:huge_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "A" * (News::MAX_CONTENT_LENGTH + 1),
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        allow(Telegram::ForwardMessageService).to receive(:call).and_return(
+          Telegram::ForwardMessageService::Result.new(success: true, message: huge_payload, error_code: nil, description: nil)
+        )
+      end
+
+      it "does not create a draft" do
+        expect {
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        }.not_to change(News, :count)
+      end
+
+      it "DMs the too_long error" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: a_string_including("превышает лимит")
         )
       end
     end

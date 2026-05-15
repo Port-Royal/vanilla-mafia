@@ -32,7 +32,7 @@ module Telegram
 
       author, fell_back = resolve_author(sender_id)
       news = build_draft(same_sender, author)
-      news.save!
+      return dm_too_long unless news.save
 
       AutolinkPlayersInNewsService.call(news)
       NotifyEditorsAboutDraftService.call(news)
@@ -97,8 +97,10 @@ module Telegram
       )
     end
 
+    MESSAGE_SEPARATOR = "<br><br>".freeze
+
     def assemble_content(messages)
-      messages.flat_map { |m| html_parts_for(m) }.join
+      messages.map { |m| html_parts_for(m).join }.reject(&:blank?).join(MESSAGE_SEPARATOR)
     end
 
     def html_parts_for(message)
@@ -171,6 +173,13 @@ module Telegram
       Telegram::BotDmService.call(
         chat_id: @operator_chat_id,
         text: I18n.t("telegram.force_import.no_access")
+      )
+    end
+
+    def dm_too_long
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.too_long", max: News::MAX_CONTENT_LENGTH)
       )
     end
   end

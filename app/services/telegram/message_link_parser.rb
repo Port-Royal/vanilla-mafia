@@ -2,8 +2,8 @@ module Telegram
   class MessageLinkParser
     Result = Data.define(:source_chat, :message_id, :count)
 
-    PRIVATE_LINK = %r{\Ahttps://t\.me/c/(\d+)/(?:\d+/)?(\d+)\z}
-    PUBLIC_LINK  = %r{\Ahttps://t\.me/([A-Za-z][A-Za-z0-9_]{3,31})/(\d+)\z}
+    PRIVATE_LINK = %r{\Ahttps://t\.me/c/(\d+)/(?:\d+/)?(\d+)(?:\?\S*)?\z}
+    PUBLIC_LINK  = %r{\Ahttps://t\.me/([A-Za-z][A-Za-z0-9_]{3,31})/(\d+)(?:\?\S*)?\z}
     SUFFIX       = /\A\s*(.+?)(?:\s+\+(\d+))?\s*\z/
 
     def self.call(text)
