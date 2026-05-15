@@ -288,4 +288,107 @@ RSpec.describe Telegram::ForceImportService do
       end
     end
   end
+
+  describe ".call (author resolution)" do
+    before do
+      allow(Telegram::ForwardMessageService).to receive(:call).and_return(
+        Telegram::ForwardMessageService::Result.new(success: true, message: single_message_payload, error_code: nil, description: nil)
+      )
+      allow(Telegram::BotDmService).to receive(:call).and_return(true)
+      allow(AutolinkPlayersInNewsService).to receive(:call)
+      allow(NotifyEditorsAboutDraftService).to receive(:call)
+      FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+        ft.enabled = true
+        ft.value = ""
+        ft.description = "force_import"
+      end
+    end
+
+    context "when sender has a TelegramAuthor with a linked user" do
+      it "authors as that linked user" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to eq(sender_user)
+      end
+    end
+
+    context "when sender has a TelegramAuthor with no user but a player (vm-196 stub path)" do
+      let_it_be(:player) { create(:player) }
+      let_it_be(:stub_author) { create(:telegram_author, telegram_user_id: 77777, user: nil, player: player) }
+
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "stub me",
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 77777, "first_name" => "Stub" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      it "authors with a stub user linked to the player" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to be_telegram_stub
+        expect(News.last.author.player).to eq(player)
+      end
+    end
+
+    context "when sender has no TelegramAuthor row" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "stranger",
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 11111, "first_name" => "Stranger" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      it "authors as the operator" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to eq(operator_user)
+      end
+
+      it "DMs a warning to the operator" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: a_string_including("Автор сообщения не привязан")
+        )
+      end
+    end
+
+    context "when sender has a TelegramAuthor row but no user and no player" do
+      let_it_be(:orphan_author) { create(:telegram_author, telegram_user_id: 22222, user: nil, player: nil) }
+
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "orphan",
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 22222, "first_name" => "Orphan" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      it "falls back to the operator as author" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to eq(operator_user)
+      end
+
+      it "DMs a warning" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: a_string_including("Автор сообщения не привязан")
+        )
+      end
+    end
+  end
 end

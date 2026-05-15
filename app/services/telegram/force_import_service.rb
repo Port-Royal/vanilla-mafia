@@ -22,13 +22,14 @@ module Telegram
       sender_id = original_sender_id(first)
       same_sender = forwarded.select { |m| original_sender_id(m) == sender_id }
 
-      author = resolve_author(sender_id)
+      author, fell_back = resolve_author(sender_id)
       news = build_draft(same_sender, author)
       news.save!
 
       AutolinkPlayersInNewsService.call(news)
       NotifyEditorsAboutDraftService.call(news)
 
+      dm_no_author if fell_back
       dm_success(news, imported: same_sender.size, total: forwarded.size)
     end
 
@@ -67,9 +68,9 @@ module Telegram
     def resolve_author(sender_id)
       author = TelegramAuthor.find_by_telegram_user_id(sender_id)
       user = author&.ensure_user!
-      return user if user.present?
+      return [ user, false ] if user.present?
 
-      @operator_user
+      [ @operator_user, true ]
     end
 
     def build_draft(messages, author)
@@ -136,6 +137,13 @@ module Telegram
       Telegram::BotDmService.call(
         chat_id: @operator_chat_id,
         text: I18n.t("telegram.force_import.no_messages")
+      )
+    end
+
+    def dm_no_author
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.no_author")
       )
     end
   end
