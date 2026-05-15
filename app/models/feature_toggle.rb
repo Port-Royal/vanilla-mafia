@@ -21,6 +21,8 @@ class FeatureToggle < ApplicationRecord
     telegram_thread_window
     telegram_thread_window_seconds
     telegram_thread_window_strategy
+    telegram_force_import_enabled
+    telegram_force_import_max_range
   ].freeze
   CACHE_TTL = 5.minutes
 
