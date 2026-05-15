@@ -77,16 +77,52 @@ module Telegram
       first_text = first["text"].presence || first["caption"].presence
       title = first_text.present? ? first_text.truncate(MAX_TITLE_LENGTH) : PHOTO_ONLY_TITLE
       first_date = original_date(first) || Time.current
+      last_date  = original_date(messages.last) || first_date
 
       News.new(
         title: title,
-        content: first_text.to_s,
+        content: assemble_content(messages),
         author: author,
         status: :draft,
         created_at: first_date,
         telegram_thread_started_at: first_date,
-        telegram_thread_last_message_at: original_date(messages.last) || first_date
+        telegram_thread_last_message_at: last_date
       )
+    end
+
+    def assemble_content(messages)
+      messages.flat_map { |m| html_parts_for(m) }.join
+    end
+
+    def html_parts_for(message)
+      parts = []
+      parts << embedded_photo_html(extract_largest_photo_id(message)) if message["photo"].present?
+      text = message["text"].presence || message["caption"].presence
+      parts << format_html(text, message["entities"] || message["caption_entities"] || []) if text.present?
+      parts
+    end
+
+    def format_html(text, entities)
+      Telegram::EntitiesFormatter.call(text, entities)
+    end
+
+    def extract_largest_photo_id(message)
+      photos = message["photo"]
+      return nil if photos.blank?
+
+      photos.max_by { |p| p["file_size"].to_i }["file_id"]
+    end
+
+    def embedded_photo_html(file_id)
+      return "" if file_id.blank?
+
+      result = Telegram::DownloadFileService.call(file_id)
+      return "" unless result.success?
+
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: result.io, filename: result.filename, content_type: result.content_type
+      )
+      ActionText::Attachment.from_attachable(blob).to_html
     end
 
     def dm_success(news, imported:, total:)
