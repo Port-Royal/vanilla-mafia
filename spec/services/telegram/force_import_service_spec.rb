@@ -257,5 +257,35 @@ RSpec.describe Telegram::ForceImportService do
         expect(News.last.photos).not_to be_attached
       end
     end
+
+    context "with messages from different senders inside the range" do
+      let(:msg_b_other) { build_forwarded("BBB", 88888, message_id: 9002, date: 1_710_000_010) }
+
+      before do
+        allow(Telegram::ForwardMessageService).to receive(:call) do |from_chat_id:, message_id:, to_chat_id:|
+          payload =
+            case message_id
+            when 100 then msg_a
+            when 101 then msg_b_other
+            when 102 then msg_c
+            end
+          Telegram::ForwardMessageService::Result.new(success: true, message: payload, error_code: nil, description: nil)
+        end
+      end
+
+      it "includes only same-sender messages in the draft body" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        body = News.last.content.body.to_plain_text
+        expect(body).to include("AAA").and include("CCC")
+        expect(body).not_to include("BBB")
+      end
+
+      it "ack reports skipped count" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: a_string_including("2/3").and(including("1"))
+        )
+      end
+    end
   end
 end
