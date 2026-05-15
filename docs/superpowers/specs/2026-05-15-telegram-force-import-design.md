@@ -79,11 +79,13 @@ The response from `forwardMessage` is the **new** message created in the destina
 
 ## Author Resolution
 
-Identical to the vm-196 path:
-
 1. Resolve `TelegramAuthor.find_by(telegram_user_id: sender_id)`.
-2. If found → `author.ensure_user!` (creates or returns the linked or stub User per vm-196 behavior).
-3. If **not** found → reuse the stub-User creation logic from vm-196 keyed on the sender's `from.id` and display name. Bot DMs a warning to the operator: "Автор не в whitelist — создан черновик с заглушкой" but the draft is still created so the operator can fix attribution later in admin.
+2. If found:
+   - `author.ensure_user!` returns a real or stub `User` (vm-196 path) → use as draft author.
+   - `ensure_user!` returns `nil` (whitelisted author with no linked user **and** no linked player — same case `ProcessTelegramWebhookJob` silently drops today) → fall back to step 3.
+3. If not found, or step 2 fell back: use the **operator** (the whitelisted DM sender's linked user) as the draft author. Bot DMs a warning: "Автор сообщения не привязан к пользователю — черновик создан под вашим авторством, переназначьте в админке." Operator can re-attribute in the admin News UI.
+
+Rationale: `User.find_or_create_telegram_stub!` requires a `Player`. Force-import with a stranger sender has no player to bind to, so spawning a stub user without one would either require a schema/validation change or a new "anonymous" stub variant — both out of scope for v1. Operator-as-author keeps the path single-line and matches normal moderation behaviour (whoever clicked the button takes responsibility).
 
 ## Draft Assembly
 
@@ -163,8 +165,9 @@ All operator DMs are Russian per existing project i18n conventions; exact string
 4. Append findings to `.artifacts.local/regular-evilution-feedback.log`.
 5. Record scores in PR description (Evilution first, then Mutant).
 
-## Open Questions (to address in plan / implementation)
+## Resolved During Planning
 
-1. **Public username → chat_id resolution.** `t.me/<username>/<id>` doesn't expose the numeric chat_id. Options: call Bot API `getChat` once on first encounter and cache mapping in a tiny key-value table or memory cache, or restrict v1 to `t.me/c/<numeric>/<id>` links and reject username-style links with a helpful DM. Pick during planning.
-2. **Title fallback for bare-photo first message.** Match whatever vm-z20 lands on for the same case; revisit when vm-z20 is closed.
-3. **Stub User reuse vs creation.** Confirm during planning that vm-196's `TelegramAuthor#ensure_user!` already handles the "no whitelist row at all" case, or whether force-import needs its own stub-creation helper.
+1. **Public username links** (`t.me/<username>/<id>`): `forwardMessage` accepts `@<username>` as `from_chat_id`, so no separate id resolution needed. Parser emits either a numeric chat_id (`-100<digits>`) for `/c/` links or a string `@<username>` for username links — both are valid for the Bot API call.
+2. **Title fallback for bare-photo first message.** Use the constant `Telegram::ForceImportService::PHOTO_ONLY_TITLE = "[медиа]"` for v1. Operator can edit the draft afterwards.
+3. **Stub User without TelegramAuthor row:** falls back to operator-as-author (see [Author Resolution](#author-resolution)). No new stub variant added in v1.
+4. **Topic links** (`t.me/c/<chat>/<topic>/<msg>`): parser treats the path as `[chat, ...maybe_topic, msg]` and always takes the **last** numeric segment as `message_id`; ignores topic segment. Topics in supergroups share message_id space, so `forwardMessage` works without the topic id.
