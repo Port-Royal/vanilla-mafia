@@ -14,6 +14,8 @@ class ProcessTelegramWebhookJob < ApplicationJob
     parsed = Telegram::MessageParser.call(payload)
     return if parsed.nil?
 
+    return if dispatch_force_import?(payload, parsed)
+
     author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
     return if author.nil?
 
@@ -36,6 +38,34 @@ class ProcessTelegramWebhookJob < ApplicationJob
   end
 
   private
+
+  def dispatch_force_import?(payload, parsed)
+    message = payload["message"] || payload["edited_message"]
+    return false if message.nil?
+    return false unless message.dig("chat", "type") == "private"
+
+    operator_author = TelegramAuthor.find_by_telegram_user_id(parsed.from_id)
+    return false if operator_author.nil?
+
+    operator_user = operator_author.ensure_user!
+    return false if operator_user.nil?
+
+    link = Telegram::MessageLinkParser.call(parsed.raw_text)
+    if link.nil?
+      Telegram::BotDmService.call(
+        chat_id: message.dig("chat", "id"),
+        text: I18n.t("telegram.force_import.bad_link")
+      )
+      return true
+    end
+
+    Telegram::ForceImportService.call(
+      parsed_link: link,
+      operator_chat_id: message.dig("chat", "id"),
+      operator_user: operator_user
+    )
+    true
+  end
 
   def thread_window_enabled?
     FeatureToggle.enabled?(THREAD_TOGGLE)
