@@ -65,6 +65,16 @@ RSpec.describe Telegram::ForwardMessageService do
           hash_including("from_chat_id" => "@channelname")
         )
       end
+
+      it "leaves error_code nil on success" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.error_code).to be_nil
+      end
+
+      it "leaves description nil on success" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.description).to be_nil
+      end
     end
 
     context "when the API returns ok=false with 400" do
@@ -86,6 +96,23 @@ RSpec.describe Telegram::ForwardMessageService do
       it "exposes the description" do
         result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
         expect(result.description).to eq("Bad Request: message to forward not found")
+      end
+
+      it "leaves message nil on failure" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.message).to be_nil
+      end
+    end
+
+    context "when the API response omits the ok key" do
+      let(:response_body) { { "result" => { "message_id" => 999 } } }
+      let(:http_response) { instance_double(Net::HTTPOK, body: response_body.to_json) }
+
+      before { allow(Net::HTTP).to receive(:post_form).and_return(http_response) }
+
+      it "treats missing ok as failure (does not raise)" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.success).to be false
       end
     end
 
@@ -110,6 +137,16 @@ RSpec.describe Telegram::ForwardMessageService do
         expect(result.success).to be false
         expect(result.description).to include("bot_token")
       end
+
+      it "leaves message nil when token is missing" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.message).to be_nil
+      end
+
+      it "leaves error_code nil when token is missing" do
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.error_code).to be_nil
+      end
     end
 
     context "when a network error occurs" do
@@ -119,6 +156,18 @@ RSpec.describe Telegram::ForwardMessageService do
         result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
         expect(result.success).to be false
         expect(result.description).to include("Net::ReadTimeout")
+      end
+    end
+
+    context "when the response body is not valid JSON" do
+      let(:http_response) { instance_double(Net::HTTPOK, body: "<html>oops</html>") }
+
+      before { allow(Net::HTTP).to receive(:post_form).and_return(http_response) }
+
+      it "joins error class and message with a colon separator" do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError.new("boom"))
+        result = described_class.call(from_chat_id: from_chat_id, message_id: message_id, to_chat_id: to_chat_id)
+        expect(result.description).to eq("JSON::ParserError: boom")
       end
     end
   end

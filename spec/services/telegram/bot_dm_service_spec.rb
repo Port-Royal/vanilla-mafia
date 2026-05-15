@@ -40,6 +40,27 @@ RSpec.describe Telegram::BotDmService do
         expect(result).to be false
         expect(Rails.logger).to have_received(:warn).with(a_string_matching(/telegram_bot_dm.+chat not found/))
       end
+
+      it "logs the failure under the 'event' key" do
+        allow(Rails.logger).to receive(:warn)
+        described_class.call(chat_id: chat_id, text: text)
+        expect(Rails.logger).to have_received(:warn).with(a_string_matching(/"event":"telegram_bot_dm.failed"/))
+      end
+
+      it "prefixes the log detail with 'api error: '" do
+        allow(Rails.logger).to receive(:warn)
+        described_class.call(chat_id: chat_id, text: text)
+        expect(Rails.logger).to have_received(:warn).with(a_string_matching(/"detail":"api error: chat not found"/))
+      end
+    end
+
+    context "when the API response omits the ok key" do
+      let(:response_body) { { "result" => { "message_id" => 1 } } }
+
+      it "treats missing ok as failure without raising" do
+        allow(Rails.logger).to receive(:warn)
+        expect(described_class.call(chat_id: chat_id, text: text)).to be false
+      end
     end
 
     context "when the network fails" do
@@ -49,6 +70,15 @@ RSpec.describe Telegram::BotDmService do
         allow(Rails.logger).to receive(:warn)
         expect(described_class.call(chat_id: chat_id, text: text)).to be false
         expect(Rails.logger).to have_received(:warn).with(a_string_matching(/Net::ReadTimeout/))
+      end
+    end
+
+    context "when the response body is not valid JSON" do
+      it "joins error class and message with a colon separator in the log detail" do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError.new("boom"))
+        allow(Rails.logger).to receive(:warn)
+        described_class.call(chat_id: chat_id, text: text)
+        expect(Rails.logger).to have_received(:warn).with(a_string_matching(/"detail":"JSON::ParserError: boom"/))
       end
     end
 

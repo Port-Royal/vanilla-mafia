@@ -77,6 +77,207 @@ RSpec.describe Telegram::ForceImportService do
       expect(News.last.title).to eq("A" * 50)
     end
 
+    context "when the message has an empty text string but a caption" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "",
+          "caption" => "caption headline",
+          "photo" => [ { "file_id" => "cap_id", "file_size" => 10, "width" => 5, "height" => 5 } ],
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(
+          Telegram::DownloadFileService::SuccessResult.new(
+            io: StringIO.new("img"), filename: "p.jpg", content_type: "image/jpeg"
+          )
+        )
+      end
+
+      it "treats the blank text as absent and falls back to the caption for the title" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.title).to eq("caption headline")
+      end
+
+      it "includes the caption text in the draft body" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.content.body.to_plain_text).to include("caption headline")
+      end
+    end
+
+    context "when the message has blank text and a blank caption (photo only)" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "",
+          "caption" => "",
+          "photo" => [ { "file_id" => "photo_id", "file_size" => 10, "width" => 5, "height" => 5 } ],
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(
+          Telegram::DownloadFileService::SuccessResult.new(
+            io: StringIO.new("img"), filename: "p.jpg", content_type: "image/jpeg"
+          )
+        )
+      end
+
+      it "uses the photo-only placeholder title" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.title).to eq("[медиа]")
+      end
+    end
+
+    context "when a photo message has no caption key at all" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "photo" => [ { "file_id" => "nokey_id", "file_size" => 10, "width" => 5, "height" => 5 } ],
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(
+          Telegram::DownloadFileService::SuccessResult.new(
+            io: StringIO.new("img"), filename: "p.jpg", content_type: "image/jpeg"
+          )
+        )
+      end
+
+      it "uses the photo-only placeholder title without raising on the missing caption" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.title).to eq("[медиа]")
+      end
+    end
+
+    context "when the message text carries formatting entities" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "Hello bold world",
+          "entities" => [ { "type" => "bold", "offset" => 6, "length" => 4 } ],
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      it "applies the entities when rendering the draft body" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.content.body.to_html).to include("<strong>bold</strong>")
+      end
+    end
+
+    context "when a photo message carries caption_entities" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "caption" => "Hello bold world",
+          "caption_entities" => [ { "type" => "bold", "offset" => 6, "length" => 4 } ],
+          "photo" => [ { "file_id" => "ce_id", "file_size" => 10, "width" => 5, "height" => 5 } ],
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      before do
+        allow(Telegram::DownloadFileService).to receive(:call).and_return(
+          Telegram::DownloadFileService::SuccessResult.new(
+            io: StringIO.new("img"), filename: "p.jpg", content_type: "image/jpeg"
+          )
+        )
+      end
+
+      it "applies caption_entities when rendering the caption" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.content.body.to_html).to include("<strong>bold</strong>")
+      end
+    end
+
+    context "when a message has no photo" do
+      it "does not embed any photo attachment in the body" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.content.body.to_html).not_to include("action-text-attachment")
+      end
+    end
+
+    context "when the message text exceeds the title length limit" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "B" * 400,
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" },
+            "date" => 1_710_000_000
+          }
+        }
+      end
+
+      it "truncates the title to 255 characters" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.title.length).to eq(255)
+      end
+    end
+
+    context "when the forwarded message has no origin date" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "no date here",
+          "forward_origin" => {
+            "type" => "user",
+            "sender_user" => { "id" => 99999, "first_name" => "S" }
+          }
+        }
+      end
+
+      it "falls back to the current time for created_at" do
+        freeze_time do
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+          expect(News.last.created_at).to eq(Time.current)
+        end
+      end
+
+      it "falls back to the current time for the thread timestamps" do
+        freeze_time do
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+          news = News.last
+          expect(news.telegram_thread_started_at).to eq(Time.current)
+          expect(news.telegram_thread_last_message_at).to eq(Time.current)
+        end
+      end
+    end
+
     it "sets created_at from forward_origin.date" do
       freeze_time do
         described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
@@ -107,6 +308,50 @@ RSpec.describe Telegram::ForceImportService do
         chat_id: operator_chat_id,
         text: a_string_including("Черновик #").and(including("импортировано 1/1"))
       )
+    end
+
+    context "when the message uses the legacy forward_from / forward_date format" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "legacy forward",
+          "forward_from" => { "id" => 99999, "first_name" => "Legacy" },
+          "forward_date" => 1_710_000_500
+        }
+      end
+
+      it "resolves the sender from forward_from.id" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to eq(sender_user)
+      end
+
+      it "dates the draft from forward_date" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.created_at).to eq(Time.at(1_710_000_500))
+      end
+    end
+
+    context "when forward_origin is present but its sender_user is not a hash" do
+      let(:single_message_payload) do
+        {
+          "message_id" => 9001,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "hidden sender",
+          "forward_origin" => { "type" => "hidden_user", "sender_user_name" => "Anon", "date" => 1_710_000_600 },
+          "forward_from" => { "id" => 99999, "first_name" => "Fallback" }
+        }
+      end
+
+      it "falls back to forward_from for the sender" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.author).to eq(sender_user)
+      end
+
+      it "still dates the draft from forward_origin.date" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.created_at).to eq(Time.at(1_710_000_600))
+      end
     end
   end
 
@@ -176,6 +421,22 @@ RSpec.describe Telegram::ForceImportService do
       )
     end
 
+    context "when the last message in the range has no origin date" do
+      let(:msg_c) do
+        {
+          "message_id" => 9003,
+          "from" => { "id" => 0, "is_bot" => true },
+          "text" => "CCC",
+          "forward_origin" => { "type" => "user", "sender_user" => { "id" => 99999, "first_name" => "S" } }
+        }
+      end
+
+      it "falls back to the first message's date for telegram_thread_last_message_at" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.telegram_thread_last_message_at).to eq(Time.at(1_710_000_000))
+      end
+    end
+
     context "with gaps (deleted middle message returns 404)" do
       before do
         allow(Telegram::ForwardMessageService).to receive(:call) do |from_chat_id:, message_id:, to_chat_id:|
@@ -205,6 +466,33 @@ RSpec.describe Telegram::ForceImportService do
       end
     end
 
+    context "when one message in the range returns 403 but others succeed" do
+      before do
+        allow(Telegram::ForwardMessageService).to receive(:call) do |from_chat_id:, message_id:, to_chat_id:|
+          case message_id
+          when 100, 102
+            payload = message_id == 100 ? msg_a : msg_c
+            Telegram::ForwardMessageService::Result.new(success: true, message: payload, error_code: nil, description: nil)
+          when 101
+            Telegram::ForwardMessageService::Result.new(success: false, message: nil, error_code: 403, description: "Forbidden")
+          end
+        end
+      end
+
+      it "still imports a draft (does not abort with 'no access')" do
+        expect {
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        }.to change(News, :count).by(1)
+      end
+
+      it "does not DM the 'no access' text" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).not_to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_access")
+        )
+      end
+    end
+
     context "with an inline photo in a range message" do
       let(:photo_message) do
         {
@@ -213,7 +501,8 @@ RSpec.describe Telegram::ForceImportService do
           "caption" => "with photo",
           "photo" => [
             { "file_id" => "small_id", "file_size" => 100, "width" => 90, "height" => 90 },
-            { "file_id" => "large_id", "file_size" => 5000, "width" => 800, "height" => 800 }
+            { "file_id" => "large_id", "file_size" => 5000, "width" => 800, "height" => 800 },
+            { "file_id" => "medium_id", "file_size" => 800, "width" => 300, "height" => 300 }
           ],
           "forward_origin" => {
             "type" => "user",
@@ -255,6 +544,30 @@ RSpec.describe Telegram::ForceImportService do
       it "does not attach photos to the gallery" do
         described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
         expect(News.last.photos).not_to be_attached
+      end
+
+      it "embeds the rendered attachment HTML (not the raw attachment object)" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(News.last.content.body.to_html).to include("<action-text-attachment")
+      end
+
+      context "when the photo download fails" do
+        before do
+          allow(Telegram::DownloadFileService).to receive(:call).and_return(
+            Telegram::DownloadFileService::FailureResult.new(description: "download boom")
+          )
+        end
+
+        it "still imports the draft without an inline attachment" do
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+          expect(News.last.content.body.to_html).not_to include("action-text-attachment")
+        end
+
+        it "still includes the surrounding text content" do
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+          body = News.last.content.body.to_plain_text
+          expect(body).to include("AAA").and include("CCC")
+        end
       end
     end
 
@@ -308,6 +621,13 @@ RSpec.describe Telegram::ForceImportService do
       it "authors as that linked user" do
         described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
         expect(News.last.author).to eq(sender_user)
+      end
+
+      it "does not DM a no-author warning when the author resolved cleanly" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).not_to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_author")
+        )
       end
     end
 
@@ -484,6 +804,47 @@ RSpec.describe Telegram::ForceImportService do
         expect {
           described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
         }.not_to change(News, :count)
+      end
+
+      it "does not also DM the 'no messages' text" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).not_to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_messages")
+        )
+      end
+    end
+
+    context "when some forwards fail with 400 and one with 403 (no successes)" do
+      let(:parsed_link) do
+        Telegram::MessageLinkParser::Result.new(
+          source_chat: source_chat, message_id: start_message_id, count: 1
+        )
+      end
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        allow(Telegram::ForwardMessageService).to receive(:call) do |from_chat_id:, message_id:, to_chat_id:|
+          code = message_id == start_message_id ? 400 : 403
+          Telegram::ForwardMessageService::Result.new(success: false, message: nil, error_code: code, description: "x")
+        end
+      end
+
+      it "DMs 'no access' because at least one forward was forbidden" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_access")
+        )
+      end
+
+      it "does not DM 'no messages'" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).not_to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_messages")
+        )
       end
     end
 

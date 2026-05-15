@@ -37,6 +37,11 @@ RSpec.describe Telegram::MessageLinkParser do
         result = described_class.call("https://t.me/channelname/678")
         expect(result.message_id).to eq(678)
       end
+
+      it "carries the range suffix count through to the result" do
+        result = described_class.call("https://t.me/channelname/678 +7")
+        expect(result.count).to eq(7)
+      end
     end
 
     context "with a range suffix" do
@@ -49,6 +54,16 @@ RSpec.describe Telegram::MessageLinkParser do
         result = described_class.call("  https://t.me/c/1234567890/678   +12  ")
         expect(result.count).to eq(12)
         expect(result.message_id).to eq(678)
+      end
+
+      it "interprets the count as base-10 (no octal parsing)" do
+        result = described_class.call("https://t.me/c/1234567890/678 +010")
+        expect(result.count).to eq(10)
+      end
+
+      it "accepts the smallest positive count of +1" do
+        result = described_class.call("https://t.me/c/1234567890/678 +1")
+        expect(result.count).to eq(1)
       end
     end
 
