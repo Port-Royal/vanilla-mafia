@@ -391,4 +391,120 @@ RSpec.describe Telegram::ForceImportService do
       end
     end
   end
+
+  describe ".call (errors)" do
+    before do
+      allow(Telegram::BotDmService).to receive(:call).and_return(true)
+      allow(AutolinkPlayersInNewsService).to receive(:call)
+      allow(NotifyEditorsAboutDraftService).to receive(:call)
+    end
+
+    context "when the feature toggle is disabled" do
+      before do
+        toggle = FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = false
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        toggle.update!(enabled: false)
+      end
+
+      it "does not create a draft" do
+        expect {
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        }.not_to change(News, :count)
+      end
+
+      it "DMs 'disabled'" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.disabled")
+        )
+      end
+
+      it "does not call ForwardMessageService" do
+        allow(Telegram::ForwardMessageService).to receive(:call)
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::ForwardMessageService).not_to have_received(:call)
+      end
+    end
+
+    context "when count exceeds the max" do
+      let(:parsed_link) do
+        Telegram::MessageLinkParser::Result.new(source_chat: source_chat, message_id: start_message_id, count: 999)
+      end
+
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_max_range") do |ft|
+          ft.enabled = true
+          ft.value = "50"
+          ft.description = "max_range"
+        end
+      end
+
+      it "does not create a draft" do
+        expect {
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        }.not_to change(News, :count)
+      end
+
+      it "DMs the count-too-large message with substituted limit and count" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: a_string_including("50").and(including("999"))
+        )
+      end
+    end
+
+    context "when ForwardMessageService returns 403 on every call" do
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        allow(Telegram::ForwardMessageService).to receive(:call).and_return(
+          Telegram::ForwardMessageService::Result.new(success: false, message: nil, error_code: 403, description: "Forbidden")
+        )
+      end
+
+      it "DMs 'no access'" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_access")
+        )
+      end
+
+      it "does not create a draft" do
+        expect {
+          described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        }.not_to change(News, :count)
+      end
+    end
+
+    context "when ForwardMessageService returns only 400s" do
+      before do
+        FeatureToggle.find_or_create_by!(key: "telegram_force_import_enabled") do |ft|
+          ft.enabled = true
+          ft.value = ""
+          ft.description = "force_import"
+        end
+        allow(Telegram::ForwardMessageService).to receive(:call).and_return(
+          Telegram::ForwardMessageService::Result.new(success: false, message: nil, error_code: 400, description: "not found")
+        )
+      end
+
+      it "DMs 'no messages'" do
+        described_class.call(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user)
+        expect(Telegram::BotDmService).to have_received(:call).with(
+          chat_id: operator_chat_id, text: I18n.t("telegram.force_import.no_messages")
+        )
+      end
+    end
+  end
 end

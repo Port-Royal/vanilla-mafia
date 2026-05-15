@@ -3,6 +3,8 @@ module Telegram
     MAX_TITLE_LENGTH = 255
     PHOTO_ONLY_TITLE = "[медиа]".freeze
     DEFAULT_MAX_RANGE = 50
+    ENABLED_TOGGLE = "telegram_force_import_enabled".freeze
+    MAX_RANGE_TOGGLE = "telegram_force_import_max_range".freeze
 
     def self.call(parsed_link:, operator_chat_id:, operator_user:)
       new(parsed_link: parsed_link, operator_chat_id: operator_chat_id, operator_user: operator_user).call
@@ -15,12 +17,18 @@ module Telegram
     end
 
     def call
-      forwarded = fetch_messages
-      return dm_no_messages if forwarded.empty?
+      return dm_disabled unless FeatureToggle.enabled?(ENABLED_TOGGLE)
+      return dm_count_too_large if @parsed_link.count > max_range
 
-      first = forwarded.first
+      results = fetch_results
+      successful = results.select(&:success).map(&:message)
+
+      return dm_no_access if successful.empty? && results.any? { |r| r.error_code == 403 }
+      return dm_no_messages if successful.empty?
+
+      first = successful.first
       sender_id = original_sender_id(first)
-      same_sender = forwarded.select { |m| original_sender_id(m) == sender_id }
+      same_sender = successful.select { |m| original_sender_id(m) == sender_id }
 
       author, fell_back = resolve_author(sender_id)
       news = build_draft(same_sender, author)
@@ -30,25 +38,23 @@ module Telegram
       NotifyEditorsAboutDraftService.call(news)
 
       dm_no_author if fell_back
-      dm_success(news, imported: same_sender.size, total: forwarded.size)
+      dm_success(news, imported: same_sender.size, total: successful.size)
     end
 
     private
 
-    def fetch_messages
-      ids = (@parsed_link.message_id..@parsed_link.message_id + @parsed_link.count).to_a
-      ids.filter_map { |id| forward_one(id) }
+    def max_range
+      FeatureToggle.value_for(MAX_RANGE_TOGGLE, default: DEFAULT_MAX_RANGE).to_i
     end
 
-    def forward_one(message_id)
-      result = Telegram::ForwardMessageService.call(
-        from_chat_id: @parsed_link.source_chat,
-        message_id: message_id,
-        to_chat_id: @operator_chat_id
-      )
-      return result.message if result.success
-
-      nil
+    def fetch_results
+      (@parsed_link.message_id..@parsed_link.message_id + @parsed_link.count).map do |id|
+        Telegram::ForwardMessageService.call(
+          from_chat_id: @parsed_link.source_chat,
+          message_id: id,
+          to_chat_id: @operator_chat_id
+        )
+      end
     end
 
     def original_sender_id(forwarded_msg)
@@ -144,6 +150,27 @@ module Telegram
       Telegram::BotDmService.call(
         chat_id: @operator_chat_id,
         text: I18n.t("telegram.force_import.no_author")
+      )
+    end
+
+    def dm_disabled
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.disabled")
+      )
+    end
+
+    def dm_count_too_large
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.count_too_large", max: max_range, count: @parsed_link.count)
+      )
+    end
+
+    def dm_no_access
+      Telegram::BotDmService.call(
+        chat_id: @operator_chat_id,
+        text: I18n.t("telegram.force_import.no_access")
       )
     end
   end
