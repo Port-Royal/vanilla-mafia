@@ -381,6 +381,15 @@ ru:
         success: "Автор обновлён."
       destroy:
         success: "Автор удалён из белого списка."
+  telegram:
+    force_import:
+      bad_link: "Не понял ссылку. Пример: https://t.me/c/.../123 +5"
+      disabled: "Force-import выключен"
+      count_too_large: "Лимит диапазона %{max}. Передано: %{count}"
+      no_access: "Бот не имеет доступа к чату источнику"
+      no_messages: "Не удалось получить сообщения"
+      no_author: "Автор сообщения не привязан к пользователю — черновик создан под вашим авторством, переназначьте в админке."
+      success: "Черновик #%{id} создан (импортировано %{imported}/%{total}, %{skipped} пропущено — другой автор)."
   podcast:
     episodes:
       index:
