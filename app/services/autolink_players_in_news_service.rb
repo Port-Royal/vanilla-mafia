@@ -43,7 +43,10 @@ class AutolinkPlayersInNewsService
 
   def sync_mentions(player_ids)
     player_ids.each do |player_id|
-      NewsPlayerMention.create_or_find_by!(news: @news, player_id: player_id)
+      NewsPlayerMention.find_or_create_by!(news: @news, player_id: player_id)
+    rescue ActiveRecord::RecordInvalid
+      # A concurrent autolink run inserted this mention between our find and
+      # create. The uniqueness validation proves it exists — nothing to do.
     end
   end
 

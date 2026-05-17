@@ -228,6 +228,26 @@ RSpec.describe AutolinkPlayersInNewsService do
         expect { described_class.call(news) }.not_to change(NewsPlayerMention, :count)
       end
 
+      it "does not raise when the player already has a mention from a previous run" do
+        news = build_news("<div>Alex scored a goal</div>")
+        NewsPlayerMention.create!(news: news, player: alex)
+        expect { described_class.call(news) }.not_to raise_error
+      end
+
+      it "keeps a single mention when the player already has one" do
+        news = build_news("<div>Alex scored a goal</div>")
+        NewsPlayerMention.create!(news: news, player: alex)
+        described_class.call(news)
+        expect(news.reload.player_mentions.where(player: alex).count).to eq(1)
+      end
+
+      it "tolerates a RecordInvalid from a concurrent mention insert" do
+        news = build_news("<div>Alex scored a goal</div>")
+        allow(NewsPlayerMention).to receive(:find_or_create_by!)
+          .and_raise(ActiveRecord::RecordInvalid.new(NewsPlayerMention.new))
+        expect { described_class.call(news) }.not_to raise_error
+      end
+
       it "records only one mention per player even when the name appears multiple times" do
         news = build_news("<div>Alex passed to Alex again</div>")
         described_class.call(news)
