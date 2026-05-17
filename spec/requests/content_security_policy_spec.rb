@@ -41,8 +41,8 @@ RSpec.describe "Content-Security-Policy header" do
       expect(csp).to include("style-src 'self' https: 'unsafe-inline'")
     end
 
-    it "permits img-src self + https + data" do
-      expect(csp).to include("img-src 'self' https: data:")
+    it "permits img-src self + https + data + blob (Trix attachment previews)" do
+      expect(csp).to include("img-src 'self' https: data: blob:")
     end
 
     it "permits font-src self + https + data" do

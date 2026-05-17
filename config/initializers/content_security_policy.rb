@@ -14,7 +14,7 @@ Rails.application.configure do
     policy.default_src     :self
     policy.script_src      :self, :https
     policy.style_src       :self, :https, :unsafe_inline
-    policy.img_src         :self, :https, :data
+    policy.img_src         :self, :https, :data, :blob # blob: — Trix editor image-attachment previews
     policy.font_src        :self, :https, :data
     policy.connect_src     :self, :https
     policy.object_src      :none
