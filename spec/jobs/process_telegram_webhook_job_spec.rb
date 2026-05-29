@@ -798,4 +798,29 @@ RSpec.describe ProcessTelegramWebhookJob do
       end
     end
   end
+
+  describe "concurrency controls" do
+    it "serializes jobs to one at a time per Telegram sender" do
+      expect(described_class.concurrency_limit).to eq(1)
+    end
+
+    it "keys the concurrency lock on the sender's Telegram user id" do
+      job = described_class.new(payload)
+      expect(job.concurrency_key).to include("12345")
+    end
+
+    it "falls back to edited_message sender when message is absent" do
+      edited_payload = {
+        "update_id" => 2,
+        "edited_message" => {
+          "text" => long_text,
+          "from" => { "id" => 99999, "username" => "reporter" },
+          "chat" => { "id" => -100123 },
+          "date" => 1710000000
+        }
+      }
+      job = described_class.new(edited_payload)
+      expect(job.concurrency_key).to include("99999")
+    end
+  end
 end
