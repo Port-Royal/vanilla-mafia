@@ -6,7 +6,7 @@ class Avo::Resources::Game < Avo::BaseResource
   }
 
   self.search = {
-    query: -> { query.where("name ILIKE ?", "%#{params[:q]}%") }
+    query: -> { query.where("LOWER(name) LIKE LOWER(?)", "%#{params[:q]}%") }
   }
 
   def fields
