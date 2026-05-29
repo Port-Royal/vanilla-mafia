@@ -15,11 +15,19 @@ class ActiveStorage::AnalyzeJobScrubber
   end
 
   def call
-    @scope.each { |sq_job| handle(sq_job) }
+    iterate { |sq_job| handle(sq_job) }
     Result.new(scanned: @scanned, orphaned: @orphaned)
   end
 
   private
+
+  def iterate(&block)
+    if @scope.respond_to?(:find_each)
+      @scope.find_each(&block)
+    else
+      @scope.each(&block)
+    end
+  end
 
   def handle(sq_job)
     @scanned += 1
