@@ -1,6 +1,13 @@
 class ProcessTelegramWebhookJob < ApplicationJob
   queue_as :default
 
+  limits_concurrency to: 1,
+                     key: ->(payload) {
+                       message = payload["message"] || payload["edited_message"]
+                       message&.dig("from", "id")
+                     },
+                     duration: 5.minutes
+
   MAX_TITLE_LENGTH = 255
   MIN_TEXT_LENGTH = 500
 
