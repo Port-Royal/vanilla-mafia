@@ -33,7 +33,7 @@ RSpec.describe Avo::Resources::User do
       end
 
       it "executes without raising a SQLite syntax error" do
-        expect { run_search("anything") }.not_to raise_error
+        expect { run_search("anything").to_a }.not_to raise_error
       end
 
       it "matches by email case-insensitively" do
