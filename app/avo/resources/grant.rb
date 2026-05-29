@@ -2,7 +2,7 @@ class Avo::Resources::Grant < Avo::BaseResource
   self.title = :code
 
   self.search = {
-    query: -> { query.where("code ILIKE ?", "%#{params[:q]}%") }
+    query: -> { query.where("LOWER(code) LIKE LOWER(?)", "%#{params[:q]}%") }
   }
 
   def fields

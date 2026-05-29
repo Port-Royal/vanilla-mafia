@@ -3,7 +3,7 @@ class Avo::Resources::Award < Avo::BaseResource
   self.default_view_type = :table
 
   self.search = {
-    query: -> { query.where("title ILIKE ?", "%#{params[:q]}%") }
+    query: -> { query.where("LOWER(title) LIKE LOWER(?)", "%#{params[:q]}%") }
   }
 
   self.index_query = -> {
