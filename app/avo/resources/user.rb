@@ -3,7 +3,7 @@ class Avo::Resources::User < Avo::BaseResource
   self.includes = [ :player ]
 
   self.search = {
-    query: -> { query.left_joins(:player).where("users.email ILIKE :q OR players.name ILIKE :q", q: "%#{params[:q]}%") }
+    query: -> { query.left_joins(:player).where("LOWER(users.email) LIKE LOWER(:q) OR LOWER(players.name) LIKE LOWER(:q)", q: "%#{params[:q]}%") }
   }
 
   def fields
