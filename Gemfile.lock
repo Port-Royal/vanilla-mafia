@@ -89,17 +89,17 @@ GEM
       traces (~> 0.18)
     auth-sanitizer (0.1.2)
       version_gem (~> 1.1, >= 1.1.9)
-    avo (3.31.2)
+    avo (3.26.0)
       actionview (>= 6.1)
       active_link_to
       activerecord (>= 6.1)
       activesupport (>= 6.1)
       addressable
-      avo-icons (>= 0.1.2)
+      avo-icons (>= 0.1.1)
       docile
       meta-tags
-      pagy (>= 7.0.0, < 43)
-      prop_initializer (>= 0.3.0)
+      pagy (>= 7.0.0)
+      prop_initializer (>= 0.2.0)
       turbo-rails (>= 2.0.0)
       turbo_power (>= 0.6.0)
       view_component (>= 3.7.0)
@@ -390,7 +390,10 @@ GEM
       omniauth (~> 2.0)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
-    pagy (9.4.0)
+    pagy (43.5.6)
+      json
+      uri
+      yaml
     parallel (2.1.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
@@ -639,6 +642,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
+    yaml (0.4.0)
     zeitwerk (2.8.2)
 
 PLATFORMS
@@ -715,7 +719,7 @@ CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   async (2.39.0) sha256=df18730073f2bbb45788077dfa20cb365ecc1b9453969f44de6796b5191a00aa
   auth-sanitizer (0.1.2) sha256=29f7638d74b2a19ff890008f1561165668a78969a4d90bc85e991128825a7c03
-  avo (3.31.2) sha256=2cf9e12969d5d814cbfeeaedb69f5086a702beac52957b338af7e498b6678521
+  avo (3.26.0) sha256=5c662e696d38ebefca0d820424d8a587ebaf21211a1627cf7da1b8467eb1e10c
   avo-icons (0.1.4) sha256=4f77070a5710ebb9db5cd6746aa5f043b8e71e61b27c7fba5210a40d87898e4d
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt (3.1.22) sha256=1f0072e88c2d705d94aff7f2c5cb02eb3f1ec4b8368671e19112527489f29032
@@ -725,7 +729,7 @@ CHECKSUMS
   bootsnap (1.24.5) sha256=36b677448524d279b470469aabd5dff4a980e3fa4931a0df68da4a500eb1b6c4
   brakeman (8.0.4) sha256=7bf921fa9638544835df9aa7b3e720a9a72c0267f34f92135955edd80d4dcf6f
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
-  bundler (4.0.12) sha256=7f8b757d28dfb636e7b24fba2344ac6dd13b5b24f4b46d62573d483f211825ac
+  bundler (4.0.13) sha256=19f08be7f27022cf0b89f27da0b044ae075e8270a9ef44ad248a932614e1ca3b
   bundler-audit (0.9.3) sha256=81c8766c71e47d0d28a0f98c7eed028539f21a6ea3cd8f685eb6f42333c9b4e9
   capybara (3.40.0) sha256=42dba720578ea1ca65fd7a41d163dd368502c191804558f6e0f71b391054aeef
   claude-code-sdk-ruby (0.1.6) sha256=c68e20f06a7d29d6db27135336b09e74baf125160ffc9d01d7eb9d46ecaa0003
@@ -828,7 +832,7 @@ CHECKSUMS
   omniauth-rails_csrf_protection (2.0.1) sha256=c6e3204d7e3925bb537cb52d50fdfc9f05293f1a9d87c5d4ab4ca3a39ba8c32d
   orm_adapter (0.5.0) sha256=aa5d0be5d540cbb46d3a93e88061f4ece6a25f6e97d6a47122beb84fe595e9b9
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
-  pagy (9.4.0) sha256=db3f2e043f684155f18f78be62a81e8d033e39b9f97b1e1a8d12ad38d7bce738
+  pagy (43.5.6) sha256=4d46d262826e055d69713fbbd2c42257cc1d0e87c13a1221764c15d30e46ff85
   parallel (2.1.0) sha256=b35258865c2e31134c5ecb708beaaf6772adf9d5efae28e93e99260877b09356
   parser (3.3.11.1) sha256=d17ace7aabe3e72c3cc94043714be27cc6f852f104d81aa284c2281aecc65d54
   pp (0.6.3) sha256=2951d514450b93ccfeb1df7d021cae0da16e0a7f95ee1e2273719669d0ab9df6
@@ -927,6 +931,7 @@ CHECKSUMS
   websocket-driver (0.8.0) sha256=ed0dba4b943c22f17f9a734817e808bc84cdce6a7e22045f5315aa57676d4962
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
   xpath (3.2.0) sha256=6dfda79d91bb3b949b947ecc5919f042ef2f399b904013eb3ef6d20dd3a4082e
+  yaml (0.4.0) sha256=240e69d1e6ce3584d6085978719a0faa6218ae426e034d8f9b02fb54d3471942
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
 BUNDLED WITH
