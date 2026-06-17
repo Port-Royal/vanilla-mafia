@@ -34,6 +34,8 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     open_thread = find_open_thread(news_author)
     if open_thread.present?
+      return if already_imported?(open_thread, parsed)
+
       append_to_thread(open_thread, parsed)
       return
     end
@@ -98,6 +100,15 @@ class ProcessTelegramWebhookJob < ApplicationJob
         .first
   end
 
+  # A single source message can be delivered more than once — Telegram re-sends
+  # webhook updates on delivery failures and emits an +edited_message+ on every
+  # edit, and the job itself may be retried. Tracking the imported message_ids
+  # per draft keeps appends idempotent so the same message is never folded into
+  # an article twice.
+  def already_imported?(news, parsed)
+    news.telegram_message_ids.include?(parsed.message_id)
+  end
+
   def append_to_thread(news, parsed)
     parts = [ news.content.body.to_html ]
     parts << embedded_photo_html(parsed.photo_file_id) if parsed.photo_file_id.present?
@@ -105,7 +116,8 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
     news.update!(
       content: parts.join,
-      telegram_thread_last_message_at: Time.current
+      telegram_thread_last_message_at: Time.current,
+      telegram_message_ids: news.telegram_message_ids + Array(parsed.message_id)
     )
 
     AutolinkPlayersInNewsService.call(news)
@@ -116,7 +128,8 @@ class ProcessTelegramWebhookJob < ApplicationJob
       title: parsed.text.truncate(MAX_TITLE_LENGTH),
       content: parsed.html_content,
       author: news_author,
-      status: :draft
+      status: :draft,
+      telegram_message_ids: Array(parsed.message_id)
     )
 
     if thread_window_enabled?

@@ -15,7 +15,8 @@ RSpec.describe Telegram::NewsScorer do
         photo_file_id: nil,
         raw_text_length: raw_text.length,
         entities: entities,
-        raw_text: raw_text
+        raw_text: raw_text,
+        message_id: 1
       )
     end
 
@@ -193,7 +194,8 @@ RSpec.describe Telegram::NewsScorer do
           photo_file_id: "some_photo_id",
           raw_text_length: raw_text.length,
           entities: entities,
-          raw_text: raw_text
+          raw_text: raw_text,
+          message_id: 1
         )
       end
 

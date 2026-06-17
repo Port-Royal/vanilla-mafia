@@ -46,9 +46,33 @@ RSpec.describe Telegram::MessageParser do
         expect(result.chat_id).to eq(42)
       end
 
+      it "extracts the message_id" do
+        result = described_class.call(payload)
+        expect(result.message_id).to eq(1)
+      end
+
       it "has no photo" do
         result = described_class.call(payload)
         expect(result.photo_file_id).to be_nil
+      end
+    end
+
+    context "when the message has no message_id" do
+      let(:payload) do
+        {
+          "update_id" => 124,
+          "message" => {
+            "from" => { "id" => 42, "first_name" => "Denis", "username" => "testuser" },
+            "chat" => { "id" => 42, "type" => "private" },
+            "date" => 1_700_000_000,
+            "text" => "Hello world"
+          }
+        }
+      end
+
+      it "returns a nil message_id" do
+        result = described_class.call(payload)
+        expect(result.message_id).to be_nil
       end
     end
 
