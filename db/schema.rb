@@ -171,7 +171,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
     t.datetime "published_at"
     t.string "slug", null: false
     t.string "status", default: "draft", null: false
-    t.json "telegram_message_ids", default: [], null: false
+    t.json "telegram_message_keys", default: [], null: false
     t.datetime "telegram_thread_last_message_at"
     t.datetime "telegram_thread_started_at"
     t.string "title", null: false

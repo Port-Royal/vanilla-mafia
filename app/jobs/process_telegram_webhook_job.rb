@@ -102,11 +102,21 @@ class ProcessTelegramWebhookJob < ApplicationJob
 
   # A single source message can be delivered more than once — Telegram re-sends
   # webhook updates on delivery failures and emits an +edited_message+ on every
-  # edit, and the job itself may be retried. Tracking the imported message_ids
+  # edit, and the job itself may be retried. Tracking the imported message keys
   # per draft keeps appends idempotent so the same message is never folded into
   # an article twice.
   def already_imported?(news, parsed)
-    news.telegram_message_ids.include?(parsed.message_id)
+    news.telegram_message_keys.include?(message_key(parsed))
+  end
+
+  # Telegram message_ids are only unique within a chat, so a draft tracks the
+  # composite "chat_id:message_id" to avoid colliding with a different message
+  # that happens to share the numeric id in another chat. Returns nil when the
+  # update carries no message_id, in which case the message is always appended.
+  def message_key(parsed)
+    return nil if parsed.message_id.nil?
+
+    "#{parsed.chat_id}:#{parsed.message_id}"
   end
 
   def append_to_thread(news, parsed)
@@ -117,7 +127,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
     news.update!(
       content: parts.join,
       telegram_thread_last_message_at: Time.current,
-      telegram_message_ids: news.telegram_message_ids + Array(parsed.message_id)
+      telegram_message_keys: news.telegram_message_keys + Array(message_key(parsed))
     )
 
     AutolinkPlayersInNewsService.call(news)
@@ -129,7 +139,7 @@ class ProcessTelegramWebhookJob < ApplicationJob
       content: parsed.html_content,
       author: news_author,
       status: :draft,
-      telegram_message_ids: Array(parsed.message_id)
+      telegram_message_keys: Array(message_key(parsed))
     )
 
     if thread_window_enabled?

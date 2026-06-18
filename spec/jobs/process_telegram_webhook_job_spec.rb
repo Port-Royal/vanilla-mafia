@@ -495,8 +495,8 @@ RSpec.describe ProcessTelegramWebhookJob do
         toggle.save!
       end
 
-      def payload_with(text: long_text, from_id: 12345, update_id: 100, photo: nil, message_id: nil, edited: false)
-        msg = { "from" => { "id" => from_id, "username" => "x", "first_name" => "X" }, "chat" => { "id" => -1 }, "date" => 1710000000 }
+      def payload_with(text: long_text, from_id: 12345, update_id: 100, photo: nil, message_id: nil, chat_id: -1, edited: false)
+        msg = { "from" => { "id" => from_id, "username" => "x", "first_name" => "X" }, "chat" => { "id" => chat_id }, "date" => 1710000000 }
         msg["text"] = text if text
         msg["photo"] = photo if photo
         msg["message_id"] = message_id if message_id
@@ -521,9 +521,9 @@ RSpec.describe ProcessTelegramWebhookJob do
           }.not_to change(News, :count)
         end
 
-        it "records the telegram message_id on the new draft" do
+        it "records the telegram message key on the new draft" do
           described_class.new.perform(payload_with(update_id: 210, message_id: 555))
-          expect(News.last.telegram_message_ids).to eq([ 555 ])
+          expect(News.last.telegram_message_keys).to eq([ "-1:555" ])
         end
       end
 
@@ -561,14 +561,14 @@ RSpec.describe ProcessTelegramWebhookJob do
           expect(thread_draft.reload.content.body.to_plain_text).to include("tiny")
         end
 
-        it "does not record a nil message_id when the message has none" do
+        it "does not record a key when the message has no message_id" do
           described_class.new.perform(payload_with(text: "tiny", update_id: 306))
-          expect(thread_draft.reload.telegram_message_ids).to eq([])
+          expect(thread_draft.reload.telegram_message_keys).to eq([])
         end
 
-        it "records the message_id when the appended message has one" do
+        it "records the composite key when the appended message has a message_id" do
           described_class.new.perform(payload_with(text: "tiny", update_id: 307, message_id: 4242))
-          expect(thread_draft.reload.telegram_message_ids).to eq([ 4242 ])
+          expect(thread_draft.reload.telegram_message_keys).to eq([ "-1:4242" ])
         end
 
         it "re-runs the player autolink service on the updated draft" do
@@ -613,11 +613,11 @@ RSpec.describe ProcessTelegramWebhookJob do
             status: :draft,
             telegram_thread_started_at: 1.minute.ago,
             telegram_thread_last_message_at: 1.minute.ago,
-            telegram_message_ids: [ 777 ]
+            telegram_message_keys: [ "-1:777" ]
           )
         end
 
-        it "does not append a re-delivery of an already-imported message_id" do
+        it "does not append a re-delivery of an already-imported message" do
           described_class.new.perform(payload_with(text: "B" * 50, update_id: 900, message_id: 777))
           expect(thread_draft.reload.content.body.to_plain_text).to eq("First message body")
         end
@@ -641,11 +641,18 @@ RSpec.describe ProcessTelegramWebhookJob do
           expect(AutolinkPlayersInNewsService).not_to have_received(:call)
         end
 
-        it "appends and records a distinct, not-yet-imported message_id" do
+        it "appends and records a distinct, not-yet-imported message" do
           described_class.new.perform(payload_with(text: "E" * 50, update_id: 904, message_id: 888))
           thread_draft.reload
           expect(thread_draft.content.body.to_plain_text).to include("E" * 50)
-          expect(thread_draft.telegram_message_ids).to contain_exactly(777, 888)
+          expect(thread_draft.telegram_message_keys).to contain_exactly("-1:777", "-1:888")
+        end
+
+        it "appends a message that reuses the numeric id from a different chat" do
+          described_class.new.perform(payload_with(text: "F" * 50, update_id: 905, message_id: 777, chat_id: -2))
+          thread_draft.reload
+          expect(thread_draft.content.body.to_plain_text).to include("F" * 50)
+          expect(thread_draft.telegram_message_keys).to contain_exactly("-1:777", "-2:777")
         end
       end
 
