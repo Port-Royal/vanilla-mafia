@@ -495,11 +495,12 @@ RSpec.describe ProcessTelegramWebhookJob do
         toggle.save!
       end
 
-      def payload_with(text: long_text, from_id: 12345, update_id: 100, photo: nil)
-        msg = { "from" => { "id" => from_id, "username" => "x", "first_name" => "X" }, "chat" => { "id" => -1 }, "date" => 1710000000 }
+      def payload_with(text: long_text, from_id: 12345, update_id: 100, photo: nil, message_id: nil, chat_id: -1, edited: false)
+        msg = { "from" => { "id" => from_id, "username" => "x", "first_name" => "X" }, "chat" => { "id" => chat_id }, "date" => 1710000000 }
         msg["text"] = text if text
         msg["photo"] = photo if photo
-        { "update_id" => update_id, "message" => msg }
+        msg["message_id"] = message_id if message_id
+        { "update_id" => update_id, (edited ? "edited_message" : "message") => msg }
       end
 
       before { enable_thread_window }
@@ -518,6 +519,11 @@ RSpec.describe ProcessTelegramWebhookJob do
           expect {
             described_class.new.perform(payload_with(text: "short", update_id: 201))
           }.not_to change(News, :count)
+        end
+
+        it "records the telegram message key on the new draft" do
+          described_class.new.perform(payload_with(update_id: 210, message_id: 555))
+          expect(News.last.telegram_message_keys).to eq([ "-1:555" ])
         end
       end
 
@@ -555,6 +561,16 @@ RSpec.describe ProcessTelegramWebhookJob do
           expect(thread_draft.reload.content.body.to_plain_text).to include("tiny")
         end
 
+        it "does not record a key when the message has no message_id" do
+          described_class.new.perform(payload_with(text: "tiny", update_id: 306))
+          expect(thread_draft.reload.telegram_message_keys).to eq([])
+        end
+
+        it "records the composite key when the appended message has a message_id" do
+          described_class.new.perform(payload_with(text: "tiny", update_id: 307, message_id: 4242))
+          expect(thread_draft.reload.telegram_message_keys).to eq([ "-1:4242" ])
+        end
+
         it "re-runs the player autolink service on the updated draft" do
           allow(AutolinkPlayersInNewsService).to receive(:call)
           described_class.new.perform(payload_with(text: "tiny", update_id: 304))
@@ -584,6 +600,59 @@ RSpec.describe ProcessTelegramWebhookJob do
           thread_draft.reload
           expect(thread_draft.content.body.to_html).to include("action-text-attachment")
           expect(thread_draft.photos).not_to be_attached
+          expect(Telegram::DownloadFileService).to have_received(:call).with("big")
+        end
+      end
+
+      context "when the same telegram message is delivered more than once" do
+        let!(:thread_draft) do
+          News.create!(
+            title: "first",
+            content: "<p>First message body</p>",
+            author: user,
+            status: :draft,
+            telegram_thread_started_at: 1.minute.ago,
+            telegram_thread_last_message_at: 1.minute.ago,
+            telegram_message_keys: [ "-1:777" ]
+          )
+        end
+
+        it "does not append a re-delivery of an already-imported message" do
+          described_class.new.perform(payload_with(text: "B" * 50, update_id: 900, message_id: 777))
+          expect(thread_draft.reload.content.body.to_plain_text).to eq("First message body")
+        end
+
+        it "does not append when the duplicate arrives as an edited_message" do
+          described_class.new.perform(payload_with(text: "C" * 50, update_id: 901, message_id: 777, edited: true))
+          expect(thread_draft.reload.content.body.to_plain_text).to eq("First message body")
+        end
+
+        it "does not bump telegram_thread_last_message_at for a duplicate" do
+          freeze_time do
+            original = thread_draft.telegram_thread_last_message_at
+            described_class.new.perform(payload_with(text: "D" * 50, update_id: 902, message_id: 777))
+            expect(thread_draft.reload.telegram_thread_last_message_at).to eq(original)
+          end
+        end
+
+        it "does not re-run the autolink service for a duplicate" do
+          allow(AutolinkPlayersInNewsService).to receive(:call)
+          described_class.new.perform(payload_with(text: "D" * 50, update_id: 903, message_id: 777))
+          expect(AutolinkPlayersInNewsService).not_to have_received(:call)
+        end
+
+        it "appends and records a distinct, not-yet-imported message" do
+          described_class.new.perform(payload_with(text: "E" * 50, update_id: 904, message_id: 888))
+          thread_draft.reload
+          expect(thread_draft.content.body.to_plain_text).to include("E" * 50)
+          expect(thread_draft.telegram_message_keys).to contain_exactly("-1:777", "-1:888")
+        end
+
+        it "appends a message that reuses the numeric id from a different chat" do
+          described_class.new.perform(payload_with(text: "F" * 50, update_id: 905, message_id: 777, chat_id: -2))
+          thread_draft.reload
+          expect(thread_draft.content.body.to_plain_text).to include("F" * 50)
+          expect(thread_draft.telegram_message_keys).to contain_exactly("-1:777", "-2:777")
         end
       end
 

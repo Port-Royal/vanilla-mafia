@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_14_044321) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -171,6 +171,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_044321) do
     t.datetime "published_at"
     t.string "slug", null: false
     t.string "status", default: "draft", null: false
+    t.json "telegram_message_keys", default: [], null: false
     t.datetime "telegram_thread_last_message_at"
     t.datetime "telegram_thread_started_at"
     t.string "title", null: false
