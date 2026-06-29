@@ -486,3 +486,7 @@ en:
   pagy:
     prev: "<<"
     next: ">>"
+    aria_label:
+      nav: "Pagination"
+      prev: "Previous"
+      next: "Next"

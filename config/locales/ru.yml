@@ -470,6 +470,10 @@ ru:
   pagy:
     prev: "<<"
     next: ">>"
+    aria_label:
+      nav: "Постраничная навигация"
+      prev: "Назад"
+      next: "Вперёд"
   game_protocols:
     index:
       title: "Незавершённые протоколы"
