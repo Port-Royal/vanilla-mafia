@@ -36,6 +36,6 @@ class NewsController < ApplicationController
   end
 
   def news_per_page
-    FeatureToggle.value_for("news_per_page", default: Pagy::DEFAULT[:limit]).to_i
+    FeatureToggle.value_for("news_per_page", default: Pagy::OPTIONS.fetch(:limit, Pagy::DEFAULT[:limit])).to_i
   end
 end
