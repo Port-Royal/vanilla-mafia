@@ -67,31 +67,37 @@ RSpec.describe CspViolationReportsController, type: :request do
       end
 
       context "when the violation originates from a browser extension" do
-        it "ignores reports whose source-file is a browser extension" do
-          payload = { "csp-report" => csp_report_payload["csp-report"].merge(
-            "blocked-uri" => "eval", "source-file" => "chrome-extension"
-          ) }
-          expect(Sentry).not_to receive(:capture_message)
+        context "when the source-file is a browser extension" do
+          let(:csp_report_payload) do
+            { "csp-report" => { "violated-directive" => "script-src", "blocked-uri" => "eval", "source-file" => "chrome-extension" } }
+          end
 
-          post csp_violation_reports_path,
-               params: payload.to_json,
-               headers: { "CONTENT_TYPE" => "application/csp-report" }
-
-          expect(response).to have_http_status(:no_content)
-        end
-
-        CspViolationReportsController::EXTENSION_SCHEMES.each do |scheme|
-          it "ignores reports whose blocked-uri uses the #{scheme} scheme" do
-            payload = { "csp-report" => csp_report_payload["csp-report"].merge(
-              "blocked-uri" => "#{scheme}://abcdef/inject.js"
-            ) }
+          it "ignores the report" do
             expect(Sentry).not_to receive(:capture_message)
 
             post csp_violation_reports_path,
-                 params: payload.to_json,
+                 params: csp_report_payload.to_json,
                  headers: { "CONTENT_TYPE" => "application/csp-report" }
 
             expect(response).to have_http_status(:no_content)
+          end
+        end
+
+        CspViolationReportsController::EXTENSION_SCHEMES.each do |scheme|
+          context "when the blocked-uri uses the #{scheme} scheme" do
+            let(:csp_report_payload) do
+              { "csp-report" => { "violated-directive" => "script-src", "blocked-uri" => "#{scheme}://abcdef/inject.js" } }
+            end
+
+            it "ignores the report" do
+              expect(Sentry).not_to receive(:capture_message)
+
+              post csp_violation_reports_path,
+                   params: csp_report_payload.to_json,
+                   headers: { "CONTENT_TYPE" => "application/csp-report" }
+
+              expect(response).to have_http_status(:no_content)
+            end
           end
         end
       end
@@ -131,17 +137,20 @@ RSpec.describe CspViolationReportsController, type: :request do
              headers: { "CONTENT_TYPE" => "application/reports+json" }
       end
 
-      it "ignores reports whose sourceFile is a browser extension" do
-        payload = [ reports_api_payload.first.deep_merge(
-          "body" => { "blockedURL" => "eval", "sourceFile" => "chrome-extension://xyz/inject.js" }
-        ) ]
-        expect(Sentry).not_to receive(:capture_message)
+      context "when the sourceFile is a browser extension" do
+        let(:reports_api_payload) do
+          [ super().first.deep_merge("body" => { "blockedURL" => "eval", "sourceFile" => "chrome-extension://xyz/inject.js" }) ]
+        end
 
-        post csp_violation_reports_path,
-             params: payload.to_json,
-             headers: { "CONTENT_TYPE" => "application/reports+json" }
+        it "ignores the report" do
+          expect(Sentry).not_to receive(:capture_message)
 
-        expect(response).to have_http_status(:no_content)
+          post csp_violation_reports_path,
+               params: reports_api_payload.to_json,
+               headers: { "CONTENT_TYPE" => "application/reports+json" }
+
+          expect(response).to have_http_status(:no_content)
+        end
       end
 
       it "ignores non-csp-violation report types" do
