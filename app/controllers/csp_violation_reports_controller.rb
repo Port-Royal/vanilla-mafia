@@ -3,6 +3,10 @@ class CspViolationReportsController < ActionController::API
   REPORTS_API_TYPE = "application/reports+json"
   ACCEPTED_TYPES = [ CSP_REPORT_TYPE, REPORTS_API_TYPE ].freeze
 
+  # Violations injected by browser extensions (script-src eval, injected scripts) are noise,
+  # not caused by our site. Skip them so Sentry only sees violations we can act on.
+  EXTENSION_SCHEMES = %w[chrome-extension moz-extension safari-extension safari-web-extension edge-extension webkit-masked-url].freeze
+
   def create
     return head(:unsupported_media_type) unless ACCEPTED_TYPES.include?(request.media_type)
 
@@ -28,6 +32,7 @@ class CspViolationReportsController < ActionController::API
 
   def forward_single(report)
     return if report.blank?
+    return if browser_extension_noise?(report["source-file"], report["blocked-uri"])
 
     directive = report["effective-directive"].presence || report["violated-directive"].presence || "unknown"
     Sentry.capture_message("CSP violation: #{directive}", level: :warning, extra: report)
@@ -37,7 +42,16 @@ class CspViolationReportsController < ActionController::API
     return unless entry.is_a?(Hash) && entry["type"] == "csp-violation"
 
     body = entry["body"].to_h
+    return if browser_extension_noise?(body["sourceFile"], body["blockedURL"])
+
     directive = body["effectiveDirective"].presence || body["violatedDirective"].presence || "unknown"
     Sentry.capture_message("CSP violation: #{directive}", level: :warning, extra: body)
+  end
+
+  def browser_extension_noise?(*fields)
+    fields.any? do |value|
+      scheme = value.to_s.split("://").first
+      EXTENSION_SCHEMES.include?(scheme)
+    end
   end
 end
