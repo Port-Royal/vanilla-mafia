@@ -5,6 +5,7 @@ class User < ApplicationRecord
   belongs_to :player, optional: true
   has_many :player_claims, dependent: :destroy
   has_many :news, foreign_key: :author_id, inverse_of: :author, dependent: :restrict_with_exception
+  has_many :game_breakdowns, foreign_key: :author_id, inverse_of: :author, dependent: :restrict_with_exception
   has_many :user_grants, dependent: :destroy
   has_many :grants, through: :user_grants
   has_many :announcement_dismissals, dependent: :destroy

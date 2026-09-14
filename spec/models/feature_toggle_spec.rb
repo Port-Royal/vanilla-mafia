@@ -32,6 +32,10 @@ RSpec.describe FeatureToggle, type: :model do
         "telegram_force_import_max_range"
       )
     end
+
+    it "includes game breakdown toggle key" do
+      expect(described_class::KEYS).to include("game_breakdown")
+    end
   end
 
   describe ".enabled?" do
