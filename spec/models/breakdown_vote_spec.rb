@@ -13,6 +13,16 @@ RSpec.describe BreakdownVote, type: :model do
     it { is_expected.to validate_numericality_of(:candidate_seat).only_integer.is_in(1..10) }
   end
 
+  describe "missing round" do
+    subject(:vote) { build(:breakdown_vote, breakdown_vote_round: nil, candidate_seat: nil, for_lift: true) }
+
+    before { vote.validate }
+
+    it "only reports the missing round" do
+      expect(vote.errors.attribute_names).to eq([ :breakdown_vote_round ])
+    end
+  end
+
   describe "round kind constraints" do
     let_it_be(:main_round) { create(:breakdown_vote_round, kind: "main") }
     let_it_be(:revote_round) { create(:breakdown_vote_round, kind: "revote") }
