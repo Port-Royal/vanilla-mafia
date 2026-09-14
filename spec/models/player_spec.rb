@@ -7,6 +7,7 @@ RSpec.describe Player, type: :model do
     it { is_expected.to have_many(:player_awards).dependent(:destroy) }
     it { is_expected.to have_many(:awards).through(:player_awards) }
     it { is_expected.to have_many(:player_claims).dependent(:destroy) }
+    it { is_expected.to have_many(:breakdown_seats).dependent(:nullify) }
     it { is_expected.to have_one(:user) }
   end
 

@@ -6,6 +6,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to have_many(:player_claims).dependent(:destroy) }
     it { is_expected.to have_many(:user_grants).dependent(:destroy) }
     it { is_expected.to have_many(:grants).through(:user_grants) }
+    it { is_expected.to have_many(:game_breakdowns).with_foreign_key(:author_id).inverse_of(:author).dependent(:restrict_with_exception) }
   end
 
   describe "devise modules" do

@@ -47,7 +47,8 @@ toggle.save!
   { key: "telegram_thread_window_seconds", description: "Window size in seconds for the Telegram message thread", enabled: false, value: "900" },
   { key: "telegram_thread_window_strategy", description: "Window strategy: 'sliding' (resets on each new message) or 'fixed' (from first message)", enabled: false, value: "sliding" },
   { key: "telegram_force_import_enabled", description: "Allow operators to force-import a specific Telegram message into a news draft via DM to the bot", enabled: false },
-  { key: "telegram_force_import_max_range", description: "Maximum number of consecutive Telegram messages allowed in one force-import (the +N suffix)", enabled: false, value: "50" }
+  { key: "telegram_force_import_max_range", description: "Maximum number of consecutive Telegram messages allowed in one force-import (the +N suffix)", enabled: false, value: "50" },
+  { key: "game_breakdown", description: "Enable the internal game breakdown tool for judges and admins", enabled: false }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?

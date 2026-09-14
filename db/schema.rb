@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_100000) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -79,6 +79,93 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
     t.index ["staff"], name: "index_awards_on_staff"
   end
 
+  create_table "breakdown_moves", force: :cascade do |t|
+    t.integer "actor_seat", null: false
+    t.json "best_move_seats"
+    t.integer "breakdown_speech_id"
+    t.integer "breakdown_vote_round_id"
+    t.string "claimed_color"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.integer "night_number"
+    t.integer "position", null: false
+    t.string "removal_reason"
+    t.integer "target_seat"
+    t.text "text"
+    t.datetime "updated_at", null: false
+    t.index ["breakdown_speech_id"], name: "index_breakdown_moves_on_breakdown_speech_id"
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_moves_on_breakdown_vote_round_id"
+    t.check_constraint "(breakdown_speech_id IS NULL) <> (breakdown_vote_round_id IS NULL)", name: "breakdown_moves_exactly_one_context"
+  end
+
+  create_table "breakdown_night_actions", force: :cascade do |t|
+    t.integer "actor_seat"
+    t.integer "breakdown_phase_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.integer "target_seat"
+    t.datetime "updated_at", null: false
+    t.index ["breakdown_phase_id"], name: "index_breakdown_night_actions_on_breakdown_phase_id"
+  end
+
+  create_table "breakdown_phases", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "game_breakdown_id", null: false
+    t.integer "killed_seat"
+    t.string "night_outcome"
+    t.integer "position", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_breakdown_id", "position"], name: "index_breakdown_phases_on_game_breakdown_id_and_position", unique: true
+    t.index ["game_breakdown_id"], name: "index_breakdown_phases_on_game_breakdown_id"
+  end
+
+  create_table "breakdown_seats", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "game_breakdown_id", null: false
+    t.string "name"
+    t.integer "number", null: false
+    t.integer "player_id"
+    t.string "role_code"
+    t.datetime "updated_at", null: false
+    t.index ["game_breakdown_id", "number"], name: "index_breakdown_seats_on_game_breakdown_id_and_number", unique: true
+    t.index ["game_breakdown_id"], name: "index_breakdown_seats_on_game_breakdown_id"
+    t.index ["player_id"], name: "index_breakdown_seats_on_player_id"
+    t.index ["role_code"], name: "index_breakdown_seats_on_role_code"
+  end
+
+  create_table "breakdown_speeches", force: :cascade do |t|
+    t.integer "breakdown_phase_id", null: false
+    t.integer "breakdown_vote_round_id"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.integer "position", null: false
+    t.integer "speaker_seat", null: false
+    t.datetime "updated_at", null: false
+    t.index ["breakdown_phase_id"], name: "index_breakdown_speeches_on_breakdown_phase_id"
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_speeches_on_breakdown_vote_round_id"
+  end
+
+  create_table "breakdown_vote_rounds", force: :cascade do |t|
+    t.integer "breakdown_phase_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.integer "number", null: false
+    t.datetime "updated_at", null: false
+    t.index ["breakdown_phase_id", "number"], name: "index_breakdown_vote_rounds_on_breakdown_phase_id_and_number", unique: true
+    t.index ["breakdown_phase_id"], name: "index_breakdown_vote_rounds_on_breakdown_phase_id"
+  end
+
+  create_table "breakdown_votes", force: :cascade do |t|
+    t.integer "breakdown_vote_round_id", null: false
+    t.integer "candidate_seat"
+    t.datetime "created_at", null: false
+    t.boolean "for_lift"
+    t.datetime "updated_at", null: false
+    t.integer "voter_seat", null: false
+    t.index ["breakdown_vote_round_id", "voter_seat"], name: "index_breakdown_votes_on_round_and_voter_seat", unique: true
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_votes_on_breakdown_vote_round_id"
+  end
+
   create_table "competitions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "ended_on"
@@ -116,6 +203,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
     t.datetime "updated_at", null: false
     t.string "value"
     t.index ["key"], name: "index_feature_toggles_on_key", unique: true
+  end
+
+  create_table "game_breakdowns", force: :cascade do |t|
+    t.integer "author_id", null: false
+    t.text "conclusion"
+    t.datetime "created_at", null: false
+    t.integer "game_id"
+    t.string "judge_name"
+    t.string "manual_result"
+    t.date "played_on"
+    t.string "roles_mode", default: "open", null: false
+    t.string "source"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "video_url"
+    t.index ["author_id"], name: "index_game_breakdowns_on_author_id"
+    t.index ["game_id"], name: "index_game_breakdowns_on_game_id"
   end
 
   create_table "game_participations", force: :cascade do |t|
@@ -363,7 +467,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_170350) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "announcement_dismissals", "announcements"
   add_foreign_key "announcement_dismissals", "users"
+  add_foreign_key "breakdown_moves", "breakdown_speeches"
+  add_foreign_key "breakdown_moves", "breakdown_vote_rounds"
+  add_foreign_key "breakdown_night_actions", "breakdown_phases"
+  add_foreign_key "breakdown_phases", "game_breakdowns"
+  add_foreign_key "breakdown_seats", "game_breakdowns"
+  add_foreign_key "breakdown_seats", "players"
+  add_foreign_key "breakdown_seats", "roles", column: "role_code", primary_key: "code"
+  add_foreign_key "breakdown_speeches", "breakdown_phases"
+  add_foreign_key "breakdown_speeches", "breakdown_vote_rounds"
+  add_foreign_key "breakdown_vote_rounds", "breakdown_phases"
+  add_foreign_key "breakdown_votes", "breakdown_vote_rounds"
   add_foreign_key "competitions", "competitions", column: "parent_id"
+  add_foreign_key "game_breakdowns", "games"
+  add_foreign_key "game_breakdowns", "users", column: "author_id"
   add_foreign_key "game_participations", "games"
   add_foreign_key "game_participations", "players"
   add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"

@@ -473,6 +473,11 @@ en:
       content_type: "has an unsupported file type"
       file_size: "is too large (maximum is %{count} MB)"
       too_many: "are too many (maximum is %{count})"
+      must_be_night: "must be a night"
+      must_be_day: "must be a day"
+      must_be_open_roles_mode: "must belong to a breakdown with open roles"
+      must_belong_to_phase: "must belong to the same phase"
+      exactly_one_context: "Move must belong to either a speech or a vote round"
     "404":
       title: "Page not found"
       message: "The page you requested does not exist or has been moved."
