@@ -7,48 +7,7 @@ RSpec.describe GameBreakdown::Timeline do
   let(:zero_round) { breakdown.phases.find_by!(position: 0) }
   let(:zero_round_state) { timeline.state_for(zero_round) }
 
-  def night(position, killed: nil)
-    create(:breakdown_phase, game_breakdown: breakdown, position: position,
-                             night_outcome: killed ? "kill" : "miss", killed_seat: killed)
-  end
-
-  def day(position)
-    create(:breakdown_phase, game_breakdown: breakdown, position: position)
-  end
-
-  def speech(phase, seat, kind: "regular")
-    create(:breakdown_speech, breakdown_phase: phase, speaker_seat: seat, kind: kind)
-  end
-
-  def nominate(phase, actor, target)
-    create(:breakdown_move, :nomination, breakdown_speech: speech(phase, actor), actor_seat: actor, target_seat: target)
-  end
-
-  def remove(phase, *seats, kind: "regular")
-    seats.each do |seat|
-      create(:breakdown_move, :removal, breakdown_speech: speech(phase, seat, kind: kind), actor_seat: seat)
-    end
-  end
-
-  # ballots: { [voter, ...] => candidate_seat } or { [voter, ...] => true/false } for lift rounds
-  def vote(phase, kind, ballots = {})
-    round = create(:breakdown_vote_round, breakdown_phase: phase, kind: kind, number: phase.vote_rounds.count + 1)
-    ballots.each do |voters, choice|
-      choice_attributes = kind == "lift" ? { for_lift: choice, candidate_seat: nil } : { candidate_seat: choice }
-      Array(voters).each do |voter|
-        create(:breakdown_vote, breakdown_vote_round: round, voter_seat: voter, **choice_attributes)
-      end
-    end
-    round
-  end
-
-  def assign_roles(mafia:, don:, sheriff:)
-    %w[peace sheriff mafia don].each { |code| Role.find_or_create_by!(code: code) { |role| role.name = code } }
-    breakdown.seats.update_all(role_code: "peace")
-    breakdown.seats.where(number: mafia).update_all(role_code: "mafia")
-    breakdown.seats.where(number: don).update_all(role_code: "don")
-    breakdown.seats.where(number: sheriff).update_all(role_code: "sheriff")
-  end
+  include GameBreakdownHelpers
 
   def elimination(seat, reason)
     described_class::Elimination.new(seat: seat, reason: reason)
@@ -789,6 +748,29 @@ RSpec.describe GameBreakdown::Timeline do
       end
     end
   end
+
+describe "#warnings_for" do
+  let!(:second_day) { day(2) }
+  let!(:late_speech) { speech(second_day, 4) }
+  let!(:alive_speech) { speech(second_day, 1) }
+
+  before do
+    breakdown.update!(roles_mode: "closed")
+    night(1, killed: 4)
+  end
+
+  it "returns the warnings attached to the record" do
+    expect(timeline.warnings_for(late_speech)).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
+  end
+
+  it "returns nothing for a record without warnings" do
+    expect(timeline.warnings_for(alive_speech)).to be_empty
+  end
+
+  it "lists every warning" do
+    expect(timeline.warnings).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
+  end
+end
 
   describe "#state_for" do
     context "when the phase belongs to the breakdown" do

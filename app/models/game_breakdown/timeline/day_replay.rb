@@ -101,7 +101,7 @@ class GameBreakdown::Timeline::DayReplay
     return main_round_step unless last
     return unless last.outcome == :tie
 
-    kind = last.round.revote? && last.leaders.size == last.candidates.size ? :lift_round : :revote_round
+    kind = last.full_revote_tie? ? :lift_round : :revote_round
     GameBreakdown::Timeline::ExpectedStep.new(kind: kind, seats: last.leaders)
   end
 

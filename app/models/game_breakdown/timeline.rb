@@ -1,5 +1,5 @@
 # Replays a breakdown's phases in order and derives what is not stored:
-# alive seats, phase labels, speech order, voting outcomes, expected next steps and the game result.
+# alive seats, phase labels, speech order, voting outcomes, expected next steps, rule warnings and the game result.
 class GameBreakdown::Timeline
   MAFIA_ROLES = %w[mafia don].freeze
   DRAW_NIGHTS = 3
@@ -9,7 +9,12 @@ class GameBreakdown::Timeline
   Nomination = Data.define(:actor_seat, :target_seat)
   ExpectedStep = Data.define(:kind, :seats)
   NextPhase = Data.define(:position, :kind, :farewell_seat, :speech_order)
-  RoundResult = Data.define(:round, :candidates, :tally, :outcome, :leaders, :eliminated)
+  RoundResult = Data.define(:round, :candidates, :tally, :outcome, :leaders, :eliminated) do
+    # A revote tied among all of its candidates: the next round is a lift (4.4.13.3).
+    def full_revote_tie?
+      outcome == :tie && round.revote? && leaders.size == candidates.size
+    end
+  end
   PhaseState = Data.define(
     :phase, :label, :alive_at_start, :alive_at_end, :eliminations, :starter, :speech_order, :farewell_seat,
     :nominations, :candidates, :vote_rounds, :voting_cancelled, :expected_steps
@@ -43,6 +48,14 @@ class GameBreakdown::Timeline
     !result.nil?
   end
 
+  def warnings
+    @warnings ||= GameBreakdown::Timeline::Warnings.new(@breakdown, phases).all
+  end
+
+  def warnings_for(record)
+    warnings.select { |warning| warning.record == record }
+  end
+
   def next_phase
     return if finished?
 
@@ -71,7 +84,7 @@ class GameBreakdown::Timeline
   end
 
   def loaded_phases
-    @breakdown.phases.includes(speeches: :moves, vote_rounds: %i[votes moves])
+    @breakdown.phases.includes(:night_actions, speeches: :moves, vote_rounds: %i[votes moves])
   end
 
   def night_state(phase, alive)
