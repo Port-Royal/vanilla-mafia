@@ -749,28 +749,28 @@ RSpec.describe GameBreakdown::Timeline do
     end
   end
 
-describe "#warnings_for" do
-  let!(:second_day) { day(2) }
-  let!(:late_speech) { speech(second_day, 4) }
-  let!(:alive_speech) { speech(second_day, 1) }
+  describe "#warnings_for" do
+    let!(:second_day) { day(2) }
+    let!(:late_speech) { speech(second_day, 4) }
+    let!(:alive_speech) { speech(second_day, 1) }
 
-  before do
-    breakdown.update!(roles_mode: "closed")
-    night(1, killed: 4)
-  end
+    before do
+      breakdown.update!(roles_mode: "closed")
+      night(1, killed: 4)
+    end
 
-  it "returns the warnings attached to the record" do
-    expect(timeline.warnings_for(late_speech)).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
-  end
+    it "returns the warnings attached to the record" do
+      expect(timeline.warnings_for(late_speech)).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
+    end
 
-  it "returns nothing for a record without warnings" do
-    expect(timeline.warnings_for(alive_speech)).to be_empty
-  end
+    it "returns nothing for a record without warnings" do
+      expect(timeline.warnings_for(alive_speech)).to be_empty
+    end
 
-  it "lists every warning" do
-    expect(timeline.warnings).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
+    it "lists every warning" do
+      expect(timeline.warnings).to eq([ described_class::Warning.for_seat(:eliminated_speaker, late_speech, 4) ])
+    end
   end
-end
 
   describe "#state_for" do
     context "when the phase belongs to the breakdown" do

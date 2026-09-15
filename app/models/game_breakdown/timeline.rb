@@ -53,7 +53,7 @@ class GameBreakdown::Timeline
   end
 
   def warnings_for(record)
-    warnings.select { |warning| warning.record == record }
+    warnings_by_record.fetch(record, [])
   end
 
   def next_phase
@@ -69,6 +69,10 @@ class GameBreakdown::Timeline
   end
 
   private
+
+  def warnings_by_record
+    @warnings_by_record ||= warnings.group_by(&:record)
+  end
 
   def replay
     alive = GameBreakdown::SEAT_NUMBERS.to_a
