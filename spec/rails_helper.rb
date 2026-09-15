@@ -1,6 +1,9 @@
-require 'simplecov'
-SimpleCov.start 'rails' do
-  minimum_coverage 85 unless ENV['DISABLE_COVERAGE_GATE']
+# NO_COVERAGE=1 skips SimpleCov — mutation tools (evilution, mutant) load this file in every forked child.
+unless ENV['NO_COVERAGE']
+  require 'simplecov'
+  SimpleCov.start 'rails' do
+    minimum_coverage 85 unless ENV['DISABLE_COVERAGE_GATE']
+  end
 end
 
 require 'spec_helper'
