@@ -450,6 +450,12 @@ ru:
       greeting: "Пользователь %{email} оспаривает ваш профиль."
       body: "Профиль игрока %{player_name} был оспорен. Администратор рассмотрит запрос."
       footer: "Если у вас есть вопросы, свяжитесь с администрацией."
+  game_breakdowns:
+    timeline:
+      zero_round: "Нулевой круг"
+      night: "Ночь %{number}"
+      round: "Круг при %{alive}"
+      final_three: "Угадайка на троих"
   errors:
     messages:
       already_claimed: "уже привязан"
