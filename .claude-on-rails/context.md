@@ -44,6 +44,7 @@ This project uses two mutation testing tools:
 [Evilution](https://github.com/marinazzio/evilution) is a Prism-based mutation testing tool with structured JSON output.
 
 #### Running Evilution
+- **Disable coverage**: prefix runs with `NO_COVERAGE=1` — otherwise SimpleCov loads and rewrites `coverage/.resultset.json` in every forked mutation child
 - **Single file**: `bundle exec evilution run app/models/your_model.rb`
 - **Line range**: `bundle exec evilution run app/models/your_model.rb:15-30`
 - **Specific method**: `bundle exec evilution run app/models/your_model.rb --target YourClass#method_name`
@@ -141,6 +142,7 @@ Full Minitest integration via `--integration minitest` / `integration: minitest`
 [Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
 
 #### Running Mutant
+- **Eager load**: `CI=1 bundle exec mutant run ...` — eager-loads the app so namespace expressions (`Foo*`) match lazily autoloaded classes. `NO_COVERAGE=1` additionally skips SimpleCov, but does not prevent mutant timeouts on slow spec files; mutant counts timeouts as kills, so check `Killtime` in its summary
 - **Single class**: `bundle exec mutant run --jobs 1 -- 'YourClass'`
 - **Single method**: `bundle exec mutant run --jobs 1 -- 'YourClass#method_name'`
 - **After writing tests**: Always run mutant against the class under test to verify test quality
