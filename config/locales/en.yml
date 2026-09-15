@@ -466,6 +466,12 @@ en:
       greeting: "User %{email} has disputed your profile."
       body: "The profile of player %{player_name} has been disputed. An administrator will review the request."
       footer: "If you have any questions, please contact the administration."
+  game_breakdowns:
+    timeline:
+      zero_round: "Zero round"
+      night: "Night %{number}"
+      round: "Round at %{alive}"
+      final_three: "Final three"
   errors:
     messages:
       already_claimed: "is already claimed"
