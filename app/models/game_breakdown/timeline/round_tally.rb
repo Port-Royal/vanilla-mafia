@@ -7,7 +7,7 @@ class GameBreakdown::Timeline::RoundTally
   end
 
   def result
-    return build(tally: {}, outcome: :pending, leaders: [], eliminated: []) if @candidates.empty? || @round.votes.empty?
+    return build(tally: {}, outcome: :pending, leaders: [], eliminated: []) if @candidates.empty? || votes_by_voter.empty?
 
     @round.lift? ? lift_result : candidate_result
   end
@@ -40,8 +40,9 @@ class GameBreakdown::Timeline::RoundTally
     )
   end
 
+  # Votes by seats that are not alive are ignored; a round with none from alive voters is still pending.
   def votes_by_voter
-    @votes_by_voter ||= @round.votes.index_by(&:voter_seat)
+    @votes_by_voter ||= @round.votes.select { |vote| @voters.include?(vote.voter_seat) }.index_by(&:voter_seat)
   end
 
   def build(tally:, outcome:, leaders:, eliminated:)

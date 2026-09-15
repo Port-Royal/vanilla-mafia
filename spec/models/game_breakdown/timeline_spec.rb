@@ -393,6 +393,40 @@ RSpec.describe GameBreakdown::Timeline do
       end
     end
 
+    context "when a round has only votes by eliminated seats" do
+      let!(:second_day) { day(2) }
+      let(:round_result) { timeline.state_for(second_day).vote_rounds.first }
+
+      before do
+        night(1, killed: 10)
+        nominate(second_day, 1, 5)
+        nominate(second_day, 2, 3)
+        vote(second_day, "main", [ 10 ] => 5)
+      end
+
+      it "is pending" do
+        expect(round_result).to have_attributes(outcome: :pending, eliminated: [])
+      end
+    end
+
+    context "when a lift round has only votes by eliminated seats" do
+      let!(:second_day) { day(2) }
+      let(:lift_result) { timeline.state_for(second_day).vote_rounds.third }
+
+      before do
+        night(1, killed: 10)
+        nominate(second_day, 1, 5)
+        nominate(second_day, 2, 3)
+        vote(second_day, "main", [ 1, 2, 3, 4 ] => 5, [ 5, 6, 7, 8 ] => 3, [ 9 ] => 7)
+        vote(second_day, "revote", [ 1, 2, 3, 4 ] => 5, [ 5, 6, 7, 8 ] => 3, [ 9 ] => 7)
+        vote(second_day, "lift", [ 10 ] => true)
+      end
+
+      it "is pending" do
+        expect(lift_result).to have_attributes(outcome: :pending, eliminated: [])
+      end
+    end
+
     context "when the main round ends in a tie" do
       let(:round_result) { zero_round_state.vote_rounds.first }
 
