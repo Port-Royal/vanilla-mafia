@@ -264,7 +264,7 @@ GEM
     inline_svg (1.10.0)
       activesupport (>= 3.0)
       nokogiri (>= 1.6)
-    io-console (0.9.2)
+    io-console (0.9.3)
     io-event (1.19.3)
     irb (1.18.0)
       pp (>= 0.6.0)
@@ -557,10 +557,10 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    sentry-rails (6.7.0)
+    sentry-rails (7.0.0)
       railties (>= 5.2.0)
-      sentry-ruby (~> 6.7.0)
-    sentry-ruby (6.7.0)
+      sentry-ruby (~> 7.0.0)
+    sentry-ruby (7.0.0)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
       logger
@@ -801,7 +801,7 @@ CHECKSUMS
   image_processing (2.0.3) sha256=793e33f38470edd0a2d6bfd00acf8cb239c76284ba2e3dfb76633ac2b457f23a
   importmap-rails (2.2.3) sha256=7101be2a4dc97cf1558fb8f573a718404c5f6bcfe94f304bf1f39e444feeb16a
   inline_svg (1.10.0) sha256=5b652934236fd9f8adc61f3fd6e208b7ca3282698b19f28659971da84bf9a10f
-  io-console (0.9.2) sha256=efa74f891dd03c0939a931dfc6e74c2813d904763d456ea9762b0525e748db08
+  io-console (0.9.3) sha256=f555049461b0afb78a5448b5be8e7c7b48371347cd48abfc22814764160000dd
   io-event (1.19.3) sha256=0fe24f0fe334ad39cf61a290131c54f8848184c0d166cea86ffae2d6548339d3
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
@@ -902,8 +902,8 @@ CHECKSUMS
   rubyzip (3.5.0) sha256=f77c49d737a849b662f6ca4de473f31b4ecd8288f1c9f901a5c820641f0f8d7c
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   selenium-webdriver (4.47.0) sha256=67f915b8223d2133bbaa13e92fd98854175394f086e2036a9eff4f5561fd69e4
-  sentry-rails (6.7.0) sha256=d295dc5aa239eb91d4fb123c55d9ff2d3c40e7c29921539c5b4ae684b1490293
-  sentry-ruby (6.7.0) sha256=b4b915d79a0395ad02106d4012aa1914641456e042ce36393f15bd1630d8db42
+  sentry-rails (7.0.0) sha256=6ac6a010e088632e46710ce42db75aa5281a6b52a547efee10568cc2ed80605a
+  sentry-ruby (7.0.0) sha256=e9616ff521355a983fad404ca575d8bb1f1949a8cac42a7a893dd02156bcdb1a
   shoulda-matchers (8.0.1) sha256=5dbb46e5765b9da225111b085e0819e8c8a121ff94bba430a153eb1ea2c60288
   simplecov (1.1.1) sha256=25825ef13f0b2e74694d769817dad6ab8e90131dabdaa666e522fea105521e78
   simpleidn (0.3.0) sha256=12ca730bed2f3db04d11e9bfd1bca3e11fb37f55b21eb2e9793fb5814bf54d03
