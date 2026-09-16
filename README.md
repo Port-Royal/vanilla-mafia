@@ -32,8 +32,11 @@ bundle exec rspec
 ### Mutation testing
 
 ```bash
-bundle exec mutant run -- 'ClassName'
+bundle exec mutant run --jobs 1 -- 'ClassName'
 ```
+
+Mutant is run against services, models and helpers only — on controllers it reports a phantom neutral for
+every subject. Controllers are covered by evilution plus request specs.
 
 ## Deployment
 

@@ -93,10 +93,12 @@ Examples:
 
 ## Phase 6: Mutation Testing
 
-12. **Run mutant first** on each changed class/method:
+12. **Run mutant first** on each changed **service, model or helper** (never a controller — mutant reports
+    a phantom neutral for every controller subject, reproducible on unchanged `master`):
     ```
-    bundle exec mutant run --jobs 4 -- 'ClassName'
+    bundle exec mutant run --jobs 1 -- 'ClassName'
     ```
+    `--jobs 1` is required: parallel workers contend on the SQLite test database and invent survivors.
 
 13. **Run evilution second** via MCP tool or CLI on each changed file:
     ```

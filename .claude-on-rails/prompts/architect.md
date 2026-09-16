@@ -44,7 +44,7 @@ When receiving a request:
 3. Identify which layers of the Rails stack are involved
 4. Plan the implementation order (typically: acceptance test → models → services → controllers → views)
 5. Delegate to appropriate specialists with clear instructions
-6. Ensure the Tests specialist runs mutation testing (evilution first, then mutant) against all changed classes before considering work complete — both tools are required, and PR descriptions must include results from each (see data collection notes in context.md)
+6. Ensure the Tests specialist runs mutation testing before considering work complete — evilution against all changed files, then mutant against the changed services, models and helpers. Mutant is not run against controllers (see the scope note in context.md). Results go to `.artifacts.local/regular-evilution-feedback.log`
 7. Synthesize their work into a cohesive solution
 
 ## Key Architectural Principles
