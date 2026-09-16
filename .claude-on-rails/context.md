@@ -141,17 +141,33 @@ Full Minitest integration via `--integration minitest` / `integration: minitest`
 
 [Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
 
+#### Scope: services, models, helpers and other POROs — NOT controllers
+Mutant reports a phantom `Neutral failure` for **every** subject of a controller driven by request specs
+("original code was inserted unmutated. And the test did NOT PASS"). It reproduces on unchanged `master`
+code — `Judge::ProtocolsController#index` gives 17 mutations, 16 kills, 1 neutral — so mutant can never
+report 100% on a controller here, and a single-job controller sweep costs ~35 minutes against evilution's
+~5. Every real defect mutant has found on this project came from a service, model or helper.
+
+Controllers are covered by evilution plus request specs. Do not run mutant against them.
+
 #### Running Mutant
+- **Always `--jobs 1`**: parallel workers contend on the SQLite test database and invent phantom survivors
+  that change between runs (`-j 2` on one service reported 4–5 alive; `-j 1` on identical code reported 0)
 - **Eager load**: `CI=1 bundle exec mutant run ...` — eager-loads the app so namespace expressions (`Foo*`) match lazily autoloaded classes. `NO_COVERAGE=1` additionally skips SimpleCov, but does not prevent mutant timeouts on slow spec files; mutant counts timeouts as kills, so check `Killtime` in its summary
 - **Single class**: `bundle exec mutant run --jobs 1 -- 'YourClass'`
 - **Single method**: `bundle exec mutant run --jobs 1 -- 'YourClass#method_name'`
-- **After writing tests**: Always run mutant against the class under test to verify test quality
+- **After writing tests**: run mutant against the changed class to verify test quality, unless it is a controller
+- **After an interrupted run**: `bin/rails db:test:prepare` — forked workers leave rows behind on abnormal
+  exit, which then breaks unrelated specs
 
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
 3. Run **evilution first** (via MCP tool or CLI) against the changed file(s) — fix any surviving mutants
-4. Run **mutant second** against the changed class(es) — fix any additional surviving mutants
+4. Run **mutant second** against the changed **services, models and helpers** — fix any additional surviving
+   mutants. Skip mutant for controllers (see scope note above)
+4a. Run one mutation tool at a time — both share the SQLite test database, and running them concurrently
+   corrupts each other's results
 5. Compare results from both tools and append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
 6. In the PR description, note mutation testing results from both tools (evilution listed first)
 7. Aim for zero surviving mutants on all new/modified code

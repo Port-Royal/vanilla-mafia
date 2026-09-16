@@ -81,12 +81,12 @@ end
 2. **Watch it fail** — confirm the test fails for the right reason
 3. **Write the minimal implementation** to make the test pass
 4. **Refactor** while keeping tests green
-5. **Run mutation testing** — run evilution first, then mutant; fix survivors from each (see below)
+5. **Run mutation testing** — run evilution first, then mutant on services/models/helpers; fix survivors from each (see below)
 6. **Repeat** for the next acceptance criterion
 
 ## Mutation Testing (Required)
 
-After writing or modifying tests, you MUST run **both** mutation testing tools against the class under test. Run evilution first, fix survivors, then run mutant and fix any additional survivors.
+After writing or modifying tests, run evilution against the changed files and fix survivors. Then run mutant against the changed **services, models and helpers** and fix any additional survivors — mutant is not run against controllers (see Step 2).
 
 ### Step 1: Evilution (run first — fast, file-level targeting)
 
@@ -104,7 +104,14 @@ bundle exec evilution run app/models/class_name.rb --target ClassName#method_nam
 bundle exec evilution run app/models/class_name.rb --format json --timeout 30
 ```
 
-### Step 2: Mutant (run second — class-level targeting)
+### Step 2: Mutant (run second — services, models and helpers only)
+
+**Do not run mutant against controllers.** It reports a phantom `Neutral failure` for every subject of a
+request-spec-driven controller — reproducible on unchanged `master` code — so it can never reach 100%
+there, and a controller sweep costs ~35 minutes. Controllers are covered by evilution plus request specs.
+
+Always `--jobs 1`: parallel workers contend on the SQLite test database and invent survivors that change
+between runs.
 
 ```bash
 # Test a single class
@@ -114,12 +121,16 @@ bundle exec mutant run --jobs 1 -- 'ClassName'
 bundle exec mutant run --jobs 1 -- 'ClassName#method_name'
 ```
 
+Run one mutation tool at a time — both use the same test database. If a run is interrupted, follow it with
+`bin/rails db:test:prepare` before trusting the suite.
+
 ### After both tools
 
 - If mutants survive in either tool, add or strengthen assertions to kill them
 - Aim for zero surviving mutants on all new/modified code
 - Common survivors: missing boundary assertions, untested return values, conditional branches without dedicated tests
-- Do NOT skip either tool — we are collecting data to compare them
+- Do not skip evilution. Do not skip mutant on a service, model or helper — we are still collecting data to
+  compare them, and mutant is still finding defects evilution scores 100% on
 
 ### Data Collection
 
