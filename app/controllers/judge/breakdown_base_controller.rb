@@ -20,9 +20,9 @@ class Judge::BreakdownBaseController < ApplicationController
     @breakdown = GameBreakdown.find(params[:breakdown_id])
   end
 
-  # A day edit can make the timeline expect new blocks, so they are materialised before re-rendering
-  # the edited phase and every phase after it.
-  def respond_with_day(phase)
+  # An edit can make the timeline expect new blocks, so they are materialised before re-rendering
+  # the edited phase and every phase after it — alive counts and labels downstream depend on it.
+  def respond_with_phase(phase)
     SyncBreakdownStepsService.call(breakdown: @breakdown)
     @from_position = phase.position
     respond_with_editor

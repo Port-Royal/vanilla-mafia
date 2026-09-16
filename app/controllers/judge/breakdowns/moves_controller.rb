@@ -8,20 +8,20 @@ class Judge::Breakdowns::MovesController < Judge::BreakdownBaseController
     move.position = next_move_position(move)
     return render_editor_error(move.errors.full_messages.to_sentence) unless move.save
 
-    respond_with_day(phase_of(move))
+    respond_with_phase(phase_of(move))
   end
 
   def update
     return render_editor_error(@move.errors.full_messages.to_sentence) unless @move.update(move_params)
 
-    respond_with_day(phase_of(@move))
+    respond_with_phase(phase_of(@move))
   end
 
   def destroy
     phase = phase_of(@move)
     @move.destroy!
 
-    respond_with_day(phase)
+    respond_with_phase(phase)
   end
 
   private

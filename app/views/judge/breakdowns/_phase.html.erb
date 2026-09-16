@@ -10,9 +10,7 @@
     <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(state.phase) %>
 
     <% if state.phase.night? %>
-      <div class="px-4 py-3 text-sm">
-        <p class="text-gray-500"><%= t("game_breakdowns.editor.night_placeholder") %></p>
-      </div>
+      <%= render "judge/breakdowns/night", state: state, seat_names: seat_names %>
     <% else %>
       <div class="divide-y">
         <% state.phase.speeches.reject(&:justification?).each do |speech| %>

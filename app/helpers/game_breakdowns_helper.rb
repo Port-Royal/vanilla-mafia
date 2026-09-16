@@ -1,4 +1,6 @@
 module GameBreakdownsHelper
+  BLACK_ROLES = %w[mafia don].freeze
+
   def breakdown_result_label(result)
     return t("game_breakdowns.results.unknown") if result.blank?
 
@@ -64,6 +66,50 @@ module GameBreakdownsHelper
 
   def breakdown_lift_options
     [ [ t("game_breakdowns.lift_choices.for"), "true" ], [ t("game_breakdowns.lift_choices.against"), "false" ] ]
+  end
+
+  def breakdown_role_seats(breakdown)
+    breakdown.seats.group_by(&:role_code).transform_values { |seats| seats.map(&:number) }
+  end
+
+  # Every mafia member still in the game shoots; a dead one has nothing to record.
+  def breakdown_shooter_seats(role_seats, alive)
+    BLACK_ROLES.flat_map { |code| role_seats.fetch(code, []) }.select { |seat| alive.include?(seat) }.sort
+  end
+
+  # The don and the sheriff check while they are alive; the role says who they are.
+  def breakdown_checker_seat(role_seats, role_code, alive)
+    seat = role_seats.fetch(role_code, []).first
+    seat if alive.include?(seat)
+  end
+
+  # The don learns sheriff / not sheriff, the sheriff learns red / black — both from the target's role.
+  def breakdown_check_result(kind, target_role)
+    return if target_role.blank?
+
+    t("game_breakdowns.check_results.#{breakdown_check_result_key(kind, target_role)}")
+  end
+
+  def breakdown_check_result_key(kind, target_role)
+    return target_role == "sheriff" ? "sheriff" : "not_sheriff" if kind == "don_check"
+
+    BLACK_ROLES.include?(target_role) ? "black" : "red"
+  end
+
+  def breakdown_night_action(actions, kind, actor_seat)
+    actions.find { |action| action.kind == kind && action.actor_seat == actor_seat }
+  end
+
+  def breakdown_check_target(action)
+    return if action.nil?
+
+    action.target_seat
+  end
+
+  def breakdown_shot_value(action)
+    return if action.nil?
+
+    action.target_seat.nil? ? SaveBreakdownNightService::NO_SHOT : action.target_seat.to_s
   end
 
   private
