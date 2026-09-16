@@ -13,8 +13,6 @@
     </div>
     <%= form.collection_select :role_code, @roles, :code, :name, { include_blank: true },
           id: "#{dom_id(seat)}_role_code", class: "w-full sm:w-48 border border-gray-300 rounded-md px-2 py-1 text-sm" %>
-    <span class="text-xs text-gray-500">
-      <%= seat.player ? t("game_breakdowns.editor.linked_player", name: seat.player.name) : t("game_breakdowns.editor.unlinked_player") %>
-    </span>
+    <%= render "judge/breakdowns/seat_link", seat: seat %>
   </div>
 <% end %>

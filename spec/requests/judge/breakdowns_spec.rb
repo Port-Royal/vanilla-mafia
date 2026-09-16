@@ -243,6 +243,24 @@ RSpec.describe "Judge::Breakdowns" do
       expect(response.media_type).to eq("text/vnd.turbo-stream.html")
     end
 
+    it "streams the renamed title so the heading does not go stale" do
+      patch judge_breakdown_path(breakdown),
+            params: { game_breakdown: { title: "Переименованный" } },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include('target="breakdown_title"').and include("Переименованный")
+    end
+
+    it "streams the phases, the footer and the seat warnings" do
+      patch judge_breakdown_path(breakdown),
+            params: { game_breakdown: { judge_name: "Иванов" } },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include('target="breakdown_seat_warnings"')
+        .and include('target="breakdown_phases"')
+        .and include('target="breakdown_footer"')
+    end
+
     context "when the attributes are invalid" do
       it "does not update the breakdown" do
         patch judge_breakdown_path(breakdown), params: { game_breakdown: { title: "" } }
@@ -302,6 +320,24 @@ RSpec.describe "Judge::Breakdowns" do
       expect(response).to redirect_to(edit_judge_breakdown_path(breakdown))
     end
 
+    it "streams the refreshed player link so the indicator does not go stale" do
+      patch judge_breakdown_seat_path(breakdown, seat),
+            params: { breakdown_seat: { name: "Тестовый" } },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include(%(target="breakdown_seat_#{seat.id}_link"))
+        .and include(I18n.t("game_breakdowns.editor.linked_player", name: "Тестовый"))
+    end
+
+    it "streams the seat warnings so a role change refreshes them" do
+      patch judge_breakdown_seat_path(breakdown, seat),
+            params: { breakdown_seat: { role_code: "sheriff" } },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include('target="breakdown_seat_warnings"')
+        .and include(I18n.t("game_breakdowns.warnings.missing_mafia"))
+    end
+
     it "does not touch a seat of another breakdown" do
       other = create(:game_breakdown, author: admin)
 
@@ -333,6 +369,13 @@ RSpec.describe "Judge::Breakdowns" do
     it "redirects back to the editor" do
       post judge_breakdown_phases_path(breakdown)
       expect(response).to redirect_to(edit_judge_breakdown_path(breakdown))
+    end
+
+    it "streams the new phase to turbo clients" do
+      post judge_breakdown_phases_path(breakdown), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include('target="breakdown_phases"')
+        .and include(I18n.t("game_breakdowns.timeline.night", number: 1))
     end
 
     context "when the next phase is a day" do
@@ -417,6 +460,16 @@ RSpec.describe "Judge::Breakdowns" do
     it "redirects back to the editor" do
       delete judge_breakdown_phase_path(breakdown, night)
       expect(response).to redirect_to(edit_judge_breakdown_path(breakdown))
+    end
+
+    it "streams the phases to turbo clients" do
+      delete judge_breakdown_phase_path(breakdown, night), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response.body).to include('target="breakdown_phases"')
+    end
+
+    it "drops the deleted phase from the stream" do
+      delete judge_breakdown_phase_path(breakdown, night), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response.body).not_to include(I18n.t("game_breakdowns.timeline.night", number: 1))
     end
 
     it "refuses to delete a phase that is not the last one" do

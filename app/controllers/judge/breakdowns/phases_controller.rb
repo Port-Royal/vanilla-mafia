@@ -21,13 +21,6 @@ class Judge::Breakdowns::PhasesController < Judge::BreakdownBaseController
     @breakdown.phases.count > 1 && @breakdown.phases.maximum(:position) == phase.position
   end
 
-  def respond_with_editor
-    respond_to do |format|
-      format.turbo_stream { render_editor_streams }
-      format.html { redirect_to editor_path }
-    end
-  end
-
   def render_editor_error(message)
     load_editor_data
     flash.now[:error] = message

@@ -7,10 +7,7 @@ class Judge::Breakdowns::SeatsController < Judge::BreakdownBaseController
     @seat.player = Player.find_by(name: @seat.name)
     return render_invalid unless @seat.save
 
-    respond_to do |format|
-      format.turbo_stream { render_editor_streams }
-      format.html { redirect_to editor_path }
-    end
+    respond_with_editor
   end
 
   private

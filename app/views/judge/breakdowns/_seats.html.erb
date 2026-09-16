@@ -3,7 +3,7 @@
     <%= t("game_breakdowns.editor.seats_panel") %>
   </div>
 
-  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(@breakdown) %>
+  <%= render "judge/breakdowns/seat_warnings" %>
 
   <template id="player-options">
     <% @players.each do |player| %>

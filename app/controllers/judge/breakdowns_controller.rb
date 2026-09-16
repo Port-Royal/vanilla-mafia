@@ -32,10 +32,7 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
   def update
     return render_invalid unless @breakdown.update(breakdown_params)
 
-    respond_to do |format|
-      format.turbo_stream { render_editor_streams }
-      format.html { redirect_to editor_path }
-    end
+    respond_with_editor
   end
 
   private

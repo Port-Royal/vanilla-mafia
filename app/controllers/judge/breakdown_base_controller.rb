@@ -22,8 +22,11 @@ class Judge::BreakdownBaseController < ApplicationController
     @players = Player.order(:name)
   end
 
-  def render_editor_streams
-    load_editor_data
-    render "judge/breakdowns/editor_streams", formats: [ :turbo_stream ]
+  # Turbo clients get the action's own stream template; everything else falls back to a full editor reload.
+  def respond_with_editor
+    respond_to do |format|
+      format.turbo_stream { load_editor_data }
+      format.html { redirect_to editor_path }
+    end
   end
 end
