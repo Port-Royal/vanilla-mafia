@@ -8,6 +8,11 @@ Rails.application.routes.draw do
           patch :autosave
         end
       end
+
+      resources :breakdowns, only: [ :index, :new, :create, :edit, :update ] do
+        resources :seats, only: [ :update ], module: :breakdowns
+        resources :phases, only: [ :create, :destroy ], module: :breakdowns
+      end
     end
   end
 

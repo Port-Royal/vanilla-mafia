@@ -1,0 +1,38 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold"><%= t("game_breakdowns.index.title") %></h1>
+  <%= link_to t("game_breakdowns.index.new_breakdown"), new_judge_breakdown_path,
+        class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+</div>
+
+<% if @breakdowns.any? %>
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="bg-gray-50 text-left">
+          <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:title) %></th>
+          <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:played_on) %></th>
+          <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:source) %></th>
+          <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:author) %></th>
+          <th class="px-4 py-3 font-semibold"><%= t("game_breakdowns.index.result") %></th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        <% @breakdowns.each do |breakdown| %>
+          <tr>
+            <td class="px-4 py-3 font-medium"><%= breakdown.title %></td>
+            <td class="px-4 py-3"><%= breakdown.played_on %></td>
+            <td class="px-4 py-3"><%= breakdown.source %></td>
+            <td class="px-4 py-3"><%= breakdown.author.display_name %></td>
+            <td class="px-4 py-3"><%= breakdown_result_label(@results[breakdown.id]) %></td>
+            <td class="px-4 py-3 text-right">
+              <%= link_to t("game_breakdowns.index.edit"), edit_judge_breakdown_path(breakdown), class: "text-maroon hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="text-gray-500"><%= t("game_breakdowns.index.no_breakdowns") %></p>
+<% end %>

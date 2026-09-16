@@ -1,0 +1,36 @@
+<div id="breakdown_footer" class="bg-white border border-gray-200 rounded-lg shadow-sm">
+  <div class="px-4 py-3 border-b border-gray-200 flex flex-wrap gap-3">
+    <% unless @timeline.finished? %>
+      <%= button_to t("game_breakdowns.editor.next_phase"), judge_breakdown_phases_path(@breakdown), method: :post,
+            class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+    <% end %>
+    <% if @breakdown.phases.size > 1 %>
+      <%= button_to t("game_breakdowns.editor.delete_last_phase"), judge_breakdown_phase_path(@breakdown, @breakdown.phases.last),
+            method: :delete,
+            form: { data: { turbo_confirm: t("game_breakdowns.editor.delete_last_phase_confirm") } },
+            class: "bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md text-sm" %>
+    <% end %>
+  </div>
+
+  <%= form_with model: @breakdown, url: judge_breakdown_path(@breakdown), method: :patch,
+        data: { controller: "autosave-form", action: "change->autosave-form#submit input->autosave-form#submitLater" } do |form| %>
+    <div class="divide-y">
+      <div class="flex flex-col sm:flex-row sm:items-center px-4 py-3 gap-2">
+        <span class="w-40 font-semibold text-sm sm:text-right"><%= t("game_breakdowns.editor.result") %></span>
+        <% if @timeline.result_computed? %>
+          <span class="font-medium"><%= breakdown_result_label(@timeline.result) %></span>
+          <span class="text-xs text-gray-500"><%= t("game_breakdowns.editor.result_computed") %></span>
+        <% else %>
+          <%= form.select :manual_result,
+                GameBreakdown.manual_results.keys.map { |key| [ t("game_breakdowns.results.#{key}"), key ] },
+                { include_blank: t("game_breakdowns.results.unknown") },
+                class: "w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        <% end %>
+      </div>
+      <div class="flex flex-col sm:flex-row px-4 py-3 gap-2">
+        <%= form.label :conclusion, class: "w-40 font-semibold text-sm sm:text-right" %>
+        <%= form.text_area :conclusion, rows: 4, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+      </div>
+    </div>
+  <% end %>
+</div>

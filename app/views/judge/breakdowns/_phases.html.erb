@@ -1,0 +1,6 @@
+<div id="breakdown_phases" class="space-y-4 mb-6">
+  <% seat_names = breakdown_seat_names(@breakdown) %>
+  <% @timeline.phases.each do |state| %>
+    <%= render "judge/breakdowns/phase", state: state, seat_names: seat_names %>
+  <% end %>
+</div>

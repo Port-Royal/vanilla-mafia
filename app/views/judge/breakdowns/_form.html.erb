@@ -1,0 +1,45 @@
+<% if @breakdown.errors.any? %>
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-md px-4 py-3 mb-4 text-sm">
+    <%= @breakdown.errors.full_messages.to_sentence %>
+  </div>
+<% end %>
+
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 divide-y">
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :title, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.text_field :title, required: true, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :played_on, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.date_field :played_on, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :source, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.text_field :source, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :video_url, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.url_field :video_url, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :judge_name, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.text_field :judge_name, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :roles_mode, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.select :roles_mode,
+          GameBreakdown.roles_modes.keys.map { |mode| [ t("game_breakdowns.roles_modes.#{mode}"), mode ] },
+          {}, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+    <%= form.label :game_id, class: "w-40 font-semibold text-sm sm:text-right" %>
+    <%= form.collection_select :game_id, @games, :id, :full_name, { include_blank: true },
+          class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+  </div>
+</div>
+
+<div class="flex justify-end">
+  <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+    <%= t("game_breakdowns.form.submit") %>
+  </button>
+</div>

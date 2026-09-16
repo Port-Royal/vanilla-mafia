@@ -1,0 +1,23 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+    <%= t("game_breakdowns.editor.seats_panel") %>
+  </div>
+
+  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(@breakdown) %>
+
+  <template id="player-options">
+    <% @players.each do |player| %>
+      <button type="button" class="w-full px-2 py-1 text-sm text-left hover:bg-gray-100 whitespace-nowrap"
+              data-player-select-target="option" data-player-name="<%= player.name %>"
+              data-action="click->player-select#select mouseenter->player-select#hover mousedown->player-select#cancelClose">
+        <%= player.name %>
+      </button>
+    <% end %>
+  </template>
+
+  <div class="divide-y">
+    <% @breakdown.seats.each do |seat| %>
+      <%= render "judge/breakdowns/seat", seat: seat %>
+    <% end %>
+  </div>
+</div>

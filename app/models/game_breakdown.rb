@@ -22,6 +22,8 @@ class GameBreakdown < ApplicationRecord
 
   validates :title, presence: true
 
+  scope :ordered, -> { order(played_on: :desc, created_at: :desc, id: :desc) }
+
   after_create :create_seats_and_zero_round
 
   private
