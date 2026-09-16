@@ -1,0 +1,29 @@
+<%= turbo_frame_tag dom_id(state.phase) do %>
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div class="px-4 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+      <span class="font-semibold text-lg"><%= state.label %></span>
+      <span class="text-sm text-gray-500">
+        <%= t("game_breakdowns.editor.alive", seats: state.alive_at_start.join(", ")) %>
+      </span>
+    </div>
+
+    <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(state.phase) %>
+
+    <div class="px-4 py-3 text-sm">
+      <% if state.phase.night? %>
+        <p class="text-gray-500"><%= t("game_breakdowns.editor.night_placeholder") %></p>
+      <% elsif state.phase.speeches.any? %>
+        <ol class="space-y-1">
+          <% state.phase.speeches.each do |speech| %>
+            <li class="flex items-baseline gap-2">
+              <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
+              <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="text-gray-500"><%= t("game_breakdowns.editor.day_placeholder") %></p>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,4 @@
+<%= turbo_stream.replace "#{dom_id(@seat)}_link" do %>
+  <%= render "judge/breakdowns/seat_link", seat: @seat %>
+<% end %>
+<%= render "judge/breakdowns/editor_streams" %>

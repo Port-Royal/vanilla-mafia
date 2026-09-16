@@ -9,7 +9,22 @@ ru:
       game_participation: "Участие в игре"
       award: "Награда"
       role: "Роль"
+      game_breakdown: "Разбор игры"
     attributes:
+      game_breakdown:
+        title: "Название"
+        played_on: "Дата игры"
+        source: "Источник"
+        video_url: "Ссылка на видео"
+        judge_name: "Ведущий"
+        roles_mode: "Роли"
+        game_id: "Клубная игра"
+        author: "Автор"
+        manual_result: "Результат"
+        conclusion: "Выводы"
+      breakdown_seat:
+        name: "Игрок"
+        role_code: "Роль"
       player:
         name: "Имя"
         comment: "Комментарий"
@@ -451,6 +466,48 @@ ru:
       body: "Профиль игрока %{player_name} был оспорен. Администратор рассмотрит запрос."
       footer: "Если у вас есть вопросы, свяжитесь с администрацией."
   game_breakdowns:
+    index:
+      title: "Разборы игр"
+      new_breakdown: "Новый разбор"
+      no_breakdowns: "Разборов пока нет."
+      result: "Результат"
+      edit: "Редактировать"
+    new:
+      title: "Новый разбор"
+    form:
+      submit: "Создать разбор"
+    create:
+      success: "Разбор создан."
+    editor:
+      back: "К списку разборов"
+      header_panel: "Информация об игре"
+      seats_panel: "Рассадка"
+      save: "Сохранить"
+      alive: "В игре: %{seats}"
+      linked_player: "Профиль: %{name}"
+      unlinked_player: "Без профиля"
+      rule: "п. %{rule}"
+      night_placeholder: "Ночь заполняется на следующем этапе."
+      day_placeholder: "В этой фазе пока нет речей."
+      next_phase: "+ Следующая фаза"
+      delete_last_phase: "Удалить последнюю фазу"
+      delete_last_phase_confirm: "Удалить последнюю фазу вместе со всем её содержимым?"
+      no_next_phase: "Игра окончена — следующую фазу добавить нельзя."
+      not_last_phase: "Удалить можно только последнюю фазу."
+      result: "Результат"
+      result_computed: "рассчитан автоматически"
+    results:
+      city: "Победа мирных"
+      mafia: "Победа мафии"
+      draw: "Ничья"
+      unknown: "Не определён"
+    roles_modes:
+      open: "Открытые"
+      closed: "Закрытые"
+    speech_kinds:
+      regular: "речь"
+      farewell: "прощальная речь"
+      justification: "оправдательная речь"
     timeline:
       zero_round: "Нулевой круг"
       night: "Ночь %{number}"

@@ -1,0 +1,5 @@
+<h1 class="text-2xl font-bold mb-6"><%= t("game_breakdowns.new.title") %></h1>
+
+<%= form_with model: @breakdown, url: judge_breakdowns_path, method: :post do |form| %>
+  <%= render "form", form: form %>
+<% end %>

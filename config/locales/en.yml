@@ -32,7 +32,23 @@ en:
     formats:
       full_date: "%-d %B %Y"
   activerecord:
+    models:
+      game_breakdown: "Game breakdown"
     attributes:
+      game_breakdown:
+        title: "Title"
+        played_on: "Played on"
+        source: "Source"
+        video_url: "Video URL"
+        judge_name: "Judge"
+        roles_mode: "Roles"
+        game_id: "Club game"
+        author: "Author"
+        manual_result: "Result"
+        conclusion: "Conclusion"
+      breakdown_seat:
+        name: "Player"
+        role_code: "Role"
       user:
         role: "Role"
         roles:
@@ -467,6 +483,48 @@ en:
       body: "The profile of player %{player_name} has been disputed. An administrator will review the request."
       footer: "If you have any questions, please contact the administration."
   game_breakdowns:
+    index:
+      title: "Game breakdowns"
+      new_breakdown: "New breakdown"
+      no_breakdowns: "No breakdowns yet."
+      result: "Result"
+      edit: "Edit"
+    new:
+      title: "New breakdown"
+    form:
+      submit: "Create breakdown"
+    create:
+      success: "Breakdown created."
+    editor:
+      back: "Back to breakdowns"
+      header_panel: "Game information"
+      seats_panel: "Seating"
+      save: "Save"
+      alive: "Alive: %{seats}"
+      linked_player: "Profile: %{name}"
+      unlinked_player: "No profile"
+      rule: "rule %{rule}"
+      night_placeholder: "Night details are filled in at a later stage."
+      day_placeholder: "This phase has no speeches yet."
+      next_phase: "+ Next phase"
+      delete_last_phase: "Delete last phase"
+      delete_last_phase_confirm: "Delete the last phase with everything in it?"
+      no_next_phase: "The game is over — no further phase can be added."
+      not_last_phase: "Only the last phase can be deleted."
+      result: "Result"
+      result_computed: "computed automatically"
+    results:
+      city: "City win"
+      mafia: "Mafia win"
+      draw: "Draw"
+      unknown: "Undetermined"
+    roles_modes:
+      open: "Open"
+      closed: "Closed"
+    speech_kinds:
+      regular: "speech"
+      farewell: "farewell speech"
+      justification: "justification speech"
     timeline:
       zero_round: "Zero round"
       night: "Night %{number}"
