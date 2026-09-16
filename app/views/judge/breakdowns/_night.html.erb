@@ -1,0 +1,74 @@
+<% role_seats = breakdown_role_seats(@breakdown) %>
+<% roles_by_seat = @breakdown.seats.to_h { |seat| [ seat.number, seat.role_code ] } %>
+<% actions = state.phase.night_actions.to_a %>
+<% alive = state.alive_at_start %>
+
+<div class="px-4 py-3 text-sm">
+  <%= form_with model: state.phase, url: judge_breakdown_phase_path(@breakdown, state.phase), method: :patch,
+        scope: :breakdown_phase,
+        data: { controller: "autosave-form", action: "change->autosave-form#submit" } do %>
+    <div class="flex flex-wrap items-end gap-3">
+      <label class="text-xs text-gray-600">
+        <%= BreakdownPhase.human_attribute_name(:night_outcome) %>
+        <%= select_tag "breakdown_phase[outcome]",
+              options_for_select(breakdown_night_outcome_options(alive, seat_names),
+                                 breakdown_night_outcome_value(state.phase)),
+              include_blank: t("game_breakdowns.editor.not_recorded"),
+              class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+      </label>
+    </div>
+
+    <% if @breakdown.open? %>
+      <% if state.phase.miss? %>
+        <% shooters = breakdown_shooter_seats(role_seats, alive) %>
+        <div class="mt-3">
+          <p class="text-xs font-semibold text-gray-600"><%= t("game_breakdowns.editor.mafia_shots") %></p>
+          <% if shooters.any? %>
+            <div class="mt-1 grid gap-1 sm:grid-cols-2">
+              <% shooters.each do |shooter| %>
+                <label class="flex items-center gap-2">
+                  <span class="w-28 shrink-0"><%= breakdown_seat_label(seat_names, shooter) %></span>
+                  <%= select_tag "shots[#{shooter}]",
+                        options_for_select(
+                          [ [ t("game_breakdowns.editor.did_not_shoot"), SaveBreakdownNightService::NO_SHOT ] ] +
+                            alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
+                          breakdown_shot_value(breakdown_night_action(actions, "mafia_shot", shooter))
+                        ),
+                        include_blank: t("game_breakdowns.editor.not_recorded"),
+                        class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+                </label>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-gray-500"><%= t("game_breakdowns.editor.no_shooters") %></p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="mt-3 grid gap-1 sm:grid-cols-2">
+        <% { "don_check" => "don", "sheriff_check" => "sheriff" }.each do |kind, role_code| %>
+          <% checker = breakdown_checker_seat(role_seats, role_code, alive) %>
+          <% next if checker.nil? %>
+          <% checked_seat = breakdown_check_target(breakdown_night_action(actions, kind, nil)) %>
+          <label class="flex items-center gap-2">
+            <span class="w-28 shrink-0"><%= t("game_breakdowns.editor.#{kind}", seat: checker) %></span>
+            <%= select_tag "checks[#{kind}]",
+                  options_for_select(alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
+                                     checked_seat.to_s),
+                  include_blank: t("game_breakdowns.editor.not_recorded"),
+                  class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+            <span class="text-xs text-gray-500 whitespace-nowrap">
+              <%= breakdown_check_result(kind, roles_by_seat[checked_seat]) %>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    <% end %>
+
+    <noscript>
+      <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-xs">
+        <%= t("game_breakdowns.editor.save_night") %>
+      </button>
+    </noscript>
+  <% end %>
+</div>

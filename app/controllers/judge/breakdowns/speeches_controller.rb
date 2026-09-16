@@ -9,7 +9,7 @@ class Judge::Breakdowns::SpeechesController < Judge::BreakdownBaseController
     speech.position = next_position(phase.speeches)
     return render_editor_error(speech.errors.full_messages.to_sentence) unless speech.save
 
-    respond_with_day(phase)
+    respond_with_phase(phase)
   end
 
   def destroy
@@ -17,7 +17,7 @@ class Judge::Breakdowns::SpeechesController < Judge::BreakdownBaseController
     phase = speech.breakdown_phase
     speech.destroy!
 
-    respond_with_day(phase)
+    respond_with_phase(phase)
   end
 
   private

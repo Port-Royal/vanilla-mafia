@@ -61,6 +61,9 @@ en:
       breakdown_speech:
         speaker_seat: "Player"
         kind: "Speech kind"
+      breakdown_phase:
+        night_outcome: "Night outcome"
+        killed_seat: "Killed"
       user:
         role: "Role"
         roles:
@@ -495,6 +498,15 @@ en:
       body: "The profile of player %{player_name} has been disputed. An administrator will review the request."
       footer: "If you have any questions, please contact the administration."
   game_breakdowns:
+    night_outcomes:
+      kill: "Kill"
+      miss: "Miss"
+      kill_seat: "Killed %{seat}"
+    check_results:
+      sheriff: "sheriff"
+      not_sheriff: "not the sheriff"
+      red: "red"
+      black: "black"
     move_kinds:
       sheriff_reveal_table: "Sheriff reveal to the table"
       sheriff_reveal_to_player: "Sheriff reveal to a player"
@@ -571,6 +583,13 @@ en:
       candidates: "Candidates: %{seats}"
       no_vote: "did not vote"
       save_votes: "Save votes"
+      not_recorded: "not recorded"
+      mafia_shots: "Mafia shots"
+      did_not_shoot: "did not shoot"
+      no_shooters: "No mafia roles are set."
+      don_check: "Don check (%{seat})"
+      sheriff_check: "Sheriff check (%{seat})"
+      save_night: "Save night"
     results:
       city: "City win"
       mafia: "Mafia win"

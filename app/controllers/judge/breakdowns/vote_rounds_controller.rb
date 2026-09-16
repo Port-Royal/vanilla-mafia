@@ -5,14 +5,14 @@ class Judge::Breakdowns::VoteRoundsController < Judge::BreakdownBaseController
   def update
     SaveBreakdownVotesService.call(round: @round, ballots: ballots_params)
 
-    respond_with_day(@round.breakdown_phase)
+    respond_with_phase(@round.breakdown_phase)
   end
 
   def destroy
     phase = @round.breakdown_phase
     @round.destroy!
 
-    respond_with_day(phase)
+    respond_with_phase(phase)
   end
 
   private

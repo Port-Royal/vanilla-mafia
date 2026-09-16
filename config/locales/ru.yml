@@ -37,6 +37,9 @@ ru:
       breakdown_speech:
         speaker_seat: "Игрок"
         kind: "Тип речи"
+      breakdown_phase:
+        night_outcome: "Итог ночи"
+        killed_seat: "Убит"
       player:
         name: "Имя"
         comment: "Комментарий"
@@ -478,6 +481,15 @@ ru:
       body: "Профиль игрока %{player_name} был оспорен. Администратор рассмотрит запрос."
       footer: "Если у вас есть вопросы, свяжитесь с администрацией."
   game_breakdowns:
+    night_outcomes:
+      kill: "Убийство"
+      miss: "Промах"
+      kill_seat: "Убит %{seat}"
+    check_results:
+      sheriff: "шериф"
+      not_sheriff: "не шериф"
+      red: "красный"
+      black: "чёрный"
     move_kinds:
       sheriff_reveal_table: "Раскрытие шерифом на стол"
       sheriff_reveal_to_player: "Раскрытие шерифом игроку"
@@ -554,6 +566,13 @@ ru:
       candidates: "Кандидаты: %{seats}"
       no_vote: "не голосовал"
       save_votes: "Сохранить голоса"
+      not_recorded: "не указано"
+      mafia_shots: "Выстрелы мафии"
+      did_not_shoot: "не стрелял"
+      no_shooters: "Роли мафии не указаны."
+      don_check: "Проверка дона (%{seat})"
+      sheriff_check: "Проверка шерифа (%{seat})"
+      save_night: "Сохранить ночь"
     results:
       city: "Победа мирных"
       mafia: "Победа мафии"
