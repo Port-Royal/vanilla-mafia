@@ -25,11 +25,11 @@ class Judge::Breakdowns::PhasesController < Judge::BreakdownBaseController
 
   private
 
-  # A killed seat only means anything on a kill, so any stale value is dropped with the outcome.
+  # The night outcome arrives as one value — "", "miss" or "kill:<seat>" — so a kill always carries its seat
+  # and any other outcome drops a stale one.
   def phase_params
-    permitted = params.require(:breakdown_phase).permit(:night_outcome, :killed_seat)
-    outcome = permitted[:night_outcome].presence
-    { night_outcome: outcome, killed_seat: outcome == "kill" ? permitted[:killed_seat].presence : nil }
+    outcome, seat = params.require(:breakdown_phase).permit(:outcome)[:outcome].to_s.split(":")
+    { night_outcome: outcome.presence, killed_seat: seat }
   end
 
   def shots_params

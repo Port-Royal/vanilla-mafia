@@ -120,6 +120,53 @@ RSpec.describe SaveBreakdownNightService do
     end
   end
 
+  # Shots belong to a miss: a kill already says who the mafia hit.
+  describe "shots against a kill" do
+    let(:phase) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
+
+    context "with shots left from an earlier miss" do
+      before { create(:breakdown_night_action, breakdown_phase: phase, kind: "mafia_shot", actor_seat: 3, target_seat: 7) }
+
+      it "drops them" do
+        expect { save }.to change { phase.night_actions.reload.count }.by(-1)
+      end
+
+      it "keeps the checks" do
+        create(:breakdown_night_action, breakdown_phase: phase, kind: "don_check", actor_seat: nil, target_seat: 5)
+
+        save
+
+        expect(phase.night_actions.reload.map(&:kind)).to eq([ "don_check" ])
+      end
+    end
+
+    context "with shots submitted anyway" do
+      let(:shots) { { "3" => "7" } }
+
+      it "records none" do
+        expect { save }.not_to change { phase.night_actions.reload.count }
+      end
+    end
+
+    context "with a check submitted" do
+      let(:checks) { { "don_check" => "5" } }
+
+      it "records it" do
+        save
+        expect(phase.night_actions.reload.map(&:kind)).to eq([ "don_check" ])
+      end
+    end
+  end
+
+  describe "shots against a night with no recorded outcome" do
+    let(:phase) { create(:breakdown_phase, game_breakdown: breakdown, position: 1) }
+    let(:shots) { { "3" => "7" } }
+
+    it "records none" do
+      expect { save }.not_to change { phase.night_actions.reload.count }
+    end
+  end
+
   context "when the breakdown hides the roles" do
     let(:breakdown) { create(:game_breakdown, roles_mode: "closed") }
     let(:shots) { { "3" => "7" } }

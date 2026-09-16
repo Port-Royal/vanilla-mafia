@@ -484,6 +484,7 @@ ru:
     night_outcomes:
       kill: "Убийство"
       miss: "Промах"
+      kill_seat: "Убит %{seat}"
     check_results:
       sheriff: "шериф"
       not_sheriff: "не шериф"

@@ -20,6 +20,7 @@ class SaveBreakdownNightService
   def call
     @shots.each { |actor_seat, choice| save_shot(actor_seat, choice) }
     @checks.each { |kind, target_seat| save_check(kind, target_seat) }
+    drop_shots unless @phase.miss?
   end
 
   private
@@ -36,6 +37,12 @@ class SaveBreakdownNightService
     return if choice == NO_SHOT
 
     choice
+  end
+
+  # Shots are only recorded on a miss — a kill says who the mafia hit — so any left from an earlier
+  # miss would contradict the outcome once it changes.
+  def drop_shots
+    @phase.night_actions.where(kind: "mafia_shot").destroy_all
   end
 
   # A check has no actor: the don and the sheriff are known from their roles.

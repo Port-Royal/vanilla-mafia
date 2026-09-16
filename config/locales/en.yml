@@ -501,6 +501,7 @@ en:
     night_outcomes:
       kill: "Kill"
       miss: "Miss"
+      kill_seat: "Killed %{seat}"
     check_results:
       sheriff: "sheriff"
       not_sheriff: "not the sheriff"

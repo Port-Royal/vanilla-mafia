@@ -68,6 +68,19 @@ module GameBreakdownsHelper
     [ [ t("game_breakdowns.lift_choices.for"), "true" ], [ t("game_breakdowns.lift_choices.against"), "false" ] ]
   end
 
+  # Outcome and killed seat are one choice: a kill is only ever valid with a seat, so offering them as two
+  # fields would let the editor submit a kill with nothing killed, which the model rightly refuses.
+  def breakdown_night_outcome_options(alive, seat_names)
+    [ [ t("game_breakdowns.night_outcomes.miss"), "miss" ] ] +
+      alive.map { |seat| [ t("game_breakdowns.night_outcomes.kill_seat", seat: breakdown_seat_label(seat_names, seat)), "kill:#{seat}" ] }
+  end
+
+  def breakdown_night_outcome_value(phase)
+    return phase.night_outcome unless phase.kill?
+
+    "kill:#{phase.killed_seat}"
+  end
+
   def breakdown_role_seats(breakdown)
     breakdown.seats.group_by(&:role_code).transform_values { |seats| seats.map(&:number) }
   end

@@ -6,24 +6,16 @@
 <div class="px-4 py-3 text-sm">
   <%= form_with model: state.phase, url: judge_breakdown_phase_path(@breakdown, state.phase), method: :patch,
         scope: :breakdown_phase,
-        data: { controller: "autosave-form", action: "change->autosave-form#submit" } do |form| %>
+        data: { controller: "autosave-form", action: "change->autosave-form#submit" } do %>
     <div class="flex flex-wrap items-end gap-3">
       <label class="text-xs text-gray-600">
         <%= BreakdownPhase.human_attribute_name(:night_outcome) %>
-        <%= form.select :night_outcome,
-              BreakdownPhase.night_outcomes.keys.map { |key| [ t("game_breakdowns.night_outcomes.#{key}"), key ] },
-              { include_blank: t("game_breakdowns.editor.not_recorded") },
+        <%= select_tag "breakdown_phase[outcome]",
+              options_for_select(breakdown_night_outcome_options(alive, seat_names),
+                                 breakdown_night_outcome_value(state.phase)),
+              include_blank: t("game_breakdowns.editor.not_recorded"),
               class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
       </label>
-
-      <% if state.phase.kill? %>
-        <label class="text-xs text-gray-600">
-          <%= BreakdownPhase.human_attribute_name(:killed_seat) %>
-          <%= form.select :killed_seat, alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat ] },
-                { include_blank: t("game_breakdowns.editor.not_recorded") },
-                class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
-        </label>
-      <% end %>
     </div>
 
     <% if @breakdown.open? %>
