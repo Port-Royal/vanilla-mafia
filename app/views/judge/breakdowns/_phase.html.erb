@@ -9,21 +9,22 @@
 
     <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(state.phase) %>
 
-    <div class="px-4 py-3 text-sm">
-      <% if state.phase.night? %>
+    <% if state.phase.night? %>
+      <div class="px-4 py-3 text-sm">
         <p class="text-gray-500"><%= t("game_breakdowns.editor.night_placeholder") %></p>
-      <% elsif state.phase.speeches.any? %>
-        <ol class="space-y-1">
-          <% state.phase.speeches.each do |speech| %>
-            <li class="flex items-baseline gap-2">
-              <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
-              <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
-            </li>
-          <% end %>
-        </ol>
-      <% else %>
-        <p class="text-gray-500"><%= t("game_breakdowns.editor.day_placeholder") %></p>
-      <% end %>
-    </div>
+      </div>
+    <% else %>
+      <div class="divide-y">
+        <% state.phase.speeches.reject(&:justification?).each do |speech| %>
+          <%= render "judge/breakdowns/speech", speech: speech, state: state, seat_names: seat_names %>
+        <% end %>
+
+        <% state.vote_rounds.each do |result| %>
+          <%= render "judge/breakdowns/vote_round", result: result, state: state, seat_names: seat_names %>
+        <% end %>
+
+        <%= render "judge/breakdowns/speech_form", state: state, seat_names: seat_names %>
+      </div>
+    <% end %>
   </div>
 <% end %>

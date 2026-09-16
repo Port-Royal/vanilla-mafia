@@ -1,0 +1,15 @@
+<div id="<%= dom_id(speech) %>" class="px-4 py-3">
+  <div class="flex flex-wrap items-baseline gap-2">
+    <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
+    <span class="text-sm text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
+    <span class="grow"></span>
+    <%= button_to t("game_breakdowns.editor.delete_speech"), judge_breakdown_speech_path(@breakdown, speech),
+          method: :delete,
+          form: { data: { turbo_confirm: t("game_breakdowns.editor.delete_speech_confirm") } },
+          class: "text-xs text-maroon hover:underline" %>
+  </div>
+
+  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(speech) %>
+
+  <%= render "judge/breakdowns/moves", moves: speech.moves, context: speech, state: state, seat_names: seat_names %>
+</div>

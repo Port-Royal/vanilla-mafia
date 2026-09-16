@@ -16,6 +16,31 @@ class Judge::BreakdownBaseController < ApplicationController
     edit_judge_breakdown_path(@breakdown)
   end
 
+  def set_breakdown
+    @breakdown = GameBreakdown.find(params[:breakdown_id])
+  end
+
+  # A day edit can make the timeline expect new blocks, so they are materialised before re-rendering
+  # the edited phase and every phase after it.
+  def respond_with_day(phase)
+    SyncBreakdownStepsService.call(breakdown: @breakdown)
+    @from_position = phase.position
+    respond_with_editor
+  end
+
+  # Positions only ever grow, so a deletion leaves a gap rather than renumbering the blocks around it.
+  # An unsaved record already attached to the collection has no position yet and must not count.
+  def next_position(records)
+    positions = records.filter_map(&:position)
+    positions.empty? ? 0 : positions.max + 1
+  end
+
+  def render_editor_error(message)
+    load_editor_data
+    flash.now[:error] = message
+    render "judge/breakdowns/edit", status: :unprocessable_content
+  end
+
   def load_editor_data
     @timeline = GameBreakdown::Timeline.new(@breakdown)
     @roles = Role.all

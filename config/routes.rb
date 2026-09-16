@@ -10,8 +10,13 @@ Rails.application.routes.draw do
       end
 
       resources :breakdowns, only: [ :index, :new, :create, :edit, :update ] do
-        resources :seats, only: [ :update ], module: :breakdowns
-        resources :phases, only: [ :create, :destroy ], module: :breakdowns
+        scope module: :breakdowns do
+          resources :seats, only: [ :update ]
+          resources :phases, only: [ :create, :destroy ]
+          resources :speeches, only: [ :create, :destroy ]
+          resources :vote_rounds, only: [ :update, :destroy ]
+          resources :moves, only: [ :create, :update, :destroy ]
+        end
       end
     end
   end

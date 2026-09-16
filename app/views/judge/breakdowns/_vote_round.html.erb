@@ -1,0 +1,62 @@
+<% round = result.round %>
+<div id="<%= dom_id(round) %>" class="px-4 py-3 bg-gray-50">
+  <div class="flex flex-wrap items-baseline gap-2">
+    <span class="font-medium">
+      <%= t("game_breakdowns.vote_round_kinds.#{round.kind}", number: round.number) %>
+    </span>
+    <span class="text-sm text-gray-500">
+      <%= t("game_breakdowns.editor.candidates", seats: result.candidates.join(", ").presence || "—") %>
+    </span>
+    <span class="grow"></span>
+    <%= button_to t("game_breakdowns.editor.reset_round"), judge_breakdown_vote_round_path(@breakdown, round),
+          method: :delete,
+          form: { data: { turbo_confirm: t("game_breakdowns.editor.reset_round_confirm") } },
+          class: "text-xs text-maroon hover:underline" %>
+  </div>
+
+  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(round) %>
+
+  <% round.justification_speeches.each do |speech| %>
+    <div class="mt-2 border-l-2 border-gray-300 pl-3">
+      <%= render "judge/breakdowns/speech", speech: speech, state: state, seat_names: seat_names %>
+    </div>
+  <% end %>
+
+  <div id="<%= dom_id(round) %>_summary" class="mt-2 text-sm">
+    <p class="font-medium"><%= t("game_breakdowns.vote_outcomes.#{result.outcome}") %></p>
+    <ul class="text-gray-600">
+      <% result.tally.each do |key, voters| %>
+        <li><%= breakdown_tally_label(round, key, seat_names) %>: <%= voters.size %> <span class="text-gray-400">(<%= voters.join(", ").presence || "—" %>)</span></li>
+      <% end %>
+    </ul>
+  </div>
+
+  <%= form_with url: judge_breakdown_vote_round_path(@breakdown, round), method: :patch,
+        data: { controller: "autosave-form", action: "change->autosave-form#submit" } do %>
+    <div class="mt-2 grid gap-1 sm:grid-cols-2">
+      <% state.alive_at_start.each do |voter| %>
+        <label class="flex items-center gap-2 text-sm">
+          <span class="w-28 shrink-0"><%= breakdown_seat_label(seat_names, voter) %></span>
+          <% if round.lift? %>
+            <%= select_tag "votes[#{voter}][for_lift]",
+                  options_for_select(breakdown_lift_options, breakdown_lift_value(result, voter)),
+                  include_blank: t("game_breakdowns.editor.no_vote"),
+                  class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          <% else %>
+            <%= select_tag "votes[#{voter}][candidate_seat]",
+                  options_for_select(result.candidates, breakdown_vote_value(result, voter)),
+                  include_blank: t("game_breakdowns.editor.no_vote"),
+                  class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          <% end %>
+        </label>
+      <% end %>
+    </div>
+    <noscript>
+      <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-xs">
+        <%= t("game_breakdowns.editor.save_votes") %>
+      </button>
+    </noscript>
+  <% end %>
+
+  <%= render "judge/breakdowns/moves", moves: round.moves, context: round, state: state, seat_names: seat_names %>
+</div>

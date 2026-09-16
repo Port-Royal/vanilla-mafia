@@ -100,4 +100,17 @@ RSpec.describe BreakdownSpeech, type: :model do
       end
     end
   end
+  describe "#move_actor_seat" do
+    it "is the speaker" do
+      expect(build(:breakdown_speech, speaker_seat: 7).move_actor_seat).to eq(7)
+    end
+  end
+
+  describe "#move_context_param" do
+    let(:speech) { create(:breakdown_speech) }
+
+    it "addresses the speech" do
+      expect(speech.move_context_param).to eq(speech_id: speech.id)
+    end
+  end
 end

@@ -16,6 +16,15 @@ class BreakdownVoteRound < ApplicationRecord
                      uniqueness: { scope: :breakdown_phase_id }
   validate :phase_is_day, if: :breakdown_phase
 
+  # A move made during a vote round has no implied actor: the editor picks one.
+  def move_actor_seat
+    nil
+  end
+
+  def move_context_param
+    { vote_round_id: id }
+  end
+
   private
 
   def phase_is_day

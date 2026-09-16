@@ -54,4 +54,17 @@ RSpec.describe BreakdownVoteRound, type: :model do
       end
     end
   end
+  describe "#move_actor_seat" do
+    it "is blank" do
+      expect(build(:breakdown_vote_round).move_actor_seat).to be_nil
+    end
+  end
+
+  describe "#move_context_param" do
+    let(:round) { create(:breakdown_vote_round) }
+
+    it "addresses the round" do
+      expect(round.move_context_param).to eq(vote_round_id: round.id)
+    end
+  end
 end

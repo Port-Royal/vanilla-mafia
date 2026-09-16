@@ -17,10 +17,6 @@ class Judge::Breakdowns::SeatsController < Judge::BreakdownBaseController
     render "judge/breakdowns/edit", status: :unprocessable_content
   end
 
-  def set_breakdown
-    @breakdown = GameBreakdown.find(params[:breakdown_id])
-  end
-
   def set_seat
     @seat = @breakdown.seats.find(params[:id])
   end

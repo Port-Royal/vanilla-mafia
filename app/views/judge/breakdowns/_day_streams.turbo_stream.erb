@@ -1,0 +1,10 @@
+<% seat_names = breakdown_seat_names(@breakdown) %>
+<% @timeline.phases.each do |state| %>
+  <% next if state.phase.position < @from_position %>
+  <%= turbo_stream.replace dom_id(state.phase) do %>
+    <%= render "judge/breakdowns/phase", state: state, seat_names: seat_names %>
+  <% end %>
+<% end %>
+<%= turbo_stream.replace "breakdown_footer" do %>
+  <%= render "judge/breakdowns/footer" %>
+<% end %>
