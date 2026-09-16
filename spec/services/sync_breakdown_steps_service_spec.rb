@@ -83,6 +83,44 @@ RSpec.describe SyncBreakdownStepsService do
     end
   end
 
+  context "when an earlier round was deleted and the numbers have a gap" do
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+      vote(zero_round, "main", [ 1, 2, 3, 4, 5 ] => 4, [ 6, 7, 8, 9, 10 ] => 5)
+      create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "revote", number: 7).destroy!
+      zero_round.vote_rounds.reload
+    end
+
+    it "numbers the new round after the highest existing one" do
+      sync
+      expect(zero_round.vote_rounds.reload.map(&:number)).to eq([ 1, 2 ])
+    end
+  end
+
+  # Deleting a middle round leaves a gap, so the next number must follow the highest one, not the count.
+  context "when a middle round was deleted and the last one ties again" do
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+      vote(zero_round, "main", [ 1, 2, 3, 4, 5 ] => 4, [ 6, 7, 8, 9, 10 ] => 5)
+      revote = create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "revote", number: 3)
+      [ 1, 2, 3, 4, 5 ].each { |seat| create(:breakdown_vote, breakdown_vote_round: revote, voter_seat: seat, candidate_seat: 4) }
+      [ 6, 7, 8, 9, 10 ].each { |seat| create(:breakdown_vote, breakdown_vote_round: revote, voter_seat: seat, candidate_seat: 5) }
+      zero_round.vote_rounds.reload
+    end
+
+    it "creates the lift round after the highest number" do
+      sync
+      expect(zero_round.vote_rounds.reload.map(&:number)).to eq([ 1, 3, 4 ])
+    end
+
+    it "creates the lift round" do
+      sync
+      expect(zero_round.vote_rounds.reload.map(&:kind)).to eq([ "main", "revote", "lift" ])
+    end
+  end
+
   context "when a revote ties among all of its candidates" do
     before do
       nominate(zero_round, 1, 4)

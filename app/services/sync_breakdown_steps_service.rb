@@ -30,8 +30,10 @@ class SyncBreakdownStepsService
     end
   end
 
+  # Numbers follow the highest existing one: deleting a middle round leaves a gap the count would collide with.
   def create_round(phase, kind)
-    phase.vote_rounds.create!(kind: kind, number: phase.vote_rounds.size + 1)
+    numbers = phase.vote_rounds.map(&:number)
+    phase.vote_rounds.create!(kind: kind, number: numbers.max.to_i + 1)
   end
 
   def create_justifications(phase, seats, round)

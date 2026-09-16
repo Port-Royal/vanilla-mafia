@@ -28,7 +28,8 @@ class Judge::BreakdownBaseController < ApplicationController
     respond_with_editor
   end
 
-  # Positions are zero-based and gap-free; an unsaved record already attached to the collection has none yet.
+  # Positions only ever grow, so a deletion leaves a gap rather than renumbering the blocks around it.
+  # An unsaved record already attached to the collection has no position yet and must not count.
   def next_position(records)
     positions = records.filter_map(&:position)
     positions.empty? ? 0 : positions.max + 1

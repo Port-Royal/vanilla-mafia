@@ -318,6 +318,40 @@ RSpec.describe "Judge::Breakdowns day editing" do
       delete judge_breakdown_vote_round_path(breakdown, round)
       expect(BreakdownVote.count).to eq(0)
     end
+
+    it "deletes its justification speeches with it" do
+      revote = create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "revote", number: 2)
+      create(:breakdown_speech, breakdown_phase: zero_round, speaker_seat: 4, kind: "justification", breakdown_vote_round: revote)
+
+      delete judge_breakdown_vote_round_path(breakdown, revote)
+
+      expect(zero_round.speeches.reload.select(&:justification?)).to be_empty
+    end
+
+    context "while the nominations still call for a vote" do
+      before do
+        nominate(zero_round, 1, 4)
+        nominate(zero_round, 2, 5)
+      end
+
+      # The timeline still expects a main round, so the reset leaves an empty one rather than no voting at all.
+      it "puts an empty round in its place" do
+        delete judge_breakdown_vote_round_path(breakdown, round)
+        expect(zero_round.vote_rounds.reload.map(&:kind)).to eq([ "main" ])
+      end
+
+      it "drops the recorded votes" do
+        delete judge_breakdown_vote_round_path(breakdown, round)
+        expect(BreakdownVote.count).to eq(0)
+      end
+    end
+
+    context "once the nominations are gone" do
+      it "leaves the phase without a vote round" do
+        delete judge_breakdown_vote_round_path(breakdown, round)
+        expect(zero_round.vote_rounds.reload).to be_empty
+      end
+    end
   end
 
   describe "turbo stream scope" do

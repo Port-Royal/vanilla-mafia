@@ -8,9 +8,9 @@
       <%= t("game_breakdowns.editor.candidates", seats: result.candidates.join(", ").presence || "—") %>
     </span>
     <span class="grow"></span>
-    <%= button_to t("game_breakdowns.editor.delete_round"), judge_breakdown_vote_round_path(@breakdown, round),
+    <%= button_to t("game_breakdowns.editor.reset_round"), judge_breakdown_vote_round_path(@breakdown, round),
           method: :delete,
-          form: { data: { turbo_confirm: t("game_breakdowns.editor.delete_round_confirm") } },
+          form: { data: { turbo_confirm: t("game_breakdowns.editor.reset_round_confirm") } },
           class: "text-xs text-maroon hover:underline" %>
   </div>
 
