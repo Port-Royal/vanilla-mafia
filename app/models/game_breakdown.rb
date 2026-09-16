@@ -19,6 +19,8 @@ class GameBreakdown < ApplicationRecord
   belongs_to :game, optional: true
   has_many :seats, -> { order(:number) }, class_name: "BreakdownSeat", inverse_of: :game_breakdown, dependent: :destroy
   has_many :phases, -> { order(:position) }, class_name: "BreakdownPhase", inverse_of: :game_breakdown, dependent: :destroy
+  has_many :speeches, through: :phases
+  has_many :vote_rounds, through: :phases
 
   validates :title, presence: true
 

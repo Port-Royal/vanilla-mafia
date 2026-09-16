@@ -25,6 +25,18 @@ ru:
       breakdown_seat:
         name: "Игрок"
         role_code: "Роль"
+      breakdown_move:
+        kind: "Тип хода"
+        actor_seat: "Игрок"
+        target_seat: "Цель"
+        claimed_color: "Цвет"
+        night_number: "Ночь"
+        removal_reason: "Причина"
+        best_move_seats: "Лучший ход"
+        text: "Комментарий"
+      breakdown_speech:
+        speaker_seat: "Игрок"
+        kind: "Тип речи"
       player:
         name: "Имя"
         comment: "Комментарий"
@@ -466,6 +478,37 @@ ru:
       body: "Профиль игрока %{player_name} был оспорен. Администратор рассмотрит запрос."
       footer: "Если у вас есть вопросы, свяжитесь с администрацией."
   game_breakdowns:
+    move_kinds:
+      sheriff_reveal_table: "Раскрытие шерифом на стол"
+      sheriff_reveal_to_player: "Раскрытие шерифом игроку"
+      check_claim: "Заявленная проверка"
+      nomination: "Выставление"
+      check_request: "Запрос проверки"
+      split_break: "Разбитие раздачи"
+      protection: "Крышевание"
+      best_move: "Лучший ход"
+      removal: "Удаление"
+      other: "Прочее"
+    claimed_colors:
+      red: "красный"
+      black: "чёрный"
+    removal_reasons:
+      fouls: "4 фола"
+      technical_fouls: "2 технических фола"
+      disqualification: "дисквалификация"
+    vote_round_kinds:
+      main: "Голосование %{number}"
+      revote: "Переголосование %{number}"
+      lift: "Подъём %{number}"
+    vote_outcomes:
+      pending: "Голоса не расставлены"
+      eliminated: "Игрок покидает игру"
+      tie: "Равенство голосов"
+      lift_passed: "Подъём состоялся"
+      lift_failed: "Подъём не состоялся"
+    lift_choices:
+      for: "За"
+      against: "Против"
     index:
       title: "Разборы игр"
       new_breakdown: "Новый разбор"
@@ -496,6 +539,21 @@ ru:
       not_last_phase: "Удалить можно только последнюю фазу."
       result: "Результат"
       result_computed: "рассчитан автоматически"
+      add_move: "+ ход"
+      edit_move: "изменить"
+      delete_move: "удалить"
+      save_move: "Сохранить ход"
+      move_actor: "игрок %{seat}"
+      night_number: "ночь %{number}"
+      add_speech: "+ речь"
+      save_speech: "Добавить речь"
+      delete_speech: "удалить речь"
+      delete_speech_confirm: "Удалить речь вместе со всеми её ходами?"
+      delete_round: "удалить голосование"
+      delete_round_confirm: "Удалить голосование вместе со всеми голосами и ходами?"
+      candidates: "Кандидаты: %{seats}"
+      no_vote: "не голосовал"
+      save_votes: "Сохранить голоса"
     results:
       city: "Победа мирных"
       mafia: "Победа мафии"

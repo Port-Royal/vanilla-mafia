@@ -49,6 +49,18 @@ en:
       breakdown_seat:
         name: "Player"
         role_code: "Role"
+      breakdown_move:
+        kind: "Move kind"
+        actor_seat: "Player"
+        target_seat: "Target"
+        claimed_color: "Colour"
+        night_number: "Night"
+        removal_reason: "Reason"
+        best_move_seats: "Best move"
+        text: "Comment"
+      breakdown_speech:
+        speaker_seat: "Player"
+        kind: "Speech kind"
       user:
         role: "Role"
         roles:
@@ -483,6 +495,37 @@ en:
       body: "The profile of player %{player_name} has been disputed. An administrator will review the request."
       footer: "If you have any questions, please contact the administration."
   game_breakdowns:
+    move_kinds:
+      sheriff_reveal_table: "Sheriff reveal to the table"
+      sheriff_reveal_to_player: "Sheriff reveal to a player"
+      check_claim: "Claimed check"
+      nomination: "Nomination"
+      check_request: "Check request"
+      split_break: "Split break"
+      protection: "Protection"
+      best_move: "Best move"
+      removal: "Removal"
+      other: "Other"
+    claimed_colors:
+      red: "red"
+      black: "black"
+    removal_reasons:
+      fouls: "4 fouls"
+      technical_fouls: "2 technical fouls"
+      disqualification: "disqualification"
+    vote_round_kinds:
+      main: "Voting %{number}"
+      revote: "Revote %{number}"
+      lift: "Lift %{number}"
+    vote_outcomes:
+      pending: "No votes recorded"
+      eliminated: "Player leaves the game"
+      tie: "Tie"
+      lift_passed: "Lift passed"
+      lift_failed: "Lift failed"
+    lift_choices:
+      for: "For"
+      against: "Against"
     index:
       title: "Game breakdowns"
       new_breakdown: "New breakdown"
@@ -513,6 +556,21 @@ en:
       not_last_phase: "Only the last phase can be deleted."
       result: "Result"
       result_computed: "computed automatically"
+      add_move: "+ move"
+      edit_move: "edit"
+      delete_move: "delete"
+      save_move: "Save move"
+      move_actor: "player %{seat}"
+      night_number: "night %{number}"
+      add_speech: "+ speech"
+      save_speech: "Add speech"
+      delete_speech: "delete speech"
+      delete_speech_confirm: "Delete the speech with all of its moves?"
+      delete_round: "delete voting"
+      delete_round_confirm: "Delete the voting round with all of its votes and moves?"
+      candidates: "Candidates: %{seats}"
+      no_vote: "did not vote"
+      save_votes: "Save votes"
     results:
       city: "City win"
       mafia: "Mafia win"

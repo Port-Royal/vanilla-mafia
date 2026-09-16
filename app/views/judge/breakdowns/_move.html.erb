@@ -1,0 +1,19 @@
+<li id="<%= dom_id(move) %>" class="text-sm">
+  <div class="flex flex-wrap items-baseline gap-2">
+    <span>· <%= breakdown_move_summary(move, seat_names) %></span>
+    <span class="text-xs text-gray-500"><%= t("game_breakdowns.editor.move_actor", seat: move.actor_seat) %></span>
+    <span class="grow"></span>
+    <%= button_to t("game_breakdowns.editor.delete_move"), judge_breakdown_move_path(@breakdown, move),
+          method: :delete, class: "text-xs text-maroon hover:underline" %>
+  </div>
+
+  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(move) %>
+
+  <details>
+    <summary class="text-xs text-gray-500 cursor-pointer"><%= t("game_breakdowns.editor.edit_move") %></summary>
+    <%= form_with model: move, url: judge_breakdown_move_path(@breakdown, move), method: :patch, scope: :breakdown_move do |form| %>
+      <%= render "judge/breakdowns/move_fields", form: form, state: state, seat_names: seat_names,
+            submit_label: t("game_breakdowns.editor.save_move") %>
+    <% end %>
+  </details>
+</li>

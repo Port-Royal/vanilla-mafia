@@ -18,6 +18,15 @@ class BreakdownSpeech < ApplicationRecord
   validate :phase_is_day, if: :breakdown_phase
   validate :vote_round_in_same_phase, if: -> { breakdown_phase && breakdown_vote_round }
 
+  # A move made during a speech is the speaker's own unless the editor says otherwise.
+  def move_actor_seat
+    speaker_seat
+  end
+
+  def move_context_param
+    { speech_id: id }
+  end
+
   private
 
   def phase_is_day

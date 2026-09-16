@@ -1,0 +1,23 @@
+<details class="px-4 py-3">
+  <summary class="text-xs text-maroon cursor-pointer"><%= t("game_breakdowns.editor.add_speech") %></summary>
+  <%= form_with model: BreakdownSpeech.new(speaker_seat: state.speech_order.first),
+        url: judge_breakdown_speeches_path(@breakdown, breakdown_phase_id: state.phase.id),
+        method: :post, scope: :breakdown_speech do |form| %>
+    <div class="mt-2 flex flex-wrap items-end gap-2">
+      <label class="text-xs text-gray-600">
+        <%= BreakdownSpeech.human_attribute_name(:speaker_seat) %>
+        <%= form.select :speaker_seat, GameBreakdown::SEAT_NUMBERS.to_a, {},
+              class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+      </label>
+      <label class="text-xs text-gray-600">
+        <%= BreakdownSpeech.human_attribute_name(:kind) %>
+        <%= form.select :kind,
+              %w[regular farewell].map { |kind| [ t("game_breakdowns.speech_kinds.#{kind}"), kind ] }, {},
+              class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+      </label>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-xs">
+        <%= t("game_breakdowns.editor.save_speech") %>
+      </button>
+    </div>
+  <% end %>
+</details>

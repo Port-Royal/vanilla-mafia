@@ -1,0 +1,63 @@
+<div class="mt-2 grid gap-2 sm:grid-cols-2" data-controller="move-form"
+     data-move-form-required-value="<%= BreakdownMove::REQUIRED_FIELDS.to_json %>">
+  <label class="text-xs text-gray-600">
+    <%= BreakdownMove.human_attribute_name(:kind) %>
+    <%= form.select :kind,
+          BreakdownMove.kinds.keys.map { |kind| [ t("game_breakdowns.move_kinds.#{kind}"), kind ] },
+          {}, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm",
+          data: { move_form_target: "kind", action: "change->move-form#kindChanged" } %>
+  </label>
+
+  <label class="text-xs text-gray-600">
+    <%= BreakdownMove.human_attribute_name(:actor_seat) %>
+    <%= form.select :actor_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
+          class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="target_seat">
+    <%= BreakdownMove.human_attribute_name(:target_seat) %>
+    <%= form.select :target_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
+          class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="claimed_color">
+    <%= BreakdownMove.human_attribute_name(:claimed_color) %>
+    <%= form.select :claimed_color,
+          BreakdownMove.claimed_colors.keys.map { |color| [ t("game_breakdowns.claimed_colors.#{color}"), color ] },
+          { include_blank: true }, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="night_number">
+    <%= BreakdownMove.human_attribute_name(:night_number) %>
+    <%= form.number_field :night_number, min: 1, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="removal_reason">
+    <%= BreakdownMove.human_attribute_name(:removal_reason) %>
+    <%= form.select :removal_reason,
+          BreakdownMove.removal_reasons.keys.map { |reason| [ t("game_breakdowns.removal_reasons.#{reason}"), reason ] },
+          { include_blank: true }, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <div class="text-xs text-gray-600" data-move-form-target="field" data-field="best_move_seats">
+    <%= BreakdownMove.human_attribute_name(:best_move_seats) %>
+    <div class="flex gap-1">
+      <% BreakdownMove::BEST_MOVE_SEATS_COUNT.each do |index| %>
+        <%= select_tag "breakdown_move[best_move_seats][]",
+              options_for_select(GameBreakdown::SEAT_NUMBERS.to_a, form.object.best_move_seats.to_a[index - 1]),
+              include_blank: true, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+      <% end %>
+    </div>
+  </div>
+
+  <label class="text-xs text-gray-600 sm:col-span-2" data-move-form-target="field" data-field="text">
+    <%= BreakdownMove.human_attribute_name(:text) %>
+    <%= form.text_field :text, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+  </label>
+
+  <div class="sm:col-span-2">
+    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-xs">
+      <%= submit_label %>
+    </button>
+  </div>
+</div>

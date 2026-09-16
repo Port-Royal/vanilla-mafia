@@ -20,14 +20,4 @@ class Judge::Breakdowns::PhasesController < Judge::BreakdownBaseController
   def deletable?(phase)
     @breakdown.phases.count > 1 && @breakdown.phases.maximum(:position) == phase.position
   end
-
-  def render_editor_error(message)
-    load_editor_data
-    flash.now[:error] = message
-    render "judge/breakdowns/edit", status: :unprocessable_content
-  end
-
-  def set_breakdown
-    @breakdown = GameBreakdown.find(params[:breakdown_id])
-  end
 end
