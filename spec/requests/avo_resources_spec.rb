@@ -18,6 +18,7 @@ RSpec.describe "Avo admin resources" do
   let_it_be(:player_claim) { create(:player_claim, user: non_admin, player: player) }
   let_it_be(:claimed_player) { create(:player, user: create(:user)) }
   let_it_be(:dispute_claim) { create(:player_claim, :dispute, user: admin, player: claimed_player) }
+  let_it_be(:game_breakdown) { create(:game_breakdown, author: admin) }
 
   shared_examples "admin-only endpoint" do
     context "when not signed in" do
@@ -59,7 +60,8 @@ RSpec.describe "Avo admin resources" do
     "player_claims" => :player_claim,
     "episodes" => :episode,
     "playlists" => :playlist,
-    "playlist_episodes" => :playlist_episode
+    "playlist_episodes" => :playlist_episode,
+    "game_breakdowns" => :game_breakdown
   }.each do |resource_name, record_method|
     describe resource_name do
       describe "GET /avo/resources/#{resource_name}" do
