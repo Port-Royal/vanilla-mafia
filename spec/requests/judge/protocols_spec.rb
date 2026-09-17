@@ -361,6 +361,11 @@ RSpec.describe "Judge::Protocols" do
         expect(response.body).to include(I18n.t("game_protocols.edit.title"))
       end
 
+      # The suggestion list is rendered once per page and cloned by player_select_controller while a menu is open.
+      it "renders the player options template once" do
+        expect(response.body.scan(%(id="player-options")).size).to eq(1)
+      end
+
       it "pre-fills the player name" do
         expect(response.body).to include("Тестовый")
       end

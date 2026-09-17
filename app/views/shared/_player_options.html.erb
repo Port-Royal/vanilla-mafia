@@ -1,0 +1,10 @@
+<%# Cloned into whichever suggestion menu is open; see player_select_controller.js. %>
+<template id="player-options">
+  <% players.each do |player| %>
+    <button type="button" class="w-full px-2 py-1 text-sm text-left hover:bg-gray-100 whitespace-nowrap"
+            data-player-select-target="option" data-player-name="<%= player.name %>"
+            data-action="click->player-select#select mouseenter->player-select#hover mousedown->player-select#cancelClose">
+      <%= player.name %>
+    </button>
+  <% end %>
+</template>
