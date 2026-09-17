@@ -2,12 +2,13 @@
 #
 # Application-wide Content-Security-Policy.
 #
-# Currently shipping in REPORT-ONLY mode (sets Content-Security-Policy-Report-Only).
-# Browsers will log violations to the devtools console and POST JSON reports to
-# `report-uri` (CspViolationReportsController#create) without blocking anything.
-# Once we've been collecting clean reports from production for ~1–2 weeks, the
-# enforcement follow-up (vm-1rb) flips `content_security_policy_report_only` to
-# false.
+# ENFORCED (sets Content-Security-Policy). Browsers block violations rather than
+# only logging them, and still POST JSON reports to `report-uri`
+# (CspViolationReportsController#create), which forwards them to Sentry.
+#
+# The policy shipped report-only first and was promoted once production had been
+# reporting cleanly (vm-1rb / #819). Loosen a directive rather than leave a real
+# violation blocked — a blocked resource is now a broken page, not a log line.
 
 Rails.application.configure do
   config.content_security_policy do |policy|
@@ -27,5 +28,5 @@ Rails.application.configure do
   config.content_security_policy_nonce_generator = ->(_request) { SecureRandom.base64(16) }
   config.content_security_policy_nonce_directives = %w[script-src]
 
-  config.content_security_policy_report_only = true
+  config.content_security_policy_report_only = false
 end
