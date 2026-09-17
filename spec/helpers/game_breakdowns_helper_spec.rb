@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe GameBreakdownsHelper do
+  include GameBreakdownHelpers
+
   describe "#breakdown_result_label" do
     it "translates a known result" do
       expect(helper.breakdown_result_label("city")).to eq(I18n.t("game_breakdowns.results.city"))
@@ -145,9 +147,7 @@ RSpec.describe GameBreakdownsHelper do
     end
   end
 
-  describe "vote pre-filling" do
-    include GameBreakdownHelpers
-
+  describe "#breakdown_vote_value" do
     let(:breakdown) { create(:game_breakdown) }
     let(:zero_round) { breakdown.phases.find_by(position: 0) }
     let(:result) { GameBreakdown::Timeline.new(breakdown).state_for(zero_round).vote_rounds.first }
@@ -160,33 +160,44 @@ RSpec.describe GameBreakdownsHelper do
 
     let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "main", number: 1) }
 
-    describe "#breakdown_vote_value" do
-      before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 1, candidate_seat: 4) }
+    before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 1, candidate_seat: 4) }
 
-      it "returns the stored choice" do
-        expect(helper.breakdown_vote_value(result, 1)).to eq(4)
-      end
-
-      # 4.4.9: a player who did not vote is counted for the last nominee.
-      it "falls back to the last nominee" do
-        expect(helper.breakdown_vote_value(result, 3)).to eq(5)
-      end
+    it "returns the stored choice" do
+      expect(helper.breakdown_vote_value(result, 1)).to eq(4)
     end
 
-    describe "#breakdown_lift_value" do
-      let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "lift", number: 1) }
-
-      before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: false) }
-
-      it "returns the stored choice as a string" do
-        expect(helper.breakdown_lift_value(result, 2)).to eq("false")
-      end
-
-      it "is blank for a voter who did not vote" do
-        expect(helper.breakdown_lift_value(result, 3)).to be_nil
-      end
+    # 4.4.9: a player who did not vote is counted for the last nominee.
+    it "falls back to the last nominee" do
+      expect(helper.breakdown_vote_value(result, 3)).to eq(5)
     end
   end
+
+  describe "#breakdown_lift_value" do
+    let(:breakdown) { create(:game_breakdown) }
+    let(:zero_round) { breakdown.phases.find_by(position: 0) }
+    let(:result) { GameBreakdown::Timeline.new(breakdown).state_for(zero_round).vote_rounds.first }
+
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+      round
+    end
+
+    let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "main", number: 1) }
+
+    let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "lift", number: 1) }
+
+    before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: false) }
+
+    it "returns the stored choice as a string" do
+      expect(helper.breakdown_lift_value(result, 2)).to eq("false")
+    end
+
+    it "is blank for a voter who did not vote" do
+      expect(helper.breakdown_lift_value(result, 3)).to be_nil
+    end
+  end
+
 
   describe "#breakdown_lift_options" do
     it "offers for and against" do
@@ -195,7 +206,7 @@ RSpec.describe GameBreakdownsHelper do
       )
     end
   end
-  describe "night helpers" do
+  describe "#breakdown_role_seats" do
     let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
     let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
 
@@ -208,283 +219,378 @@ RSpec.describe GameBreakdownsHelper do
       breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
     end
 
-    describe "#breakdown_role_seats" do
-      it "groups the seat numbers by role" do
-        expect(helper.breakdown_role_seats(breakdown)).to include("mafia" => [ 2, 3 ], "don" => [ 4 ], "sheriff" => [ 5 ])
-      end
-
-      it "groups the unassigned seats under nil" do
-        breakdown.seats.where(number: 6).update_all(role_code: nil)
-        expect(helper.breakdown_role_seats(breakdown)[nil]).to eq([ 6 ])
-      end
+    it "groups the seat numbers by role" do
+      expect(helper.breakdown_role_seats(breakdown)).to include("mafia" => [ 2, 3 ], "don" => [ 4 ], "sheriff" => [ 5 ])
     end
 
-    describe "#breakdown_shooter_seats" do
-      let(:role_seats) { helper.breakdown_role_seats(breakdown) }
-
-      it "lists the mafia and the don in seat order" do
-        expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a)).to eq([ 2, 3, 4 ])
-      end
-
-      it "leaves out a shooter who is no longer in the game" do
-        expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a - [ 3 ])).to eq([ 2, 4 ])
-      end
-
-      it "leaves out the red seats" do
-        expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a)).not_to include(5)
-      end
-
-      it "is empty when no black roles are set" do
-        breakdown.seats.update_all(role_code: "peace")
-        expect(helper.breakdown_shooter_seats(helper.breakdown_role_seats(breakdown), (1..10).to_a)).to be_empty
-      end
-    end
-
-    describe "#breakdown_checker_seat" do
-      let(:role_seats) { helper.breakdown_role_seats(breakdown) }
-
-      it "finds the seat holding the role" do
-        expect(helper.breakdown_checker_seat(role_seats, "sheriff", (1..10).to_a)).to eq(5)
-      end
-
-      it "is blank once that seat has left the game" do
-        expect(helper.breakdown_checker_seat(role_seats, "sheriff", (1..10).to_a - [ 5 ])).to be_nil
-      end
-
-      it "is blank when the role is not assigned" do
-        breakdown.seats.where(number: 5).update_all(role_code: "peace")
-        expect(helper.breakdown_checker_seat(helper.breakdown_role_seats(breakdown), "sheriff", (1..10).to_a)).to be_nil
-      end
-    end
-
-    describe "#breakdown_check_result" do
-      it "tells the don that the target is the sheriff" do
-        expect(helper.breakdown_check_result("don_check", "sheriff")).to eq(I18n.t("game_breakdowns.check_results.sheriff"))
-      end
-
-      it "tells the don that the target is not the sheriff" do
-        expect(helper.breakdown_check_result("don_check", "mafia")).to eq(I18n.t("game_breakdowns.check_results.not_sheriff"))
-      end
-
-      it "tells the sheriff that a mafia target is black" do
-        expect(helper.breakdown_check_result("sheriff_check", "mafia")).to eq(I18n.t("game_breakdowns.check_results.black"))
-      end
-
-      it "tells the sheriff that the don is black" do
-        expect(helper.breakdown_check_result("sheriff_check", "don")).to eq(I18n.t("game_breakdowns.check_results.black"))
-      end
-
-      it "tells the sheriff that a peaceful target is red" do
-        expect(helper.breakdown_check_result("sheriff_check", "peace")).to eq(I18n.t("game_breakdowns.check_results.red"))
-      end
-
-      it "tells the sheriff that another sheriff claim is red" do
-        expect(helper.breakdown_check_result("sheriff_check", "sheriff")).to eq(I18n.t("game_breakdowns.check_results.red"))
-      end
-
-      it "derives nothing when the target has no role" do
-        expect(helper.breakdown_check_result("sheriff_check", nil)).to be_nil
-      end
-    end
-
-    describe "#breakdown_night_action" do
-      let!(:shot) { create(:breakdown_night_action, breakdown_phase: night, kind: "mafia_shot", actor_seat: 2, target_seat: 7) }
-      let!(:check) { create(:breakdown_night_action, breakdown_phase: night, kind: "don_check", actor_seat: nil, target_seat: 5) }
-
-      it "finds a shot by its shooter" do
-        expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", 2)).to eq(shot)
-      end
-
-      it "finds a check by its kind" do
-        expect(helper.breakdown_night_action(night.night_actions.to_a, "don_check", nil)).to eq(check)
-      end
-
-      it "does not confuse a shot with a check" do
-        expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", nil)).to be_nil
-      end
-
-      it "is blank for a shooter with nothing recorded" do
-        expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", 3)).to be_nil
-      end
-    end
-
-    describe "#breakdown_check_target" do
-      it "returns the checked seat" do
-        action = build(:breakdown_night_action, kind: "don_check", actor_seat: nil, target_seat: 5)
-        expect(helper.breakdown_check_target(action)).to eq(5)
-      end
-
-      it "is blank when nothing was recorded" do
-        expect(helper.breakdown_check_target(nil)).to be_nil
-      end
-    end
-
-    describe "#breakdown_shot_value" do
-      it "returns the target as the select value" do
-        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
-        expect(helper.breakdown_shot_value(action)).to eq("7")
-      end
-
-      it "marks a recorded miss as the did-not-shoot choice" do
-        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
-        expect(helper.breakdown_shot_value(action)).to eq(SaveBreakdownNightService::NO_SHOT)
-      end
-
-      it "is blank when nothing was recorded" do
-        expect(helper.breakdown_shot_value(nil)).to be_nil
-      end
+    it "groups the unassigned seats under nil" do
+      breakdown.seats.where(number: 6).update_all(role_code: nil)
+      expect(helper.breakdown_role_seats(breakdown)[nil]).to eq([ 6 ])
     end
   end
-  describe "read-only view helpers" do
+
+  describe "#breakdown_shooter_seats" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    let(:role_seats) { helper.breakdown_role_seats(breakdown) }
+
+    it "lists the mafia and the don in seat order" do
+      expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a)).to eq([ 2, 3, 4 ])
+    end
+
+    it "leaves out a shooter who is no longer in the game" do
+      expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a - [ 3 ])).to eq([ 2, 4 ])
+    end
+
+    it "leaves out the red seats" do
+      expect(helper.breakdown_shooter_seats(role_seats, (1..10).to_a)).not_to include(5)
+    end
+
+    it "is empty when no black roles are set" do
+      breakdown.seats.update_all(role_code: "peace")
+      expect(helper.breakdown_shooter_seats(helper.breakdown_role_seats(breakdown), (1..10).to_a)).to be_empty
+    end
+  end
+
+  describe "#breakdown_checker_seat" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    let(:role_seats) { helper.breakdown_role_seats(breakdown) }
+
+    it "finds the seat holding the role" do
+      expect(helper.breakdown_checker_seat(role_seats, "sheriff", (1..10).to_a)).to eq(5)
+    end
+
+    it "is blank once that seat has left the game" do
+      expect(helper.breakdown_checker_seat(role_seats, "sheriff", (1..10).to_a - [ 5 ])).to be_nil
+    end
+
+    it "is blank when the role is not assigned" do
+      breakdown.seats.where(number: 5).update_all(role_code: "peace")
+      expect(helper.breakdown_checker_seat(helper.breakdown_role_seats(breakdown), "sheriff", (1..10).to_a)).to be_nil
+    end
+  end
+
+  describe "#breakdown_check_result" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    it "tells the don that the target is the sheriff" do
+      expect(helper.breakdown_check_result("don_check", "sheriff")).to eq(I18n.t("game_breakdowns.check_results.sheriff"))
+    end
+
+    it "tells the don that the target is not the sheriff" do
+      expect(helper.breakdown_check_result("don_check", "mafia")).to eq(I18n.t("game_breakdowns.check_results.not_sheriff"))
+    end
+
+    it "tells the sheriff that a mafia target is black" do
+      expect(helper.breakdown_check_result("sheriff_check", "mafia")).to eq(I18n.t("game_breakdowns.check_results.black"))
+    end
+
+    it "tells the sheriff that the don is black" do
+      expect(helper.breakdown_check_result("sheriff_check", "don")).to eq(I18n.t("game_breakdowns.check_results.black"))
+    end
+
+    it "tells the sheriff that a peaceful target is red" do
+      expect(helper.breakdown_check_result("sheriff_check", "peace")).to eq(I18n.t("game_breakdowns.check_results.red"))
+    end
+
+    it "tells the sheriff that another sheriff claim is red" do
+      expect(helper.breakdown_check_result("sheriff_check", "sheriff")).to eq(I18n.t("game_breakdowns.check_results.red"))
+    end
+
+    it "derives nothing when the target has no role" do
+      expect(helper.breakdown_check_result("sheriff_check", nil)).to be_nil
+    end
+  end
+
+  describe "#breakdown_night_action" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    let!(:shot) { create(:breakdown_night_action, breakdown_phase: night, kind: "mafia_shot", actor_seat: 2, target_seat: 7) }
+    let!(:check) { create(:breakdown_night_action, breakdown_phase: night, kind: "don_check", actor_seat: nil, target_seat: 5) }
+
+    it "finds a shot by its shooter" do
+      expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", 2)).to eq(shot)
+    end
+
+    it "finds a check by its kind" do
+      expect(helper.breakdown_night_action(night.night_actions.to_a, "don_check", nil)).to eq(check)
+    end
+
+    it "does not confuse a shot with a check" do
+      expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", nil)).to be_nil
+    end
+
+    it "is blank for a shooter with nothing recorded" do
+      expect(helper.breakdown_night_action(night.night_actions.to_a, "mafia_shot", 3)).to be_nil
+    end
+  end
+
+  describe "#breakdown_check_target" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    it "returns the checked seat" do
+      action = build(:breakdown_night_action, kind: "don_check", actor_seat: nil, target_seat: 5)
+      expect(helper.breakdown_check_target(action)).to eq(5)
+    end
+
+    it "is blank when nothing was recorded" do
+      expect(helper.breakdown_check_target(nil)).to be_nil
+    end
+  end
+
+  describe "#breakdown_shot_value" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
+
+    before do
+      { "peace" => "Мирный", "mafia" => "Мафия", "don" => "Дон", "sheriff" => "Шериф" }
+        .each { |code, name| Role.find_or_create_by!(code: code) { |role| role.name = name } }
+      breakdown.seats.update_all(role_code: "peace")
+      breakdown.seats.where(number: [ 2, 3 ]).update_all(role_code: "mafia")
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+      breakdown.seats.where(number: 5).update_all(role_code: "sheriff")
+    end
+
+    it "returns the target as the select value" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
+      expect(helper.breakdown_shot_value(action)).to eq("7")
+    end
+
+    it "marks a recorded miss as the did-not-shoot choice" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
+      expect(helper.breakdown_shot_value(action)).to eq(SaveBreakdownNightService::NO_SHOT)
+    end
+
+    it "is blank when nothing was recorded" do
+      expect(helper.breakdown_shot_value(nil)).to be_nil
+    end
+  end
+
+  describe "#breakdown_view_metadata" do
     let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
 
-    describe "#breakdown_view_metadata" do
-      it "labels every row" do
-        expect(helper.breakdown_view_metadata(breakdown).map(&:first))
-          .to include(GameBreakdown.human_attribute_name(:played_on), GameBreakdown.human_attribute_name(:author))
-      end
-
-      it "carries the recorded values" do
-        expect(helper.breakdown_view_metadata(breakdown).to_h)
-          .to include(GameBreakdown.human_attribute_name(:source) => "Кубок",
-                      GameBreakdown.human_attribute_name(:judge_name) => "Иванов")
-      end
-
-      it "dashes out what was never filled in" do
-        blank = create(:game_breakdown)
-        expect(helper.breakdown_view_metadata(blank).to_h[GameBreakdown.human_attribute_name(:played_on)]).to eq("—")
-      end
-
-      it "names the roles mode in words" do
-        expect(helper.breakdown_view_metadata(breakdown).to_h[GameBreakdown.human_attribute_name(:roles_mode)])
-          .to eq(I18n.t("game_breakdowns.roles_modes.open"))
-      end
+    it "labels every row" do
+      expect(helper.breakdown_view_metadata(breakdown).map(&:first))
+        .to include(GameBreakdown.human_attribute_name(:played_on), GameBreakdown.human_attribute_name(:author))
     end
 
-    describe "#breakdown_video_link" do
-      it "links an http address" do
-        breakdown.update!(video_url: "http://example.com/v")
-        expect(helper.breakdown_video_link(breakdown)).to include(%(href="http://example.com/v"))
-      end
-
-      it "links an https address" do
-        breakdown.update!(video_url: "https://example.com/v")
-        expect(helper.breakdown_video_link(breakdown)).to include(%(href="https://example.com/v"))
-      end
-
-      it "opens it in a new tab without leaking the referrer" do
-        breakdown.update!(video_url: "https://example.com/v")
-        expect(helper.breakdown_video_link(breakdown)).to include('rel="noopener noreferrer"')
-      end
-
-      # The URL is free text a judge typed, so it must never become a scripted href.
-      it "refuses to link a javascript url" do
-        breakdown.update!(video_url: "javascript:alert(1)")
-        expect(helper.breakdown_video_link(breakdown)).not_to include("href")
-      end
-
-      it "returns the odd value as plain text" do
-        breakdown.update!(video_url: "javascript:alert(1)")
-        expect(helper.breakdown_video_link(breakdown)).to eq("javascript:alert(1)")
-      end
-
-      it "dashes out a missing url" do
-        expect(helper.breakdown_video_link(breakdown)).to eq("—")
-      end
+    it "carries the recorded values" do
+      expect(helper.breakdown_view_metadata(breakdown).to_h)
+        .to include(GameBreakdown.human_attribute_name(:source) => "Кубок",
+                    GameBreakdown.human_attribute_name(:judge_name) => "Иванов")
     end
 
-    describe "#breakdown_game_link" do
-      it "dashes out an unlinked breakdown" do
-        expect(helper.breakdown_game_link(breakdown)).to eq("—")
-      end
-
-      it "links the club game" do
-        game = create(:game)
-        breakdown.update!(game: game)
-
-        expect(helper.breakdown_game_link(breakdown)).to include(game_path(game))
-      end
+    it "dashes out what was never filled in" do
+      blank = create(:game_breakdown)
+      expect(helper.breakdown_view_metadata(blank).to_h[GameBreakdown.human_attribute_name(:played_on)]).to eq("—")
     end
 
-    describe "#breakdown_roles_by_seat" do
-      it "maps every seat to its role" do
-        Role.find_or_create_by!(code: "don") { |role| role.name = "Дон" }
-        breakdown.seats.where(number: 4).update_all(role_code: "don")
-
-        expect(helper.breakdown_roles_by_seat(breakdown)).to include(4 => "don", 1 => nil)
-      end
+    it "names the roles mode in words" do
+      expect(helper.breakdown_view_metadata(breakdown).to_h[GameBreakdown.human_attribute_name(:roles_mode)])
+        .to eq(I18n.t("game_breakdowns.roles_modes.open"))
     end
   end
 
-  describe "night summaries" do
+  describe "#breakdown_video_link" do
+    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+
+    it "links an http address" do
+      breakdown.update!(video_url: "http://example.com/v")
+      expect(helper.breakdown_video_link(breakdown)).to include(%(href="http://example.com/v"))
+    end
+
+    it "links an https address" do
+      breakdown.update!(video_url: "https://example.com/v")
+      expect(helper.breakdown_video_link(breakdown)).to include(%(href="https://example.com/v"))
+    end
+
+    # A judge pasting an address from a browser may well capitalise the scheme.
+    it "links an uppercase scheme" do
+      breakdown.update!(video_url: "HTTPS://example.com/v")
+      expect(helper.breakdown_video_link(breakdown)).to include(%(href="HTTPS://example.com/v"))
+    end
+
+    it "opens it in a new tab without leaking the referrer" do
+      breakdown.update!(video_url: "https://example.com/v")
+      expect(helper.breakdown_video_link(breakdown)).to include('rel="noopener noreferrer"')
+    end
+
+    # The URL is free text a judge typed, so it must never become a scripted href.
+    it "refuses to link a javascript url" do
+      breakdown.update!(video_url: "javascript:alert(1)")
+      expect(helper.breakdown_video_link(breakdown)).not_to include("href")
+    end
+
+    it "returns the odd value as plain text" do
+      breakdown.update!(video_url: "javascript:alert(1)")
+      expect(helper.breakdown_video_link(breakdown)).to eq("javascript:alert(1)")
+    end
+
+    it "dashes out a missing url" do
+      expect(helper.breakdown_video_link(breakdown)).to eq("—")
+    end
+  end
+
+  describe "#breakdown_game_link" do
+    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+
+    it "dashes out an unlinked breakdown" do
+      expect(helper.breakdown_game_link(breakdown)).to eq("—")
+    end
+
+    it "links the club game" do
+      game = create(:game)
+      breakdown.update!(game: game)
+
+      expect(helper.breakdown_game_link(breakdown)).to include(game_path(game))
+    end
+  end
+
+  describe "#breakdown_roles_by_seat" do
+    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+
+    it "maps every seat to its role" do
+      Role.find_or_create_by!(code: "don") { |role| role.name = "Дон" }
+      breakdown.seats.where(number: 4).update_all(role_code: "don")
+
+      expect(helper.breakdown_roles_by_seat(breakdown)).to include(4 => "don", 1 => nil)
+    end
+  end
+
+
+  describe "#breakdown_night_outcome_summary" do
     let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
     let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
     let(:seat_names) { { 4 => "Гость" } }
     let(:roles_by_seat) { { 2 => "mafia", 7 => "peace" } }
 
-    describe "#breakdown_night_outcome_summary" do
-      it "names the killed seat" do
-        expect(helper.breakdown_night_outcome_summary(night, seat_names))
-          .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
-      end
-
-      it "names a miss" do
-        night.update!(night_outcome: "miss", killed_seat: nil)
-        expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.night_outcomes.miss"))
-      end
-
-      it "says when nothing was recorded" do
-        night.update!(night_outcome: nil, killed_seat: nil)
-        expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.editor.not_recorded"))
-      end
+    it "names the killed seat" do
+      expect(helper.breakdown_night_outcome_summary(night, seat_names))
+        .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
     end
 
-    describe "#breakdown_shot_summary" do
-      it "names shooter and target" do
-        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
-        expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
-      end
-
-      it "reports a shooter who held fire" do
-        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
-        expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.no_shot", actor: 2))
-      end
+    it "names a miss" do
+      night.update!(night_outcome: "miss", killed_seat: nil)
+      expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.night_outcomes.miss"))
     end
 
-    describe "#breakdown_night_action_summary" do
-      it "summarises a shot" do
-        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
-        expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
-          .to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
-      end
+    it "says when nothing was recorded" do
+      night.update!(night_outcome: nil, killed_seat: nil)
+      expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.editor.not_recorded"))
+    end
+  end
 
-      it "summarises a check with its derived result" do
-        action = build(:breakdown_night_action, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
+  describe "#breakdown_shot_summary" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
+    let(:seat_names) { { 4 => "Гость" } }
+    let(:roles_by_seat) { { 2 => "mafia", 7 => "peace" } }
 
-        expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
-          .to eq(I18n.t("game_breakdowns.view.check",
-                        role: I18n.t("game_breakdowns.view.sheriff_check"),
-                        seat: "2",
-                        result: I18n.t("game_breakdowns.check_results.black")))
-      end
+    it "names shooter and target" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
+      expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
     end
 
-    describe "#breakdown_night_summary" do
-      it "opens with the outcome" do
-        expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).first)
-          .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
-      end
+    it "reports a shooter who held fire" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
+      expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.no_shot", actor: 2))
+    end
+  end
 
-      it "adds a part per recorded action" do
-        create(:breakdown_night_action, breakdown_phase: night, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
-        create(:breakdown_night_action, breakdown_phase: night, kind: "don_check", actor_seat: nil, target_seat: 7)
+  describe "#breakdown_night_action_summary" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
+    let(:seat_names) { { 4 => "Гость" } }
+    let(:roles_by_seat) { { 2 => "mafia", 7 => "peace" } }
 
-        expect(helper.breakdown_night_summary(night.reload, seat_names, roles_by_seat).size).to eq(3)
-      end
+    it "summarises a shot" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
+      expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
+        .to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
+    end
 
-      it "is just the outcome when nothing was recorded inside the night" do
-        expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).size).to eq(1)
-      end
+    it "summarises a check with its derived result" do
+      action = build(:breakdown_night_action, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
+
+      expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
+        .to eq(I18n.t("game_breakdowns.view.check",
+                      role: I18n.t("game_breakdowns.view.sheriff_check"),
+                      seat: "2",
+                      result: I18n.t("game_breakdowns.check_results.black")))
+    end
+  end
+
+  describe "#breakdown_night_summary" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
+    let(:seat_names) { { 4 => "Гость" } }
+    let(:roles_by_seat) { { 2 => "mafia", 7 => "peace" } }
+
+    it "opens with the outcome" do
+      expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).first)
+        .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
+    end
+
+    it "adds a part per recorded action" do
+      create(:breakdown_night_action, breakdown_phase: night, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
+      create(:breakdown_night_action, breakdown_phase: night, kind: "don_check", actor_seat: nil, target_seat: 7)
+
+      expect(helper.breakdown_night_summary(night.reload, seat_names, roles_by_seat).size).to eq(3)
+    end
+
+    it "is just the outcome when nothing was recorded inside the night" do
+      expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).size).to eq(1)
     end
   end
 end
