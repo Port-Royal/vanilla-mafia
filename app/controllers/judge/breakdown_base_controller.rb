@@ -41,8 +41,12 @@ class Judge::BreakdownBaseController < ApplicationController
     render "judge/breakdowns/edit", status: :unprocessable_content
   end
 
-  def load_editor_data
+  def load_timeline
     @timeline = GameBreakdown::Timeline.new(@breakdown)
+  end
+
+  def load_editor_data
+    load_timeline
     @roles = Role.all
     @players = Player.order(:name)
   end

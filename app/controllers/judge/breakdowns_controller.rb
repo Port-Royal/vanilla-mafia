@@ -1,7 +1,7 @@
 class Judge::BreakdownsController < Judge::BreakdownBaseController
   GAME_OPTIONS_LIMIT = 200
 
-  before_action :set_breakdown, only: [ :edit, :update ]
+  before_action :set_breakdown, only: [ :show, :edit, :update ]
 
   def index
     @breakdowns = GameBreakdown.includes(:author).ordered.load
@@ -25,6 +25,10 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
     end
   end
 
+  def show
+    load_timeline
+  end
+
   def edit
     load_editor_data
   end
@@ -45,6 +49,7 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
   def set_breakdown
     @breakdown = GameBreakdown.find(params[:id])
   end
+
 
   def load_form_data
     @games = Game.recent.includes(competition: :parent).limit(GAME_OPTIONS_LIMIT)

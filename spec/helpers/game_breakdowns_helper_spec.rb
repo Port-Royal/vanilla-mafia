@@ -335,4 +335,156 @@ RSpec.describe GameBreakdownsHelper do
       end
     end
   end
+  describe "read-only view helpers" do
+    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+
+    describe "#breakdown_view_metadata" do
+      it "labels every row" do
+        expect(helper.breakdown_view_metadata(breakdown).map(&:first))
+          .to include(GameBreakdown.human_attribute_name(:played_on), GameBreakdown.human_attribute_name(:author))
+      end
+
+      it "carries the recorded values" do
+        expect(helper.breakdown_view_metadata(breakdown).to_h)
+          .to include(GameBreakdown.human_attribute_name(:source) => "Кубок",
+                      GameBreakdown.human_attribute_name(:judge_name) => "Иванов")
+      end
+
+      it "dashes out what was never filled in" do
+        blank = create(:game_breakdown)
+        expect(helper.breakdown_view_metadata(blank).to_h[GameBreakdown.human_attribute_name(:played_on)]).to eq("—")
+      end
+
+      it "names the roles mode in words" do
+        expect(helper.breakdown_view_metadata(breakdown).to_h[GameBreakdown.human_attribute_name(:roles_mode)])
+          .to eq(I18n.t("game_breakdowns.roles_modes.open"))
+      end
+    end
+
+    describe "#breakdown_video_link" do
+      it "links an http address" do
+        breakdown.update!(video_url: "http://example.com/v")
+        expect(helper.breakdown_video_link(breakdown)).to include(%(href="http://example.com/v"))
+      end
+
+      it "links an https address" do
+        breakdown.update!(video_url: "https://example.com/v")
+        expect(helper.breakdown_video_link(breakdown)).to include(%(href="https://example.com/v"))
+      end
+
+      it "opens it in a new tab without leaking the referrer" do
+        breakdown.update!(video_url: "https://example.com/v")
+        expect(helper.breakdown_video_link(breakdown)).to include('rel="noopener noreferrer"')
+      end
+
+      # The URL is free text a judge typed, so it must never become a scripted href.
+      it "refuses to link a javascript url" do
+        breakdown.update!(video_url: "javascript:alert(1)")
+        expect(helper.breakdown_video_link(breakdown)).not_to include("href")
+      end
+
+      it "returns the odd value as plain text" do
+        breakdown.update!(video_url: "javascript:alert(1)")
+        expect(helper.breakdown_video_link(breakdown)).to eq("javascript:alert(1)")
+      end
+
+      it "dashes out a missing url" do
+        expect(helper.breakdown_video_link(breakdown)).to eq("—")
+      end
+    end
+
+    describe "#breakdown_game_link" do
+      it "dashes out an unlinked breakdown" do
+        expect(helper.breakdown_game_link(breakdown)).to eq("—")
+      end
+
+      it "links the club game" do
+        game = create(:game)
+        breakdown.update!(game: game)
+
+        expect(helper.breakdown_game_link(breakdown)).to include(game_path(game))
+      end
+    end
+
+    describe "#breakdown_roles_by_seat" do
+      it "maps every seat to its role" do
+        Role.find_or_create_by!(code: "don") { |role| role.name = "Дон" }
+        breakdown.seats.where(number: 4).update_all(role_code: "don")
+
+        expect(helper.breakdown_roles_by_seat(breakdown)).to include(4 => "don", 1 => nil)
+      end
+    end
+  end
+
+  describe "night summaries" do
+    let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+    let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
+    let(:seat_names) { { 4 => "Гость" } }
+    let(:roles_by_seat) { { 2 => "mafia", 7 => "peace" } }
+
+    describe "#breakdown_night_outcome_summary" do
+      it "names the killed seat" do
+        expect(helper.breakdown_night_outcome_summary(night, seat_names))
+          .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
+      end
+
+      it "names a miss" do
+        night.update!(night_outcome: "miss", killed_seat: nil)
+        expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.night_outcomes.miss"))
+      end
+
+      it "says when nothing was recorded" do
+        night.update!(night_outcome: nil, killed_seat: nil)
+        expect(helper.breakdown_night_outcome_summary(night, seat_names)).to eq(I18n.t("game_breakdowns.editor.not_recorded"))
+      end
+    end
+
+    describe "#breakdown_shot_summary" do
+      it "names shooter and target" do
+        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
+        expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
+      end
+
+      it "reports a shooter who held fire" do
+        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
+        expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.no_shot", actor: 2))
+      end
+    end
+
+    describe "#breakdown_night_action_summary" do
+      it "summarises a shot" do
+        action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: 7)
+        expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
+          .to eq(I18n.t("game_breakdowns.view.shot", actor: 2, target: "7"))
+      end
+
+      it "summarises a check with its derived result" do
+        action = build(:breakdown_night_action, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
+
+        expect(helper.breakdown_night_action_summary(action, seat_names, roles_by_seat))
+          .to eq(I18n.t("game_breakdowns.view.check",
+                        role: I18n.t("game_breakdowns.view.sheriff_check"),
+                        seat: "2",
+                        result: I18n.t("game_breakdowns.check_results.black")))
+      end
+    end
+
+    describe "#breakdown_night_summary" do
+      it "opens with the outcome" do
+        expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).first)
+          .to eq(I18n.t("game_breakdowns.view.killed", seat: "4 — Гость"))
+      end
+
+      it "adds a part per recorded action" do
+        create(:breakdown_night_action, breakdown_phase: night, kind: "sheriff_check", actor_seat: nil, target_seat: 2)
+        create(:breakdown_night_action, breakdown_phase: night, kind: "don_check", actor_seat: nil, target_seat: 7)
+
+        expect(helper.breakdown_night_summary(night.reload, seat_names, roles_by_seat).size).to eq(3)
+      end
+
+      it "is just the outcome when nothing was recorded inside the night" do
+        expect(helper.breakdown_night_summary(night, seat_names, roles_by_seat).size).to eq(1)
+      end
+    end
+  end
 end

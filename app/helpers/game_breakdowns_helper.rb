@@ -81,6 +81,66 @@ module GameBreakdownsHelper
     "kill:#{phase.killed_seat}"
   end
 
+  def breakdown_view_metadata(breakdown)
+    [
+      [ GameBreakdown.human_attribute_name(:played_on), breakdown.played_on || "—" ],
+      [ GameBreakdown.human_attribute_name(:source), breakdown.source.presence || "—" ],
+      [ GameBreakdown.human_attribute_name(:video_url), breakdown_video_link(breakdown) ],
+      [ GameBreakdown.human_attribute_name(:judge_name), breakdown.judge_name.presence || "—" ],
+      [ GameBreakdown.human_attribute_name(:roles_mode), t("game_breakdowns.roles_modes.#{breakdown.roles_mode}") ],
+      [ GameBreakdown.human_attribute_name(:game_id), breakdown_game_link(breakdown) ],
+      [ GameBreakdown.human_attribute_name(:author), breakdown.author.display_name ]
+    ]
+  end
+
+  # The video URL is free text a judge typed, so only a real web address becomes a link.
+  def breakdown_video_link(breakdown)
+    url = breakdown.video_url
+    return "—" if url.blank?
+    return url unless url.match?(%r{\Ahttps?://}i)
+
+    link_to(url, url, target: "_blank", rel: "noopener noreferrer", class: "text-maroon hover:underline")
+  end
+
+  def breakdown_game_link(breakdown)
+    return "—" if breakdown.game.nil?
+
+    link_to(breakdown.game.full_name, game_path(breakdown.game), class: "text-maroon hover:underline")
+  end
+
+  # One line per night: the morning outcome, then whatever the open-roles table recorded inside it.
+  def breakdown_night_summary(phase, seat_names, roles_by_seat)
+    [ breakdown_night_outcome_summary(phase, seat_names) ] +
+      phase.night_actions.map { |action| breakdown_night_action_summary(action, seat_names, roles_by_seat) }
+  end
+
+  def breakdown_night_outcome_summary(phase, seat_names)
+    return t("game_breakdowns.view.killed", seat: breakdown_seat_label(seat_names, phase.killed_seat)) if phase.kill?
+    return t("game_breakdowns.night_outcomes.miss") if phase.miss?
+
+    t("game_breakdowns.editor.not_recorded")
+  end
+
+  def breakdown_night_action_summary(action, seat_names, roles_by_seat)
+    return breakdown_shot_summary(action, seat_names) if action.mafia_shot?
+
+    t("game_breakdowns.view.check",
+      role: t("game_breakdowns.view.#{action.kind}"),
+      seat: breakdown_seat_label(seat_names, action.target_seat),
+      result: breakdown_check_result(action.kind, roles_by_seat[action.target_seat]))
+  end
+
+  def breakdown_shot_summary(action, seat_names)
+    target = action.target_seat
+    return t("game_breakdowns.view.no_shot", actor: action.actor_seat) if target.nil?
+
+    t("game_breakdowns.view.shot", actor: action.actor_seat, target: breakdown_seat_label(seat_names, target))
+  end
+
+  def breakdown_roles_by_seat(breakdown)
+    breakdown.seats.to_h { |seat| [ seat.number, seat.role_code ] }
+  end
+
   def breakdown_role_seats(breakdown)
     breakdown.seats.group_by(&:role_code).transform_values { |seats| seats.map(&:number) }
   end

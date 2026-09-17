@@ -9,7 +9,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :breakdowns, only: [ :index, :new, :create, :edit, :update ] do
+      resources :breakdowns, only: [ :index, :show, :new, :create, :edit, :update ] do
         scope module: :breakdowns do
           resources :seats, only: [ :update ]
           resources :phases, only: [ :create, :update, :destroy ]

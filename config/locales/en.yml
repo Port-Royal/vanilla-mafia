@@ -507,6 +507,14 @@ en:
       not_sheriff: "not the sheriff"
       red: "red"
       black: "black"
+    view:
+      edit: "Edit"
+      killed: "Killed %{seat}"
+      shot: "Mafia %{actor} → %{target}"
+      no_shot: "Mafia %{actor} did not shoot"
+      check: "%{role} → %{seat} (%{result})"
+      don_check: "Don"
+      sheriff_check: "Sheriff"
     move_kinds:
       sheriff_reveal_table: "Sheriff reveal to the table"
       sheriff_reveal_to_player: "Sheriff reveal to a player"
@@ -542,6 +550,7 @@ en:
       title: "Game breakdowns"
       new_breakdown: "New breakdown"
       no_breakdowns: "No breakdowns yet."
+      view: "View"
       result: "Result"
       edit: "Edit"
     new:

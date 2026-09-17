@@ -1,0 +1,56 @@
+<% speeches = state.phase.speeches.reject(&:justification?) %>
+
+<% if speeches.any? %>
+  <ul class="space-y-2">
+    <% speeches.each do |speech| %>
+      <li>
+        <div class="flex flex-wrap items-baseline gap-2">
+          <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
+          <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
+        </div>
+        <%= render "judge/breakdowns/view_moves", moves: speech.moves, seat_names: seat_names %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% state.vote_rounds.each do |result| %>
+  <div class="mt-3">
+    <p class="font-medium">
+      <%= t("game_breakdowns.vote_round_kinds.#{result.round.kind}", number: result.round.number) %>
+      <span class="text-gray-500 font-normal">— <%= t("game_breakdowns.vote_outcomes.#{result.outcome}") %></span>
+    </p>
+
+    <% result.round.justification_speeches.each do |speech| %>
+      <div class="mt-1 border-l-2 border-gray-300 pl-3">
+        <div class="flex flex-wrap items-baseline gap-2">
+          <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
+          <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.justification") %></span>
+        </div>
+        <%= render "judge/breakdowns/view_moves", moves: speech.moves, seat_names: seat_names %>
+      </div>
+    <% end %>
+
+    <% if result.tally.any? %>
+      <div class="mt-1 overflow-x-auto">
+        <table class="text-sm">
+          <tbody>
+            <% result.tally.each do |key, voters| %>
+              <tr>
+                <td class="pr-3 py-0.5 whitespace-nowrap"><%= breakdown_tally_label(result.round, key, seat_names) %></td>
+                <td class="pr-3 py-0.5 font-medium"><%= voters.size %></td>
+                <td class="py-0.5 text-gray-500"><%= voters.join(", ").presence || "—" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <%= render "judge/breakdowns/view_moves", moves: result.round.moves, seat_names: seat_names %>
+  </div>
+<% end %>
+
+<% if speeches.empty? && state.vote_rounds.empty? %>
+  <p class="text-gray-500"><%= t("game_breakdowns.editor.day_placeholder") %></p>
+<% end %>

@@ -1,0 +1,10 @@
+<% if moves.any? %>
+  <ul class="mt-0.5 ml-4 space-y-0.5 text-gray-700">
+    <% moves.each do |move| %>
+      <li>
+        · <%= breakdown_move_summary(move, seat_names) %>
+        <span class="text-xs text-gray-500"><%= t("game_breakdowns.editor.move_actor", seat: move.actor_seat) %></span>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
