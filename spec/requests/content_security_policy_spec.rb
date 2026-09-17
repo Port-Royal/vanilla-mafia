@@ -1,15 +1,15 @@
 require "rails_helper"
 
 RSpec.describe "Content-Security-Policy header" do
-  it "ships in report-only mode (no enforcing header)" do
+  it "is enforced (no report-only header)" do
     get root_path
 
-    expect(response.headers["Content-Security-Policy-Report-Only"]).to be_present
-    expect(response.headers["Content-Security-Policy"]).to be_blank
+    expect(response.headers["Content-Security-Policy"]).to be_present
+    expect(response.headers["Content-Security-Policy-Report-Only"]).to be_blank
   end
 
-  describe "report-only directives" do
-    let(:csp) { response.headers["Content-Security-Policy-Report-Only"] }
+  describe "directives" do
+    let(:csp) { response.headers["Content-Security-Policy"] }
 
     before { get root_path }
 
@@ -53,6 +53,7 @@ RSpec.describe "Content-Security-Policy header" do
       expect(csp).to include("connect-src 'self' https:")
     end
 
+    # Enforcing does not stop reporting: violations are still posted and forwarded to Sentry.
     it "configures report-uri to the CSP violation endpoint" do
       expect(csp).to include("report-uri /csp_violation_reports")
     end
@@ -62,7 +63,7 @@ RSpec.describe "Content-Security-Policy header" do
     it "stamps the script-src nonce onto inline <script> tags" do
       get root_path
 
-      csp = response.headers["Content-Security-Policy-Report-Only"]
+      csp = response.headers["Content-Security-Policy"]
       nonce_match = csp.match(/script-src[^;]*'nonce-([A-Za-z0-9+\/=_-]+)'/)
       expect(nonce_match).to be_present, "expected script-src nonce in CSP header, got: #{csp}"
 
