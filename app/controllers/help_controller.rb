@@ -9,9 +9,12 @@ class HelpController < ApplicationController
     @pages = PAGES.select { |slug| available?(slug) }
   end
 
+  # The whitelist check stands alone: show.html.erb renders the partial by slug, and Brakeman only
+  # recognises the render path as safe while a bare PAGES.include? guards it.
   def show
     @slug = params[:slug]
-    raise ActiveRecord::RecordNotFound unless PAGES.include?(@slug) && available?(@slug)
+    raise ActiveRecord::RecordNotFound unless PAGES.include?(@slug)
+    raise ActiveRecord::RecordNotFound unless available?(@slug)
   end
 
   private
