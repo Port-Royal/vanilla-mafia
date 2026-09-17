@@ -5,6 +5,55 @@ RSpec.describe "Navigation" do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:user) { create(:user) }
 
+  describe "breakdowns link" do
+    let_it_be(:judge) { create(:user, :judge) }
+
+    context "when the toggle is on" do
+      let!(:toggle) { create(:feature_toggle, key: "game_breakdown", enabled: true) }
+
+      it "displays the link for a judge" do
+        sign_in judge
+        get "/news"
+        expect(response.body).to include(judge_breakdowns_path)
+      end
+
+      it "displays the link for an admin" do
+        sign_in admin
+        get "/news"
+        expect(response.body).to include(judge_breakdowns_path)
+      end
+
+      it "hides the link from a regular user" do
+        sign_in user
+        get "/news"
+        expect(response.body).not_to include(judge_breakdowns_path)
+      end
+
+      it "hides the link from a guest" do
+        get "/news"
+        expect(response.body).not_to include(judge_breakdowns_path)
+      end
+    end
+
+    context "when the toggle is off" do
+      let!(:toggle) { create(:feature_toggle, key: "game_breakdown", enabled: false) }
+
+      it "hides the link from a judge" do
+        sign_in judge
+        get "/news"
+        expect(response.body).not_to include(judge_breakdowns_path)
+      end
+    end
+
+    context "when the toggle was never set" do
+      it "hides the link from a judge" do
+        sign_in judge
+        get "/news"
+        expect(response.body).not_to include(judge_breakdowns_path)
+      end
+    end
+  end
+
   describe "help link" do
     let_it_be(:judge) { create(:user, :judge) }
 
