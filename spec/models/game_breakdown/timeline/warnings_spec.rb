@@ -343,6 +343,46 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
         end
       end
 
+      # 7.5.8: a player who broke the split onto themselves forfeits the day best move.
+      context "when the leaving player broke the split into themselves" do
+        before do
+          create(:breakdown_move, :split_break, breakdown_speech: speech(zero_round, 5), actor_seat: 5, target_seat: 5)
+          vote(zero_round, "revote", [ 1, 2, 3, 4, 6, 8 ] => 5, [ 5, 7, 9, 10 ] => 3)
+        end
+
+        let!(:move) { best_move(zero_round, 5) }
+
+        it "warns about the move" do
+          expect(timeline.warnings_for(move)).to eq([ warning(:best_move_without_right, move, rule: "7.5.8") ])
+        end
+      end
+
+      context "when the leaving player broke the split into someone else" do
+        before do
+          create(:breakdown_move, :split_break, breakdown_speech: speech(zero_round, 5), actor_seat: 5, target_seat: 7)
+          vote(zero_round, "revote", [ 1, 2, 3, 4, 6, 8 ] => 5, [ 5, 7, 9, 10 ] => 3)
+        end
+
+        let!(:move) { best_move(zero_round, 5) }
+
+        it "does not warn" do
+          expect(timeline.warnings_for(move)).to be_empty
+        end
+      end
+
+      context "when someone else broke the split into the leaving player" do
+        before do
+          create(:breakdown_move, :split_break, breakdown_speech: speech(zero_round, 8), actor_seat: 8, target_seat: 5)
+          vote(zero_round, "revote", [ 1, 2, 3, 4, 6, 8 ] => 5, [ 5, 7, 9, 10 ] => 3)
+        end
+
+        let!(:move) { best_move(zero_round, 5) }
+
+        it "does not warn" do
+          expect(timeline.warnings_for(move)).to be_empty
+        end
+      end
+
       context "when a player who stayed makes it after a split break" do
         before do
           create(:breakdown_move, :split_break, breakdown_speech: speech(zero_round, 8), actor_seat: 8)
