@@ -190,6 +190,20 @@ RSpec.describe "Judge::Breakdowns" do
       expect(response.body).to include(I18n.t("game_breakdowns.timeline.zero_round"))
     end
 
+    # The suggestion list is rendered once per page and cloned by player_select_controller while a menu is open.
+    it "renders the player options template once" do
+      get edit_judge_breakdown_path(breakdown)
+      expect(response.body.scan(%(id="player-options")).size).to eq(1)
+    end
+
+    it "lists the site players in it" do
+      create(:player, name: "Подсказка")
+
+      get edit_judge_breakdown_path(breakdown)
+
+      expect(response.body).to include("Подсказка")
+    end
+
     it "renders a row for every seat" do
       get edit_judge_breakdown_path(breakdown)
       expect(response.body.scan(/data-seat-number=/).size).to eq(10)

@@ -33,18 +33,29 @@ export default class extends Controller {
     }
 
     this.activeIndex = -1
-    this.populateOptions()
   }
 
+  // The option list is cloned while the menu is open and thrown away when it closes, so one copy exists
+  // at a time rather than one per input on the page.
+  //
+  // The guard counts option targets rather than child nodes: a menu element written across two lines
+  // holds a whitespace text node, which would make a hasChildNodes() guard skip the clone forever.
   populateOptions() {
+    if (this.optionTargets.length > 0) return
+
     const template = document.getElementById("player-options")
     if (template) {
       this.menuTarget.appendChild(template.content.cloneNode(true))
     }
   }
 
+  clearOptions() {
+    this.menuTarget.replaceChildren()
+  }
+
   disconnect() {
     this.cancelClose()
+    this.clearOptions()
     this.constructor.instances.delete(this)
 
     if (this.constructor.instances.size === 0 && this.constructor.globalListenersAttached) {
@@ -57,6 +68,7 @@ export default class extends Controller {
 
   open() {
     this.cancelClose()
+    this.populateOptions()
     this.menuTarget.classList.remove("hidden")
     this.filter()
     this.repositionMenu()
@@ -136,7 +148,7 @@ export default class extends Controller {
   close() {
     this.menuTarget.classList.add("hidden")
     this.activeIndex = -1
-    this.optionTargets.forEach((option) => option.classList.remove("bg-gray-100"))
+    this.clearOptions()
   }
 
   scheduleClose() {
