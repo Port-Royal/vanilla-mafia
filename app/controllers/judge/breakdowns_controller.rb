@@ -1,7 +1,8 @@
 class Judge::BreakdownsController < Judge::BreakdownBaseController
   GAME_OPTIONS_LIMIT = 200
 
-  before_action :set_breakdown, only: [ :show, :edit, :update ]
+  before_action :set_breakdown, only: [ :edit, :update ]
+  before_action :set_breakdown_with_roles, only: [ :show ]
 
   def index
     @breakdowns = GameBreakdown.includes(:author).ordered.load
@@ -48,6 +49,11 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
 
   def set_breakdown
     @breakdown = GameBreakdown.find(params[:id])
+  end
+
+  # The read-only page prints the role of every seat, so they are preloaded instead of queried one by one.
+  def set_breakdown_with_roles
+    @breakdown = GameBreakdown.includes(seats: :role).find(params[:id])
   end
 
 

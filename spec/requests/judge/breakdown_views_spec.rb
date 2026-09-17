@@ -96,6 +96,20 @@ RSpec.describe "Judge::Breakdowns read-only view" do
       expect(response.body).not_to include(I18n.t("game_breakdowns.editor.add_move"))
     end
 
+    # Every seat prints its role; without preloading that is one query per seat.
+    it "loads the seat roles in a single query" do
+      assign_table_roles
+      role_queries = []
+      subscription = ActiveSupport::Notifications.subscribe("sql.active_record") do |*, payload|
+        role_queries << payload[:sql] if payload[:sql].include?(%("roles"))
+      end
+
+      get judge_breakdown_path(breakdown)
+      ActiveSupport::Notifications.unsubscribe(subscription)
+
+      expect(role_queries.size).to eq(1)
+    end
+
     it "renders the conclusion" do
       breakdown.update!(conclusion: "Скрышевали шерифа")
       get judge_breakdown_path(breakdown)
