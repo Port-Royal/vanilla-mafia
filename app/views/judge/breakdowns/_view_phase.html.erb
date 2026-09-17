@@ -1,0 +1,18 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+  <div class="px-4 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+    <span class="font-semibold text-lg"><%= state.label %></span>
+    <span class="text-sm text-gray-500">
+      <%= t("game_breakdowns.editor.alive", seats: state.alive_at_start.join(", ")) %>
+    </span>
+  </div>
+
+  <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(state.phase) %>
+
+  <div class="px-4 py-3 text-sm">
+    <% if state.phase.night? %>
+      <p><%= breakdown_night_summary(state.phase, seat_names, roles_by_seat).join(" · ") %></p>
+    <% else %>
+      <%= render "judge/breakdowns/view_day", state: state, seat_names: seat_names %>
+    <% end %>
+  </div>
+</div>

@@ -490,6 +490,14 @@ ru:
       not_sheriff: "не шериф"
       red: "красный"
       black: "чёрный"
+    view:
+      edit: "Редактировать"
+      killed: "Убит %{seat}"
+      shot: "Мафия %{actor} → %{target}"
+      no_shot: "Мафия %{actor} не стреляла"
+      check: "%{role} → %{seat} (%{result})"
+      don_check: "Дон"
+      sheriff_check: "Шериф"
     move_kinds:
       sheriff_reveal_table: "Раскрытие шерифом на стол"
       sheriff_reveal_to_player: "Раскрытие шерифом игроку"
@@ -525,6 +533,7 @@ ru:
       title: "Разборы игр"
       new_breakdown: "Новый разбор"
       no_breakdowns: "Разборов пока нет."
+      view: "Смотреть"
       result: "Результат"
       edit: "Редактировать"
     new:

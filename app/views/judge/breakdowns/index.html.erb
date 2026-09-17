@@ -20,7 +20,9 @@
       <tbody class="divide-y">
         <% @breakdowns.each do |breakdown| %>
           <tr>
-            <td class="px-4 py-3 font-medium"><%= breakdown.title %></td>
+            <td class="px-4 py-3 font-medium">
+              <%= link_to breakdown.title, judge_breakdown_path(breakdown), class: "text-maroon hover:underline" %>
+            </td>
             <td class="px-4 py-3"><%= breakdown.played_on %></td>
             <td class="px-4 py-3"><%= breakdown.source %></td>
             <td class="px-4 py-3"><%= breakdown.author.display_name %></td>
