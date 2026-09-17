@@ -74,12 +74,20 @@ class GameBreakdown::Timeline::DayWarnings
   end
 
   # Night best move: the first night-killed player, unless two or more players left the zero round (4.5.10, 6.11.4).
-  # Day best move: a player leaving the zero round after a split break (4.4.20).
+  # Day best move: a player leaving the zero round after a split break (4.4.20), unless they broke it
+  # onto themselves and so engineered their own exit (7.5.8).
   def best_move_warning(move, speech)
     return unless move.best_move?
     return if @phase.zero_round? ? split_break_farewell?(speech) : first_night_farewell?(speech)
 
-    GameBreakdown::Timeline::Warning.new(code: :best_move_without_right, record: move, rule: @phase.zero_round? ? "4.4.20" : "6.11.4")
+    GameBreakdown::Timeline::Warning.new(code: :best_move_without_right, record: move, rule: best_move_rule(speech))
+  end
+
+  def best_move_rule(speech)
+    return "6.11.4" unless @phase.zero_round?
+    return "7.5.8" if broke_into_self?(speech.speaker_seat)
+
+    "4.4.20"
   end
 
   def first_night_farewell?(speech)
@@ -87,7 +95,17 @@ class GameBreakdown::Timeline::DayWarnings
   end
 
   def split_break_farewell?(speech)
-    speech.farewell? && vote_eliminated.include?(speech.speaker_seat) && @phase.speeches.flat_map(&:moves).any?(&:split_break?)
+    speech.farewell? && vote_eliminated.include?(speech.speaker_seat) &&
+      split_breaks.any? && !broke_into_self?(speech.speaker_seat)
+  end
+
+  # 7.5.8: breaking the split onto oneself forfeits the day best move — the player chose to leave.
+  def broke_into_self?(seat)
+    split_breaks.any? { |move| move.actor_seat == seat && move.target_seat == seat }
+  end
+
+  def split_breaks
+    @split_breaks ||= @phase.speeches.flat_map(&:moves).select(&:split_break?)
   end
 
   def opening_farewell?(speech)
