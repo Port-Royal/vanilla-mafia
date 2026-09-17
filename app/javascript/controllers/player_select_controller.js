@@ -37,8 +37,11 @@ export default class extends Controller {
 
   // The option list is cloned while the menu is open and thrown away when it closes, so one copy exists
   // at a time rather than one per input on the page.
+  //
+  // The guard counts option targets rather than child nodes: a menu element written across two lines
+  // holds a whitespace text node, which would make a hasChildNodes() guard skip the clone forever.
   populateOptions() {
-    if (this.menuTarget.hasChildNodes()) return
+    if (this.optionTargets.length > 0) return
 
     const template = document.getElementById("player-options")
     if (template) {
