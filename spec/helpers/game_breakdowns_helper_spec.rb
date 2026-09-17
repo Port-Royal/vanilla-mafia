@@ -183,8 +183,6 @@ RSpec.describe GameBreakdownsHelper do
       round
     end
 
-    let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "main", number: 1) }
-
     let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "lift", number: 1) }
 
     before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: false) }
@@ -198,7 +196,6 @@ RSpec.describe GameBreakdownsHelper do
     end
   end
 
-
   describe "#breakdown_lift_options" do
     it "offers for and against" do
       expect(helper.breakdown_lift_options).to eq(
@@ -206,6 +203,7 @@ RSpec.describe GameBreakdownsHelper do
       )
     end
   end
+
   describe "#breakdown_role_seats" do
     let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
     let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
