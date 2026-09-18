@@ -419,7 +419,7 @@ RSpec.describe GameBreakdownsHelper do
   describe "#breakdown_view_metadata" do
     subject(:metadata) { helper.breakdown_view_metadata(breakdown) }
 
-    let_it_be(:game) { create(:game) }
+    let(:game) { build_stubbed(:game, slug: "cup-game-1") }
     let(:author) { build_stubbed(:user, email: "judge@example.com") }
 
     def label(attribute)
@@ -532,17 +532,24 @@ RSpec.describe GameBreakdownsHelper do
   end
 
   describe "#breakdown_game_link" do
-    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+    subject(:link) { helper.breakdown_game_link(breakdown) }
 
-    it "dashes out an unlinked breakdown" do
-      expect(helper.breakdown_game_link(breakdown)).to eq("—")
+    let(:breakdown) { build_stubbed(:game_breakdown, game: game) }
+
+    context "without a linked game" do
+      let(:game) { nil }
+
+      it "dashes it out" do
+        expect(link).to eq("—")
+      end
     end
 
-    it "links the club game" do
-      game = create(:game)
-      breakdown.update!(game: game)
+    context "with a linked game" do
+      let(:game) { build_stubbed(:game, slug: "cup-game-1") }
 
-      expect(helper.breakdown_game_link(breakdown)).to include(game_path(game))
+      it "links the club game by its full name" do
+        expect(link).to eq(%(<a class="text-maroon hover:underline" href="#{game_path(game)}">#{game.full_name}</a>))
+      end
     end
   end
 
