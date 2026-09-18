@@ -33,7 +33,7 @@ class GameBreakdown < ApplicationRecord
   def create_seats_and_zero_round
     participations = participations_by_seat
     SEAT_NUMBERS.each { |number| seats.create!(seat_attributes(number, participations[number])) }
-    phases.create!(position: 0)
+    AppendBreakdownPhaseService.start(breakdown: self)
   end
 
   def participations_by_seat

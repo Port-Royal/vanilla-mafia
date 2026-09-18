@@ -55,6 +55,14 @@ RSpec.describe GameBreakdown::Timeline do
     end
   end
 
+  describe "#opening_phase" do
+    it "plans the zero round with every seat speaking from seat 1" do
+      expect(timeline.opening_phase).to eq(
+        described_class::NextPhase.new(position: 0, kind: :day, farewell_seat: nil, speech_order: (1..10).to_a)
+      )
+    end
+  end
+
   describe "nights" do
     context "when the night ends with a kill" do
       let!(:first_night) { night(1, killed: 4) }
