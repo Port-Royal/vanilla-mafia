@@ -144,9 +144,13 @@ RSpec.describe "Judge::Breakdowns read-only view" do
       expect(response.body).to include(I18n.t("game_breakdowns.vote_outcomes.eliminated"))
     end
 
-    it "says so for a day with nothing recorded" do
-      get judge_breakdown_path(breakdown)
-      expect(response.body).to include(I18n.t("game_breakdowns.editor.day_placeholder"))
+    context "when a day has nothing recorded" do
+      before { zero_round.speeches.delete_all }
+
+      it "says so" do
+        get judge_breakdown_path(breakdown)
+        expect(response.body).to include(I18n.t("game_breakdowns.editor.day_placeholder"))
+      end
     end
 
     it "renders the warnings" do

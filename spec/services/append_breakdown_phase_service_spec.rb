@@ -76,6 +76,7 @@ RSpec.describe AppendBreakdownPhaseService do
     end
 
     before do
+      breakdown
       allow(GameBreakdown::Timeline).to receive(:new).and_return(instance_double(GameBreakdown::Timeline, next_phase: step))
     end
 
@@ -88,8 +89,7 @@ RSpec.describe AppendBreakdownPhaseService do
     end
 
     it "rolls the speeches back" do
-      suppress(ActiveRecord::RecordInvalid) { append }
-      expect(BreakdownSpeech.count).to eq(0)
+      expect { suppress(ActiveRecord::RecordInvalid) { append } }.not_to change(BreakdownSpeech, :count)
     end
   end
 
@@ -105,6 +105,35 @@ RSpec.describe AppendBreakdownPhaseService do
 
     it "creates no phase" do
       expect { append }.not_to change { breakdown.phases.reload.count }
+    end
+  end
+
+  describe ".start" do
+    subject(:start) { described_class.start(breakdown: breakdown) }
+
+    before { breakdown.phases.destroy_all }
+
+    it "creates the zero round" do
+      expect(start).to have_attributes(position: 0, night_outcome: nil)
+    end
+
+    it "gives every seat a regular speech starting from seat 1" do
+      expect(start.speeches.map { |speech| [ speech.speaker_seat, speech.kind ] }).to eq((1..10).map { |seat| [ seat, "regular" ] })
+    end
+
+    it "numbers the speeches from zero without gaps" do
+      expect(start.speeches.map(&:position)).to eq((0..9).to_a)
+    end
+
+    context "when the game is already over" do
+      before do
+        %w[peace mafia].each { |code| Role.find_or_create_by!(code: code) { |role| role.name = code } }
+        breakdown.seats.update_all(role_code: "peace")
+      end
+
+      it "still creates the zero round" do
+        expect(start.speeches.size).to eq(10)
+      end
     end
   end
 end

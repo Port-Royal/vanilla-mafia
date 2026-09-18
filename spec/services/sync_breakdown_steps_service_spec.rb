@@ -226,6 +226,7 @@ RSpec.describe SyncBreakdownStepsService do
     let(:state) { instance_double(GameBreakdown::Timeline::PhaseState, phase: zero_round, expected_steps: [ step ]) }
 
     before do
+      zero_round.speeches.delete_all
       allow(GameBreakdown::Timeline).to receive(:new).and_return(instance_double(GameBreakdown::Timeline, phases: [ state ]))
     end
 
@@ -236,6 +237,8 @@ RSpec.describe SyncBreakdownStepsService do
   end
 
   context "when nothing is expected" do
+    before { breakdown }
+
     it "creates no rounds" do
       expect { sync }.not_to change(BreakdownVoteRound, :count)
     end

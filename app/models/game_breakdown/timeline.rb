@@ -56,19 +56,28 @@ class GameBreakdown::Timeline
     warnings_by_record.fetch(record, [])
   end
 
-  def next_phase
-    return if finished?
+  # The zero round a breakdown opens with: every seat speaks, whatever the result.
+  def opening_phase
+    day_step(0, previous_day: nil, farewell_seat: nil, alive: GameBreakdown::SEAT_NUMBERS.to_a)
+  end
 
+  # Nothing comes next once the game is over or every seat has left it (possible while roles are unset).
+  def next_phase
     last = phases.last
+    return if finished? || last.alive_at_end.empty?
+
     position = last.phase.position + 1
     return NextPhase.new(position: position, kind: :night, farewell_seat: nil, speech_order: []) if last.phase.day?
 
-    alive = last.alive_at_end
-    starter = day_starter(phases.reverse.find { |state| state.phase.day? }, alive)
-    NextPhase.new(position: position, kind: :day, farewell_seat: night_killed_seat(last), speech_order: alive.rotate(alive.index(starter)))
+    day_step(position, previous_day: phases.reverse.find { |state| state.phase.day? }, farewell_seat: night_killed_seat(last), alive: last.alive_at_end)
   end
 
   private
+
+  def day_step(position, previous_day:, farewell_seat:, alive:)
+    starter = day_starter(previous_day, alive)
+    NextPhase.new(position: position, kind: :day, farewell_seat: farewell_seat, speech_order: alive.rotate(alive.index(starter)))
+  end
 
   def warnings_by_record
     @warnings_by_record ||= warnings.group_by(&:record)

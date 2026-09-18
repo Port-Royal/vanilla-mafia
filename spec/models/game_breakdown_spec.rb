@@ -67,6 +67,45 @@ RSpec.describe GameBreakdown, type: :model do
       it "creates the zero round phase" do
         expect(breakdown.phases.pluck(:position)).to eq([ 0 ])
       end
+
+      it "gives every seat a speech in the zero round, starting from seat 1" do
+        expect(breakdown.phases.first.speeches.pluck(:speaker_seat)).to eq((1..10).to_a)
+      end
+
+      it "numbers the zero round speeches from zero without gaps" do
+        expect(breakdown.phases.first.speeches.pluck(:position)).to eq((0..9).to_a)
+      end
+
+      it "makes every zero round speech regular" do
+        expect(breakdown.phases.first.speeches.pluck(:kind).uniq).to eq([ "regular" ])
+      end
+    end
+
+    context "with a manual result already set" do
+      let_it_be(:breakdown) { create(:game_breakdown, manual_result: "draw") }
+
+      it "still pre-fills the zero round" do
+        expect(breakdown.phases.first.speeches.pluck(:speaker_seat)).to eq((1..10).to_a)
+      end
+    end
+
+    context "when a zero round speech cannot be created" do
+      let(:step) do
+        GameBreakdown::Timeline::NextPhase.new(position: 0, kind: :day, farewell_seat: nil, speech_order: [ 1, 99 ])
+      end
+
+      before do
+        allow(GameBreakdown::Timeline).to receive(:new).and_return(instance_double(GameBreakdown::Timeline, opening_phase: step))
+      end
+
+      it "raises" do
+        expect { create(:game_breakdown) }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+
+      it "rolls the whole breakdown back" do
+        expect { suppress(ActiveRecord::RecordInvalid) { create(:game_breakdown) } }
+          .not_to change { [ described_class.count, BreakdownSeat.count, BreakdownPhase.count, BreakdownSpeech.count ] }
+      end
     end
 
     context "with a linked game" do
@@ -120,7 +159,7 @@ RSpec.describe GameBreakdown, type: :model do
         .to change(BreakdownSeat, :count).by(-10)
         .and change(BreakdownPhase, :count).by(-3)
         .and change(BreakdownNightAction, :count).by(-1)
-        .and change(BreakdownSpeech, :count).by(-1)
+        .and change(BreakdownSpeech, :count).by(-11)
         .and change(BreakdownVoteRound, :count).by(-1)
         .and change(BreakdownVote, :count).by(-1)
         .and change(BreakdownMove, :count).by(-2)
