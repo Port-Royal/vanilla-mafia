@@ -74,6 +74,11 @@ export default class extends Controller {
     this.repositionMenu()
   }
 
+  // Opening re-runs the filter, which resets the highlight, so the arrow keys only open a closed menu.
+  openIfClosed() {
+    if (!this.isOpen()) this.open()
+  }
+
   filter() {
     const query = this.searchTarget.value.trim().toLowerCase()
     const taken = this.takenPlayerNames()
@@ -107,14 +112,14 @@ export default class extends Controller {
 
     if (event.key === "ArrowDown") {
       event.preventDefault()
-      this.open()
+      this.openIfClosed()
       this.move(1)
       return
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault()
-      this.open()
+      this.openIfClosed()
       this.move(-1)
       return
     }
