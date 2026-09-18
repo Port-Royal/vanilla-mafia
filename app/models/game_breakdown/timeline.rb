@@ -61,10 +61,11 @@ class GameBreakdown::Timeline
     day_step(0, previous_day: nil, farewell_seat: nil, alive: GameBreakdown::SEAT_NUMBERS.to_a)
   end
 
+  # Nothing comes next once the game is over or every seat has left it (possible while roles are unset).
   def next_phase
-    return if finished?
-
     last = phases.last
+    return if finished? || last.alive_at_end.empty?
+
     position = last.phase.position + 1
     return NextPhase.new(position: position, kind: :night, farewell_seat: nil, speech_order: []) if last.phase.day?
 

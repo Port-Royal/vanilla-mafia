@@ -553,6 +553,25 @@ RSpec.describe GameBreakdown::Timeline do
   end
 
   describe "removals" do
+    context "when the last seat leaves the game at night and the result is unknown" do
+      before do
+        remove(zero_round, *(1..9))
+        night(1, killed: 10)
+      end
+
+      it "plans no next phase" do
+        expect(timeline.next_phase).to be_nil
+      end
+    end
+
+    context "when every seat leaves the game during a day and the result is unknown" do
+      before { remove(zero_round, *(1..10)) }
+
+      it "plans no next phase" do
+        expect(timeline.next_phase).to be_nil
+      end
+    end
+
     context "when a player is removed during speeches" do
       before do
         nominate(zero_round, 1, 5)
