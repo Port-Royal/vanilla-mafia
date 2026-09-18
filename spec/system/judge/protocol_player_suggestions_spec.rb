@@ -46,7 +46,7 @@ RSpec.describe "Protocol editor player suggestions" do
     end
 
     it "closes the suggestions" do
-      expect(seat_one_picker).to have_no_css("[data-player-select-target='menu']")
+      expect(seat_one_picker).to have_no_css("[data-player-select-target='menu']", visible: true)
     end
   end
 
