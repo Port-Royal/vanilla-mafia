@@ -36,4 +36,49 @@
     @apply overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0;
   }
 
+  /*
+   * OBS overlay: fills the browser source, which is sized to the stream canvas.
+   * The tile width is the smaller of the width-based and height-based limits, so a
+   * different source size changes the tile size, never its 3:4 proportions.
+   * Everything else is sized in em off the tile width, so the whole overlay scales uniformly.
+   */
+  .overlay-canvas {
+    --overlay-pad: 2vmin;
+    --overlay-gap-ratio: 0.05;
+    --overlay-row-max-height: 40vh;
+    --overlay-tile-width: min(
+      (100vw - 2 * var(--overlay-pad)) / (10 + 9 * var(--overlay-gap-ratio)),
+      var(--overlay-row-max-height) * 3 / 4
+    );
+
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--overlay-pad);
+    overflow: hidden;
+    font-size: calc(var(--overlay-tile-width) * 0.1);
+  }
+
+  .overlay-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
+    gap: 1em;
+  }
+
+  .overlay-tiles {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--overlay-tile-width) * var(--overlay-gap-ratio));
+  }
+
+  .overlay-tile {
+    flex: none;
+    width: var(--overlay-tile-width);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+  }
+
 }

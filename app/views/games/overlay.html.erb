@@ -6,57 +6,65 @@
      data-game-overlay-role-icon-template-value="<%= asset_path('roles/peace.png').sub('peace', '%ROLE_CODE%') %>"
      data-game-overlay-status-classes-value="<%= GamesHelper::OVERLAY_STATUS_CLASSES.transform_keys(&:to_s).to_json %>"
      data-game-overlay-status-labels-value="<%= GameParticipation.statuses.keys.index_with { |k| t("games.overlay.status.#{k}") }.to_json %>"
-     class="flex gap-2 px-2 text-white"
+     class="overlay-canvas text-white"
      <% if custom_style.present? %>style="<%= custom_style %>"<% end %>>
-  <% (1..10).each do |seat| %>
-    <% participation = @participations_by_seat[seat] %>
-    <% player = participation ? participation.player : nil %>
-    <% role = participation ? participation.role : nil %>
-    <% status = overlay_player_status(participation) %>
-    <div id="seat-<%= seat %>" class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded bg-black/40 p-2">
-      <% unless @overlay_config[:hide_seats] %>
-        <div class="self-start text-xs text-gray-400">#<%= seat %></div>
-      <% end %>
+  <div class="overlay-header">
+    <div id="overlay-table" class="justify-self-start"></div>
+    <div id="overlay-game-number" class="justify-self-center"></div>
+    <div id="overlay-judge" class="justify-self-end"></div>
+  </div>
 
-      <div class="w-full aspect-square overflow-hidden rounded">
-        <% if player && player.photo.attached? %>
-          <%= image_tag player.photo.variant(resize_to_fill: [ 200, 200 ]),
-                        alt: player.name,
-                        class: "w-full h-full object-cover" %>
-        <% else %>
-          <%= image_tag Player::DEFAULT_PHOTO_PATH,
-                        alt: player ? player.name : "",
-                        class: "w-full h-full object-cover" %>
+  <div class="overlay-tiles">
+    <% (1..10).each do |seat| %>
+      <% participation = @participations_by_seat[seat] %>
+      <% player = participation ? participation.player : nil %>
+      <% role = participation ? participation.role : nil %>
+      <% status = overlay_player_status(participation) %>
+      <div id="seat-<%= seat %>" class="overlay-tile flex flex-col items-center gap-[0.3em] rounded-[0.4em] bg-black/40 p-[0.4em]">
+        <% unless @overlay_config[:hide_seats] %>
+          <div class="self-start text-[0.7em] text-gray-400">#<%= seat %></div>
         <% end %>
-      </div>
 
-      <div class="w-full text-center font-semibold truncate"
-           data-game-overlay-target="playerName"
-           data-seat="<%= seat %>">
-        <%= player ? player.name : "" %>
-      </div>
-
-      <% unless @overlay_config[:hide_roles] %>
-        <div class="flex items-center gap-1 text-xs"
-             data-game-overlay-target="roleCode"
-             data-seat="<%= seat %>">
-          <% if participation && participation.role_code.present? %>
-            <%= image_tag "roles/#{participation.role_code}.png",
-                          alt: role && role.name.present? ? role.name : participation.role_code,
-                          class: "inline-block h-4 w-4",
-                          title: role && role.name.present? ? role.name : participation.role_code %>
-            <span><%= role && role.name.present? ? role.name : participation.role_code %></span>
+        <div class="w-full flex-1 min-h-0 overflow-hidden rounded-[0.3em]">
+          <% if player && player.photo.attached? %>
+            <%= image_tag player.photo.variant(resize_to_fill: [ 200, 200 ]),
+                          alt: player.name,
+                          class: "w-full h-full object-cover" %>
+          <% else %>
+            <%= image_tag Player::DEFAULT_PHOTO_PATH,
+                          alt: player ? player.name : "",
+                          class: "w-full h-full object-cover" %>
           <% end %>
         </div>
-      <% end %>
 
-      <% unless @overlay_config[:hide_status] %>
-        <div class="text-xs px-2 py-0.5 rounded <%= overlay_status_class(status) %>"
-             data-game-overlay-target="status"
+        <div class="w-full text-center font-semibold truncate"
+             data-game-overlay-target="playerName"
              data-seat="<%= seat %>">
-          <%= status ? t("games.overlay.status.#{status}") : "" %>
+          <%= player ? player.name : "" %>
         </div>
-      <% end %>
-    </div>
-  <% end %>
+
+        <% unless @overlay_config[:hide_roles] %>
+          <div class="flex items-center gap-[0.3em] text-[0.7em]"
+               data-game-overlay-target="roleCode"
+               data-seat="<%= seat %>">
+            <% if participation && participation.role_code.present? %>
+              <%= image_tag "roles/#{participation.role_code}.png",
+                            alt: role && role.name.present? ? role.name : participation.role_code,
+                            class: "inline-block h-[1.2em] w-[1.2em]",
+                            title: role && role.name.present? ? role.name : participation.role_code %>
+              <span><%= role && role.name.present? ? role.name : participation.role_code %></span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% unless @overlay_config[:hide_status] %>
+          <div class="text-[0.7em] px-[0.6em] py-[0.1em] rounded-[0.3em] <%= overlay_status_class(status) %>"
+               data-game-overlay-target="status"
+               data-seat="<%= seat %>">
+            <%= status ? t("games.overlay.status.#{status}") : "" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
