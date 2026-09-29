@@ -38,6 +38,16 @@ export default class extends Controller {
   }
 
   updateHeader(data) {
+    const displaySettingClasses = {
+      hide_roles: "overlay-canvas--hide-roles",
+      hide_game_info: "overlay-canvas--hide-game-info",
+      hide_table_info: "overlay-canvas--hide-table-info"
+    }
+    if (displaySettingClasses[data.field]) {
+      this.element.classList.toggle(displaySettingClasses[data.field], data.value === "1")
+      return
+    }
+
     const gameNumberKeys = { game_number: "number", games_total: "total" }
     if (gameNumberKeys[data.field]) {
       this.updateGameNumber(gameNumberKeys[data.field], data.value)

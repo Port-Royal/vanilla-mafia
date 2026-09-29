@@ -1,7 +1,7 @@
 class AutosaveGameProtocolService
   Result = Data.define(:success, :errors)
 
-  GAME_FIELDS = %w[game_number played_on name result judge competition_id table_number games_total].freeze
+  GAME_FIELDS = %w[game_number played_on name result judge competition_id table_number games_total hide_roles hide_game_info hide_table_info].freeze
   PARTICIPATION_FIELDS = %w[player_name role_code plus minus best_move first_shoot notes status best_move_seats].freeze
 
   def self.call(game:, scope:, field:, value:, seat: nil)

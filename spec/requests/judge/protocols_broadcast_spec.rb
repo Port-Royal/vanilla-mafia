@@ -29,6 +29,16 @@ RSpec.describe "GameProtocol broadcasting" do
       end
     end
 
+    context "when switching a display setting" do
+      it "broadcasts the update to the game channel" do
+        expect {
+          patch autosave_judge_protocol_path(game), params: { scope: "game", field: "hide_game_info", value: "1" }, as: :json
+        }.to have_broadcasted_to(game).from_channel(GameProtocolChannel).with(
+          hash_including(scope: "game", field: "hide_game_info", value: "1")
+        )
+      end
+    end
+
     context "when updating a participation field" do
       let!(:participation) do
         create(:game_participation, game: game, player: player, seat: 1)

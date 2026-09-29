@@ -148,9 +148,7 @@ RSpec.describe "Games#overlay" do
       let(:badge) { ->(seat) { tile.(seat).at_css(".overlay-role-badge") } }
       let(:status_icon) { ->(seat) { tile.(seat).at_css(".overlay-status-icon svg") } }
 
-      let(:overlay_params) { {} }
-
-      before { get overlay_game_path(tile_game, **overlay_params) }
+      before { get overlay_game_path(tile_game) }
 
       { 1 => "Ш", 2 => "Д", 3 => "М" }.each do |seat, letter|
         it "shows the #{letter} badge on seat #{seat}" do
@@ -232,14 +230,6 @@ RSpec.describe "Games#overlay" do
         )
       end
 
-      context "when hide_roles is set" do
-        let(:overlay_params) { { hide_roles: "1" } }
-
-        it "renders no role badges" do
-          expect(document.css(".overlay-role-badge")).to be_empty
-        end
-      end
-
       context "with the best move strip" do
         let(:strip_cells) do
           ->(seat) { tile.(seat).css(".overlay-best-move .overlay-best-move-cell").map { |cell| [ cell.text.strip, cell["data-colour"] ] } }
@@ -247,7 +237,7 @@ RSpec.describe "Games#overlay" do
 
         before do
           owner_participation.update!(best_move_seats: best_move_seats)
-          get overlay_game_path(tile_game, **overlay_params)
+          get overlay_game_path(tile_game)
         end
 
         let(:owner_participation) { tile_game.game_participations.find_by(seat: 4) }
@@ -284,47 +274,15 @@ RSpec.describe "Games#overlay" do
           end
         end
 
-        context "when roles are hidden" do
-          let(:best_move_seats) { [ 2, 1 ] }
-          let(:overlay_params) { { hide_roles: "1" } }
-
-          it "shows the seats without role colours" do
-            expect(strip_cells.(4)).to eq([ %w[2 neutral], %w[1 neutral] ])
-          end
-
-          it "exposes no roles for live updates" do
-            expect(document.at_css("#game-overlay").to_h).to include(
-              "data-game-overlay-seat-roles-value" => "{}",
-              "data-game-overlay-best-move-colours-value" => "{}"
-            )
-          end
-        end
-
-        context "when roles are shown" do
+        context "with live update data" do
           let(:best_move_seats) { [ 2 ] }
 
-          it "exposes seat roles and role colours for live updates" do
+          it "exposes seat roles and role colours" do
             expect(document.at_css("#game-overlay").to_h).to include(
               "data-game-overlay-seat-roles-value" => { "1" => "sheriff", "2" => "don", "3" => "mafia", "4" => "peace" }.to_json,
               "data-game-overlay-best-move-colours-value" => GamesHelper::OVERLAY_BEST_MOVE_COLOURS.to_json
             )
           end
-        end
-      end
-
-      context "when hide_status is set" do
-        let(:overlay_params) { { hide_status: "1" } }
-
-        it "renders no status icons" do
-          expect(document.css(".overlay-status-icon")).to be_empty
-        end
-      end
-
-      context "when hide_seats is set" do
-        let(:overlay_params) { { hide_seats: "1" } }
-
-        it "renders no seat cells" do
-          expect(document.css(".overlay-seat")).to be_empty
         end
       end
     end
@@ -357,61 +315,55 @@ RSpec.describe "Games#overlay" do
       expect(response).to have_http_status(:not_found)
     end
 
-    context "with URL parameter customization" do
-      it "applies custom font size" do
-        get overlay_game_path(game, font_size: "24")
+    context "with display settings" do
+      let(:canvas_classes) { response.parsed_body.at_css("#game-overlay")["class"].split }
+      let(:flags) { %w[overlay-canvas--hide-roles overlay-canvas--hide-game-info overlay-canvas--hide-table-info] }
 
-        expect(response.body).to include('font-size: 24px')
+      before do
+        game.update!(settings)
+        get overlay_game_path(game)
       end
 
-      it "ignores invalid font size" do
-        get overlay_game_path(game, font_size: "abc")
+      context "when nothing is hidden" do
+        let(:settings) { {} }
 
-        expect(response.body).not_to include("font-size:")
+        it "hides no block" do
+          expect(canvas_classes & flags).to be_empty
+        end
       end
 
-      it "clamps font size to allowed range" do
-        get overlay_game_path(game, font_size: "200")
+      {
+        hide_roles: "overlay-canvas--hide-roles",
+        hide_game_info: "overlay-canvas--hide-game-info",
+        hide_table_info: "overlay-canvas--hide-table-info"
+      }.each do |setting, css_class|
+        context "when #{setting} is on" do
+          let(:settings) { { setting => true } }
 
-        expect(response.body).to include("font-size: 72px")
+          it "marks the canvas with #{css_class} only" do
+            expect(canvas_classes & flags).to eq([ css_class ])
+          end
+        end
+      end
+    end
+
+    context "with legacy URL parameters" do
+      let(:document) { response.parsed_body }
+
+      before do
+        get overlay_game_path(game, font_size: "24", color: "ff0000", hide_roles: "1", hide_seats: "1", hide_status: "1")
       end
 
-      it "applies custom text color" do
-        get overlay_game_path(game, color: "ff0000")
-
-        expect(response.body).to include("color: #ff0000")
+      it "ignores the custom style" do
+        expect(document.at_css("#game-overlay")["style"]).to be_nil
       end
 
-      it "ignores invalid color" do
-        get overlay_game_path(game, color: "not-a-color")
-
-        expect(response.body).not_to include("color:")
+      it "hides no block" do
+        expect(document.at_css("#game-overlay")["class"]).not_to include("--hide-")
       end
 
-      it "ignores color with invalid length" do
-        get overlay_game_path(game, color: "ff00f")
-
-        expect(response.body).not_to include("color:")
-      end
-
-      it "accepts 3-digit hex color" do
-        get overlay_game_path(game, color: "f00")
-
-        expect(response.body).to include("color: #f00")
-      end
-
-      it "handles array parameter for font_size gracefully" do
-        get overlay_game_path(game, font_size: [ "24" ])
-
-        expect(response).to have_http_status(:ok)
-        expect(response.body).not_to include("font-size:")
-      end
-
-      it "handles array parameter for color gracefully" do
-        get overlay_game_path(game, color: [ "ff0000" ])
-
-        expect(response).to have_http_status(:ok)
-        expect(response.body).not_to include("color:")
+      it "still renders role badges, status icons and seat cells" do
+        expect(%w[.overlay-role-badge .overlay-status-icon .overlay-seat].map { |css| document.css(css).size }).to eq([ 10, 10, 10 ])
       end
     end
   end

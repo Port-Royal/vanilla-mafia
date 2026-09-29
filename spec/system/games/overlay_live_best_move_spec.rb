@@ -23,10 +23,8 @@ RSpec.describe "Game overlay live best move strip" do
       JS
     end
   end
-  let(:overlay_params) { {} }
-
   before do
-    visit overlay_game_path(game, **overlay_params)
+    visit overlay_game_path(game)
     page.document.synchronize do
       raise Capybara::ExpectationNotMet, "overlay controller is not connected" unless page.evaluate_script("!!#{controller_js}")
     end
@@ -74,16 +72,13 @@ RSpec.describe "Game overlay live best move strip" do
   end
 
   context "when roles are hidden" do
-    let(:overlay_params) { { hide_roles: "1" } }
-    let(:payloads) do
-      [
-        { scope: "participation", seat: 3, field: "role_code", value: "mafia" },
-        { scope: "participation", seat: 1, field: "best_move_seats", value: [ "3", "4" ] }
-      ]
+    let(:payloads) { [ { scope: "game", field: "hide_roles", value: "1" } ] }
+    let(:cell_backgrounds) do
+      page.evaluate_script('Array.from(document.querySelectorAll("#seat-1 .overlay-best-move-cell")).map((cell) => getComputedStyle(cell).backgroundColor)')
     end
 
-    it "keeps every cell neutral" do
-      expect(strip.(1)).to eq([ %w[3 neutral], %w[4 neutral] ])
+    it "paints every cell neutral" do
+      expect(cell_backgrounds).to eq([ "rgba(255, 255, 255, 0.2)" ] * 2)
     end
   end
 end

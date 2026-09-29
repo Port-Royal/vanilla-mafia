@@ -140,6 +140,21 @@
     background: rgb(255 255 255 / 0.2);
   }
 
+  /* Display settings from the protocol, toggled live by the game-overlay controller. */
+  .overlay-canvas--hide-roles .overlay-role-badge {
+    display: none;
+  }
+
+  .overlay-canvas--hide-roles .overlay-best-move-cell[data-colour] {
+    background: rgb(255 255 255 / 0.2);
+    box-shadow: none;
+  }
+
+  .overlay-canvas--hide-game-info #overlay-game-number,
+  .overlay-canvas--hide-table-info #overlay-table {
+    visibility: hidden;
+  }
+
   .overlay-tile--eliminated .overlay-photo {
     opacity: 0.4;
     filter: grayscale(1);

@@ -65,6 +65,18 @@
       <label class="w-40 font-semibold text-sm text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
       <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
     </div>
+    <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
+      <span class="w-40 font-semibold text-sm text-right"><%= t("game_protocols.form.overlay") %></span>
+      <div class="w-full flex flex-wrap items-center gap-6">
+        <% %i[hide_roles hide_game_info hide_table_info].each do |setting| %>
+          <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+            <input type="hidden" name="game[<%= setting %>]" value="0" />
+            <input type="checkbox" name="game[<%= setting %>]" value="1" <%= "checked" if @game.public_send(setting) %> class="rounded" />
+            <%= Game.human_attribute_name(setting) %>
+          </label>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>
 

@@ -148,6 +148,16 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(game.reload.games_total).to be_nil
         end
 
+        %w[hide_roles hide_game_info hide_table_info].each do |setting|
+          it "switches #{setting} on and off" do
+            patch autosave_judge_protocol_path(game), params: { scope: "game", field: setting, value: "1" }, as: :json
+            switched_on = game.reload.public_send(setting)
+            patch autosave_judge_protocol_path(game), params: { scope: "game", field: setting, value: "0" }, as: :json
+
+            expect([ switched_on, game.reload.public_send(setting) ]).to eq([ true, false ])
+          end
+        end
+
         it "rejects disallowed fields" do
           patch autosave_judge_protocol_path(game), params: {
             scope: "game", field: "id", value: "999"
