@@ -49,6 +49,40 @@ RSpec.describe "Game overlay live header" do
     end
   end
 
+  context "when the total is set" do
+    let(:payloads) { [ { scope: "game", field: "games_total", value: "8" } ] }
+
+    it "shows the game number out of the total" do
+      expect(header_texts[1]).to eq("Игра 3/8")
+    end
+  end
+
+  context "when the game number changes after the total is set" do
+    let(:payloads) do
+      [
+        { scope: "game", field: "games_total", value: "8" },
+        { scope: "game", field: "game_number", value: "4" }
+      ]
+    end
+
+    it "keeps the total" do
+      expect(header_texts[1]).to eq("Игра 4/8")
+    end
+  end
+
+  context "when the total is cleared" do
+    let(:payloads) do
+      [
+        { scope: "game", field: "games_total", value: "8" },
+        { scope: "game", field: "games_total", value: "" }
+      ]
+    end
+
+    it "shows only the game number" do
+      expect(header_texts[1]).to eq("Игра 3")
+    end
+  end
+
   context "when another game field changes" do
     let(:payloads) { [ { scope: "game", field: "name", value: "Финал" } ] }
 

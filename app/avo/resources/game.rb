@@ -13,6 +13,7 @@ class Avo::Resources::Game < Avo::BaseResource
     field :id, as: :id
     field :competition, as: :belongs_to, required: true
     field :game_number, as: :number, required: true, sortable: true
+    field :games_total, as: :number
     field :played_on, as: :date, sortable: true
     field :name, as: :text
     field :result, as: :select, enum: ::Game.results

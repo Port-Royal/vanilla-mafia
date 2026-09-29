@@ -32,7 +32,11 @@
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
-      <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+      <div class="w-full flex flex-col sm:flex-row sm:items-center gap-2">
+        <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+        <label class="w-40 self-center sm:w-auto shrink-0 whitespace-nowrap font-semibold text-sm text-right sm:pl-2" for="game_games_total"><%= Game.human_attribute_name(:games_total) %></label>
+        <input type="number" name="game[games_total]" id="game_games_total" value="<%= @game.games_total %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      </div>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_table_number"><%= Game.human_attribute_name(:table_number) %></label>

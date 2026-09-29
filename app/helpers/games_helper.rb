@@ -42,9 +42,10 @@ module GamesHelper
     t("games.overlay.table", number: game.table_number)
   end
 
-  # The total games count arrives with a protocol field of its own; until then only the number is shown.
   def overlay_game_label(game)
-    t("games.overlay.game", number: game.game_number)
+    return t("games.overlay.game", number: game.game_number) if game.games_total.nil?
+
+    t("games.overlay.game_of_total", number: game.game_number, total: game.games_total)
   end
 
   def overlay_judge_label(game)

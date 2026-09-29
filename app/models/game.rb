@@ -20,6 +20,8 @@ class Game < ApplicationRecord
   validates :result, presence: true
   validates :game_number, uniqueness: { scope: :competition_id }
   validates :table_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validates :games_total, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validate :games_total_covers_game_number
 
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :ordered, -> { order(played_on: :asc, game_number: :asc) }
@@ -41,5 +43,11 @@ class Game < ApplicationRecord
     return SecureRandom.hex(Sluggable::TAIL_BYTES) unless competition
 
     "#{competition.slug}-game-#{game_number}"
+  end
+
+  def games_total_covers_game_number
+    return if games_total.nil? || game_number.nil? || games_total >= game_number
+
+    errors.add(:games_total, :greater_than_or_equal_to, count: game_number)
   end
 end

@@ -39,6 +39,48 @@ RSpec.describe Game, type: :model do
       expect(game.errors[:table_number]).to be_present
     end
 
+    it { is_expected.to validate_numericality_of(:games_total).only_integer.is_greater_than(0).allow_nil }
+
+    context "with games_total" do
+      subject(:game) { build(:game, game_number: 3, games_total: games_total) }
+
+      context "when games_total is blank" do
+        let(:games_total) { nil }
+
+        it { is_expected.to be_valid }
+      end
+
+      context "when games_total equals game_number" do
+        let(:games_total) { 3 }
+
+        it { is_expected.to be_valid }
+      end
+
+      context "when games_total is greater than game_number" do
+        let(:games_total) { 8 }
+
+        it { is_expected.to be_valid }
+      end
+
+      context "when games_total is less than game_number" do
+        let(:games_total) { 2 }
+
+        it "is invalid with an error on games_total" do
+          game.validate
+          expect(game.errors.added?(:games_total, :greater_than_or_equal_to, count: 3)).to be(true)
+        end
+      end
+    end
+
+    context "when game_number is blank and games_total is set" do
+      subject(:game) { build(:game, game_number: nil, games_total: 8) }
+
+      it "reports only the missing game_number" do
+        game.validate
+        expect(game.errors.attribute_names).to eq([ :game_number ])
+      end
+    end
+
     it 'rejects invalid result values' do
       game = build(:game)
       game.result = "invalid"

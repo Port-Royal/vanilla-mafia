@@ -69,10 +69,16 @@ RSpec.describe "Games#overlay" do
       before { get overlay_game_path(header_game) }
 
       context "when the table number and the judge are set" do
-        let_it_be(:header_game) { create(:game, game_number: 3, competition: competition, table_number: 2, judge: "Кузнецов") }
+        let_it_be(:header_game) { create(:game, game_number: 3, games_total: 8, competition: competition, table_number: 2, judge: "Кузнецов") }
 
-        it "shows the table, the game number and the judge" do
-          expect(header_texts).to eq([ "Стол 2", "Игра 3", "Судья Кузнецов" ])
+        it "shows the table, the game number out of the total and the judge" do
+          expect(header_texts).to eq([ "Стол 2", "Игра 3/8", "Судья Кузнецов" ])
+        end
+
+        it "keeps the game number and the total for live updates" do
+          expect(document.at_css("#overlay-game-number").to_h).to include(
+            "data-game-overlay-target" => "gameNumber", "data-number" => "3", "data-total" => "8"
+          )
         end
       end
 
@@ -82,6 +88,10 @@ RSpec.describe "Games#overlay" do
         it "shows only the game number" do
           expect(header_texts).to eq([ "", "Игра 4", "" ])
         end
+
+        it "keeps an empty total for live updates" do
+          expect(document.at_css("#overlay-game-number")["data-total"]).to eq("")
+        end
       end
 
       context "with live update templates" do
@@ -90,7 +100,9 @@ RSpec.describe "Games#overlay" do
         it "exposes the table and judge label templates for the overlay controller" do
           expect(overlay.to_h).to include(
             "data-game-overlay-table-template-value" => "Стол %VALUE%",
-            "data-game-overlay-judge-template-value" => "Судья %VALUE%"
+            "data-game-overlay-judge-template-value" => "Судья %VALUE%",
+            "data-game-overlay-game-template-value" => "Игра %NUMBER%",
+            "data-game-overlay-game-of-total-template-value" => "Игра %NUMBER%/%TOTAL%"
           )
         end
 

@@ -7,11 +7,16 @@
      data-game-overlay-default-photo-value="<%= Player::DEFAULT_PHOTO_PATH %>"
      data-game-overlay-table-template-value="<%= t("games.overlay.table", number: "%VALUE%") %>"
      data-game-overlay-judge-template-value="<%= t("games.overlay.judge", name: "%VALUE%") %>"
+     data-game-overlay-game-template-value="<%= t("games.overlay.game", number: "%NUMBER%") %>"
+     data-game-overlay-game-of-total-template-value="<%= t("games.overlay.game_of_total", number: "%NUMBER%", total: "%TOTAL%") %>"
      class="overlay-canvas text-white"
      <% if custom_style.present? %>style="<%= custom_style %>"<% end %>>
   <div class="overlay-header">
     <div id="overlay-table" class="justify-self-start" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
-    <div id="overlay-game-number" class="justify-self-center"><%= overlay_game_label(@game) %></div>
+    <div id="overlay-game-number" class="justify-self-center"
+         data-game-overlay-target="gameNumber"
+         data-number="<%= @game.game_number %>"
+         data-total="<%= @game.games_total %>"><%= overlay_game_label(@game) %></div>
     <div id="overlay-judge" class="justify-self-end" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
   </div>
 
