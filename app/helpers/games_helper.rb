@@ -2,6 +2,9 @@ module GamesHelper
   OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia].freeze
   OVERLAY_ELIMINATED_STATUSES = %i[killed_by_mafia voted_out banned].freeze
   OVERLAY_STATUS_ICONS_DIR = Rails.root.join("app/assets/images/overlay/status")
+  # Best move cells: black when the named player is mafia (a hit), red when a civilian (a miss).
+  OVERLAY_BEST_MOVE_COLOURS = { "mafia" => "black", "don" => "black", "peace" => "red", "sheriff" => "red" }.freeze
+  OVERLAY_BEST_MOVE_NEUTRAL = "neutral".freeze
 
   def overlay_custom_style(config)
     parts = []
@@ -34,6 +37,23 @@ module GamesHelper
     svg["data-status"] = status
     svg["aria-hidden"] = "true"
     svg.to_xml.html_safe # rubocop:disable Rails/OutputSafety -- our own asset files, not user input
+  end
+
+  def overlay_best_move_colour(role_code)
+    OVERLAY_BEST_MOVE_COLOURS.fetch(role_code, OVERLAY_BEST_MOVE_NEUTRAL)
+  end
+
+  # Hidden roles leave the map empty, so best move cells stay neutral on the page and in live updates.
+  def overlay_seat_roles(participations_by_seat, hide_roles:)
+    return {} if hide_roles
+
+    participations_by_seat.slice(*GameBreakdown::SEAT_NUMBERS).transform_values(&:role_code).compact
+  end
+
+  def overlay_best_move_cells(participation, seat_roles)
+    return [] unless participation
+
+    participation.best_move_seats.to_a.map { |seat| [ seat, overlay_best_move_colour(seat_roles[seat]) ] }
   end
 
   def overlay_table_label(game)

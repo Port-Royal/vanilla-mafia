@@ -240,6 +240,78 @@ RSpec.describe "Games#overlay" do
         end
       end
 
+      context "with the best move strip" do
+        let(:strip_cells) do
+          ->(seat) { tile.(seat).css(".overlay-best-move .overlay-best-move-cell").map { |cell| [ cell.text.strip, cell["data-colour"] ] } }
+        end
+
+        before do
+          owner_participation.update!(best_move_seats: best_move_seats)
+          get overlay_game_path(tile_game, **overlay_params)
+        end
+
+        let(:owner_participation) { tile_game.game_participations.find_by(seat: 4) }
+
+        context "when every named seat is mafia" do
+          let(:best_move_seats) { [ 2, 3 ] }
+
+          it "shows black cells" do
+            expect(strip_cells.(4)).to eq([ %w[2 black], %w[3 black] ])
+          end
+        end
+
+        context "when every named seat is a civilian" do
+          let(:best_move_seats) { [ 1, 5 ] }
+
+          it "shows red cells, a role-less seat staying neutral" do
+            expect(strip_cells.(4)).to eq([ %w[1 red], %w[5 neutral] ])
+          end
+        end
+
+        context "when the guess is mixed" do
+          let(:best_move_seats) { [ 2, 1, 8 ] }
+
+          it "colours each cell by the named player's role" do
+            expect(strip_cells.(4)).to eq([ %w[2 black], %w[1 red], %w[8 neutral] ])
+          end
+        end
+
+        context "when no seats are named" do
+          let(:best_move_seats) { nil }
+
+          it "renders an empty strip" do
+            expect(tile.(4).at_css(".overlay-best-move").children).to be_empty
+          end
+        end
+
+        context "when roles are hidden" do
+          let(:best_move_seats) { [ 2, 1 ] }
+          let(:overlay_params) { { hide_roles: "1" } }
+
+          it "shows the seats without role colours" do
+            expect(strip_cells.(4)).to eq([ %w[2 neutral], %w[1 neutral] ])
+          end
+
+          it "exposes no roles for live updates" do
+            expect(document.at_css("#game-overlay").to_h).to include(
+              "data-game-overlay-seat-roles-value" => "{}",
+              "data-game-overlay-best-move-colours-value" => "{}"
+            )
+          end
+        end
+
+        context "when roles are shown" do
+          let(:best_move_seats) { [ 2 ] }
+
+          it "exposes seat roles and role colours for live updates" do
+            expect(document.at_css("#game-overlay").to_h).to include(
+              "data-game-overlay-seat-roles-value" => { "1" => "sheriff", "2" => "don", "3" => "mafia", "4" => "peace" }.to_json,
+              "data-game-overlay-best-move-colours-value" => GamesHelper::OVERLAY_BEST_MOVE_COLOURS.to_json
+            )
+          end
+        end
+      end
+
       context "when hide_status is set" do
         let(:overlay_params) { { hide_status: "1" } }
 
@@ -261,6 +333,22 @@ RSpec.describe "Games#overlay" do
       get overlay_game_path(game)
 
       expect(response.body).to include(game.id.to_s)
+    end
+
+    context "with an unseated legacy participation" do
+      let_it_be(:legacy_game) { create(:game, game_number: 9, competition: competition) }
+      let_it_be(:seated) { create(:game_participation, game: legacy_game, player: player_one, seat: 1, role_code: "sheriff") }
+      let_it_be(:unseated) { create(:game_participation, game: legacy_game, player: player_two, seat: nil, role_code: "don") }
+
+      before { get overlay_game_path(legacy_game) }
+
+      it "renders the overlay" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "keeps the unseated participation out of the seat roles" do
+        expect(response.parsed_body.at_css("#game-overlay")["data-game-overlay-seat-roles-value"]).to eq({ "1" => "sheriff" }.to_json)
+      end
     end
 
     it "returns not found for non-existent game" do

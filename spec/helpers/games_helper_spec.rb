@@ -197,4 +197,86 @@ RSpec.describe GamesHelper do
       end
     end
   end
+
+  describe "#overlay_best_move_colour" do
+    {
+      "mafia" => "black",
+      "don" => "black",
+      "peace" => "red",
+      "sheriff" => "red",
+      nil => "neutral",
+      "unknown" => "neutral"
+    }.each do |role_code, colour|
+      context "when the named player's role is #{role_code.inspect}" do
+        it "is #{colour}" do
+          expect(helper.overlay_best_move_colour(role_code)).to eq(colour)
+        end
+      end
+    end
+  end
+
+  describe "#overlay_seat_roles" do
+    let(:participations_by_seat) do
+      {
+        5 => GameParticipation.new(seat: 5, role_code: "peace"),
+        3 => GameParticipation.new(seat: 3, role_code: "don"),
+        7 => GameParticipation.new(seat: 7, role_code: nil)
+      }
+    end
+
+    context "when roles are shown" do
+      it "maps every seat with a role, in seat order" do
+        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: false).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
+      end
+    end
+
+    context "when roles are hidden" do
+      it "is empty" do
+        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: true)).to eq({})
+      end
+    end
+
+    context "with an unseated legacy participation" do
+      before { participations_by_seat[nil] = GameParticipation.new(seat: nil, role_code: "mafia") }
+
+      it "leaves it out" do
+        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: false).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
+      end
+    end
+  end
+
+  describe "#overlay_best_move_cells" do
+    let(:seat_roles) { { 3 => "don", 5 => "peace" } }
+    let(:participation) { GameParticipation.new(seat: 1, best_move_seats: best_move_seats) }
+    let(:best_move_seats) { [ 3, 5, 7 ] }
+    let(:cells) { helper.overlay_best_move_cells(participation, seat_roles) }
+
+    it "colours every named seat by its player's role" do
+      expect(cells).to eq([ [ 3, "black" ], [ 5, "red" ], [ 7, "neutral" ] ])
+    end
+
+    context "when no roles are known" do
+      let(:seat_roles) { {} }
+
+      it "keeps every cell neutral" do
+        expect(cells).to eq([ [ 3, "neutral" ], [ 5, "neutral" ], [ 7, "neutral" ] ])
+      end
+    end
+
+    context "when no seats are named" do
+      let(:best_move_seats) { nil }
+
+      it "has no cells" do
+        expect(cells).to eq([])
+      end
+    end
+
+    context "when the seat is empty" do
+      let(:participation) { nil }
+
+      it "has no cells" do
+        expect(cells).to eq([])
+      end
+    end
+  end
 end
