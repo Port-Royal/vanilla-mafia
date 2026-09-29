@@ -41,6 +41,26 @@ RSpec.describe "Games#overlay" do
       end
     end
 
+    context "with the full-canvas layout" do
+      let(:document) { response.parsed_body }
+      let(:header_slots) { document.css(".overlay-header > div").map { |slot| [ slot["id"], slot.text.strip ] } }
+      let(:tile_ids) { document.css(".overlay-tiles > .overlay-tile").map { |tile| tile["id"] } }
+
+      before { get overlay_game_path(game) }
+
+      it "renders the overlay as a full canvas" do
+        expect(document.css("#game-overlay.overlay-canvas").size).to eq(1)
+      end
+
+      it "renders empty header slots for the table, the game number and the judge" do
+        expect(header_slots).to eq([ [ "overlay-table", "" ], [ "overlay-game-number", "" ], [ "overlay-judge", "" ] ])
+      end
+
+      it "renders every seat card as a fixed-aspect tile in the bottom row" do
+        expect(tile_ids).to eq((1..10).map { |seat| "seat-#{seat}" })
+      end
+    end
+
     it "displays player names inside their cards" do
       get overlay_game_path(game)
 

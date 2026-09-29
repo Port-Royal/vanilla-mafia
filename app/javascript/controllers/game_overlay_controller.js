@@ -103,7 +103,7 @@ export default class extends Controller {
       img.src = src
       img.alt = roleCode
       img.title = roleCode
-      img.className = "inline-block h-4 w-4"
+      img.className = "inline-block h-[1.2em] w-[1.2em]"
       target.appendChild(img)
     }
   }
