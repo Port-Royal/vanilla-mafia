@@ -6,12 +6,14 @@
      data-game-overlay-role-icon-template-value="<%= asset_path('roles/peace.png').sub('peace', '%ROLE_CODE%') %>"
      data-game-overlay-status-classes-value="<%= GamesHelper::OVERLAY_STATUS_CLASSES.transform_keys(&:to_s).to_json %>"
      data-game-overlay-status-labels-value="<%= GameParticipation.statuses.keys.index_with { |k| t("games.overlay.status.#{k}") }.to_json %>"
+     data-game-overlay-table-template-value="<%= t("games.overlay.table", number: "%VALUE%") %>"
+     data-game-overlay-judge-template-value="<%= t("games.overlay.judge", name: "%VALUE%") %>"
      class="overlay-canvas text-white"
      <% if custom_style.present? %>style="<%= custom_style %>"<% end %>>
   <div class="overlay-header">
-    <div id="overlay-table" class="justify-self-start"></div>
-    <div id="overlay-game-number" class="justify-self-center"></div>
-    <div id="overlay-judge" class="justify-self-end"></div>
+    <div id="overlay-table" class="justify-self-start" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
+    <div id="overlay-game-number" class="justify-self-center"><%= overlay_game_label(@game) %></div>
+    <div id="overlay-judge" class="justify-self-end" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
   </div>
 
   <div class="overlay-tiles">

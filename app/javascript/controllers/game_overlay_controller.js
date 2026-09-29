@@ -6,9 +6,11 @@ export default class extends Controller {
     gameId: Number,
     roleIconTemplate: String,
     statusClasses: Object,
-    statusLabels: Object
+    statusLabels: Object,
+    tableTemplate: String,
+    judgeTemplate: String
   }
-  static targets = ["playerName", "roleCode", "status"]
+  static targets = ["playerName", "roleCode", "status", "table", "judge"]
 
   connect() {
     this.subscription = createConsumer().subscriptions.create(
@@ -26,7 +28,22 @@ export default class extends Controller {
   handleUpdate(data) {
     if (data.scope === "participation" && data.seat) {
       this.updateParticipation(data)
+    } else if (data.scope === "game") {
+      this.updateHeader(data)
     }
+  }
+
+  updateHeader(data) {
+    const slots = {
+      table_number: [this.tableTarget, this.tableTemplateValue],
+      judge: [this.judgeTarget, this.judgeTemplateValue]
+    }
+    const slot = slots[data.field]
+    if (!slot) return
+
+    const [target, template] = slot
+    const value = (data.value || "").trim()
+    target.textContent = value === "" ? "" : template.replace("%VALUE%", () => value)
   }
 
   updateParticipation(data) {

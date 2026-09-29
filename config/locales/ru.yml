@@ -274,6 +274,9 @@ ru:
         peace_victory: "Победа мирных"
         mafia_victory: "Победа мафии"
     overlay:
+      table: "Стол %{number}"
+      game: "Игра %{number}"
+      judge: "Судья %{name}"
       status:
         alive: "Жив"
         killed_by_mafia: "Убит"
