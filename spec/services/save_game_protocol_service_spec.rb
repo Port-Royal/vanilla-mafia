@@ -16,7 +16,7 @@ RSpec.describe SaveGameProtocolService do
       let(:participations_params) do
         params = {}
         params["1"] = { player_name: "Алексей", role_code: "don", plus: "1", minus: "0", best_move: "0.5", first_shoot: "0", notes: "Капитан" }
-        params["2"] = { player_name: "Новый Игрок", role_code: "maf", plus: "0", minus: "1", best_move: "", first_shoot: "1", notes: "" }
+        params["2"] = { player_name: "Новый Игрок", role_code: "maf", plus: "0", minus: "1", best_move: "", first_shoot: "1", notes: "", best_move_seats: [ "1", "", "5" ] }
         (3..10).each { |i| params[i.to_s] = { player_name: "", role_code: "", plus: "", minus: "", best_move: "", first_shoot: "0", notes: "" } }
         ActionController::Parameters.new(params).permit!
       end
@@ -77,6 +77,16 @@ RSpec.describe SaveGameProtocolService do
         result = described_class.call(game: game, game_params: game_params, participations_params: participations_params)
         participation = result.game.game_participations.find_by(seat: 2)
         expect(participation.first_shoot).to be true
+      end
+
+      it "sets best move seats" do
+        result = described_class.call(game: game, game_params: game_params, participations_params: participations_params)
+        expect(result.game.game_participations.find_by(seat: 2).best_move_seats).to eq([ 1, 5 ])
+      end
+
+      it "leaves best move seats empty when not submitted" do
+        result = described_class.call(game: game, game_params: game_params, participations_params: participations_params)
+        expect(result.game.game_participations.find_by(seat: 1).best_move_seats).to be_nil
       end
 
       it "skips seats with blank player_name" do

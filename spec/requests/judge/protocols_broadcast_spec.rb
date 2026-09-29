@@ -50,6 +50,30 @@ RSpec.describe "GameProtocol broadcasting" do
       end
     end
 
+    context "when entering best move seats" do
+      let!(:participation) do
+        create(:game_participation, game: game, player: player, seat: 1)
+      end
+
+      it "broadcasts a participation update with the seats" do
+        expect {
+          patch autosave_judge_protocol_path(game), params: {
+            scope: "participation", seat: 1, field: "best_move_seats", value: [ "3", "7" ]
+          }, as: :json
+        }.to have_broadcasted_to(game).from_channel(GameProtocolChannel).with(
+          hash_including(scope: "participation", field: "best_move_seats", value: [ "3", "7" ], seat: 1)
+        )
+      end
+
+      it "stores the seats" do
+        patch autosave_judge_protocol_path(game), params: {
+          scope: "participation", seat: 1, field: "best_move_seats", value: [ "3", "7" ]
+        }, as: :json
+
+        expect(participation.reload.best_move_seats).to eq([ 3, 7 ])
+      end
+    end
+
     context "when the update fails" do
       it "does not broadcast" do
         expect {
