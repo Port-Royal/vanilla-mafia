@@ -335,6 +335,22 @@ RSpec.describe "Games#overlay" do
       expect(response.body).to include(game.id.to_s)
     end
 
+    context "with an unseated legacy participation" do
+      let_it_be(:legacy_game) { create(:game, game_number: 9, competition: competition) }
+      let_it_be(:seated) { create(:game_participation, game: legacy_game, player: player_one, seat: 1, role_code: "sheriff") }
+      let_it_be(:unseated) { create(:game_participation, game: legacy_game, player: player_two, seat: nil, role_code: "don") }
+
+      before { get overlay_game_path(legacy_game) }
+
+      it "renders the overlay" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "keeps the unseated participation out of the seat roles" do
+        expect(response.parsed_body.at_css("#game-overlay")["data-game-overlay-seat-roles-value"]).to eq({ "1" => "sheriff" }.to_json)
+      end
+    end
+
     it "returns not found for non-existent game" do
       get overlay_game_path(slug: "nonexistent-slug")
 

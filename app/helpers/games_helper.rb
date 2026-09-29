@@ -47,7 +47,7 @@ module GamesHelper
   def overlay_seat_roles(participations_by_seat, hide_roles:)
     return {} if hide_roles
 
-    participations_by_seat.sort.to_h.transform_values(&:role_code).compact
+    participations_by_seat.slice(*GameBreakdown::SEAT_NUMBERS).transform_values(&:role_code).compact
   end
 
   def overlay_best_move_cells(participation, seat_roles)

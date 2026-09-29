@@ -235,6 +235,14 @@ RSpec.describe GamesHelper do
         expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: true)).to eq({})
       end
     end
+
+    context "with an unseated legacy participation" do
+      before { participations_by_seat[nil] = GameParticipation.new(seat: nil, role_code: "mafia") }
+
+      it "leaves it out" do
+        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: false).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
+      end
+    end
   end
 
   describe "#overlay_best_move_cells" do
