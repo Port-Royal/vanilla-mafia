@@ -1,10 +1,14 @@
 <% custom_style = overlay_custom_style(@overlay_config) %>
+<% hide_roles = @overlay_config[:hide_roles] %>
+<% seat_roles = overlay_seat_roles(@participations_by_seat, hide_roles: hide_roles) %>
 
 <div id="game-overlay"
      data-controller="game-overlay"
      data-game-overlay-game-id-value="<%= @game.id %>"
      data-game-overlay-role-badges-value="<%= GamesHelper::OVERLAY_ROLE_BADGE_CODES.index_with { |code| overlay_role_badge(code) }.to_json %>"
      data-game-overlay-default-photo-value="<%= Player::DEFAULT_PHOTO_PATH %>"
+     data-game-overlay-seat-roles-value="<%= seat_roles.to_json %>"
+     data-game-overlay-best-move-colours-value="<%= (hide_roles ? {} : GamesHelper::OVERLAY_BEST_MOVE_COLOURS).to_json %>"
      data-game-overlay-table-template-value="<%= t("games.overlay.table", number: "%VALUE%") %>"
      data-game-overlay-judge-template-value="<%= t("games.overlay.judge", name: "%VALUE%") %>"
      data-game-overlay-game-template-value="<%= t("games.overlay.game", number: "%NUMBER%") %>"
@@ -47,13 +51,15 @@
           <% end %>
         </div>
 
-        <% unless @overlay_config[:hide_roles] %>
+        <% unless hide_roles %>
           <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>"><%= overlay_role_badge(participation ? participation.role_code : nil) %></div>
         <% end %>
 
         <% unless @overlay_config[:hide_status] %>
           <div class="overlay-status-icon" data-game-overlay-target="status" data-seat="<%= seat %>"><%= overlay_status_icon(status) %></div>
         <% end %>
+
+        <div class="overlay-best-move" data-game-overlay-target="bestMove" data-seat="<%= seat %>"><% overlay_best_move_cells(participation, seat_roles).each do |named_seat, colour| %><span class="overlay-best-move-cell" data-named-seat="<%= named_seat %>" data-colour="<%= colour %>"><%= named_seat %></span><% end %></div>
 
         <div class="overlay-bottom flex items-stretch bg-black/70 font-semibold">
           <% unless @overlay_config[:hide_seats] %>

@@ -6,14 +6,17 @@ export default class extends Controller {
     gameId: Number,
     roleBadges: Object,
     defaultPhoto: String,
+    seatRoles: Object,
+    bestMoveColours: Object,
     tableTemplate: String,
     judgeTemplate: String,
     gameTemplate: String,
     gameOfTotalTemplate: String
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove"]
 
   connect() {
+    this.seatRoles = { ...this.seatRolesValue }
     this.subscription = createConsumer().subscriptions.create(
       { channel: "GameProtocolChannel", game_id: this.gameIdValue },
       { received: (data) => this.handleUpdate(data) }
@@ -70,8 +73,11 @@ export default class extends Controller {
       this.updatePlayerName(seat, value)
     } else if (data.field === "role_code") {
       this.updateRoleBadge(seat, value)
+      this.updateSeatRole(seat, value)
     } else if (data.field === "status") {
       this.updateStatus(seat, value)
+    } else if (data.field === "best_move_seats") {
+      this.renderBestMove(seat, value)
     }
   }
 
@@ -85,7 +91,9 @@ export default class extends Controller {
 
   clearSeat(seat) {
     this.updateRoleBadge(seat, null)
+    this.updateSeatRole(seat, null)
     this.updateStatus(seat, null)
+    this.renderBestMove(seat, [])
 
     const photo = this.seatTarget(this.photoTargets, seat)
     if (photo) {
@@ -107,6 +115,34 @@ export default class extends Controller {
 
     const slot = this.seatTarget(this.statusTargets, seat)
     if (slot) slot.replaceChildren(...(iconTemplate ? [iconTemplate.content.cloneNode(true)] : []))
+  }
+
+  // Cells naming this seat change colour with its player's role.
+  updateSeatRole(seat, roleCode) {
+    this.seatRoles[seat] = roleCode
+    this.bestMoveTargets.forEach((strip) => {
+      strip.querySelectorAll(`[data-named-seat="${seat}"]`).forEach((cell) => this.colourBestMoveCell(cell))
+    })
+  }
+
+  renderBestMove(seat, namedSeats) {
+    const strip = this.seatTarget(this.bestMoveTargets, seat)
+    if (!strip) return
+
+    const cells = (namedSeats || []).map(String).filter((named) => named !== "").map((named) => {
+      const cell = document.createElement("span")
+      cell.className = "overlay-best-move-cell"
+      cell.dataset.namedSeat = named
+      cell.textContent = named
+      this.colourBestMoveCell(cell)
+      return cell
+    })
+    strip.replaceChildren(...cells)
+  }
+
+  colourBestMoveCell(cell) {
+    const roleCode = this.seatRoles[cell.dataset.namedSeat]
+    cell.dataset.colour = Object.hasOwn(this.bestMoveColoursValue, roleCode) ? this.bestMoveColoursValue[roleCode] : "neutral"
   }
 
   seatTarget(targets, seat) {
