@@ -107,9 +107,22 @@ RSpec.describe GamesHelper do
     %i[killed_by_mafia voted_out banned].each do |status_key|
       context "when the status is #{status_key}" do
         let(:status) { status_key }
+        let(:source) { Nokogiri::XML(Rails.root.join("app/assets/images/overlay/status/#{status_key}.svg").read).root }
 
-        it "renders the #{status_key} icon" do
-          expect(icon["data-status"]).to eq(status_key.to_s)
+        it "inlines the #{status_key} icon file" do
+          expect(icon.at_css("path")["d"]).to eq(source.at_xpath("//*[local-name()='path']")["d"])
+        end
+
+        it "returns markup safe to inline" do
+          expect(helper.overlay_status_icon(status)).to be_html_safe
+        end
+
+        it "marks the icon with its status, sizing and accessibility attributes" do
+          expect(icon.to_h).to include(
+            "data-status" => status_key.to_s,
+            "class" => "h-full w-full drop-shadow",
+            "aria-hidden" => "true"
+          )
         end
       end
     end
