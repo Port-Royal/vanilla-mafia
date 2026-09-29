@@ -1,5 +1,9 @@
 usage: opensource
 integration:
   name: rspec
+# Set before `requires` is loaded: without it Rails boots in development and kill forks run
+# specs against the development database.
+environment_variables:
+  RAILS_ENV: test
 requires:
   - ./config/environment

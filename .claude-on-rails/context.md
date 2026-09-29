@@ -141,14 +141,20 @@ Full Minitest integration via `--integration minitest` / `integration: minitest`
 
 [Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
 
-#### Scope: services, models, helpers and other POROs — NOT controllers
-Mutant reports a phantom `Neutral failure` for **every** subject of a controller driven by request specs
-("original code was inserted unmutated. And the test did NOT PASS"). It reproduces on unchanged `master`
-code — `Judge::ProtocolsController#index` gives 17 mutations, 16 kills, 1 neutral — so mutant can never
-report 100% on a controller here, and a single-job controller sweep costs ~35 minutes against evilution's
-~5. Every real defect mutant has found on this project came from a service, model or helper.
+#### Test environment (`config/mutant.yml`)
+`config/mutant.yml` sets `environment_variables: { RAILS_ENV: test }`. Mutant applies it before loading
+`requires: ./config/environment`; without it Rails booted in **development**, and every kill fork ran specs
+against `storage/development.sqlite3`. Real rows there (roles `don`, `peace`, …) collided with spec data, which
+produced phantom `Neutral failure`s and **false kills**. Mutant results recorded before 2026-09-29 (vm-uuz) are
+inflated: with the fix, `SaveGameProtocolService` and `AutosaveGameProtocolService` show ~117 survivors that
+were hidden. Do not remove the setting.
 
-Controllers are covered by evilution plus request specs. Do not run mutant against them.
+#### Scope
+Services, models, helpers and other POROs: run mutant on the changed class. Controllers: the phantom neutral
+once seen on every controller subject came from the development database, not from request specs
+(`Judge::ProtocolsController#index` is 17/17 with the fix). Mutant still costs far more than evilution on
+controllers (~1.5 min for one action), so run it only on the changed action (`'Foo::BarController#action'`),
+never a whole-controller sweep.
 
 #### Running Mutant
 - **Always `--jobs 1`**: parallel workers contend on the SQLite test database and invent phantom survivors
@@ -156,16 +162,16 @@ Controllers are covered by evilution plus request specs. Do not run mutant again
 - **Eager load**: `CI=1 bundle exec mutant run ...` — eager-loads the app so namespace expressions (`Foo*`) match lazily autoloaded classes. `NO_COVERAGE=1` additionally skips SimpleCov, but does not prevent mutant timeouts on slow spec files; mutant counts timeouts as kills, so check `Killtime` in its summary
 - **Single class**: `bundle exec mutant run --jobs 1 -- 'YourClass'`
 - **Single method**: `bundle exec mutant run --jobs 1 -- 'YourClass#method_name'`
-- **After writing tests**: run mutant against the changed class to verify test quality, unless it is a controller
-- **After an interrupted run**: `bin/rails db:test:prepare` — forked workers leave rows behind on abnormal
-  exit, which then breaks unrelated specs
+- **After writing tests**: run mutant against the changed class (for a controller, the changed action) to verify test quality
+- **After an interrupted run**: `bin/rails db:test:prepare` — forked workers leave rows behind in the test
+  database on abnormal exit, which then breaks unrelated specs
 
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
 3. Run **evilution first** (via MCP tool or CLI) against the changed file(s) — fix any surviving mutants
-4. Run **mutant second** against the changed **services, models and helpers** — fix any additional surviving
-   mutants. Skip mutant for controllers (see scope note above)
+4. Run **mutant second** against the changed **services, models and helpers**, and against changed
+   **controller actions** one by one — fix any additional surviving mutants (see scope note above)
 4a. Run one mutation tool at a time — both share the SQLite test database, and running them concurrently
    corrupts each other's results
 5. Compare results from both tools and append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
