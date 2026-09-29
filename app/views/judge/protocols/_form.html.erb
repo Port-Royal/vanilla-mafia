@@ -83,6 +83,7 @@
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:minus) %></th>
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move) %></th>
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:first_shoot) %></th>
+          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move_seats) %></th>
           <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:status) %></th>
           <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.notes") %></th>
         </tr>
@@ -95,7 +96,7 @@
             <td class="px-3 py-2 text-center font-medium">
               <%= seat %>
             </td>
-            <td class="px-3 py-2 overflow-visible">
+            <td class="px-3 py-2 min-w-48 overflow-visible">
               <div class="relative overflow-visible" data-controller="player-select">
                 <input
                   type="text"
@@ -130,6 +131,15 @@
             <td class="px-3 py-2 text-center">
               <input type="hidden" name="participations[<%= seat %>][first_shoot]" value="0" />
               <input type="checkbox" name="participations[<%= seat %>][first_shoot]" value="1" <%= "checked" if participation.first_shoot %> class="rounded" />
+            </td>
+            <td class="px-3 py-2">
+              <div class="flex gap-1">
+                <% BestMoveSeatsValidator::SEATS_COUNT.each do |index| %>
+                  <select name="participations[<%= seat %>][best_move_seats][]" class="w-14 border border-gray-300 rounded-md px-1 py-1 text-sm">
+                    <%= options_for_select([ "" ] + (GameBreakdown::SEAT_NUMBERS.to_a - [ seat ]), participation.best_move_seats.to_a[index - 1]) %>
+                  </select>
+                <% end %>
+              </div>
             </td>
             <td class="px-3 py-2">
               <select name="participations[<%= seat %>][status]" class="w-auto max-w-full border border-gray-300 rounded-md px-2 py-1 text-sm">

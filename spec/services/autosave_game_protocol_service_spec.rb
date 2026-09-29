@@ -194,6 +194,32 @@ RSpec.describe AutosaveGameProtocolService do
           expect(participation.reload.notes).to eq("Комментарий")
         end
 
+        it "updates best move seats" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "best_move_seats", value: [ "2", "", "7" ], seat: 4
+          )
+
+          expect(result.success).to be true
+          expect(participation.reload.best_move_seats).to eq([ 2, 7 ])
+        end
+
+        it "clears best move seats when every seat is blank" do
+          participation.update!(best_move_seats: [ 2 ])
+
+          described_class.call(game: game, scope: "participation", field: "best_move_seats", value: [ "", "", "" ], seat: 4)
+
+          expect(participation.reload.best_move_seats).to be_nil
+        end
+
+        it "rejects best move seats naming the player's own seat" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "best_move_seats", value: [ "4" ], seat: 4
+          )
+
+          expect(result.success).to be false
+          expect(participation.reload.best_move_seats).to be_nil
+        end
+
         it "updates status" do
           result = described_class.call(
             game: game, scope: "participation", field: "status", value: "killed_by_mafia", seat: 4

@@ -24,7 +24,7 @@ class BreakdownMove < ApplicationRecord
     disqualification: "disqualification"
   }.freeze
 
-  BEST_MOVE_SEATS_COUNT = (1..3)
+  BEST_MOVE_SEATS_COUNT = BestMoveSeatsValidator::SEATS_COUNT
 
   enum :kind, REQUIRED_FIELDS.keys.index_by(&:itself), validate: true
   enum :claimed_color, CLAIMED_COLORS, prefix: true, validate: { allow_nil: true }
@@ -41,7 +41,7 @@ class BreakdownMove < ApplicationRecord
   validates :night_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :exactly_one_context
   validate :kind_required_fields
-  validate :best_move_seats_shape, unless: -> { best_move_seats.nil? }
+  validates :best_move_seats, best_move_seats: true
 
   private
 
@@ -59,16 +59,5 @@ class BreakdownMove < ApplicationRecord
     REQUIRED_FIELDS.fetch(kind, []).each do |attribute|
       errors.add(attribute, :blank) if public_send(attribute).blank?
     end
-  end
-
-  def best_move_seats_shape
-    errors.add(:best_move_seats, :invalid) unless valid_best_move_seats?
-  end
-
-  def valid_best_move_seats?
-    best_move_seats.is_a?(Array) &&
-      BEST_MOVE_SEATS_COUNT.cover?(best_move_seats.size) &&
-      best_move_seats.uniq.size == best_move_seats.size &&
-      best_move_seats.all? { |seat| seat.is_a?(Integer) && GameBreakdown::SEAT_NUMBERS.cover?(seat) }
   end
 end

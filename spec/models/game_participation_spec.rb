@@ -46,6 +46,68 @@ RSpec.describe GameParticipation, type: :model do
     end
   end
 
+  describe "best move seats" do
+    subject(:participation) { build(:game_participation, seat: 1, best_move_seats: seats) }
+
+    context "with seats from the protocol form" do
+      let(:seats) { [ "3", "", "9" ] }
+
+      it "keeps the named seats as integers" do
+        expect(participation.best_move_seats).to eq([ 3, 9 ])
+      end
+    end
+
+    context "with integer seats" do
+      let(:seats) { [ 2, 4 ] }
+
+      it "keeps them" do
+        expect(participation.best_move_seats).to eq([ 2, 4 ])
+      end
+    end
+
+    context "with only blank seats" do
+      let(:seats) { [ "", "" ] }
+
+      it "stores nothing" do
+        expect(participation.best_move_seats).to be_nil
+      end
+    end
+
+    context "with a zero-padded seat" do
+      let(:seats) { [ "08" ] }
+
+      it "reads it as a decimal seat" do
+        expect(participation.best_move_seats).to eq([ 8 ])
+      end
+    end
+
+    context "with a non-numeric seat" do
+      let(:seats) { [ "x" ] }
+
+      before { participation.validate }
+
+      it "is invalid" do
+        expect(participation.errors).to be_of_kind(:best_move_seats, :invalid)
+      end
+    end
+
+    context "when naming the player's own seat" do
+      let(:seats) { [ 1, 5 ] }
+
+      before { participation.validate }
+
+      it "is invalid" do
+        expect(participation.errors).to be_of_kind(:best_move_seats, :own_seat)
+      end
+    end
+
+    context "when not given" do
+      let(:seats) { nil }
+
+      it { is_expected.to be_valid }
+    end
+  end
+
   describe "status enum" do
     it "defines the expected mapping" do
       expect(described_class.statuses).to eq(

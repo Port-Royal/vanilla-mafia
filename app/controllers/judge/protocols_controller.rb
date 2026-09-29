@@ -122,7 +122,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def participations_params
-    permitted_keys = (1..10).map { |i| [ i.to_s, [ :player_name, :role_code, :plus, :minus, :best_move, :first_shoot, :notes, :status ] ] }
+    permitted_keys = (1..10).map { |i| [ i.to_s, [ :player_name, :role_code, :plus, :minus, :best_move, :first_shoot, :notes, :status, { best_move_seats: [] } ] ] }
     params.require(:participations).permit(permitted_keys.to_h)
   end
 

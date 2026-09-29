@@ -238,6 +238,18 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with best move seats" do
+        let(:game_params) { { game_number: 85, result: "peace_victory", competition_id: competition.id } }
+        let(:participations_params) do
+          valid_participations_params.tap { |params| params["1"][:best_move_seats] = [ "4", "", "6" ] }
+        end
+
+        it "persists the named seats" do
+          post judge_protocols_path, params: { game: game_params, participations: participations_params }
+          expect(Game.last.game_participations.find_by(seat: 1).best_move_seats).to eq([ 4, 6 ])
+        end
+      end
+
       context "with games_total" do
         let(:game_params) { { game_number: 86, result: "peace_victory", competition_id: competition.id, games_total: "90" } }
 
@@ -354,7 +366,7 @@ RSpec.describe "Judge::Protocols" do
 
   describe "GET /judge/protocols/:id/edit" do
     let_it_be(:game) { create(:game, game_number: 50, games_total: 60, judge: "Судья") }
-    let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1) }
+    let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1, best_move_seats: [ 3, 7 ]) }
 
     context "when user is admin" do
       before do
@@ -377,6 +389,22 @@ RSpec.describe "Judge::Protocols" do
 
       it "pre-fills the player name" do
         expect(response.body).to include("Тестовый")
+      end
+
+      context "with best move seat selects" do
+        let(:selects) { response.parsed_body.css("select[name='participations[1][best_move_seats][]']") }
+
+        it "renders three selects in the player's row" do
+          expect(selects.size).to eq(3)
+        end
+
+        it "offers every other seat" do
+          expect(selects.first.css("option").map { |option| option["value"] }).to eq([ "" ] + (2..10).map(&:to_s))
+        end
+
+        it "preselects the stored seats in order" do
+          expect(selects.map { |select| select.css("option[selected]").map { |option| option["value"] }.first }).to eq([ "3", "7", nil ])
+        end
       end
 
       it "renders the games_total input next to the game number" do

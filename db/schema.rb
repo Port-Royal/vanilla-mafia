@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_014115) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_021813) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -224,6 +224,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_014115) do
 
   create_table "game_participations", force: :cascade do |t|
     t.decimal "best_move", precision: 5, scale: 2
+    t.json "best_move_seats"
     t.datetime "created_at", null: false
     t.boolean "first_shoot", default: false
     t.integer "game_id", null: false
