@@ -96,9 +96,31 @@ RSpec.describe HelpController do
 
         expect(response.body).to include(I18n.t("help.pages.obs-overlay.setup_title"))
         expect(response.body).to include(I18n.t("help.pages.obs-overlay.recommended_title"))
-        expect(response.body).to include(I18n.t("help.pages.obs-overlay.params_title"))
+        expect(response.body).to include(I18n.t("help.pages.obs-overlay.display_title"))
         expect(response.body).to include(I18n.t("help.pages.obs-overlay.judge_title"))
         expect(response.body).to include(I18n.t("help.pages.obs-overlay.realtime_title"))
+      end
+
+      context "with the redesigned overlay" do
+        let(:page_text) { response.parsed_body.at_css("main").text }
+
+        before { get help_path(slug: "obs-overlay") }
+
+        it "tells to size the source to the canvas and not to stretch it" do
+          expect(page_text).to include(I18n.t("help.pages.obs-overlay.step_set_size"), I18n.t("help.pages.obs-overlay.step_position"))
+        end
+
+        it "shows the overlay URL for a game slug" do
+          expect(page_text).to include("https://vanilla-mafia.ru/games/season-6-series-1-game-3/overlay")
+        end
+
+        it "describes every protocol display setting by its form label" do
+          expect(page_text).to include(*%i[hide_roles hide_game_info hide_table_info].map { |setting| Game.human_attribute_name(setting) })
+        end
+
+        it "no longer mentions URL parameters" do
+          expect(page_text).not_to match(/font_size|color=|hide_seats|hide_status|hide_roles=|overlay\?/)
+        end
       end
     end
 
