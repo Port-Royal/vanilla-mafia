@@ -19,6 +19,8 @@
     </div>
   </div>
 
+  <%= render "overlay_link", game: @game %>
+
   <%= form_with url: judge_protocol_path(@game), method: :patch, local: true,
         html: { data: { action: "change->protocol-autosave#fieldChanged input->protocol-autosave#fieldInput" } } do %>
     <%= render "form", submit_label: t("game_protocols.form.submit_update") %>
