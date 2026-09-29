@@ -52,12 +52,51 @@ RSpec.describe "Games#overlay" do
         expect(document.css("#game-overlay.overlay-canvas").size).to eq(1)
       end
 
-      it "renders empty header slots for the table, the game number and the judge" do
-        expect(header_slots).to eq([ [ "overlay-table", "" ], [ "overlay-game-number", "" ], [ "overlay-judge", "" ] ])
+      it "renders header slots for the table, the game number and the judge" do
+        expect(header_slots.map(&:first)).to eq(%w[overlay-table overlay-game-number overlay-judge])
       end
 
       it "renders every seat card as a fixed-aspect tile in the bottom row" do
         expect(tile_ids).to eq((1..10).map { |seat| "seat-#{seat}" })
+      end
+    end
+
+    context "with the header" do
+      let(:document) { response.parsed_body }
+      let(:header_texts) { %w[overlay-table overlay-game-number overlay-judge].map { |id| document.at_css("##{id}").text.strip } }
+      let(:overlay) { document.at_css("#game-overlay") }
+
+      before { get overlay_game_path(header_game) }
+
+      context "when the table number and the judge are set" do
+        let_it_be(:header_game) { create(:game, game_number: 3, competition: competition, table_number: 2, judge: "Кузнецов") }
+
+        it "shows the table, the game number and the judge" do
+          expect(header_texts).to eq([ "Стол 2", "Игра 3", "Судья Кузнецов" ])
+        end
+      end
+
+      context "when the table number and the judge are blank" do
+        let_it_be(:header_game) { create(:game, game_number: 4, competition: competition, table_number: nil, judge: "") }
+
+        it "shows only the game number" do
+          expect(header_texts).to eq([ "", "Игра 4", "" ])
+        end
+      end
+
+      context "with live update templates" do
+        let_it_be(:header_game) { create(:game, game_number: 5, competition: competition) }
+
+        it "exposes the table and judge label templates for the overlay controller" do
+          expect(overlay.to_h).to include(
+            "data-game-overlay-table-template-value" => "Стол %VALUE%",
+            "data-game-overlay-judge-template-value" => "Судья %VALUE%"
+          )
+        end
+
+        it "marks the table and judge slots as controller targets" do
+          expect(%w[overlay-table overlay-judge].map { |id| document.at_css("##{id}")["data-game-overlay-target"] }).to eq(%w[table judge])
+        end
       end
     end
 

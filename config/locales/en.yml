@@ -452,6 +452,9 @@ en:
         peace_victory: "City wins"
         mafia_victory: "Mafia wins"
     overlay:
+      table: "Table %{number}"
+      game: "Game %{number}"
+      judge: "Judge %{name}"
       status:
         alive: "Alive"
         killed_by_mafia: "Killed"
