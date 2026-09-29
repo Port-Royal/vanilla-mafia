@@ -113,6 +113,12 @@ en:
       title: "New Protocol"
     edit:
       title: "Edit Protocol"
+      overlay_link:
+        title: "Overlay link for OBS"
+        copy: "Copy"
+        open: "Open"
+        hint: "Paste the link into an OBS Browser source."
+        help: "How to set up the overlay"
     edit_link: "Edit protocol"
     form:
       overlay: "Overlay"

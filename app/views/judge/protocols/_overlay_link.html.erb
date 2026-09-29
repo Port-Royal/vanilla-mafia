@@ -1,0 +1,23 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6" data-controller="clipboard">
+  <h2 class="text-sm font-semibold text-gray-700 mb-2"><%= t("game_protocols.edit.overlay_link.title") %></h2>
+  <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+    <input type="text"
+           readonly
+           value="<%= overlay_game_url(game) %>"
+           data-clipboard-target="source"
+           class="w-full sm:w-auto sm:flex-1 min-w-0 text-sm bg-white border border-gray-300 rounded px-3 py-2 text-gray-600 select-all">
+    <button type="button"
+            data-action="click->clipboard#copy"
+            data-clipboard-target="button"
+            class="px-3 py-2 bg-maroon text-white text-sm rounded hover:bg-maroon/90 transition-colors shrink-0">
+      <%= t("game_protocols.edit.overlay_link.copy") %>
+    </button>
+    <%= link_to t("game_protocols.edit.overlay_link.open"), overlay_game_url(game),
+                target: "_blank", rel: "noopener",
+                class: "px-3 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors shrink-0" %>
+  </div>
+  <p class="text-xs text-gray-500 mt-2">
+    <%= t("game_protocols.edit.overlay_link.hint") %>
+    <%= link_to t("game_protocols.edit.overlay_link.help"), help_path(slug: "obs-overlay"), class: "text-maroon hover:underline" %>
+  </p>
+</div>

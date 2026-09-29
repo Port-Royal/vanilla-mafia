@@ -70,6 +70,10 @@ RSpec.describe "Judge::Protocols" do
         expect(response).to have_http_status(:ok)
       end
 
+      it "shows no overlay link for an unsaved game" do
+        expect(response.parsed_body.css("[data-controller='clipboard']")).to be_empty
+      end
+
       it "renders the new protocol form" do
         expect(response.body).to include(I18n.t("game_protocols.new.title"))
       end
@@ -415,6 +419,27 @@ RSpec.describe "Judge::Protocols" do
 
         it "preselects the stored seats in order" do
           expect(selects.map { |select| select.css("option[selected]").map { |option| option["value"] }.first }).to eq([ "3", "7", nil ])
+        end
+      end
+
+      context "with the overlay link" do
+        let(:block) { response.parsed_body.at_css("[data-controller='clipboard']") }
+
+        it "shows the absolute overlay URL in a read-only input" do
+          expect(block.at_css("input[readonly][data-clipboard-target='source']")["value"]).to eq(overlay_game_url(game))
+        end
+
+        it "renders the copy button" do
+          expect(block.at_css("button[type='button'][data-action='click->clipboard#copy'][data-clipboard-target='button']").text.strip)
+            .to eq(I18n.t("game_protocols.edit.overlay_link.copy"))
+        end
+
+        it "links to the overlay in a new tab" do
+          expect(block.at_css("a[target='_blank'][href='#{overlay_game_url(game)}']")).to be_present
+        end
+
+        it "keeps the link out of the protocol form" do
+          expect(response.parsed_body.css("form [data-controller='clipboard']")).to be_empty
         end
       end
 
