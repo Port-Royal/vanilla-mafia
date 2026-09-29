@@ -5,8 +5,10 @@
   <li><%= t(".step_add_source") %></li>
   <li><%= t(".step_enter_url") %>
     <pre class="bg-gray-100 rounded px-3 py-2 mt-1 text-sm overflow-x-auto"><%= t(".url_example") %></pre>
+    <p class="mt-1 text-sm text-gray-600"><%= t(".url_hint") %></p>
   </li>
   <li><%= t(".step_set_size") %></li>
+  <li><%= t(".step_position") %></li>
   <li><%= t(".step_done") %></li>
 </ol>
 
@@ -16,11 +18,11 @@
   <tbody>
     <tr>
       <td class="font-medium"><%= t(".setting_width") %></td>
-      <td>800–1920 px</td>
+      <td><%= t(".setting_width_value") %></td>
     </tr>
     <tr>
       <td class="font-medium"><%= t(".setting_height") %></td>
-      <td>400–600 px</td>
+      <td><%= t(".setting_height_value") %></td>
     </tr>
     <tr>
       <td class="font-medium"><%= t(".setting_fps") %></td>
@@ -33,49 +35,22 @@
   </tbody>
 </table>
 
-<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".params_title") %></h2>
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".display_title") %></h2>
 
-<p class="mb-3"><%= t(".params_description") %></p>
+<p class="mb-3"><%= t(".display_description") %></p>
 
-<table class="data-table mb-8">
-  <thead>
-    <tr>
-      <th><%= t(".param_name") %></th>
-      <th><%= t(".param_example") %></th>
-      <th><%= t(".param_description") %></th>
-    </tr>
-  </thead>
+<table class="data-table mb-3">
   <tbody>
-    <tr>
-      <td><code>font_size</code></td>
-      <td><code>font_size=20</code></td>
-      <td><%= t(".param_font_size") %></td>
-    </tr>
-    <tr>
-      <td><code>color</code></td>
-      <td><code>color=ffffff</code></td>
-      <td><%= t(".param_color") %></td>
-    </tr>
-    <tr>
-      <td><code>hide_seats</code></td>
-      <td><code>hide_seats=1</code></td>
-      <td><%= t(".param_hide_seats") %></td>
-    </tr>
-    <tr>
-      <td><code>hide_roles</code></td>
-      <td><code>hide_roles=1</code></td>
-      <td><%= t(".param_hide_roles") %></td>
-    </tr>
-    <tr>
-      <td><code>hide_status</code></td>
-      <td><code>hide_status=1</code></td>
-      <td><%= t(".param_hide_status") %></td>
-    </tr>
+    <% %i[hide_roles hide_game_info hide_table_info].each do |setting| %>
+      <tr>
+        <td class="font-medium"><%= Game.human_attribute_name(setting) %></td>
+        <td><%= t(".display_#{setting}") %></td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 
-<p class="mb-3"><%= t(".params_example_full") %></p>
-<pre class="bg-gray-100 rounded px-3 py-2 text-sm overflow-x-auto mb-8"><%= t(".params_example_url") %></pre>
+<p class="mb-8"><%= t(".display_game_number") %></p>
 
 <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".judge_title") %></h2>
 
