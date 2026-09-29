@@ -107,37 +107,142 @@ RSpec.describe "Games#overlay" do
       expect(response.body).to include("Борис")
     end
 
-    it "displays player roles" do
-      get overlay_game_path(game)
-
-      expect(response.body).to include("sheriff")
-      expect(response.body).to include("don")
-    end
-
     it "renders a default photo placeholder for players without an attached photo" do
       get overlay_game_path(game)
 
       expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
     end
 
-    it "renders a status pill with the default :alive status for every taken seat" do
-      get overlay_game_path(game)
+    context "with player tiles" do
+      let_it_be(:role_mafia) { create(:role, code: "mafia", name: "Мафия") }
+      let_it_be(:role_peace) { create(:role, code: "peace", name: "Мирный") }
+      let_it_be(:tile_game) { create(:game, game_number: 7, competition: competition) }
 
-      expect(response.body.scan(I18n.t("games.overlay.status.alive")).size).to be >= 2
-    end
+      let_it_be(:tile_participations) do
+        [
+          [ 1, "sheriff", :alive ],
+          [ 2, "don", :killed_by_mafia ],
+          [ 3, "mafia", :voted_out ],
+          [ 4, "peace", :banned ],
+          [ 5, nil, :alive ]
+        ].each do |seat, role_code, status|
+          create(:game_participation, game: tile_game, player: create(:player, name: "Игрок #{seat}"),
+                                      seat: seat, role_code: role_code, status: status)
+        end
+      end
 
-    it "reflects each participation's persisted status label" do
-      participation_two.update!(status: :voted_out)
-      get overlay_game_path(game)
+      let(:document) { response.parsed_body }
+      let(:tile) { ->(seat) { document.at_css("#seat-#{seat}") } }
+      let(:badge) { ->(seat) { tile.(seat).at_css(".overlay-role-badge") } }
+      let(:status_icon) { ->(seat) { tile.(seat).at_css(".overlay-status-icon svg") } }
 
-      expect(response.body).to include(I18n.t("games.overlay.status.voted_out"))
-    end
+      let(:overlay_params) { {} }
 
-    it "exposes status class and label maps for the overlay controller" do
-      get overlay_game_path(game)
+      before { get overlay_game_path(tile_game, **overlay_params) }
 
-      expect(response.body).to include("data-game-overlay-status-classes-value")
-      expect(response.body).to include("data-game-overlay-status-labels-value")
+      { 1 => "Ш", 2 => "Д", 3 => "М" }.each do |seat, letter|
+        it "shows the #{letter} badge on seat #{seat}" do
+          expect(badge.(seat).text.strip).to eq(letter)
+        end
+      end
+
+      it "shows no badge for a civilian" do
+        expect(badge.(4).text.strip).to eq("")
+      end
+
+      it "shows no badge for a player without a role" do
+        expect(badge.(5).text.strip).to eq("")
+      end
+
+      it "renders no role icons" do
+        expect(document.css(".overlay-tile img[src*='roles/']")).to be_empty
+      end
+
+      { 2 => "killed_by_mafia", 3 => "voted_out", 4 => "banned" }.each do |seat, status|
+        context "when the player is #{status}" do
+          it "shows the #{status} icon" do
+            expect(status_icon.(seat)["data-status"]).to eq(status)
+          end
+
+          it "dims the tile" do
+            expect(tile.(seat)["class"]).to include("overlay-tile--eliminated")
+          end
+        end
+      end
+
+      context "when the player is alive" do
+        it "shows no status icon" do
+          expect(status_icon.(1)).to be_nil
+        end
+
+        it "does not dim the tile" do
+          expect(tile.(1)["class"]).not_to include("overlay-tile--eliminated")
+        end
+      end
+
+      it "renders no status pill" do
+        expect(document.text).not_to include(I18n.t("games.overlay.status.alive"))
+      end
+
+      it "shows the seat number and the nickname in the bottom row" do
+        expect(%w[.overlay-seat .overlay-name].map { |cell| tile.(1).at_css(".overlay-bottom #{cell}").text.strip }).to eq([ "1", "Игрок 1" ])
+      end
+
+      it "fills the tile body with the photo" do
+        expect(tile.(1).at_css(".overlay-photo img")["class"]).to include("object-cover")
+      end
+
+      context "with an empty seat" do
+        it "shows the default photo, the seat number and no name" do
+          expect([
+            tile.(6).at_css(".overlay-photo img")["src"],
+            tile.(6).at_css(".overlay-seat").text.strip,
+            tile.(6).at_css(".overlay-name").text.strip,
+            badge.(6).text.strip,
+            status_icon.(6)
+          ]).to eq([ Player::DEFAULT_PHOTO_PATH, "6", "", "", nil ])
+        end
+
+        it "does not dim the tile" do
+          expect(tile.(6)["class"]).not_to include("overlay-tile--eliminated")
+        end
+      end
+
+      it "exposes the status icon templates for live updates" do
+        expect(document.css("template[data-game-overlay-target='statusIconTemplate']").map { |t| t["data-status"] })
+          .to eq(%w[killed_by_mafia voted_out banned])
+      end
+
+      it "exposes the role badge letters and the default photo for live updates" do
+        expect(document.at_css("#game-overlay").to_h).to include(
+          "data-game-overlay-role-badges-value" => { sheriff: "Ш", don: "Д", mafia: "М" }.to_json,
+          "data-game-overlay-default-photo-value" => Player::DEFAULT_PHOTO_PATH
+        )
+      end
+
+      context "when hide_roles is set" do
+        let(:overlay_params) { { hide_roles: "1" } }
+
+        it "renders no role badges" do
+          expect(document.css(".overlay-role-badge")).to be_empty
+        end
+      end
+
+      context "when hide_status is set" do
+        let(:overlay_params) { { hide_status: "1" } }
+
+        it "renders no status icons" do
+          expect(document.css(".overlay-status-icon")).to be_empty
+        end
+      end
+
+      context "when hide_seats is set" do
+        let(:overlay_params) { { hide_seats: "1" } }
+
+        it "renders no seat cells" do
+          expect(document.css(".overlay-seat")).to be_empty
+        end
+      end
     end
 
     it "includes ActionCable subscription data for the game" do
@@ -207,24 +312,6 @@ RSpec.describe "Games#overlay" do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).not_to include("color:")
-      end
-
-      it "hides role display when hide_roles param is set" do
-        get overlay_game_path(game, hide_roles: "1")
-
-        expect(response.body).not_to include("sheriff")
-      end
-
-      it "hides seat numbers when hide_seats param is set" do
-        get overlay_game_path(game, hide_seats: "1")
-
-        expect(response.body).not_to include("#1")
-      end
-
-      it "hides status pill when hide_status param is set" do
-        get overlay_game_path(game, hide_status: "1")
-
-        expect(response.body).not_to include('data-game-overlay-target="status"')
       end
     end
   end

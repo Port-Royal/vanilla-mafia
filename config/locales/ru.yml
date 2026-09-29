@@ -190,7 +190,7 @@ ru:
         param_color: "Цвет текста в формате hex без #. Например, ffffff для белого."
         param_hide_seats: "Скрыть номера мест."
         param_hide_roles: "Скрыть отображение роли."
-        param_hide_status: "Скрыть плашку статуса игрока."
+        param_hide_status: "Скрыть значок статуса игрока."
         params_example_full: "Полный пример со всеми параметрами:"
         params_example_url: "https://vanilla-mafia.ru/games/123/overlay?font_size=20&color=ffffff&hide_seats=1"
         judge_title: "Руководство для ведущего"
@@ -274,6 +274,10 @@ ru:
         peace_victory: "Победа мирных"
         mafia_victory: "Победа мафии"
     overlay:
+      role_badge:
+        sheriff: "Ш"
+        don: "Д"
+        mafia: "М"
       table: "Стол %{number}"
       game: "Игра %{number}"
       judge: "Судья %{name}"

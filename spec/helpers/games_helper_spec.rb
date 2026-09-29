@@ -2,6 +2,10 @@ require "rails_helper"
 
 RSpec.describe GamesHelper do
   describe "#overlay_custom_style" do
+    it "returns empty string when the config has no style keys" do
+      expect(helper.overlay_custom_style({})).to eq("")
+    end
+
     it "returns empty string when no config values set" do
       config = { font_size: nil, color: nil }
 
@@ -57,25 +61,80 @@ RSpec.describe GamesHelper do
     end
   end
 
-  describe "#overlay_status_class" do
-    it "returns a non-empty class string for alive" do
-      expect(helper.overlay_status_class(:alive)).to include("green")
+  describe "#overlay_role_badge" do
+    {
+      "sheriff" => "Ш",
+      "don" => "Д",
+      "mafia" => "М"
+    }.each do |role_code, letter|
+      context "when the role is #{role_code}" do
+        it "returns the #{letter} letter" do
+          expect(helper.overlay_role_badge(role_code)).to eq(letter)
+        end
+      end
     end
 
-    it "returns a non-empty class string for killed_by_mafia" do
-      expect(helper.overlay_status_class(:killed_by_mafia)).to include("red")
+    [ "peace", nil, "unknown" ].each do |role_code|
+      context "when the role is #{role_code.inspect}" do
+        it "returns nil" do
+          expect(helper.overlay_role_badge(role_code)).to be_nil
+        end
+      end
+    end
+  end
+
+  describe "#overlay_eliminated?" do
+    %i[killed_by_mafia voted_out banned].each do |status|
+      context "when the status is #{status}" do
+        it "is true" do
+          expect(helper.overlay_eliminated?(status)).to be(true)
+        end
+      end
     end
 
-    it "returns a non-empty class string for voted_out" do
-      expect(helper.overlay_status_class(:voted_out)).to include("orange")
+    [ :alive, nil ].each do |status|
+      context "when the status is #{status.inspect}" do
+        it "is false" do
+          expect(helper.overlay_eliminated?(status)).to be(false)
+        end
+      end
+    end
+  end
+
+  describe "#overlay_status_icon" do
+    let(:icon) { Nokogiri::HTML5.fragment(helper.overlay_status_icon(status)).at_css("svg") }
+
+    %i[killed_by_mafia voted_out banned].each do |status_key|
+      context "when the status is #{status_key}" do
+        let(:status) { status_key }
+        let(:source) { Nokogiri::XML(Rails.root.join("app/assets/images/overlay/status/#{status_key}.svg").read).root }
+
+        it "inlines the #{status_key} icon file" do
+          expect(icon.at_css("path")["d"]).to eq(source.at_xpath("//*[local-name()='path']")["d"])
+        end
+
+        it "returns markup safe to inline" do
+          expect(helper.overlay_status_icon(status)).to be_html_safe
+        end
+
+        it "marks the icon with its status, sizing and accessibility attributes" do
+          expect(icon.to_h).to include(
+            "data-status" => status_key.to_s,
+            "class" => "h-full w-full drop-shadow",
+            "aria-hidden" => "true"
+          )
+        end
+      end
     end
 
-    it "returns a non-empty class string for banned" do
-      expect(helper.overlay_status_class(:banned)).to include("gray")
-    end
+    [ :alive, nil ].each do |status_key|
+      context "when the status is #{status_key.inspect}" do
+        let(:status) { status_key }
 
-    it "returns an empty string for unknown status" do
-      expect(helper.overlay_status_class(:unknown)).to eq("")
+        it "renders nothing" do
+          expect(helper.overlay_status_icon(status)).to be_nil
+        end
+      end
     end
   end
 

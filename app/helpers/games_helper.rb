@@ -1,10 +1,7 @@
 module GamesHelper
-  OVERLAY_STATUS_CLASSES = {
-    alive: "bg-green-700/70 text-green-100",
-    killed_by_mafia: "bg-red-700/70 text-red-100",
-    voted_out: "bg-orange-700/70 text-orange-100",
-    banned: "bg-gray-700/70 text-gray-100"
-  }.freeze
+  OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia].freeze
+  OVERLAY_ELIMINATED_STATUSES = %i[killed_by_mafia voted_out banned].freeze
+  OVERLAY_STATUS_ICONS_DIR = Rails.root.join("app/assets/images/overlay/status")
 
   def overlay_custom_style(config)
     parts = []
@@ -19,8 +16,24 @@ module GamesHelper
     participation.status.to_sym
   end
 
-  def overlay_status_class(status)
-    OVERLAY_STATUS_CLASSES.fetch(status, "")
+  def overlay_role_badge(role_code)
+    return unless OVERLAY_ROLE_BADGE_CODES.include?(role_code)
+
+    t("games.overlay.role_badge.#{role_code}")
+  end
+
+  def overlay_eliminated?(status)
+    OVERLAY_ELIMINATED_STATUSES.include?(status)
+  end
+
+  def overlay_status_icon(status)
+    return unless overlay_eliminated?(status)
+
+    svg = Nokogiri::XML(OVERLAY_STATUS_ICONS_DIR.join("#{status}.svg")).root
+    svg["class"] = "h-full w-full drop-shadow"
+    svg["data-status"] = status
+    svg["aria-hidden"] = "true"
+    svg.to_xml.html_safe # rubocop:disable Rails/OutputSafety -- our own asset files, not user input
   end
 
   def overlay_table_label(game)
