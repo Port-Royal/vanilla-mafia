@@ -63,6 +63,9 @@ ru:
         judge: "Ведущий"
         table_number: "Номер стола"
         games_total: "Всего игр"
+        hide_roles: "Скрыть роли"
+        hide_game_info: "Скрыть номер игры"
+        hide_table_info: "Скрыть номер стола"
         results:
           in_progress: "В процессе"
           peace_victory: "Победа мирных"
@@ -704,6 +707,7 @@ ru:
       title: "Редактирование протокола"
     edit_link: "Редактировать протокол"
     form:
+      overlay: "Оверлей"
       game_panel: "Игра"
       protocol_panel: "Протокол"
       seat: "Место"

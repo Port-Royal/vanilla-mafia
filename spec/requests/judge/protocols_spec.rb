@@ -250,6 +250,17 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with display settings" do
+        let(:game_params) do
+          { game_number: 84, result: "peace_victory", competition_id: competition.id, hide_roles: "1", hide_game_info: "0", hide_table_info: "1" }
+        end
+
+        it "persists them" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.slice(:hide_roles, :hide_game_info, :hide_table_info).values).to eq([ true, false, true ])
+        end
+      end
+
       context "with games_total" do
         let(:game_params) { { game_number: 86, result: "peace_victory", competition_id: competition.id, games_total: "90" } }
 
@@ -365,7 +376,7 @@ RSpec.describe "Judge::Protocols" do
   end
 
   describe "GET /judge/protocols/:id/edit" do
-    let_it_be(:game) { create(:game, game_number: 50, games_total: 60, judge: "Судья") }
+    let_it_be(:game) { create(:game, game_number: 50, games_total: 60, judge: "Судья", hide_game_info: true) }
     let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1, best_move_seats: [ 3, 7 ]) }
 
     context "when user is admin" do
@@ -405,6 +416,13 @@ RSpec.describe "Judge::Protocols" do
         it "preselects the stored seats in order" do
           expect(selects.map { |select| select.css("option[selected]").map { |option| option["value"] }.first }).to eq([ "3", "7", nil ])
         end
+      end
+
+      it "renders a checkbox per display setting, reflecting the stored value" do
+        checkboxes = %w[hide_roles hide_game_info hide_table_info].map do |setting|
+          response.parsed_body.at_css("input[type='checkbox'][name='game[#{setting}]']").key?("checked")
+        end
+        expect(checkboxes).to eq([ false, true, false ])
       end
 
       it "renders the games_total input next to the game number" do

@@ -85,6 +85,9 @@ en:
       game:
         table_number: "Table number"
         games_total: "Total games"
+        hide_roles: "Hide roles"
+        hide_game_info: "Hide game number"
+        hide_table_info: "Hide table number"
         results:
           in_progress: "In progress"
           peace_victory: "Peace victory"
@@ -112,6 +115,7 @@ en:
       title: "Edit Protocol"
     edit_link: "Edit protocol"
     form:
+      overlay: "Overlay"
       game_panel: "Game"
       protocol_panel: "Protocol"
       seat: "Seat"

@@ -1,36 +1,6 @@
 require "rails_helper"
 
 RSpec.describe GamesHelper do
-  describe "#overlay_custom_style" do
-    it "returns empty string when the config has no style keys" do
-      expect(helper.overlay_custom_style({})).to eq("")
-    end
-
-    it "returns empty string when no config values set" do
-      config = { font_size: nil, color: nil }
-
-      expect(helper.overlay_custom_style(config)).to eq("")
-    end
-
-    it "returns font-size when set" do
-      config = { font_size: 24, color: nil }
-
-      expect(helper.overlay_custom_style(config)).to eq("font-size: 24px")
-    end
-
-    it "returns color when set" do
-      config = { font_size: nil, color: "ff0000" }
-
-      expect(helper.overlay_custom_style(config)).to eq("color: #ff0000")
-    end
-
-    it "returns both font-size and color when both set" do
-      config = { font_size: 16, color: "00ff00" }
-
-      expect(helper.overlay_custom_style(config)).to eq("font-size: 16px; color: #00ff00")
-    end
-  end
-
   describe "#overlay_player_status" do
     it "returns nil when no participation is given" do
       expect(helper.overlay_player_status(nil)).to be_nil
@@ -224,23 +194,15 @@ RSpec.describe GamesHelper do
       }
     end
 
-    context "when roles are shown" do
-      it "maps every seat with a role, in seat order" do
-        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: false).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
-      end
-    end
-
-    context "when roles are hidden" do
-      it "is empty" do
-        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: true)).to eq({})
-      end
+    it "maps every seat with a role, in seat order" do
+      expect(helper.overlay_seat_roles(participations_by_seat).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
     end
 
     context "with an unseated legacy participation" do
       before { participations_by_seat[nil] = GameParticipation.new(seat: nil, role_code: "mafia") }
 
       it "leaves it out" do
-        expect(helper.overlay_seat_roles(participations_by_seat, hide_roles: false).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
+        expect(helper.overlay_seat_roles(participations_by_seat).to_a).to eq([ [ 3, "don" ], [ 5, "peace" ] ])
       end
     end
   end
@@ -276,6 +238,43 @@ RSpec.describe GamesHelper do
 
       it "has no cells" do
         expect(cells).to eq([])
+      end
+    end
+  end
+
+  describe "#overlay_canvas_class" do
+    let(:game) { Game.new(settings) }
+    let(:classes) { helper.overlay_canvas_class(game).split }
+
+    context "when nothing is hidden" do
+      let(:settings) { {} }
+
+      it "is the plain canvas" do
+        expect(classes).to eq(%w[overlay-canvas text-white])
+      end
+    end
+
+    context "when everything is hidden" do
+      let(:settings) { { hide_roles: true, hide_game_info: true, hide_table_info: true } }
+
+      it "adds a class per hidden block" do
+        expect(classes).to eq(%w[
+          overlay-canvas text-white overlay-canvas--hide-roles overlay-canvas--hide-game-info overlay-canvas--hide-table-info
+        ])
+      end
+    end
+
+    {
+      hide_roles: "overlay-canvas--hide-roles",
+      hide_game_info: "overlay-canvas--hide-game-info",
+      hide_table_info: "overlay-canvas--hide-table-info"
+    }.each do |setting, css_class|
+      context "when only #{setting} is on" do
+        let(:settings) { { setting => true } }
+
+        it "adds only #{css_class}" do
+          expect(classes).to eq([ "overlay-canvas", "text-white", css_class ])
+        end
       end
     end
   end

@@ -62,7 +62,7 @@ export default class extends Controller {
 
     const gameMatch = name.match(/^game\[(\w+)\]$/)
     if (gameMatch) {
-      return { scope: "game", field: gameMatch[1], value: input.value }
+      return { scope: "game", field: gameMatch[1], value: this.inputValue(input) }
     }
 
     const partMatch = name.match(/^participations\[(\d+)\]\[(\w+)\](\[\])?$/)
@@ -70,13 +70,19 @@ export default class extends Controller {
       let value = input.value
       if (partMatch[3]) {
         value = this.listValue(input)
-      } else if (input.type === "checkbox") {
-        value = input.checked ? "1" : "0"
+      } else {
+        value = this.inputValue(input)
       }
       return { scope: "participation", seat: partMatch[1], field: partMatch[2], value: value }
     }
 
     return null
+  }
+
+  inputValue(input) {
+    if (input.type === "checkbox") return input.checked ? "1" : "0"
+
+    return input.value
   }
 
   // A list field is posted as several inputs sharing one name; autosave sends their filled values together.

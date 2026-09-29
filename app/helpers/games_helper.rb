@@ -6,13 +6,6 @@ module GamesHelper
   OVERLAY_BEST_MOVE_COLOURS = { "mafia" => "black", "don" => "black", "peace" => "red", "sheriff" => "red" }.freeze
   OVERLAY_BEST_MOVE_NEUTRAL = "neutral".freeze
 
-  def overlay_custom_style(config)
-    parts = []
-    parts << "font-size: #{config[:font_size]}px" if config[:font_size]
-    parts << "color: ##{config[:color]}" if config[:color]
-    parts.join("; ")
-  end
-
   def overlay_player_status(participation)
     return nil unless participation
 
@@ -43,10 +36,7 @@ module GamesHelper
     OVERLAY_BEST_MOVE_COLOURS.fetch(role_code, OVERLAY_BEST_MOVE_NEUTRAL)
   end
 
-  # Hidden roles leave the map empty, so best move cells stay neutral on the page and in live updates.
-  def overlay_seat_roles(participations_by_seat, hide_roles:)
-    return {} if hide_roles
-
+  def overlay_seat_roles(participations_by_seat)
     participations_by_seat.slice(*GameBreakdown::SEAT_NUMBERS).transform_values(&:role_code).compact
   end
 
@@ -54,6 +44,15 @@ module GamesHelper
     return [] unless participation
 
     participation.best_move_seats.to_a.map { |seat| [ seat, overlay_best_move_colour(seat_roles[seat]) ] }
+  end
+
+  def overlay_canvas_class(game)
+    class_names(
+      "overlay-canvas text-white",
+      "overlay-canvas--hide-roles" => game.hide_roles,
+      "overlay-canvas--hide-game-info" => game.hide_game_info,
+      "overlay-canvas--hide-table-info" => game.hide_table_info
+    )
   end
 
   def overlay_table_label(game)
