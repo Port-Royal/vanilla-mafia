@@ -45,8 +45,6 @@ class Game < ApplicationRecord
     "#{competition.slug}-game-#{game_number}"
   end
 
-  private
-
   def games_total_covers_game_number
     return if games_total.nil? || game_number.nil? || games_total >= game_number
 
