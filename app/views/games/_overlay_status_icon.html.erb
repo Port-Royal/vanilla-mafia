@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+     class="h-full w-full drop-shadow" data-status="<%= status %>" aria-hidden="true">
+  <% case status %>
+  <% when :killed_by_mafia %>
+    <g stroke="#ef4444">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 1v6M12 17v6M1 12h6M17 12h6" />
+      <circle cx="12" cy="12" r="1" fill="#ef4444" />
+    </g>
+  <% when :voted_out %>
+    <g stroke="#ffffff">
+      <path d="M18 11V6a2 2 0 0 0-4 0" />
+      <path d="M14 10V4a2 2 0 0 0-4 0v2" />
+      <path d="M10 10.5V6a2 2 0 0 0-4 0v8" />
+      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+    </g>
+  <% when :banned %>
+    <path d="M3 3l18 18M21 3L3 21" stroke="#dc2626" stroke-width="4" />
+  <% end %>
+</svg>

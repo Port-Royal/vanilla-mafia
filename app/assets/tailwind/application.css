@@ -81,4 +81,36 @@
     overflow: hidden;
   }
 
+  .overlay-role-badge,
+  .overlay-status-icon {
+    position: absolute;
+    top: 0.3em;
+    width: 1.6em;
+    height: 1.6em;
+  }
+
+  .overlay-role-badge {
+    left: 0.3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.3em;
+    background: rgb(0 0 0 / 0.75);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .overlay-role-badge:empty {
+    display: none;
+  }
+
+  .overlay-status-icon {
+    right: 0.3em;
+  }
+
+  .overlay-tile--eliminated .overlay-photo {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+
 }
