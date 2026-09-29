@@ -82,6 +82,7 @@ en:
           fun_session: "Fun Session"
       game:
         table_number: "Table number"
+        games_total: "Total games"
         results:
           in_progress: "In progress"
           peace_victory: "Peace victory"
@@ -458,6 +459,7 @@ en:
         mafia: "M"
       table: "Table %{number}"
       game: "Game %{number}"
+      game_of_total: "Game %{number}/%{total}"
       judge: "Judge %{name}"
       status:
         alive: "Alive"

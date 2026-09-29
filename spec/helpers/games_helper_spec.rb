@@ -159,10 +159,22 @@ RSpec.describe GamesHelper do
   end
 
   describe "#overlay_game_label" do
-    let(:game) { Game.new(game_number: 5) }
+    let(:game) { Game.new(game_number: 5, games_total: games_total) }
 
-    it "labels the game by its number" do
-      expect(helper.overlay_game_label(game)).to eq("Игра 5")
+    context "when the total is set" do
+      let(:games_total) { 8 }
+
+      it "labels the game as a fraction of the total" do
+        expect(helper.overlay_game_label(game)).to eq("Игра 5/8")
+      end
+    end
+
+    context "when the total is blank" do
+      let(:games_total) { nil }
+
+      it "labels the game by its number" do
+        expect(helper.overlay_game_label(game)).to eq("Игра 5")
+      end
     end
   end
 

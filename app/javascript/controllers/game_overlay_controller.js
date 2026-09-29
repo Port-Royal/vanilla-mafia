@@ -7,9 +7,11 @@ export default class extends Controller {
     roleBadges: Object,
     defaultPhoto: String,
     tableTemplate: String,
-    judgeTemplate: String
+    judgeTemplate: String,
+    gameTemplate: String,
+    gameOfTotalTemplate: String
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber"]
 
   connect() {
     this.subscription = createConsumer().subscriptions.create(
@@ -33,6 +35,12 @@ export default class extends Controller {
   }
 
   updateHeader(data) {
+    const gameNumberKeys = { game_number: "number", games_total: "total" }
+    if (gameNumberKeys[data.field]) {
+      this.updateGameNumber(gameNumberKeys[data.field], data.value)
+      return
+    }
+
     const slots = {
       table_number: [this.tableTarget, this.tableTemplateValue],
       judge: [this.judgeTarget, this.judgeTemplateValue]
@@ -43,6 +51,15 @@ export default class extends Controller {
     const [target, template] = slot
     const value = (data.value || "").trim()
     target.textContent = value === "" ? "" : template.replace("%VALUE%", () => value)
+  }
+
+  updateGameNumber(key, value) {
+    const target = this.gameNumberTarget
+    target.dataset[key] = (value || "").trim()
+
+    const { number, total } = target.dataset
+    const template = total === "" ? this.gameTemplateValue : this.gameOfTotalTemplateValue
+    target.textContent = template.replace("%NUMBER%", () => number).replace("%TOTAL%", () => total)
   }
 
   updateParticipation(data) {

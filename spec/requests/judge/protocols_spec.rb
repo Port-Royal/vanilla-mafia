@@ -238,6 +238,15 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with games_total" do
+        let(:game_params) { { game_number: 86, result: "peace_victory", competition_id: competition.id, games_total: "90" } }
+
+        it "persists the submitted games_total" do
+          post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          expect(Game.last.games_total).to eq(90)
+        end
+      end
+
       context "with blank table_number" do
         let(:game_params) { { game_number: 87, result: "peace_victory", competition_id: competition.id, table_number: "" } }
 
@@ -344,7 +353,7 @@ RSpec.describe "Judge::Protocols" do
   end
 
   describe "GET /judge/protocols/:id/edit" do
-    let_it_be(:game) { create(:game, game_number: 50, judge: "Судья") }
+    let_it_be(:game) { create(:game, game_number: 50, games_total: 60, judge: "Судья") }
     let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1) }
 
     context "when user is admin" do
@@ -368,6 +377,11 @@ RSpec.describe "Judge::Protocols" do
 
       it "pre-fills the player name" do
         expect(response.body).to include("Тестовый")
+      end
+
+      it "renders the games_total input next to the game number" do
+        expect(response.parsed_body.css("#game_game_number, #game_games_total").map { |input| input["name"] })
+          .to eq(%w[game[game_number] game[games_total]])
       end
     end
 

@@ -19,6 +19,10 @@ RSpec.describe Avo::Resources::Game do
       expect(field.required).to be(true)
     end
 
+    it "includes games_total as a number" do
+      expect(items.find { |f| f.id == :games_total }).to be_a(Avo::Fields::NumberField)
+    end
+
     it "does not include season" do
       expect(items.map(&:id)).not_to include(:season)
     end
