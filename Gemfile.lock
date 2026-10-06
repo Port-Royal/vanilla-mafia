@@ -293,16 +293,17 @@ GEM
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     logger (1.7.0)
-    logtail (0.1.17)
+    logtail (0.1.21)
+      logger (~> 1.0)
       msgpack (~> 1.0)
-    logtail-rack (0.2.6)
+    logtail-rack (0.2.9)
       logtail (~> 0.1)
       rack (>= 1.2, < 4.0)
-    logtail-rails (0.2.12)
+    logtail-rails (0.3.0)
       actionpack (>= 5.0.0)
       activerecord (>= 5.0.0)
-      logtail (~> 0.1, >= 0.1.14)
-      logtail-rack (~> 0.1)
+      logtail (~> 0.1, >= 0.1.21)
+      logtail-rack (~> 0.2, >= 0.2.9)
       railties (>= 5.0.0)
     loofah (2.25.2)
       crass (~> 1.0.2)
@@ -479,7 +480,7 @@ GEM
       logger
       prism (>= 1.6.0)
       tsort
-    rdoc (8.0.0)
+    rdoc (8.1.0)
       erb
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
@@ -810,9 +811,9 @@ CHECKSUMS
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
-  logtail (0.1.17) sha256=866d05690453b3d0c4088e236054a0497ae07380690f565d0c6132eb2d523a48
-  logtail-rack (0.2.6) sha256=a7959441efd43cf7fe198516bbb358be806e4686de9492d51f7b8ed87617808d
-  logtail-rails (0.2.12) sha256=2685b10779a1d733cde9e35da6fb123ae275e754741036c206dd58a73e3a8955
+  logtail (0.1.21) sha256=c06a3524921d3f880e8195a3ff9687f0a057fff9ac27c804523d7f41d80c66fb
+  logtail-rack (0.2.9) sha256=f57eccdf0cd8d72c8b1cb358c1038a37e91654728bfc91822e537f25f50fb46b
+  logtail-rails (0.3.0) sha256=49aec3cb9f6f187be69e8bb5d44ccf0f26626d3ab81c4025539f868d37ec6edf
   loofah (2.25.2) sha256=2007f746959ac65552456e04b433e83deb22759ab38c838b4445c70e43425918
   mail (2.9.1) sha256=06574eca475253d6c18145dd70af80d0eb970182d55053497c5f4d797ea160e8
   marcel (1.2.1) sha256=1678e9360e32f9eafa917c80029e2f6d10b2715c66a4b87b6d0da9b9cd1f859f
@@ -878,7 +879,7 @@ CHECKSUMS
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   rbs (4.2.0) sha256=51f7b886dcc05bc09e10b901daa6a81829f6adc03101d6ca9ea4aac6103e0674
-  rdoc (8.0.0) sha256=03bf8c08a9639658855a0cfd77c0abca8325c227693f7f33f82957811348c469
+  rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   regexp_parser (2.13.0) sha256=d105d95d2138954e73914d2fbfb3d0a8f8605a49a3e89864c32e78b9107cb770
   reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d
   responders (3.2.1) sha256=c2772970cbda654c0e772d852e5a851e82cd8e96f5fa958650861ba75b8ffa84
