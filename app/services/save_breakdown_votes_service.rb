@@ -1,6 +1,6 @@
 # Replaces the ballots of one vote round from the editor's vote table.
-# A blank or missing choice means the player did not vote: the row is removed, and the tally falls back
-# to the last nominee for that player (4.4.9). An invalid choice is dropped rather than raised on.
+# A blank or missing choice means the player did not vote: the row is removed, and the round stays pending
+# until every alive player has a ballot. An invalid choice is dropped rather than raised on.
 class SaveBreakdownVotesService
   def self.call(round:, ballots:)
     new(round, ballots).call

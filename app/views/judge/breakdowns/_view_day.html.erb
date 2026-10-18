@@ -18,7 +18,7 @@
   <div class="mt-3">
     <p class="font-medium">
       <%= t("game_breakdowns.vote_round_kinds.#{result.round.kind}", number: result.round.number) %>
-      <span class="text-gray-500 font-normal">— <%= t("game_breakdowns.vote_outcomes.#{result.outcome}") %></span>
+      <span class="text-gray-500 font-normal">— <%= breakdown_vote_outcome_label(result) %></span>
     </p>
 
     <% result.round.justification_speeches.each do |speech| %>

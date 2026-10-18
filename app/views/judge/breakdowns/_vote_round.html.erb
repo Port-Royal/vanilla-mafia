@@ -23,7 +23,7 @@
   <% end %>
 
   <div id="<%= dom_id(round) %>_summary" class="mt-2 text-sm">
-    <p class="font-medium"><%= t("game_breakdowns.vote_outcomes.#{result.outcome}") %></p>
+    <p class="font-medium"><%= breakdown_vote_outcome_label(result) %></p>
     <ul class="text-gray-600">
       <% result.tally.each do |key, voters| %>
         <li><%= breakdown_tally_label(round, key, seat_names) %>: <%= voters.size %> <span class="text-gray-400">(<%= voters.join(", ").presence || "—" %>)</span></li>

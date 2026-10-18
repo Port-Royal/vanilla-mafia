@@ -9,10 +9,15 @@ class GameBreakdown::Timeline
   Nomination = Data.define(:actor_seat, :target_seat)
   ExpectedStep = Data.define(:kind, :seats)
   NextPhase = Data.define(:position, :kind, :farewell_seat, :speech_order)
-  RoundResult = Data.define(:round, :candidates, :tally, :outcome, :leaders, :eliminated) do
+  RoundResult = Data.define(:round, :candidates, :tally, :outcome, :leaders, :eliminated, :missing_voters) do
     # A revote tied among all of its candidates: the next round is a lift (4.4.13.3).
     def full_revote_tie?
       outcome == :tie && round.revote? && leaders.size == candidates.size
+    end
+
+    # The judge has started entering votes, but some alive players have no ballot yet.
+    def awaiting_votes?
+      outcome == :pending && tally.any?
     end
   end
   PhaseState = Data.define(

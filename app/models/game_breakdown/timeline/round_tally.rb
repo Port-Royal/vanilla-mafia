@@ -14,13 +14,16 @@ class GameBreakdown::Timeline::RoundTally
 
   private
 
-  # A player who did not vote is counted for the last nominee (4.4.9); votes for non-candidates are ignored.
+  # The round stays pending until every alive player has a ballot: a player who did not vote is counted for the
+  # last nominee (4.4.9) only once the judge records it, so no outcome appears while the votes are being entered.
+  # Votes for non-candidates are ignored.
   def candidate_result
     tally = @candidates.index_with { [] }
-    @voters.each do |voter|
-      choice = votes_by_voter.key?(voter) ? votes_by_voter[voter].candidate_seat : @candidates.last
+    (@voters & votes_by_voter.keys).each do |voter|
+      choice = votes_by_voter[voter].candidate_seat
       tally[choice] << voter if tally.key?(choice)
     end
+    return build(tally: tally, outcome: :pending, leaders: [], eliminated: []) if missing_voters.any?
 
     most_votes = tally.values.map(&:size).max
     leaders = @candidates.select { |seat| tally[seat].size == most_votes }
@@ -45,9 +48,14 @@ class GameBreakdown::Timeline::RoundTally
     @votes_by_voter ||= @round.votes.select { |vote| @voters.include?(vote.voter_seat) }.index_by(&:voter_seat)
   end
 
+  def missing_voters
+    @voters - votes_by_voter.keys
+  end
+
   def build(tally:, outcome:, leaders:, eliminated:)
     GameBreakdown::Timeline::RoundResult.new(
-      round: @round, candidates: @candidates, tally: tally, outcome: outcome, leaders: leaders, eliminated: eliminated
+      round: @round, candidates: @candidates, tally: tally, outcome: outcome, leaders: leaders, eliminated: eliminated,
+      missing_voters: missing_voters
     )
   end
 end

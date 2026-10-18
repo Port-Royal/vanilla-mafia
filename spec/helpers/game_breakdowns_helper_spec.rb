@@ -166,9 +166,43 @@ RSpec.describe GameBreakdownsHelper do
       expect(helper.breakdown_vote_value(result, 1)).to eq(4)
     end
 
-    # 4.4.9: a player who did not vote is counted for the last nominee.
-    it "falls back to the last nominee" do
-      expect(helper.breakdown_vote_value(result, 3)).to eq(5)
+    it "leaves a voter without a ballot on no vote" do
+      expect(helper.breakdown_vote_value(result, 3)).to be_nil
+    end
+  end
+
+  describe "#breakdown_vote_outcome_label" do
+    let(:breakdown) { create(:game_breakdown) }
+    let(:zero_round) { breakdown.phases.find_by(position: 0) }
+    let(:result) { GameBreakdown::Timeline.new(breakdown).state_for(zero_round).vote_rounds.first }
+
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+    end
+
+    context "when no ballot is recorded" do
+      before { vote(zero_round, "main") }
+
+      it "says the votes are not recorded" do
+        expect(helper.breakdown_vote_outcome_label(result)).to eq("Голоса не расставлены")
+      end
+    end
+
+    context "when some players have not voted yet" do
+      before { vote(zero_round, "main", [ 1, 2, 3 ] => 4) }
+
+      it "counts the players without a ballot" do
+        expect(helper.breakdown_vote_outcome_label(result)).to eq("Ещё не проголосовали: 7")
+      end
+    end
+
+    context "when everyone voted" do
+      before { vote(zero_round, "main", (1..6).to_a => 4, (7..10).to_a => 5) }
+
+      it "names the outcome" do
+        expect(helper.breakdown_vote_outcome_label(result)).to eq("Игрок покидает игру")
+      end
     end
   end
 
