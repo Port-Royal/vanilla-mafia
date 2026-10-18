@@ -8,7 +8,7 @@
   <summary class="text-xs text-maroon cursor-pointer"><%= t("game_breakdowns.editor.add_move") %></summary>
   <%= form_with model: BreakdownMove.new(breakdown_move_defaults(context, state)),
         url: judge_breakdown_moves_path(@breakdown, context.move_context_param),
-        method: :post, scope: :breakdown_move do |form| %>
+        method: :post, scope: :breakdown_move, namespace: dom_id(context, :new_move) do |form| %>
     <%= render "judge/breakdowns/move_fields", form: form, state: state, seat_names: seat_names,
           submit_label: t("game_breakdowns.editor.save_move") %>
   <% end %>

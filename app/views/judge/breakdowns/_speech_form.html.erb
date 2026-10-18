@@ -2,7 +2,7 @@
   <summary class="text-xs text-maroon cursor-pointer"><%= t("game_breakdowns.editor.add_speech") %></summary>
   <%= form_with model: BreakdownSpeech.new(speaker_seat: state.speech_order.first),
         url: judge_breakdown_speeches_path(@breakdown, breakdown_phase_id: state.phase.id),
-        method: :post, scope: :breakdown_speech do |form| %>
+        method: :post, scope: :breakdown_speech, namespace: dom_id(state.phase, :new_speech) do |form| %>
     <div class="mt-2 flex flex-wrap items-end gap-2">
       <label class="text-xs text-gray-600">
         <%= BreakdownSpeech.human_attribute_name(:speaker_seat) %>
