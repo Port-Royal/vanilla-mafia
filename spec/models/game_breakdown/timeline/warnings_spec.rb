@@ -881,8 +881,59 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
 
       it "warns about each missing role" do
         expect(timeline.warnings_for(breakdown)).to eq([
-          warning(:missing_mafia, breakdown), warning(:missing_don, breakdown), warning(:missing_sheriff, breakdown)
+          warning(:missing_mafia, breakdown, count: 0, expected: 2),
+          warning(:missing_don, breakdown, count: 0, expected: 1),
+          warning(:missing_sheriff, breakdown, count: 0, expected: 1)
         ])
+      end
+
+      it "says how many mafia members are set" do
+        expect(timeline.warnings_for(breakdown).first.message).to eq("Указано мафиози: 0 из 2")
+      end
+    end
+
+    context "when an open breakdown has one mafia member" do
+      let!(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+
+      before { assign_roles(mafia: [ 1 ], don: 3, sheriff: 4) }
+
+      it "warns that a mafia member is missing" do
+        expect(timeline.warnings_for(breakdown)).to eq([ warning(:missing_mafia, breakdown, count: 1, expected: 2) ])
+      end
+
+      it "says how many mafia members are set" do
+        expect(timeline.warnings_for(breakdown).first.message).to eq("Указано мафиози: 1 из 2")
+      end
+    end
+
+    context "when an open breakdown has three mafia members" do
+      let!(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+
+      before { assign_roles(mafia: [ 1, 2, 5 ], don: 3, sheriff: 4) }
+
+      it "warns about the extra mafia member" do
+        expect(timeline.warnings_for(breakdown)).to eq([ warning(:too_many_mafia, breakdown, count: 3, expected: 2) ])
+      end
+
+      it "says how many mafia members are set" do
+        expect(timeline.warnings_for(breakdown).first.message).to eq("Лишние мафиози: указано 3 из 2")
+      end
+    end
+
+    context "when an open breakdown has two dons and two sheriffs" do
+      let!(:breakdown) { create(:game_breakdown, roles_mode: "open") }
+
+      before { assign_roles(mafia: [ 1, 2 ], don: [ 3, 5 ], sheriff: [ 4, 6 ]) }
+
+      it "warns about the extra don and sheriff" do
+        expect(timeline.warnings_for(breakdown)).to eq([
+          warning(:too_many_don, breakdown, count: 2, expected: 1),
+          warning(:too_many_sheriff, breakdown, count: 2, expected: 1)
+        ])
+      end
+
+      it "names the extra roles" do
+        expect(timeline.warnings_for(breakdown).map(&:message)).to eq([ "Указано несколько донов: 2", "Указано несколько шерифов: 2" ])
       end
     end
 
@@ -905,7 +956,7 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
       end
 
       it "warns about the don" do
-        expect(timeline.warnings_for(breakdown)).to eq([ warning(:missing_don, breakdown) ])
+        expect(timeline.warnings_for(breakdown)).to eq([ warning(:missing_don, breakdown, count: 0, expected: 1) ])
       end
     end
 

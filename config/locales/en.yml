@@ -685,9 +685,12 @@ en:
       voting_after_removal: "Voting after a player removal"
       lift_forbidden: "Lift is forbidden"
       unexpected_vote_round: "Voting does not match the game flow"
-      missing_mafia: "Mafia members are not set"
+      missing_mafia: "Mafia members set: %{count} of %{expected}"
       missing_don: "Don is not set"
       missing_sheriff: "Sheriff is not set"
+      too_many_mafia: "Too many mafia members: %{count} of %{expected}"
+      too_many_don: "More than one don: %{count}"
+      too_many_sheriff: "More than one sheriff: %{count}"
   errors:
     messages:
       already_claimed: "is already claimed"

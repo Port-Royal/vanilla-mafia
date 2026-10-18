@@ -1,6 +1,6 @@
 # Collects non-blocking rule warnings for a replayed breakdown; they never block saving.
 class GameBreakdown::Timeline::Warnings
-  REQUIRED_ROLES = %w[mafia don sheriff].freeze
+  ROLE_COUNTS = { "mafia" => 2, "don" => 1, "sheriff" => 1 }.freeze
 
   def initialize(breakdown, phases)
     @breakdown = breakdown
@@ -20,12 +20,16 @@ class GameBreakdown::Timeline::Warnings
       GameBreakdown::Timeline::VotingWarnings.new(state).all
   end
 
-  # Open roles mode needs the mafia, the don and the sheriff to derive checks and the result.
+  # Open roles mode needs two mafia members, the don and the sheriff to derive checks and the result.
   def role_warnings
     return [] unless @breakdown.open?
 
-    (REQUIRED_ROLES - role_seats.keys).map do |role|
-      GameBreakdown::Timeline::Warning.new(code: :"missing_#{role}", record: @breakdown)
+    ROLE_COUNTS.filter_map do |role, expected|
+      count = role_seats.fetch(role, []).size
+      next if count == expected
+
+      code = count < expected ? :"missing_#{role}" : :"too_many_#{role}"
+      GameBreakdown::Timeline::Warning.new(code: code, record: @breakdown, details: { count: count, expected: expected })
     end
   end
 
