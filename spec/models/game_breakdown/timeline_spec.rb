@@ -287,6 +287,14 @@ RSpec.describe GameBreakdown::Timeline do
         expect(round_result.outcome).to eq(:pending)
       end
 
+      it "is not awaiting votes yet" do
+        expect(round_result.awaiting_votes?).to be false
+      end
+
+      it "lists every alive player as not voted" do
+        expect(round_result.missing_voters).to eq((1..10).to_a)
+      end
+
       it "expects nothing" do
         expect(zero_round_state.expected_steps).to be_empty
       end
@@ -303,6 +311,10 @@ RSpec.describe GameBreakdown::Timeline do
 
       it "tallies voters per candidate" do
         expect(round_result.tally).to eq(5 => [ 1, 2, 3, 4, 6, 7 ], 3 => [ 5, 8, 9, 10 ])
+      end
+
+      it "has no missing voters" do
+        expect(round_result).to have_attributes(missing_voters: [], awaiting_votes?: false)
       end
 
       it "eliminates the leader" do
@@ -330,6 +342,8 @@ RSpec.describe GameBreakdown::Timeline do
       end
     end
 
+    # A non-voter is counted for the last nominee (4.4.9) only when the judge records it: the round waits for
+    # every alive player's ballot instead of resolving halfway through entering the votes.
     context "when some players did not vote" do
       let(:round_result) { zero_round_state.vote_rounds.first }
 
@@ -339,8 +353,105 @@ RSpec.describe GameBreakdown::Timeline do
         vote(zero_round, "main", [ 1, 2, 3, 4 ] => 5)
       end
 
-      it "counts their votes for the last nominee" do
-        expect(round_result.tally).to eq(5 => [ 1, 2, 3, 4 ], 3 => [ 5, 6, 7, 8, 9, 10 ])
+      it "tallies only the cast votes" do
+        expect(round_result.tally).to eq(5 => [ 1, 2, 3, 4 ], 3 => [])
+      end
+
+      it "is pending" do
+        expect(round_result).to have_attributes(outcome: :pending, leaders: [], eliminated: [])
+      end
+
+      it "lists the players who have not voted" do
+        expect(round_result.missing_voters).to eq([ 5, 6, 7, 8, 9, 10 ])
+      end
+
+      it "is awaiting votes" do
+        expect(round_result.awaiting_votes?).to be true
+      end
+
+      it "expects nothing" do
+        expect(zero_round_state.expected_steps).to be_empty
+      end
+    end
+
+    context "when ballots were entered out of seat order" do
+      let(:round_result) { zero_round_state.vote_rounds.first }
+
+      before do
+        nominate(zero_round, 1, 5)
+        nominate(zero_round, 2, 3)
+        vote(zero_round, "main", [ 9, 2 ] => 5, [ 7, 1 ] => 3)
+      end
+
+      it "lists voters in seat order" do
+        expect(round_result.tally).to eq(5 => [ 2, 9 ], 3 => [ 1, 7 ])
+      end
+    end
+
+    context "when everyone voted in a round without candidates" do
+      let(:round_result) { zero_round_state.vote_rounds.first }
+
+      before { vote(zero_round, "main", (1..10).to_a => 5) }
+
+      it "is pending" do
+        expect(round_result).to have_attributes(outcome: :pending, tally: {}, leaders: [])
+      end
+    end
+
+    context "when all but one player voted" do
+      let(:round_result) { zero_round_state.vote_rounds.first }
+
+      before do
+        nominate(zero_round, 1, 5)
+        nominate(zero_round, 2, 3)
+        vote(zero_round, "main", [ 1, 2, 3, 4, 6, 7 ] => 5, [ 5, 8, 9 ] => 3)
+      end
+
+      it "is pending" do
+        expect(round_result).to have_attributes(outcome: :pending, leaders: [], eliminated: [], missing_voters: [ 10 ])
+      end
+
+      it "eliminates nobody" do
+        expect(zero_round_state.eliminations).to be_empty
+      end
+
+      it "expects no farewell speech" do
+        expect(zero_round_state.expected_steps).to be_empty
+      end
+    end
+
+    context "when all but one player voted and the votes are tied" do
+      before do
+        nominate(zero_round, 1, 5)
+        nominate(zero_round, 2, 3)
+        vote(zero_round, "main", [ 1, 2, 3, 4 ] => 5, [ 5, 6, 7, 8 ] => 3, [ 9 ] => 5)
+      end
+
+      it "expects no revote" do
+        expect(zero_round_state.expected_steps).to be_empty
+      end
+    end
+
+    context "when a player is removed during the voting" do
+      let(:round) { vote(zero_round, "main", [ 1, 2, 3 ] => 5) }
+      let(:round_result) { zero_round_state.vote_rounds.first }
+
+      before do
+        nominate(zero_round, 1, 5)
+        nominate(zero_round, 2, 3)
+        create(:breakdown_move, :removal, :in_vote_round, breakdown_vote_round: round, actor_seat: 4)
+      end
+
+      it "leaves the round unresolved" do
+        expect(round_result).to have_attributes(outcome: :pending, eliminated: [])
+      end
+
+      it "expects nothing" do
+        expect(zero_round_state.expected_steps).to be_empty
+      end
+
+      it "records only the removal" do
+        expect(zero_round_state.eliminations).to eq([ elimination(4, :removal) ])
       end
     end
 

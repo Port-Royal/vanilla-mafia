@@ -50,11 +50,16 @@ module GameBreakdownsHelper
     breakdown_seat_label(seat_names, key)
   end
 
+  # A voter without a ballot stays on "не голосовал": the judge records a non-voter's vote explicitly (4.4.9).
   def breakdown_vote_value(result, voter)
     vote = breakdown_vote_for(result, voter)
-    return vote.candidate_seat if vote
+    vote.candidate_seat if vote
+  end
 
-    result.candidates.last
+  def breakdown_vote_outcome_label(result)
+    return t("game_breakdowns.vote_outcomes.awaiting", count: result.missing_voters.size) if result.awaiting_votes?
+
+    t("game_breakdowns.vote_outcomes.#{result.outcome}")
   end
 
   def breakdown_lift_value(result, voter)

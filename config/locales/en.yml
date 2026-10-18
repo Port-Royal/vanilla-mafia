@@ -592,6 +592,7 @@ en:
       lift: "Lift %{number}"
     vote_outcomes:
       pending: "No votes recorded"
+      awaiting: "Not voted yet: %{count}"
       eliminated: "Player leaves the game"
       tie: "Tie"
       lift_passed: "Lift passed"

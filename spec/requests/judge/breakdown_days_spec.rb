@@ -62,6 +62,45 @@ RSpec.describe "Judge::Breakdowns day editing" do
     end
   end
 
+  describe "GET /judge/breakdowns/:id/edit with a voting in progress" do
+    let(:candidate_selects) { response.body.scan(%r{<select[^>]*name="votes\[\d+\]\[candidate_seat\]"[^>]*>.*?</select>}m) }
+
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+    end
+
+    context "when the round has no ballots" do
+      before do
+        vote(zero_round, "main")
+        get edit_judge_breakdown_path(breakdown)
+      end
+
+      it "leaves every voter on no vote" do
+        expect(candidate_selects.grep(/selected/)).to be_empty
+      end
+
+      it "reports that no votes are recorded" do
+        expect(response.body).to include(I18n.t("game_breakdowns.vote_outcomes.pending"))
+      end
+    end
+
+    context "when some players have voted" do
+      before do
+        vote(zero_round, "main", [ 1, 2, 3, 4 ] => 4)
+        get edit_judge_breakdown_path(breakdown)
+      end
+
+      it "selects only the stored ballots" do
+        expect(candidate_selects.grep(/selected/).size).to eq(4)
+      end
+
+      it "reports how many players have not voted" do
+        expect(response.body).to include(I18n.t("game_breakdowns.vote_outcomes.awaiting", count: 6))
+      end
+    end
+  end
+
   describe "POST /judge/breakdowns/:breakdown_id/speeches" do
     let(:params) { { breakdown_phase_id: zero_round.id, breakdown_speech: { speaker_seat: 6, kind: "regular" } } }
 
@@ -285,6 +324,19 @@ RSpec.describe "Judge::Breakdowns day editing" do
             params: ballots((1..5).index_with { 4 }.merge((6..10).index_with { 5 }))
 
       expect(zero_round.vote_rounds.reload.map(&:kind)).to eq([ "main", "revote" ])
+    end
+
+    it "creates no farewell speech while players still have no ballot" do
+      patch judge_breakdown_vote_round_path(breakdown, round),
+            params: ballots((1..6).index_with { 4 }.merge((7..9).index_with { 5 })).deep_merge(votes: { 10 => { candidate_seat: "" } })
+
+      expect(zero_round.speeches.reload.select(&:farewell?)).to be_empty
+    end
+
+    it "creates no revote while players still have no ballot" do
+      patch judge_breakdown_vote_round_path(breakdown, round), params: ballots((1..4).index_with { 4 }.merge((5..8).index_with { 5 }))
+
+      expect(zero_round.vote_rounds.reload.map(&:kind)).to eq([ "main" ])
     end
 
     it "stores lift ballots" do

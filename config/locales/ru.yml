@@ -567,6 +567,7 @@ ru:
       lift: "Подъём %{number}"
     vote_outcomes:
       pending: "Голоса не расставлены"
+      awaiting: "Ещё не проголосовали: %{count}"
       eliminated: "Игрок покидает игру"
       tie: "Равенство голосов"
       lift_passed: "Подъём состоялся"
