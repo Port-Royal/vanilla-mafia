@@ -33,10 +33,10 @@ RSpec.describe "Admin Games CRUD" do
   describe "create" do
     it "creates a new game" do
       visit "/avo/resources/games/new"
-      select "Тестовый турнир", from: "Competition"
-      fill_in "Game number", with: "1"
-      fill_in "Name", with: "Тестовая игра"
-      select "peace_victory", from: "Result"
+      select "Тестовый турнир", from: Game.human_attribute_name(:competition)
+      fill_in Game.human_attribute_name(:game_number), with: "1"
+      fill_in Game.human_attribute_name(:name), with: "Тестовая игра"
+      select "peace_victory", from: Game.human_attribute_name(:result)
       click_on "Сохранить"
 
       expect(Game.find_by(name: "Тестовая игра")).to have_attributes(
@@ -51,7 +51,7 @@ RSpec.describe "Admin Games CRUD" do
 
     it "updates the game" do
       visit "/avo/resources/games/#{game.id}/edit"
-      fill_in "Name", with: "Новое"
+      fill_in Game.human_attribute_name(:name), with: "Новое"
       click_on "Сохранить"
 
       expect(game.reload.name).to eq("Новое")

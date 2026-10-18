@@ -28,8 +28,8 @@ RSpec.describe "Admin Players CRUD" do
   describe "create" do
     it "creates a new player" do
       visit "/avo/resources/players/new"
-      fill_in "Name", with: "Новый Игрок"
-      fill_in "Comment", with: "Новый комментарий"
+      fill_in Player.human_attribute_name(:name), with: "Новый Игрок"
+      fill_in Player.human_attribute_name(:comment), with: "Новый комментарий"
       click_on "Сохранить"
 
       expect(Player.find_by(name: "Новый Игрок")).to have_attributes(comment: "Новый комментарий")
@@ -41,7 +41,7 @@ RSpec.describe "Admin Players CRUD" do
 
     it "updates the player" do
       visit "/avo/resources/players/#{player.id}/edit"
-      fill_in "Name", with: "Новое Имя"
+      fill_in Player.human_attribute_name(:name), with: "Новое Имя"
       click_on "Сохранить"
 
       expect(player.reload.name).to eq("Новое Имя")

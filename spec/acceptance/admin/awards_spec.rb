@@ -29,10 +29,10 @@ RSpec.describe "Admin Awards CRUD" do
   describe "create" do
     it "creates a new award" do
       visit "/avo/resources/awards/new"
-      fill_in "Title", with: "Новая награда"
-      fill_in "Description", with: "Описание награды"
-      check "Staff"
-      fill_in "Position", with: "2"
+      fill_in Award.human_attribute_name(:title), with: "Новая награда"
+      fill_in Award.human_attribute_name(:description), with: "Описание награды"
+      check Award.human_attribute_name(:staff)
+      fill_in Award.human_attribute_name(:position), with: "2"
       click_on "Сохранить"
 
       expect(Award.find_by(title: "Новая награда")).to have_attributes(
@@ -46,7 +46,7 @@ RSpec.describe "Admin Awards CRUD" do
 
     it "updates the award" do
       visit "/avo/resources/awards/#{award.id}/edit"
-      fill_in "Title", with: "Обновлённая награда"
+      fill_in Award.human_attribute_name(:title), with: "Обновлённая награда"
       click_on "Сохранить"
 
       expect(award.reload.title).to eq("Обновлённая награда")
