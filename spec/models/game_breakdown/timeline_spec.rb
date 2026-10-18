@@ -241,6 +241,31 @@ RSpec.describe GameBreakdown::Timeline do
     end
   end
 
+  describe "day speech order" do
+    let!(:second_day) { day(2) }
+    let(:state) { timeline.state_for(second_day) }
+    let!(:night_farewell) { speech(second_day, 7, kind: "farewell") }
+    let!(:first_regular) { speech(second_day, 1) }
+    let!(:second_regular) { speech(second_day, 2) }
+    let!(:vote_farewell) { speech(second_day, 4, kind: "farewell") }
+
+    before do
+      night(1, killed: 7)
+      create(:breakdown_move, :nomination, breakdown_speech: first_regular, actor_seat: 1, target_seat: 4)
+      create(:breakdown_move, :nomination, breakdown_speech: second_regular, actor_seat: 2, target_seat: 5)
+      vote(second_day, "main", [ 1, 2, 3, 4, 5, 6 ] => 4, [ 8, 9, 10 ] => 5)
+      speech(second_day, 5, kind: "justification", round: second_day.vote_rounds.first)
+    end
+
+    it "opens with the night farewell and the regular speeches" do
+      expect(state.opening_speeches).to eq([ night_farewell, first_regular, second_regular ])
+    end
+
+    it "closes with the farewell speeches after the voting" do
+      expect(state.closing_speeches).to eq([ vote_farewell ])
+    end
+  end
+
   describe "voting" do
     context "when a zero round has a single nominee" do
       before { nominate(zero_round, 1, 5) }

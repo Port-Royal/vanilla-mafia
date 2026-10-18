@@ -1,0 +1,13 @@
+<% if speeches.any? %>
+  <ul class="space-y-2<%= " mt-3" if local_assigns[:spaced] %>">
+    <% speeches.each do |speech| %>
+      <li>
+        <div class="flex flex-wrap items-baseline gap-2">
+          <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
+          <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
+        </div>
+        <%= render "judge/breakdowns/view_moves", moves: speech.moves, seat_names: seat_names %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

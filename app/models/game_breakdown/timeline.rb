@@ -20,12 +20,27 @@ class GameBreakdown::Timeline
       outcome == :pending && tally.any?
     end
   end
-  PhaseState = Data.define(
+  # A named subclass rather than a `Data.define` block, so mutant can match its methods.
+  class PhaseState < Data.define(
     :phase, :label, :alive_at_start, :alive_at_end, :eliminations, :starter, :speech_order, :farewell_seat,
     :nominations, :candidates, :vote_rounds, :voting_cancelled, :expected_steps
-  ) do
+  )
     def voting_cancelled?
       voting_cancelled
+    end
+
+    # The killed seat's farewell and the regular speeches come before the voting; justification speeches belong to their round.
+    def opening_speeches
+      phase.speeches.reject { |speech| speech.justification? || post_vote_farewell?(speech) }
+    end
+
+    # Farewell speeches of seats that left after the opening one follow the voting.
+    def closing_speeches
+      phase.speeches.select { |speech| post_vote_farewell?(speech) }
+    end
+
+    def post_vote_farewell?(speech)
+      speech.farewell? && speech.speaker_seat != farewell_seat
     end
   end
 
