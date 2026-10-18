@@ -45,7 +45,7 @@
       <% BreakdownMove::BEST_MOVE_SEATS_COUNT.each do |index| %>
         <%= select_tag "breakdown_move[best_move_seats][]",
               options_for_select(GameBreakdown::SEAT_NUMBERS.to_a, form.object.best_move_seats.to_a[index - 1]),
-              include_blank: true, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+              include_blank: true, id: form.field_id(:best_move_seats, index), class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
       <% end %>
     </div>
   </div>

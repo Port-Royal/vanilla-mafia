@@ -13,7 +13,7 @@
         <%= select_tag "breakdown_phase[outcome]",
               options_for_select(breakdown_night_outcome_options(alive, seat_names),
                                  breakdown_night_outcome_value(state.phase)),
-              include_blank: t("game_breakdowns.editor.not_recorded"),
+              include_blank: t("game_breakdowns.editor.not_recorded"), id: "#{dom_id(state.phase)}_outcome",
               class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
       </label>
     </div>
@@ -34,7 +34,7 @@
                             alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
                           breakdown_shot_value(breakdown_night_action(actions, "mafia_shot", shooter))
                         ),
-                        include_blank: t("game_breakdowns.editor.not_recorded"),
+                        include_blank: t("game_breakdowns.editor.not_recorded"), id: "#{dom_id(state.phase)}_shots_#{shooter}",
                         class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
                 </label>
               <% end %>
@@ -55,7 +55,7 @@
             <%= select_tag "checks[#{kind}]",
                   options_for_select(alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
                                      checked_seat.to_s),
-                  include_blank: t("game_breakdowns.editor.not_recorded"),
+                  include_blank: t("game_breakdowns.editor.not_recorded"), id: "#{dom_id(state.phase)}_checks_#{kind}",
                   class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
             <span class="text-xs text-gray-500 whitespace-nowrap">
               <%= breakdown_check_result(kind, roles_by_seat[checked_seat]) %>

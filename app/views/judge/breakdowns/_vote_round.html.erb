@@ -40,12 +40,12 @@
           <% if round.lift? %>
             <%= select_tag "votes[#{voter}][for_lift]",
                   options_for_select(breakdown_lift_options, breakdown_lift_value(result, voter)),
-                  include_blank: t("game_breakdowns.editor.no_vote"),
+                  include_blank: t("game_breakdowns.editor.no_vote"), id: "#{dom_id(round)}_votes_#{voter}_for_lift",
                   class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
           <% else %>
             <%= select_tag "votes[#{voter}][candidate_seat]",
                   options_for_select(result.candidates, breakdown_vote_value(result, voter)),
-                  include_blank: t("game_breakdowns.editor.no_vote"),
+                  include_blank: t("game_breakdowns.editor.no_vote"), id: "#{dom_id(round)}_votes_#{voter}_candidate_seat",
                   class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
           <% end %>
         </label>
