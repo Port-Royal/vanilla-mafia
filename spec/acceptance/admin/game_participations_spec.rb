@@ -31,11 +31,11 @@ RSpec.describe "Admin Game Participations CRUD" do
   describe "create" do
     it "creates a new game participation" do
       visit "/avo/resources/game_participations/new"
-      select game.full_name, from: "Game"
-      select player.name, from: "Player"
-      fill_in "Plus", with: "4.5"
-      fill_in "Minus", with: "0.5"
-      check "Win"
+      select game.full_name, from: GameParticipation.human_attribute_name(:game)
+      select player.name, from: GameParticipation.human_attribute_name(:player)
+      fill_in GameParticipation.human_attribute_name(:plus), with: "4.5"
+      fill_in GameParticipation.human_attribute_name(:minus), with: "0.5"
+      check GameParticipation.human_attribute_name(:win)
       click_on "Сохранить"
 
       expect(GameParticipation.last).to have_attributes(game_id: game.id, plus: 4.5, minus: 0.5, win: true)
@@ -47,7 +47,7 @@ RSpec.describe "Admin Game Participations CRUD" do
 
     it "updates the participation" do
       visit "/avo/resources/game_participations/#{participation.id}/edit"
-      fill_in "Plus", with: "5.0"
+      fill_in GameParticipation.human_attribute_name(:plus), with: "5.0"
       click_on "Сохранить"
 
       expect(participation.reload.plus).to eq(5.0)
