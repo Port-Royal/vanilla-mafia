@@ -101,6 +101,36 @@ RSpec.describe "Judge::Breakdowns day editing" do
     end
   end
 
+  describe "GET /judge/breakdowns/:id/edit day order" do
+    let(:second_day) { day(2) }
+    let!(:night_farewell) { speech(second_day, 7, kind: "farewell") }
+    let!(:regular) { speech(second_day, 1) }
+    let!(:round) { vote(second_day, "main", [ 1, 2, 3, 4, 5, 6 ] => 4, [ 8, 9, 10 ] => 5) }
+    let!(:vote_farewell) { speech(second_day, 4, kind: "farewell") }
+    let(:blocks) { [ night_farewell, regular, round, vote_farewell ].map { |record| ActionView::RecordIdentifier.dom_id(record) } }
+    let(:positions) { blocks.map { |id| response.body.index(%(id="#{id}")) } }
+
+    before do
+      night(1, killed: 7)
+      create(:breakdown_move, :nomination, breakdown_speech: regular, actor_seat: 1, target_seat: 4)
+      nominate(second_day, 2, 5)
+      get edit_judge_breakdown_path(breakdown)
+    end
+
+    it "puts the voted-out farewell after the voting" do
+      expect(positions).to eq(positions.compact.sort)
+    end
+
+    it "renders every block" do
+      expect(positions).to all(be_present)
+    end
+
+    it "keeps the add-speech form after the closing farewell" do
+      form = response.body.index(%(id="#{ActionView::RecordIdentifier.dom_id(second_day, :new_speech)}_breakdown_speech_speaker_seat"))
+      expect(form).to be > positions.last
+    end
+  end
+
   describe "POST /judge/breakdowns/:breakdown_id/speeches" do
     let(:params) { { breakdown_phase_id: zero_round.id, breakdown_speech: { speaker_seat: 6, kind: "regular" } } }
 

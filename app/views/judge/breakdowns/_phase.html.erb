@@ -13,12 +13,16 @@
       <%= render "judge/breakdowns/night", state: state, seat_names: seat_names %>
     <% else %>
       <div class="divide-y">
-        <% state.phase.speeches.reject(&:justification?).each do |speech| %>
+        <% state.opening_speeches.each do |speech| %>
           <%= render "judge/breakdowns/speech", speech: speech, state: state, seat_names: seat_names %>
         <% end %>
 
         <% state.vote_rounds.each do |result| %>
           <%= render "judge/breakdowns/vote_round", result: result, state: state, seat_names: seat_names %>
+        <% end %>
+
+        <% state.closing_speeches.each do |speech| %>
+          <%= render "judge/breakdowns/speech", speech: speech, state: state, seat_names: seat_names %>
         <% end %>
 
         <%= render "judge/breakdowns/speech_form", state: state, seat_names: seat_names %>

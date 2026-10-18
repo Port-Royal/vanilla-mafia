@@ -158,6 +158,31 @@ RSpec.describe "Judge::Breakdowns read-only view" do
       expect(response.body).to include(I18n.t("game_breakdowns.warnings.missing_sheriff"))
     end
 
+    context "when a day has a night farewell, a voting and a voted-out farewell" do
+      let(:second_day) { day(2) }
+      let(:farewell_label) { I18n.t("game_breakdowns.speech_kinds.farewell") }
+      let(:voting_label) { I18n.t("game_breakdowns.vote_round_kinds.main", number: 1) }
+      let(:farewells) { response.body.enum_for(:scan, farewell_label).map { Regexp.last_match.begin(0) } }
+
+      before do
+        night(1, killed: 7)
+        speech(second_day, 7, kind: "farewell")
+        nominate(second_day, 1, 4)
+        nominate(second_day, 2, 5)
+        vote(second_day, "main", [ 1, 2, 3, 4, 5, 6 ] => 4, [ 8, 9, 10 ] => 5)
+        speech(second_day, 4, kind: "farewell")
+        get judge_breakdown_path(breakdown)
+      end
+
+      it "shows the night farewell before the voting" do
+        expect(farewells.first).to be < response.body.index(voting_label)
+      end
+
+      it "shows the voted-out farewell after the voting" do
+        expect(farewells.last).to be > response.body.index(voting_label)
+      end
+    end
+
     context "with a night" do
       let!(:first_night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "kill", killed_seat: 4) }
 
