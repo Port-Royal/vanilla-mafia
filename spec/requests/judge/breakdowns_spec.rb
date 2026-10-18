@@ -349,7 +349,7 @@ RSpec.describe "Judge::Breakdowns" do
             headers: { "Accept" => "text/vnd.turbo-stream.html" }
 
       expect(response.body).to include('target="breakdown_seat_warnings"')
-        .and include(I18n.t("game_breakdowns.warnings.missing_mafia"))
+        .and include(I18n.t("game_breakdowns.warnings.missing_mafia", count: 0, expected: 2))
     end
 
     it "does not touch a seat of another breakdown" do

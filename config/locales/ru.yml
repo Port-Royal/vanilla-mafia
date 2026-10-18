@@ -660,9 +660,12 @@ ru:
       voting_after_removal: "Голосование после удаления игрока"
       lift_forbidden: "Подъём запрещён"
       unexpected_vote_round: "Голосование не соответствует ходу игры"
-      missing_mafia: "Не указаны мафиози"
+      missing_mafia: "Указано мафиози: %{count} из %{expected}"
       missing_don: "Не указан дон"
       missing_sheriff: "Не указан шериф"
+      too_many_mafia: "Лишние мафиози: указано %{count} из %{expected}"
+      too_many_don: "Указано несколько донов: %{count}"
+      too_many_sheriff: "Указано несколько шерифов: %{count}"
   errors:
     messages:
       already_claimed: "уже привязан"
