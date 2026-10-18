@@ -15,12 +15,18 @@ RSpec.describe AutosaveGameProtocolService do
       end
 
       it "includes error message" do
-        expect(result.errors).to include("Unknown scope: unknown")
+        expect(result.errors).to eq([ "Unknown scope: unknown" ])
       end
     end
 
     context "with game scope" do
       context "when field is allowed" do
+        let(:result) { described_class.call(game: game, scope: "game", field: "judge", value: "Другой") }
+
+        it "returns no errors" do
+          expect(result.errors).to eq([])
+        end
+
         it "updates judge" do
           result = described_class.call(game: game, scope: "game", field: "judge", value: "Новый")
 
@@ -57,6 +63,21 @@ RSpec.describe AutosaveGameProtocolService do
           expect(game.reload.competition_id).to eq(other.id)
         end
 
+        {
+          "table_number" => [ "3", 3 ],
+          "games_total" => [ "12", 12 ],
+          "hide_roles" => [ "1", true ],
+          "hide_game_info" => [ "1", true ],
+          "hide_table_info" => [ "1", true ]
+        }.each do |field, (value, stored)|
+          it "updates #{field}" do
+            result = described_class.call(game: game, scope: "game", field: field, value: value)
+
+            expect(result.success).to be true
+            expect(game.reload.public_send(field)).to eq(stored)
+          end
+        end
+
         it "updates game_number" do
           result = described_class.call(game: game, scope: "game", field: "game_number", value: "42")
 
@@ -73,7 +94,7 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes field error" do
-          expect(result.errors).to include("Field not allowed: id")
+          expect(result.errors).to eq([ "Field not allowed: id" ])
         end
       end
 
@@ -85,7 +106,7 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes validation errors" do
-          expect(result.errors).to be_present
+          expect(result.errors).to eq([ "Результат имеет непредусмотренное значение" ])
         end
       end
     end
@@ -117,6 +138,40 @@ RSpec.describe AutosaveGameProtocolService do
               game: game, scope: "participation", field: "player_name", value: "", seat: 3
             )
           }.to change(GameParticipation, :count).by(-1)
+        end
+
+        it "matches an existing player by stripped name" do
+          described_class.call(
+            game: game, scope: "participation", field: "player_name", value: "  Тестовый  ", seat: 1
+          )
+
+          expect(game.game_participations.find_by(seat: 1).player).to eq(player)
+        end
+
+        it "returns no errors when seating a player" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "player_name", value: "Тестовый", seat: 1
+          )
+
+          expect(result.errors).to eq([])
+        end
+
+        it "removes participation when value is nil" do
+          create(:game_participation, game: game, player: player, seat: 3)
+
+          expect {
+            described_class.call(
+              game: game, scope: "participation", field: "player_name", value: nil, seat: 3
+            )
+          }.to change(GameParticipation, :count).by(-1)
+        end
+
+        it "returns no errors when removing a participation" do
+          result = described_class.call(
+            game: game, scope: "participation", field: "player_name", value: "", seat: 10
+          )
+
+          expect(result.errors).to eq([])
         end
 
         it "succeeds when removing nonexistent participation" do
@@ -217,6 +272,7 @@ RSpec.describe AutosaveGameProtocolService do
           )
 
           expect(result.success).to be false
+          expect(result.errors).to eq([ "Лучший ход: места не может включать место самого игрока" ])
           expect(participation.reload.best_move_seats).to be_nil
         end
 
@@ -235,7 +291,7 @@ RSpec.describe AutosaveGameProtocolService do
           )
 
           expect(result.success).to be false
-          expect(result.errors).to include(a_string_matching(/Invalid status/))
+          expect(result.errors).to eq([ "Invalid status: vaporized" ])
           expect(participation.reload.status).to eq("alive")
         end
       end
@@ -254,7 +310,54 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes field error" do
-          expect(result.errors).to include("Field not allowed: game_id")
+          expect(result.errors).to eq([ "Field not allowed: game_id" ])
+        end
+      end
+
+      context "when the player already sits at another seat" do
+        let!(:participation) { create(:game_participation, game: game, player: player, seat: 6) }
+
+        let(:result) do
+          described_class.call(
+            game: game, scope: "participation", field: "player_name", value: "Тестовый", seat: 7
+          )
+        end
+
+        it "returns failure with validation errors" do
+          expect(result.success).to be false
+          expect(result.errors).to eq([ "Player уже существует" ])
+        end
+
+        it "does not seat the player twice" do
+          result
+          expect(game.game_participations.where(player: player).pluck(:seat)).to eq([ 6 ])
+        end
+      end
+
+      context "when seat is passed as a string" do
+        let!(:participation) { create(:game_participation, game: game, player: player, seat: 4) }
+
+        let(:result) do
+          described_class.call(
+            game: game, scope: "participation", field: "notes", value: "Строка", seat: "4"
+          )
+        end
+
+        it "updates the participation at that seat" do
+          expect(result).to have_attributes(success: true, errors: [])
+          expect(participation.reload.notes).to eq("Строка")
+        end
+      end
+
+      context "when seat is zero" do
+        let(:result) do
+          described_class.call(
+            game: game, scope: "participation", field: "role_code", value: "don", seat: 0
+          )
+        end
+
+        it "rejects the seat" do
+          expect(result.errors).to eq([ "Invalid seat" ])
         end
       end
 
@@ -270,7 +373,7 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes error message" do
-          expect(result.errors).to include("Invalid seat")
+          expect(result.errors).to eq([ "Invalid seat" ])
         end
       end
 
@@ -286,7 +389,7 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes error message" do
-          expect(result.errors).to include("Invalid seat")
+          expect(result.errors).to eq([ "Invalid seat" ])
         end
       end
 
@@ -302,7 +405,7 @@ RSpec.describe AutosaveGameProtocolService do
         end
 
         it "includes error message" do
-          expect(result.errors).to include("No participation at seat 9")
+          expect(result.errors).to eq([ "No participation at seat 9" ])
         end
       end
     end

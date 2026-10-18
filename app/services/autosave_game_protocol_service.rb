@@ -13,7 +13,7 @@ class AutosaveGameProtocolService
     @scope = scope
     @field = field
     @value = value
-    @seat = seat&.to_i
+    @seat = seat.to_i
   end
 
   def call
@@ -82,7 +82,7 @@ class AutosaveGameProtocolService
     participation = @game.game_participations.find_by(seat: @seat)
     return Result.new(success: false, errors: [ "No participation at seat #{@seat}" ]) unless participation
 
-    if @field == "status" && !GameParticipation.statuses.key?(@value.to_s)
+    if @field == "status" && !GameParticipation.statuses.key?(@value)
       return Result.new(success: false, errors: [ "Invalid status: #{@value}" ])
     end
 
