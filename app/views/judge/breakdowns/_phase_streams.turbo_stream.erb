@@ -5,6 +5,7 @@
     <%= render "judge/breakdowns/phase", state: state, seat_names: seat_names %>
   <% end %>
 <% end %>
+<%= render "judge/breakdowns/seat_fouls_streams" %>
 <%= turbo_stream.replace "breakdown_footer" do %>
   <%= render "judge/breakdowns/footer" %>
 <% end %>

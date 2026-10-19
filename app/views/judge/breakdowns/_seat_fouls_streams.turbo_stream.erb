@@ -1,0 +1,6 @@
+<%# A move anywhere in the game can change a player's foul count. %>
+<% @breakdown.seats.each do |seat| %>
+  <%= turbo_stream.replace "#{dom_id(seat)}_fouls" do %>
+    <%= render "judge/breakdowns/seat_fouls", seat: seat %>
+  <% end %>
+<% end %>

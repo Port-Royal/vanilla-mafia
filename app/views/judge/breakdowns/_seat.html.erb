@@ -14,5 +14,6 @@
     <%= form.collection_select :role_code, @roles, :code, :name, { include_blank: true },
           id: "#{dom_id(seat)}_role_code", class: "w-full sm:w-48 border border-gray-300 rounded-md px-2 py-1 text-sm" %>
     <%= render "judge/breakdowns/seat_link", seat: seat %>
+    <%= render "judge/breakdowns/seat_fouls", seat: seat %>
   </div>
 <% end %>

@@ -87,6 +87,11 @@ RSpec.describe GameBreakdownsHelper do
       expect(helper.breakdown_move_summary(move, seat_names)).to eq("Проверка в стол · 4 — Гость · красный")
     end
 
+    it "reads a foul as kind, running number and comment" do
+      move = build(:breakdown_move, :foul, actor_seat: 3, text: "жест")
+      expect(helper.breakdown_move_summary(move, seat_names, foul_number: 3)).to eq("Фол · 3-й · жест")
+    end
+
     it "appends the details after the kind" do
       move = build(:breakdown_move, :nomination, actor_seat: 1, target_seat: 4, text: nil)
 

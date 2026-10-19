@@ -14,7 +14,7 @@ A breakdown records the flow of the game as a chronology of **phases**, **game e
 
 - Phases: zero round → night 1 → round at N players → night 2 → … → «угадайка на троих».
 - Events: voting, mafia shots, don/sheriff checks, removals, farewell speeches of leaving players.
-- Moves: sheriff reveal to the table («Вскрытие в стол»), voiced checks, nominations, check requests, broken votes («Слом голосования»), «крышевание», best move, other.
+- Moves: sheriff reveal to the table («Вскрытие в стол»), voiced checks, nominations, check requests, broken votes («Слом голосования»), «крышевание», best move, fouls, other.
 
 ## Constraints and decisions
 
@@ -145,12 +145,17 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 | `split_break` | «Слом голосования»: votes differently from what the town agreed; may be added in a speech or in the vote round block | `target_seat` optional («В кого сломал»; the actor's own seat for 7.5.8) |
 | `protection` | «крышевание» | `target_seat` |
 | `best_move` | best move (night or day) | `best_move_seats` (1..3) |
+| `foul` | «Фол»: a foul given to a player (actor = the player fouled, editable — often not the speaker) | — |
 | `removal` | removal / disqualification; actor = removed player | `removal_reason` |
 | `other` | anything else | `text` |
 
 A `check_claim` may name a player who has already left the table (a sheriff may voice an old check); it does not warn.
 
 ## Timeline (computed, not stored)
+
+- **Fouls.** Counted per seat over the whole game, in the order the editor shows each day's blocks (speeches before
+  the voting, each vote round after its justification speeches, farewells after the voting). Shown next to each seat
+  and as the running number in the move summary («Фол · 3-й»). No warnings are tied to the count.
 
 `GameBreakdown::Timeline` replays phases in order and exposes, per phase:
 

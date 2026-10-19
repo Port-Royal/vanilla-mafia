@@ -33,8 +33,9 @@ module GameBreakdownsHelper
     t("game_breakdowns.move_field_labels").deep_stringify_keys
   end
 
-  def breakdown_move_summary(move, seat_names)
-    [ t("game_breakdowns.move_kinds.#{move.kind}"), breakdown_move_details(move, seat_names) ].compact_blank.join(" · ")
+  def breakdown_move_summary(move, seat_names, foul_number: nil)
+    foul = t("game_breakdowns.editor.foul_number", number: foul_number) if foul_number
+    [ t("game_breakdowns.move_kinds.#{move.kind}"), foul, breakdown_move_details(move, seat_names) ].compact_blank.join(" · ")
   end
 
   def breakdown_move_details(move, seat_names)

@@ -266,6 +266,39 @@ RSpec.describe GameBreakdown::Timeline do
     end
   end
 
+  describe "fouls" do
+    let!(:second_day) { day(2) }
+    let(:first_speech) { speech(zero_round, 1) }
+    let(:round) { vote(zero_round, "main") }
+    let(:closing) { speech(zero_round, 4, kind: "farewell") }
+    let!(:first_foul) { create(:breakdown_move, :foul, breakdown_speech: first_speech, actor_seat: 3) }
+    let!(:round_foul) { create(:breakdown_move, :foul, :in_vote_round, breakdown_vote_round: round, actor_seat: 3) }
+    let!(:closing_foul) { create(:breakdown_move, :foul, breakdown_speech: closing, actor_seat: 3) }
+    let!(:other_seat_foul) { create(:breakdown_move, :foul, breakdown_speech: first_speech, actor_seat: 6) }
+    let!(:next_day_foul) { create(:breakdown_move, :foul, breakdown_speech: speech(second_day, 2), actor_seat: 3) }
+
+    before do
+      night(1)
+      create(:breakdown_move, :nomination, breakdown_speech: first_speech, actor_seat: 3, target_seat: 5)
+    end
+
+    it "counts fouls per seat over the whole game" do
+      expect(timeline.fouls_by_seat).to eq(3 => 4, 6 => 1)
+    end
+
+    it "numbers each foul in the order the day's blocks are shown" do
+      expect([ first_foul, round_foul, closing_foul, next_day_foul ].map { |move| timeline.foul_number(move) }).to eq([ 1, 2, 3, 4 ])
+    end
+
+    it "numbers each seat separately" do
+      expect(timeline.foul_number(other_seat_foul)).to eq(1)
+    end
+
+    it "does not number other moves" do
+      expect(timeline.foul_number(first_speech.moves.find_by!(kind: "nomination"))).to be_nil
+    end
+  end
+
   describe "voting" do
     context "when a zero round has a single nominee" do
       before { nominate(zero_round, 1, 5) }

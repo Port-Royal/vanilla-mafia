@@ -8,6 +8,7 @@ class BreakdownMove < ApplicationRecord
     "split_break" => [],
     "protection" => %i[target_seat],
     "best_move" => %i[best_move_seats],
+    "foul" => [],
     "removal" => %i[removal_reason],
     "other" => %i[text]
   }.freeze

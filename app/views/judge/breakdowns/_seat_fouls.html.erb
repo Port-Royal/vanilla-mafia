@@ -1,0 +1,4 @@
+<% count = @timeline.fouls_by_seat.fetch(seat.number, 0) %>
+<span id="<%= dom_id(seat) %>_fouls" class="text-xs text-gray-500 whitespace-nowrap">
+  <%= t("game_breakdowns.editor.fouls", count: count) if count.positive? %>
+</span>
