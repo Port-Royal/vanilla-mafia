@@ -88,12 +88,14 @@ RSpec.describe SaveBreakdownVotesService do
   describe "a lift round" do
     let(:round) { create(:breakdown_vote_round, breakdown_phase: phase, kind: "lift", number: 1) }
 
-    context "with both choices" do
+    context "with a vote for the lift and a stale «against» from an old form" do
       let(:ballots) { { "1" => { "for_lift" => "true" }, "2" => { "for_lift" => "false" } } }
 
-      it "stores each choice" do
+      before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: true) }
+
+      it "stores the vote for the lift and treats «against» as no vote" do
         save
-        expect(round.votes.reload.map { |vote| [ vote.voter_seat, vote.for_lift ] }).to contain_exactly([ 1, true ], [ 2, false ])
+        expect(round.votes.reload.map { |vote| [ vote.voter_seat, vote.for_lift ] }).to eq([ [ 1, true ] ])
       end
 
       it "leaves candidate_seat unset" do

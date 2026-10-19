@@ -32,11 +32,12 @@ class GameBreakdown::Timeline::RoundTally
   end
 
   # Lift passes when strictly more than half of alive players vote for it; then every candidate leaves.
+  # Every lift ballot is a vote for it: a player who does not raise a hand has none.
   def lift_result
-    supporters = @voters.select { |voter| votes_by_voter.key?(voter) && votes_by_voter[voter].for_lift }
+    supporters = @voters & votes_by_voter.keys
     passed = supporters.size * 2 > @voters.size
     build(
-      tally: { for: supporters, against: @voters - supporters },
+      tally: { for: supporters },
       outcome: passed ? :lift_passed : :lift_failed,
       leaders: [],
       eliminated: passed ? @candidates : []

@@ -48,7 +48,7 @@ module GameBreakdownsHelper
     details.join(" · ")
   end
 
-  # Candidate rounds tally by seat; lift rounds tally into the `for` and `against` buckets.
+  # Candidate rounds tally by seat; a lift round tallies its supporters under `for`.
   def breakdown_tally_label(round, key, seat_names)
     return t("game_breakdowns.lift_choices.#{key}") if round.lift?
 
@@ -74,8 +74,16 @@ module GameBreakdownsHelper
     vote.for_lift.to_s
   end
 
+  # «не голосовал» is the select's blank default, so «За» is the only real choice.
   def breakdown_lift_options
-    [ [ t("game_breakdowns.lift_choices.for"), "true" ], [ t("game_breakdowns.lift_choices.against"), "false" ] ]
+    [ [ t("game_breakdowns.lift_choices.for"), "true" ] ]
+  end
+
+  # A lift reads as supporters out of the alive players (everyone who voted for it plus everyone who did not).
+  def breakdown_tally_count(result, voters)
+    return voters.size.to_s unless result.round.lift?
+
+    t("game_breakdowns.editor.lift_count", count: voters.size, total: voters.size + result.missing_voters.size)
   end
 
   # Outcome and killed seat are one choice: a kill is only ever valid with a seat, so offering them as two

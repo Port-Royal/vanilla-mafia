@@ -61,9 +61,13 @@ RSpec.describe BreakdownVote, type: :model do
     end
 
     context "when a lift vote is against lifting" do
-      subject { build(:breakdown_vote, :lift, breakdown_vote_round: lift_round, for_lift: false) }
+      subject(:vote) { build(:breakdown_vote, :lift, breakdown_vote_round: lift_round, for_lift: false) }
 
-      it { is_expected.to be_valid }
+      before { vote.validate }
+
+      it "is refused: a player who does not raise a hand simply has no ballot" do
+        expect(vote.errors).to be_of_kind(:for_lift, :inclusion)
+      end
     end
 
     context "when a lift vote has no decision" do

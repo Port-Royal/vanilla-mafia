@@ -131,6 +131,31 @@ RSpec.describe "Judge::Breakdowns day editing" do
     end
   end
 
+  describe "GET /judge/breakdowns/:id/edit with a lift round" do
+    let(:lift_select) { response.body[%r{<select[^>]*name="votes\[7\]\[for_lift\]".*?</select>}m] }
+
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+      vote(zero_round, "main", (1..5).to_a => 4, (6..10).to_a => 5)
+      vote(zero_round, "revote", (1..5).to_a => 4, (6..10).to_a => 5)
+      vote(zero_round, "lift", (1..6).to_a => true)
+      get edit_judge_breakdown_path(breakdown)
+    end
+
+    it "offers only «не голосовал» and «За»" do
+      expect(lift_select.scan(/<option[^>]*>([^<]*)</).flatten).to eq([ I18n.t("game_breakdowns.editor.no_vote"), "За" ])
+    end
+
+    it "leaves a player without a ballot on «не голосовал»" do
+      expect(lift_select).not_to include("selected")
+    end
+
+    it "sums the lift up as supporters out of the alive players" do
+      expect(response.body).to include("За: 6 из 10")
+    end
+  end
+
   describe "POST /judge/breakdowns/:breakdown_id/speeches" do
     let(:params) { { breakdown_phase_id: zero_round.id, breakdown_speech: { speaker_seat: 6, kind: "regular" } } }
 
@@ -389,13 +414,13 @@ RSpec.describe "Judge::Breakdowns day editing" do
       expect(zero_round.vote_rounds.reload.map(&:kind)).to eq([ "main" ])
     end
 
-    it "stores lift ballots" do
+    it "stores only the votes for the lift" do
       lift = create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "lift", number: 2)
 
       patch judge_breakdown_vote_round_path(breakdown, lift),
             params: { votes: { "1" => { for_lift: "true" }, "2" => { for_lift: "false" } } }
 
-      expect(lift.votes.reload.map { |vote| [ vote.voter_seat, vote.for_lift ] }).to contain_exactly([ 1, true ], [ 2, false ])
+      expect(lift.votes.reload.map { |vote| [ vote.voter_seat, vote.for_lift ] }).to eq([ [ 1, true ] ])
     end
 
     it "ignores ballots for seats outside the table" do
