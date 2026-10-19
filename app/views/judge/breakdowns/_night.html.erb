@@ -53,8 +53,7 @@
           <label class="flex items-center gap-2">
             <span class="w-28 shrink-0"><%= t("game_breakdowns.editor.#{kind}", seat: checker) %></span>
             <%= select_tag "checks[#{kind}]",
-                  options_for_select(alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
-                                     checked_seat.to_s),
+                  options_for_select(breakdown_check_options(alive, seat_names), checked_seat.to_s),
                   include_blank: t("game_breakdowns.editor.not_recorded"), id: "#{dom_id(state.phase)}_checks_#{kind}",
                   class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
             <span class="text-xs text-gray-500 whitespace-nowrap">

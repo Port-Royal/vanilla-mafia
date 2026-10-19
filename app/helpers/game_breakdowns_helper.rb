@@ -80,6 +80,15 @@ module GameBreakdownsHelper
       alive.map { |seat| [ t("game_breakdowns.night_outcomes.kill_seat", seat: breakdown_seat_label(seat_names, seat)), "kill:#{seat}" ] }
   end
 
+  # A check may target a player who has already left the table (unlike a shot), so every seat is offered.
+  def breakdown_check_options(alive, seat_names)
+    GameBreakdown::SEAT_NUMBERS.map do |seat|
+      label = breakdown_seat_label(seat_names, seat)
+      label = t("game_breakdowns.editor.left_seat", seat: label) unless alive.include?(seat)
+      [ label, seat.to_s ]
+    end
+  end
+
   def breakdown_night_outcome_value(phase)
     return phase.night_outcome unless phase.kill?
 

@@ -822,6 +822,21 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
         end
       end
 
+      context "when checks target an eliminated seat" do
+        before { remove(zero_round, 6) }
+
+        let!(:don_check) { night_action("don_check", target: 6) }
+        let!(:sheriff_check) { night_action("sheriff_check", target: 6) }
+
+        it "does not warn about the don check" do
+          expect(timeline.warnings_for(don_check)).to be_empty
+        end
+
+        it "does not warn about the sheriff check" do
+          expect(timeline.warnings_for(sheriff_check)).to be_empty
+        end
+      end
+
       context "when a mafia member does not shoot" do
         let!(:shot) { night_action("mafia_shot", actor: 2) }
 

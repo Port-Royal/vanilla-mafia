@@ -198,7 +198,7 @@ at once).
 Each warning is attached to a phase/block and carries a rules reference.
 
 - Speech or move by an eliminated seat (except its own farewell speech).
-- Nomination / vote / target pointing to an eliminated seat.
+- Nomination / vote / target pointing to an eliminated seat (a don or sheriff check may target a seat that has left).
 - More than one nomination by the same player in a day (4.4.2).
 - Vote for a seat that is not a candidate of the round.
 - Voting held in the zero round with a single nominee (4.4.11).

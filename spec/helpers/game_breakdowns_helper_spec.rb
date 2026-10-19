@@ -366,6 +366,22 @@ RSpec.describe GameBreakdownsHelper do
     end
   end
 
+  describe "#breakdown_check_options" do
+    let(:options) { helper.breakdown_check_options([ 1, 2, 3, 4, 5, 7, 8, 9, 10 ], { 6 => "Гость", 7 => "Хозяин" }) }
+
+    it "offers every seat" do
+      expect(options.map(&:last)).to eq((1..10).map(&:to_s))
+    end
+
+    it "labels a seat still at the table as usual" do
+      expect(options[6]).to eq([ "7 — Хозяин", "7" ])
+    end
+
+    it "marks a seat that has left" do
+      expect(options[5]).to eq([ "6 — Гость (выбыл)", "6" ])
+    end
+  end
+
   describe "#breakdown_night_action" do
     let(:breakdown) { create(:game_breakdown, roles_mode: "open") }
     let(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
