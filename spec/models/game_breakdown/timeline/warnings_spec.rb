@@ -223,28 +223,6 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
         expect(timeline.warnings_for(nomination)).to be_empty
       end
     end
-
-    context "when a check claim names a night that has not passed" do
-      let!(:second_day) { day(2) }
-      let!(:claim) { create(:breakdown_move, :check_claim, breakdown_speech: speech(second_day, 1), night_number: 2) }
-
-      before { night(1) }
-
-      it "warns about the claim" do
-        expect(timeline.warnings_for(claim)).to eq([ warning(:check_claim_night_out_of_range, claim, night: 2) ])
-      end
-    end
-
-    context "when a check claim names the last passed night" do
-      let!(:second_day) { day(2) }
-      let!(:claim) { create(:breakdown_move, :check_claim, breakdown_speech: speech(second_day, 1), night_number: 1) }
-
-      before { night(1) }
-
-      it "does not warn" do
-        expect(timeline.warnings_for(claim)).to be_empty
-      end
-    end
   end
 
   describe "best move" do

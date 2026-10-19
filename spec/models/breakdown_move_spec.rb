@@ -11,7 +11,6 @@ RSpec.describe BreakdownMove, type: :model do
 
     it { is_expected.to validate_numericality_of(:position).only_integer.is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:target_seat).only_integer.is_in(1..10).allow_nil }
-    it { is_expected.to validate_numericality_of(:night_number).only_integer.is_greater_than(0).allow_nil }
   end
 
   describe "enums" do
@@ -160,7 +159,7 @@ RSpec.describe BreakdownMove, type: :model do
     {
       "sheriff_reveal_table" => [],
       "sheriff_reveal_to_player" => %i[target_seat],
-      "check_claim" => %i[claimed_color night_number],
+      "check_claim" => %i[claimed_color target_seat],
       "nomination" => %i[target_seat],
       "check_request" => %i[target_seat],
       "split_break" => [],
@@ -181,8 +180,8 @@ RSpec.describe BreakdownMove, type: :model do
       end
     end
 
-    context "when a check claim has a color, night and no target" do
-      subject { build(:breakdown_move, kind: "check_claim", claimed_color: "black", night_number: 1, target_seat: nil) }
+    context "when a check to the table has a color and a checked player" do
+      subject { build(:breakdown_move, kind: "check_claim", claimed_color: "black", target_seat: 3) }
 
       it { is_expected.to be_valid }
     end

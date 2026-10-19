@@ -42,7 +42,7 @@ class GameBreakdown::Timeline::DayWarnings
   end
 
   def speech_move_warnings(move, speech)
-    [ actor_warning(move, speech), target_warning(move), check_claim_warning(move), best_move_warning(move, speech) ].compact
+    [ actor_warning(move, speech), target_warning(move), best_move_warning(move, speech) ].compact
   end
 
   # The night-killed seat may still act in its own farewell speech.
@@ -57,12 +57,6 @@ class GameBreakdown::Timeline::DayWarnings
     return unless TARGETED_KINDS.include?(move.kind) && !move.target_seat.nil? && !alive?(move.target_seat)
 
     warning_for_seat(:eliminated_target, move, move.target_seat)
-  end
-
-  def check_claim_warning(move)
-    return unless move.check_claim? && move.night_number > nights_passed
-
-    GameBreakdown::Timeline::Warning.new(code: :check_claim_night_out_of_range, record: move, details: { night: move.night_number })
   end
 
   # More than one nomination by the same player in a day (4.4.2).
@@ -122,10 +116,6 @@ class GameBreakdown::Timeline::DayWarnings
 
   def justified_seats(speech)
     @state.vote_rounds.find { |result| result.round.id == speech.breakdown_vote_round_id }.candidates
-  end
-
-  def nights_passed
-    @phase.position / 2
   end
 
   def alive?(seat)

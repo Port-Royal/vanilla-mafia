@@ -27,11 +27,6 @@
           { include_blank: true }, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
   </label>
 
-  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="night_number">
-    <%= BreakdownMove.human_attribute_name(:night_number) %>
-    <%= form.number_field :night_number, min: 1, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
-  </label>
-
   <label class="text-xs text-gray-600" data-move-form-target="field" data-field="removal_reason">
     <%= BreakdownMove.human_attribute_name(:removal_reason) %>
     <%= form.select :removal_reason,

@@ -221,6 +221,26 @@ RSpec.describe "Judge::Breakdowns day editing" do
       expect(host_speech.moves.reload.last).to have_attributes(kind: "nomination", actor_seat: 2, target_seat: 7)
     end
 
+    context "when the move is a check to the table" do
+      let(:params) do
+        { speech_id: host_speech.id, breakdown_move: { kind: "check_claim", actor_seat: 2, target_seat: 7, claimed_color: "black" } }
+      end
+
+      it "stores the checked player and the colour" do
+        post judge_breakdown_moves_path(breakdown), params: params
+        expect(host_speech.moves.reload.last).to have_attributes(kind: "check_claim", target_seat: 7, claimed_color: "black")
+      end
+    end
+
+    context "when the move is a removal" do
+      let(:params) { { speech_id: host_speech.id, breakdown_move: { kind: "removal", actor_seat: 2, removal_reason: "fouls" } } }
+
+      it "stores the reason" do
+        post judge_breakdown_moves_path(breakdown), params: params
+        expect(host_speech.moves.reload.last).to have_attributes(kind: "removal", removal_reason: "fouls")
+      end
+    end
+
     it "numbers moves from zero within the speech" do
       post judge_breakdown_moves_path(breakdown), params: params
       post judge_breakdown_moves_path(breakdown), params: params
