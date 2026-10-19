@@ -153,6 +153,28 @@ RSpec.describe "Judge::Breakdowns night editing" do
     end
   end
 
+  describe "a tactical miss" do
+    let(:shot_select) { response.body[%r{<select[^>]*name="shots\[2\]".*?</select>}m] }
+
+    before do
+      assign_table_roles
+      first_night.update!(night_outcome: "miss")
+      patch judge_breakdown_phase_path(breakdown, first_night),
+            params: { breakdown_phase: { outcome: "miss" }, shots: { "2" => SaveBreakdownNightService::TACTICAL_MISS } }
+    end
+
+    it "is offered next to «не стрелял» and stays selected after a reload" do
+      get edit_judge_breakdown_path(breakdown)
+      expect(shot_select).to include(%(<option selected="selected" value="#{SaveBreakdownNightService::TACTICAL_MISS}">тактический промах</option>))
+        .and include(I18n.t("game_breakdowns.editor.did_not_shoot"))
+    end
+
+    it "reads as a tactical miss in the read-only view" do
+      get judge_breakdown_path(breakdown)
+      expect(response.body).to include("Мафия 2 — тактический промах")
+    end
+  end
+
   describe "PATCH /judge/breakdowns/:breakdown_id/phases/:id" do
     before { assign_table_roles }
 

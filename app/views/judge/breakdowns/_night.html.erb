@@ -30,7 +30,8 @@
                   <span class="w-28 shrink-0"><%= breakdown_seat_label(seat_names, shooter) %></span>
                   <%= select_tag "shots[#{shooter}]",
                         options_for_select(
-                          [ [ t("game_breakdowns.editor.did_not_shoot"), SaveBreakdownNightService::NO_SHOT ] ] +
+                          [ [ t("game_breakdowns.editor.did_not_shoot"), SaveBreakdownNightService::NO_SHOT ],
+                            [ t("game_breakdowns.editor.tactical_miss"), SaveBreakdownNightService::TACTICAL_MISS ] ] +
                             alive.map { |seat| [ breakdown_seat_label(seat_names, seat), seat.to_s ] },
                           breakdown_shot_value(breakdown_night_action(actions, "mafia_shot", shooter))
                         ),
