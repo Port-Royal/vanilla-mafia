@@ -6,6 +6,7 @@
           <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
           <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
         </div>
+        <%= render "judge/breakdowns/view_speech_summary", speech: speech %>
         <%= render "judge/breakdowns/view_moves", moves: speech.moves, seat_names: seat_names %>
       </li>
     <% end %>
