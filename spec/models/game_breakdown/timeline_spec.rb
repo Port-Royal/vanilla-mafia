@@ -676,14 +676,14 @@ RSpec.describe GameBreakdown::Timeline do
       end
 
       context "when strictly more than half vote to lift" do
-        before { vote(zero_round, "lift", [ 1, 2, 3, 4, 5, 6 ] => true, [ 7, 8, 9, 10 ] => false) }
+        before { vote(zero_round, "lift", [ 1, 2, 3, 4, 5, 6 ] => true) }
 
         it "eliminates every candidate" do
           expect(lift_result).to have_attributes(outcome: :lift_passed, candidates: [ 5, 3 ], eliminated: [ 5, 3 ])
         end
 
-        it "tallies voters for and against" do
-          expect(lift_result.tally).to eq(for: [ 1, 2, 3, 4, 5, 6 ], against: [ 7, 8, 9, 10 ])
+        it "tallies only the voters for the lift" do
+          expect(lift_result.tally).to eq(for: [ 1, 2, 3, 4, 5, 6 ])
         end
 
         it "records vote eliminations" do
@@ -695,6 +695,14 @@ RSpec.describe GameBreakdown::Timeline do
         end
       end
 
+      context "when the lift ballots were entered out of seat order" do
+        before { vote(zero_round, "lift", [ 9, 2, 7, 1, 5, 4 ] => true) }
+
+        it "lists the supporters in seat order" do
+          expect(lift_result.tally).to eq(for: [ 1, 2, 4, 5, 7, 9 ])
+        end
+      end
+
       context "when exactly half vote to lift" do
         before { vote(zero_round, "lift", [ 1, 2, 3, 4, 5 ] => true) }
 
@@ -702,8 +710,12 @@ RSpec.describe GameBreakdown::Timeline do
           expect(lift_result).to have_attributes(outcome: :lift_failed, eliminated: [])
         end
 
-        it "counts missing votes as against" do
-          expect(lift_result.tally).to eq(for: [ 1, 2, 3, 4, 5 ], against: [ 6, 7, 8, 9, 10 ])
+        it "tallies only the voters for the lift" do
+          expect(lift_result.tally).to eq(for: [ 1, 2, 3, 4, 5 ])
+        end
+
+        it "lists the players who did not vote" do
+          expect(lift_result.missing_voters).to eq([ 6, 7, 8, 9, 10 ])
         end
 
         it "expects nothing" do

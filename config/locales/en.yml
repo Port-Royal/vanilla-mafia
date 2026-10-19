@@ -415,7 +415,7 @@ en:
         automatic_description: "After each change the editor adds the blocks the game now calls for:"
         automatic_main_round: "nominations appeared — a voting round is created (except for a single nominee in the zero round);"
         automatic_revote: "the votes tied — justification speeches for the tied candidates and a revote are added;"
-        automatic_lift: "the revote tied again among all of its candidates — a lift is added, with no speeches;"
+        automatic_lift: "the revote tied again among all of its candidates — a lift is added, with no speeches. In a lift each player is either \"did not vote\" or \"For\"; the lift passes when more than half of the alive players are \"For\";"
         automatic_farewell: "a player left by vote — their farewell speech is added."
         automatic_no_deletion: "Nothing is ever deleted automatically. If a correction leaves a block obsolete, it stays and is flagged with a warning; removing or editing it is up to you."
         warnings_title: "Warnings"
@@ -607,7 +607,6 @@ en:
       lift_failed: "Lift failed"
     lift_choices:
       for: "For"
-      against: "Against"
     index:
       title: "Game breakdowns"
       new_breakdown: "New breakdown"
@@ -622,6 +621,7 @@ en:
     create:
       success: "Breakdown created."
     editor:
+      lift_count: "%{count} of %{total}"
       speech_summary_hint: "Gist of the speech: what the player said (optional)"
       fouls:
         one: "%{count} foul"

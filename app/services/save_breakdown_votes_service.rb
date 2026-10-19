@@ -30,8 +30,8 @@ class SaveBreakdownVotesService
     { candidate_seat: seat } if seat
   end
 
+  # Only «За» is a lift ballot; anything else, a stale «Против» from an old form included, means no vote.
   def lift_attributes(ballot)
-    choice = ballot["for_lift"].presence
-    { for_lift: choice } if choice
+    { for_lift: true } if ballot["for_lift"] == "true"
   end
 end

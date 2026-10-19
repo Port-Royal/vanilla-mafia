@@ -225,10 +225,10 @@ RSpec.describe GameBreakdownsHelper do
 
     let(:round) { create(:breakdown_vote_round, breakdown_phase: zero_round, kind: "lift", number: 1) }
 
-    before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: false) }
+    before { create(:breakdown_vote, breakdown_vote_round: round, voter_seat: 2, candidate_seat: nil, for_lift: true) }
 
     it "returns the stored choice as a string" do
-      expect(helper.breakdown_lift_value(result, 2)).to eq("false")
+      expect(helper.breakdown_lift_value(result, 2)).to eq("true")
     end
 
     it "is blank for a voter who did not vote" do
@@ -236,11 +236,42 @@ RSpec.describe GameBreakdownsHelper do
     end
   end
 
+  describe "#breakdown_tally_count" do
+    let(:breakdown) { create(:game_breakdown) }
+    let(:zero_round) { breakdown.phases.find_by(position: 0) }
+    let(:state) { GameBreakdown::Timeline.new(breakdown).state_for(zero_round) }
+
+    before do
+      nominate(zero_round, 1, 4)
+      nominate(zero_round, 2, 5)
+    end
+
+    context "when the round is a lift" do
+      before do
+        vote(zero_round, "main", (1..5).to_a => 4, (6..10).to_a => 5)
+        vote(zero_round, "revote", (1..5).to_a => 4, (6..10).to_a => 5)
+        vote(zero_round, "lift", (1..6).to_a => true)
+      end
+
+      it "counts the supporters out of the alive players" do
+        result = state.vote_rounds.third
+        expect(helper.breakdown_tally_count(result, result.tally[:for])).to eq("6 из 10")
+      end
+    end
+
+    context "when the round has candidates" do
+      before { vote(zero_round, "main", (1..6).to_a => 4, (7..10).to_a => 5) }
+
+      it "counts the voters" do
+        result = state.vote_rounds.first
+        expect(helper.breakdown_tally_count(result, result.tally[4])).to eq("6")
+      end
+    end
+  end
+
   describe "#breakdown_lift_options" do
-    it "offers for and against" do
-      expect(helper.breakdown_lift_options).to eq(
-        [ [ I18n.t("game_breakdowns.lift_choices.for"), "true" ], [ I18n.t("game_breakdowns.lift_choices.against"), "false" ] ]
-      )
+    it "offers only «За»: «не голосовал» is the blank default" do
+      expect(helper.breakdown_lift_options).to eq([ [ "За", "true" ] ])
     end
   end
 

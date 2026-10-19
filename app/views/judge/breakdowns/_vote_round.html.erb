@@ -26,7 +26,7 @@
     <p class="font-medium"><%= breakdown_vote_outcome_label(result) %></p>
     <ul class="text-gray-600">
       <% result.tally.each do |key, voters| %>
-        <li><%= breakdown_tally_label(round, key, seat_names) %>: <%= voters.size %> <span class="text-gray-400">(<%= voters.join(", ").presence || "—" %>)</span></li>
+        <li><%= breakdown_tally_label(round, key, seat_names) %>: <%= breakdown_tally_count(result, voters) %> <span class="text-gray-400">(<%= voters.join(", ").presence || "—" %>)</span></li>
       <% end %>
     </ul>
   </div>

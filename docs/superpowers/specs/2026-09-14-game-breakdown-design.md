@@ -116,7 +116,7 @@ previous round; `lift` — tied candidates of the previous round.
 | `breakdown_vote_round_id` | references, not null | |
 | `voter_seat` | integer, not null | unique per round |
 | `candidate_seat` | integer, null | required for `main` / `revote` |
-| `for_lift` | boolean, null | required for `lift` |
+| `for_lift` | boolean, null | `true` for every `lift` ballot — a player who does not raise a hand has no ballot |
 
 The final vote of each player is stored. Dynamics ("added a hand", "shouted to drop hands") are `other` moves in the round.
 
@@ -238,7 +238,7 @@ Hotwire (Turbo Frames + Turbo Streams); Stimulus only for small things (move for
   3. Phases: each in a `turbo_frame`, titled by the timeline label, with the alive list.
      - Day: speeches → vote rounds → justification speeches / revotes → farewell speeches.
      - Speech: speaker and its moves; "+ move" opens an inline form (kind → kind-specific fields → save).
-     - Vote round: candidates, one row per alive voter with a candidate select (or for/against for `lift`); round moves.
+     - Vote round: candidates, one row per alive voter with a candidate select (or «не голосовал» / «За» for `lift`, summed up as «За: N из M»); round moves.
      - Night: fields depend on roles mode.
      - Saving a block re-renders via Turbo Stream the affected phase and all following phases (labels, alive, warnings).
   4. Warnings — highlighted plate next to the block.

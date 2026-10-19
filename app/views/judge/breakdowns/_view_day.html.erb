@@ -25,7 +25,7 @@
             <% result.tally.each do |key, voters| %>
               <tr>
                 <td class="pr-3 py-0.5 whitespace-nowrap"><%= breakdown_tally_label(result.round, key, seat_names) %></td>
-                <td class="pr-3 py-0.5 font-medium"><%= voters.size %></td>
+                <td class="pr-3 py-0.5 font-medium"><%= breakdown_tally_count(result, voters) %></td>
                 <td class="py-0.5 text-gray-500"><%= voters.join(", ").presence || "—" %></td>
               </tr>
             <% end %>

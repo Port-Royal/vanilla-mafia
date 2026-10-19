@@ -198,7 +198,7 @@ RSpec.describe SyncBreakdownStepsService do
       nominate(zero_round, 2, 5)
       vote(zero_round, "main", [ 1, 2, 3, 4, 5 ] => 4, [ 6, 7, 8, 9, 10 ] => 5)
       vote(zero_round, "revote", [ 1, 2, 3, 4, 5 ] => 4, [ 6, 7, 8, 9, 10 ] => 5)
-      vote(zero_round, "lift", (1..8).to_a => true, [ 9, 10 ] => false)
+      vote(zero_round, "lift", (1..8).to_a => true)
     end
 
     it "creates a farewell speech for every lifted candidate" do
