@@ -695,6 +695,14 @@ RSpec.describe GameBreakdown::Timeline do
         end
       end
 
+      context "when the lift ballots were entered out of seat order" do
+        before { vote(zero_round, "lift", [ 9, 2, 7, 1, 5, 4 ] => true) }
+
+        it "lists the supporters in seat order" do
+          expect(lift_result.tally).to eq(for: [ 1, 2, 4, 5, 7, 9 ])
+        end
+      end
+
       context "when exactly half vote to lift" do
         before { vote(zero_round, "lift", [ 1, 2, 3, 4, 5 ] => true) }
 

@@ -15,6 +15,7 @@ RSpec.describe DeleteAgainstLiftVotes do
     before do
       # «Против» is no longer a valid ballot, so the row is set up the way old data looks.
       against.update_column(:for_lift, false)
+      candidate_vote.update_column(:for_lift, false)
       ActiveRecord::Migration.suppress_messages { migration.migrate(:up) }
     end
 
@@ -22,7 +23,7 @@ RSpec.describe DeleteAgainstLiftVotes do
       expect(BreakdownVote.exists?(against.id)).to be false
     end
 
-    it "keeps the votes for the lift and the candidate votes" do
+    it "keeps the votes for the lift and the candidate votes, even a damaged one" do
       expect(BreakdownVote.where(id: [ supporter.id, candidate_vote.id ]).count).to eq(2)
     end
   end
