@@ -39,7 +39,9 @@ Write specs using `let_it_be`/`let`/`let!` declarations and nested `context` blo
 
 This project uses evilution for mutation testing. Mutant was dropped in #972 once evilution closed the reporting
 gaps that kept it (per-subject scores, failing runs on spec-less files, block-unwrap and hash-pair operators); the
-side-by-side data lives in `.artifacts.local/regular-evilution-feedback.log`.
+side-by-side data lives in `.artifacts.local/regular-evilution-feedback.log`. Dated plans and specs under
+`docs/superpowers/` that mention mutant are records of past work and are intentionally left as written — do not follow
+their mutant steps.
 
 ### Evilution
 
