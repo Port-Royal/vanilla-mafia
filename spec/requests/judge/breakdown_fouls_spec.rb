@@ -5,7 +5,7 @@ RSpec.describe "Judge::Breakdowns fouls" do
 
   let_it_be(:admin) { create(:user, :admin) }
 
-  let!(:toggle) { create(:feature_toggle, key: "game_breakdown", enabled: true) }
+  let_it_be(:toggle) { create(:feature_toggle, key: "game_breakdown", enabled: true) }
   let(:breakdown) { create(:game_breakdown, author: admin) }
   let(:zero_round) { breakdown.phases.find_by!(position: 0) }
   let(:host_speech) { speech(zero_round, 1) }

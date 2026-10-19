@@ -60,7 +60,7 @@ class GameBreakdown::Timeline
   end
 
   def fouls_by_seat
-    fouls.map(&:actor_seat).tally
+    @fouls_by_seat ||= fouls.map(&:actor_seat).tally
   end
 
   # The foul's running number for its player across the whole game, nil for any other move.
