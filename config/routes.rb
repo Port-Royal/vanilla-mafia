@@ -13,7 +13,7 @@ Rails.application.routes.draw do
         scope module: :breakdowns do
           resources :seats, only: [ :update ]
           resources :phases, only: [ :create, :update, :destroy ]
-          resources :speeches, only: [ :create, :destroy ]
+          resources :speeches, only: [ :create, :update, :destroy ]
           resources :vote_rounds, only: [ :update, :destroy ]
           resources :moves, only: [ :create, :update, :destroy ]
         end

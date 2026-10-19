@@ -60,6 +60,7 @@ en:
         best_move_seats: "Best move"
         text: "Comment"
       breakdown_speech:
+        summary: "Speech summary"
         speaker_seat: "Player"
         kind: "Speech kind"
       breakdown_phase:
@@ -409,6 +410,7 @@ en:
         phases_day: "A day is created with the farewell speech of the seat killed at night (when there is one) and the speeches of everyone alive, in speaking order."
         phases_delete: "Only the last phase can be deleted, together with everything in it."
         phases_fouls: "A foul is recorded with the \"Foul\" move for any player, not only the speaker. Each seat in the seating panel shows its foul count, and the move itself shows its number for that player (e.g. \"Foul · #3\")."
+        phases_speech_summary: "Every speech has a \"Speech summary\" field for the gist of what the player said. It saves on its own and may stay empty; an empty one is not shown in the read-only view."
         automatic_title: "What the editor builds for you"
         automatic_description: "After each change the editor adds the blocks the game now calls for:"
         automatic_main_round: "nominations appeared — a voting round is created (except for a single nominee in the zero round);"
@@ -620,6 +622,7 @@ en:
     create:
       success: "Breakdown created."
     editor:
+      speech_summary_hint: "Gist of the speech: what the player said (optional)"
       fouls:
         one: "%{count} foul"
         other: "%{count} fouls"

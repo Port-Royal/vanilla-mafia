@@ -12,6 +12,17 @@ class Judge::Breakdowns::SpeechesController < Judge::BreakdownBaseController
     respond_with_phase(phase)
   end
 
+  # The gist of a speech changes nothing else on the page, so a stream request gets no content back and the
+  # textarea the judge is typing in is left alone.
+  def update
+    @breakdown.speeches.find(params[:id]).update!(params.require(:breakdown_speech).permit(:summary))
+
+    respond_to do |format|
+      format.turbo_stream { head :no_content }
+      format.html { redirect_to editor_path }
+    end
+  end
+
   def destroy
     speech = @breakdown.speeches.find(params[:id])
     phase = speech.breakdown_phase

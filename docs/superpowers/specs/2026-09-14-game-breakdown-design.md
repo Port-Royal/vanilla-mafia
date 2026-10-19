@@ -96,6 +96,7 @@ seat's role (don: sheriff / not sheriff; sheriff: red / black).
 | `kind` | string, not null | enum `regular` / `farewell` / `justification` |
 | `position` | integer, not null | order within the phase |
 | `breakdown_vote_round_id` | references, null | for `justification`: the revote round it precedes |
+| `summary` | text, null | gist of the speech, any kind; autosaved in the speech block, shown in the view only when filled |
 
 ### `breakdown_vote_rounds`
 
