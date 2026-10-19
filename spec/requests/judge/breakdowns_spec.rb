@@ -103,7 +103,7 @@ RSpec.describe "Judge::Breakdowns" do
   end
 
   describe "the source field" do
-    let!(:breakdown) { create(:game_breakdown, author: admin) }
+    let_it_be(:breakdown) { create(:game_breakdown, author: admin) }
 
     before { sign_in admin }
 
