@@ -5,6 +5,9 @@ class BreakdownNightAction < ApplicationRecord
     sheriff_check: "sheriff_check"
   }.freeze
 
+  # A check has no actor seat: the don and the sheriff are known from their roles.
+  CHECKER_ROLES = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
+
   enum :kind, KINDS, validate: true
 
   belongs_to :breakdown_phase, inverse_of: :night_actions

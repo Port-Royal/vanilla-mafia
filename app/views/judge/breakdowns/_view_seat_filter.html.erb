@@ -1,0 +1,13 @@
+<%# Narrows the chronology to one player; a plain link per seat, so a filtered view is shareable and needs no JavaScript. %>
+<nav class="flex flex-wrap items-center gap-2 mb-4 text-sm" aria-label="<%= t("game_breakdowns.view.seat_filter") %>">
+  <span class="font-semibold text-gray-600"><%= t("game_breakdowns.view.seat_filter") %>:</span>
+  <%= link_to t("game_breakdowns.view.all_players"), judge_breakdown_path(@breakdown),
+        aria: { current: @seat_filter.seat.nil? || nil },
+        class: "px-2 py-1 rounded-md border #{@seat_filter.seat.nil? ? "bg-maroon text-white border-maroon" : "border-gray-300 text-maroon hover:underline"}" %>
+  <% @breakdown.seats.each do |seat| %>
+    <% selected = @seat_filter.seat == seat.number %>
+    <%= link_to breakdown_seat_label(seat_names, seat.number), judge_breakdown_path(@breakdown, seat: seat.number),
+          aria: { current: selected || nil },
+          class: "px-2 py-1 rounded-md border #{selected ? "bg-maroon text-white border-maroon" : "border-gray-300 text-maroon hover:underline"}" %>
+  <% end %>
+</nav>

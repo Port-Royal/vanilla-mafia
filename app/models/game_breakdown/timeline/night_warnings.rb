@@ -1,7 +1,5 @@
 # Warnings for a night phase: the kill and, in open roles mode, the recorded shots and checks.
 class GameBreakdown::Timeline::NightWarnings
-  CHECKER_ROLES = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
-
   def initialize(state, role_seats:)
     @state = state
     @role_seats = role_seats
@@ -21,7 +19,7 @@ class GameBreakdown::Timeline::NightWarnings
   def actor_warning(action)
     return eliminated_warning(:eliminated_actor, action, action.actor_seat) if action.mafia_shot?
 
-    eliminated_warning(:eliminated_checker, action, @role_seats.fetch(CHECKER_ROLES.fetch(action.kind), []).first)
+    eliminated_warning(:eliminated_checker, action, @role_seats.fetch(BreakdownNightAction::CHECKER_ROLES.fetch(action.kind), []).first)
   end
 
   # A shot needs a player at the table; a check may target one who has already left.

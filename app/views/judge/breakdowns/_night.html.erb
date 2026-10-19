@@ -47,7 +47,7 @@
       <% end %>
 
       <div class="mt-3 grid gap-1 sm:grid-cols-2">
-        <% { "don_check" => "don", "sheriff_check" => "sheriff" }.each do |kind, role_code| %>
+        <% BreakdownNightAction::CHECKER_ROLES.each do |kind, role_code| %>
           <% checker = breakdown_checker_seat(role_seats, role_code, alive) %>
           <% next if checker.nil? %>
           <% checked_seat = breakdown_check_target(breakdown_night_action(actions, kind, nil)) %>

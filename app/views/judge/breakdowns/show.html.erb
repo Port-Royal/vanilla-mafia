@@ -46,8 +46,10 @@
   </div>
 <% end %>
 
+<%= render "judge/breakdowns/view_seat_filter", seat_names: seat_names %>
+
 <div class="space-y-4 mb-6">
-  <% @timeline.phases.each do |state| %>
+  <% @timeline.phases.select { |state| @seat_filter.phase?(state) }.each do |state| %>
     <%= render "judge/breakdowns/view_phase", state: state, seat_names: seat_names, roles_by_seat: roles_by_seat %>
   <% end %>
 </div>

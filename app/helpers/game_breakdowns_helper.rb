@@ -134,10 +134,11 @@ module GameBreakdownsHelper
     link_to(breakdown.game.full_name, game_path(breakdown.game), class: "text-maroon hover:underline")
   end
 
-  # One line per night: the morning outcome, then whatever the open-roles table recorded inside it.
-  def breakdown_night_summary(phase, seat_names, roles_by_seat)
-    [ breakdown_night_outcome_summary(phase, seat_names) ] +
-      phase.night_actions.map { |action| breakdown_night_action_summary(action, seat_names, roles_by_seat) }
+  # One line per night: the morning outcome, then whatever the open-roles table recorded inside it — narrowed to one
+  # player when the view is filtered.
+  def breakdown_night_summary(phase, seat_names, roles_by_seat, filter: GameBreakdown::SeatFilter::Everything.new)
+    outcome = filter.night_outcome?(phase) ? [ breakdown_night_outcome_summary(phase, seat_names) ] : []
+    outcome + filter.night_actions(phase).map { |action| breakdown_night_action_summary(action, seat_names, roles_by_seat) }
   end
 
   def breakdown_night_outcome_summary(phase, seat_names)

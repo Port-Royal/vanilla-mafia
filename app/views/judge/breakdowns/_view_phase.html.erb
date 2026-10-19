@@ -10,7 +10,7 @@
 
   <div class="px-4 py-3 text-sm">
     <% if state.phase.night? %>
-      <p><%= breakdown_night_summary(state.phase, seat_names, roles_by_seat).join(" · ") %></p>
+      <p><%= breakdown_night_summary(state.phase, seat_names, roles_by_seat, filter: @seat_filter).join(" · ") %></p>
     <% else %>
       <%= render "judge/breakdowns/view_day", state: state, seat_names: seat_names %>
     <% end %>
