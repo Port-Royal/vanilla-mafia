@@ -45,7 +45,6 @@ Seats are referenced **by number (1..10)** everywhere (actor, target, voter, can
 |---|---|---|
 | `title` | string, not null | |
 | `played_on` | date, null | |
-| `source` | string, null | tournament / event, free text |
 | `video_url` | string, null | |
 | `judge_name` | string, null | free text |
 | `author_id` | references(users), not null | set to current user |
@@ -229,7 +228,7 @@ Each warning is attached to a phase/block and carries a rules reference.
 
 Hotwire (Turbo Frames + Turbo Streams); Stimulus only for small things (move form fields switching by kind, autosubmit).
 
-- **Index** `/judge/breakdowns` — table (title, date, source, author, result), "+ new breakdown".
+- **Index** `/judge/breakdowns` — table (title, date, author, result), "+ new breakdown".
 - **Editor** `/judge/breakdowns/:id/edit` — single page, top to bottom:
   1. Header: metadata and roles mode, inline, saved on field change.
   2. Seats: 10 rows — number, name (free text with suggestions from site players; picking one sets `player_id`),

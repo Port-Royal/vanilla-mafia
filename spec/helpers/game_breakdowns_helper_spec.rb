@@ -478,14 +478,13 @@ RSpec.describe GameBreakdownsHelper do
 
     context "when every field is filled in" do
       let(:breakdown) do
-        build_stubbed(:game_breakdown, author: author, game: game, played_on: Date.new(2026, 9, 14), source: "Кубок",
+        build_stubbed(:game_breakdown, author: author, game: game, played_on: Date.new(2026, 9, 14),
                                        video_url: "https://example.com/v", judge_name: "Иванов", roles_mode: "closed")
       end
 
       it "lists every field in order with its value" do
         expect(metadata).to eq([
           [ label(:played_on), Date.new(2026, 9, 14) ],
-          [ label(:source), "Кубок" ],
           [ label(:video_url), helper.breakdown_video_link(breakdown) ],
           [ label(:judge_name), "Иванов" ],
           [ label(:roles_mode), I18n.t("game_breakdowns.roles_modes.closed") ],
@@ -496,11 +495,11 @@ RSpec.describe GameBreakdownsHelper do
     end
 
     context "when nothing optional was filled in" do
-      let(:breakdown) { build_stubbed(:game_breakdown, author: author, source: "", judge_name: "") }
+      let(:breakdown) { build_stubbed(:game_breakdown, author: author, judge_name: "") }
 
       it "dashes out every blank field" do
-        expect(metadata.to_h.values_at(label(:played_on), label(:source), label(:video_url), label(:judge_name), label(:game_id)))
-          .to eq([ "—" ] * 5)
+        expect(metadata.to_h.values_at(label(:played_on), label(:video_url), label(:judge_name), label(:game_id)))
+          .to eq([ "—" ] * 4)
       end
     end
   end
@@ -604,7 +603,7 @@ RSpec.describe GameBreakdownsHelper do
   end
 
   describe "#breakdown_roles_by_seat" do
-    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), source: "Кубок", judge_name: "Иванов") }
+    let(:breakdown) { create(:game_breakdown, played_on: Date.new(2026, 9, 14), judge_name: "Иванов") }
 
     it "maps every seat to its role" do
       Role.find_or_create_by!(code: "don") { |role| role.name = "Дон" }

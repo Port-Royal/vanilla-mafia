@@ -17,7 +17,6 @@ class Avo::Resources::GameBreakdown < Avo::BaseResource
     field :id, as: :id
     field :title, as: :text, required: true
     field :played_on, as: :date, sortable: true
-    field :source, as: :text
     field :video_url, as: :text
     field :judge_name, as: :text
     field :roles_mode, as: :select, enum: ::GameBreakdown.roles_modes

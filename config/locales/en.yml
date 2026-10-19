@@ -40,7 +40,6 @@ en:
       game_breakdown:
         title: "Title"
         played_on: "Played on"
-        source: "Source"
         video_url: "Video URL"
         judge_name: "Judge"
         roles_mode: "Roles"
@@ -396,7 +395,7 @@ en:
         difference_title: "How a breakdown differs from a protocol"
         difference_description: "A protocol records the outcome of a game and its points. A breakdown records the flow: who spoke when, what they claimed, whom they nominated, how the table voted and what happened at night. They are two different records of one game and neither replaces the other."
         create_title: "Creating a breakdown"
-        create_step_metadata: "Fill in the title, date, source (tournament, stream), video link and judge."
+        create_step_metadata: "Fill in the title (a good place for the tournament name), date, video link and judge."
         create_step_roles_mode: "Choose the roles mode — open or closed."
         create_step_game: "Optionally link a club game: the seating is pre-filled from its protocol."
         create_step_seats: "Check the seating: names are free text with suggestions from the site's players, and a role may be left empty."

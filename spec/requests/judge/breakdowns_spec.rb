@@ -102,10 +102,28 @@ RSpec.describe "Judge::Breakdowns" do
     end
   end
 
+  describe "the source field" do
+    let_it_be(:breakdown) { create(:game_breakdown, author: admin) }
+
+    before { sign_in admin }
+
+    {
+      "the index" => -> { judge_breakdowns_path },
+      "the new form" => -> { new_judge_breakdown_path },
+      "the editor" => -> { edit_judge_breakdown_path(breakdown) },
+      "the read-only view" => -> { judge_breakdown_path(breakdown) }
+    }.each do |page, path|
+      it "is gone from #{page}" do
+        get instance_exec(&path)
+        expect(response.body).not_to include("Источник")
+      end
+    end
+  end
+
   describe "POST /judge/breakdowns" do
     before { sign_in admin }
 
-    let(:params) { { game_breakdown: { title: "Разбор", roles_mode: "closed", played_on: "2026-09-14", source: "Кубок" } } }
+    let(:params) { { game_breakdown: { title: "Разбор", roles_mode: "closed", played_on: "2026-09-14", video_url: "https://example.com/v" } } }
 
     it "creates a breakdown" do
       expect { post judge_breakdowns_path, params: params }.to change(GameBreakdown, :count).by(1)
@@ -118,7 +136,9 @@ RSpec.describe "Judge::Breakdowns" do
 
     it "stores the submitted attributes" do
       post judge_breakdowns_path, params: params
-      expect(GameBreakdown.last).to have_attributes(title: "Разбор", roles_mode: "closed", source: "Кубок")
+      expect(GameBreakdown.last).to have_attributes(
+        title: "Разбор", roles_mode: "closed", played_on: Date.new(2026, 9, 14), video_url: "https://example.com/v"
+      )
     end
 
     it "creates ten seats" do

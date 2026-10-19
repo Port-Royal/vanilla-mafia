@@ -11,7 +11,6 @@
         <tr class="bg-gray-50 text-left">
           <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:title) %></th>
           <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:played_on) %></th>
-          <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:source) %></th>
           <th class="px-4 py-3 font-semibold"><%= GameBreakdown.human_attribute_name(:author) %></th>
           <th class="px-4 py-3 font-semibold"><%= t("game_breakdowns.index.result") %></th>
           <th class="px-4 py-3"></th>
@@ -24,7 +23,6 @@
               <%= link_to breakdown.title, judge_breakdown_path(breakdown), class: "text-maroon hover:underline" %>
             </td>
             <td class="px-4 py-3"><%= breakdown.played_on %></td>
-            <td class="px-4 py-3"><%= breakdown.source %></td>
             <td class="px-4 py-3"><%= breakdown.author.display_name %></td>
             <td class="px-4 py-3"><%= breakdown_result_label(@results[breakdown.id]) %></td>
             <td class="px-4 py-3 text-right">
