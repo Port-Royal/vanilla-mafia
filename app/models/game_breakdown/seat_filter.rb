@@ -2,13 +2,11 @@
 # and night events aimed at or made by them. `.for` falls back to Everything, which leaves the whole game in place, so the
 # views ask the same questions whether a player is selected or not.
 module GameBreakdown::SeatFilter
-  CHECKER_ROLES = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
-
   def self.for(breakdown, seat_param)
     seat = Integer(seat_param.to_s, 10, exception: false)
     return Everything.new unless GameBreakdown::SEAT_NUMBERS.include?(seat)
 
-    Seat.new(seat, breakdown.seats.where(role_code: CHECKER_ROLES.values).to_h { |row| [ row.role_code, row.number ] })
+    Seat.new(seat, breakdown.seats.to_h { |row| [ row.role_code, row.number ] })
   end
 
   class Everything
@@ -79,9 +77,8 @@ module GameBreakdown::SeatFilter
       move.actor_seat == seat || move.target_seat == seat || Array(move.best_move_seats).include?(seat)
     end
 
-    # A check has no actor seat: the don and the sheriff are known from their roles.
     def checker(action)
-      @checkers[CHECKER_ROLES[action.kind]]
+      @checkers[BreakdownNightAction::CHECKER_ROLES[action.kind]]
     end
   end
 end

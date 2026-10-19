@@ -56,6 +56,16 @@ RSpec.describe "Judge::Breakdowns read-only view filtered by a player" do
     end
   end
 
+  context "without the seat parameter at all" do
+    let(:seat) { nil }
+
+    before { get judge_breakdown_path(breakdown) }
+
+    it "shows the full view" do
+      expect(response.body).to include("Речь пятого").and include("Речь девятого")
+    end
+  end
+
   context "without a seat" do
     let(:seat) { nil }
 

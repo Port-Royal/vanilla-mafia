@@ -7,7 +7,7 @@
 class SaveBreakdownNightService
   NO_SHOT = "none".freeze
   TACTICAL_MISS = "tactical_miss".freeze
-  CHECK_KINDS = %w[don_check sheriff_check].freeze
+  CHECK_KINDS = BreakdownNightAction::CHECKER_ROLES.keys.freeze
 
   def self.call(phase:, shots:, checks:)
     new(phase, shots, checks).call
