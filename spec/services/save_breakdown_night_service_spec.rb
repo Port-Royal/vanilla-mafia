@@ -36,6 +36,28 @@ RSpec.describe SaveBreakdownNightService do
       end
     end
 
+    context "when a shot at a target is corrected" do
+      before { create(:breakdown_night_action, breakdown_phase: phase, kind: "mafia_shot", actor_seat: 3, target_seat: 7) }
+
+      context "to did not shoot" do
+        let(:shots) { { "3" => described_class::NO_SHOT } }
+
+        it "drops the target" do
+          save
+          expect(phase.night_actions.reload.map { |a| [ a.target_seat, a.tactical_miss ] }).to eq([ [ nil, false ] ])
+        end
+      end
+
+      context "to a tactical miss" do
+        let(:shots) { { "3" => described_class::TACTICAL_MISS } }
+
+        it "drops the target" do
+          save
+          expect(phase.night_actions.reload.map { |a| [ a.target_seat, a.tactical_miss ] }).to eq([ [ nil, true ] ])
+        end
+      end
+    end
+
     context "when a tactical miss is corrected" do
       before { create(:breakdown_night_action, breakdown_phase: phase, kind: "mafia_shot", actor_seat: 3, target_seat: nil, tactical_miss: true) }
 
