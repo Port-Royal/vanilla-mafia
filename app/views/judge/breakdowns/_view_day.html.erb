@@ -1,28 +1,29 @@
-<%= render "judge/breakdowns/view_speeches", speeches: state.opening_speeches, seat_names: seat_names %>
+<%= render "judge/breakdowns/view_speeches", speeches: @seat_filter.speeches(state.opening_speeches), seat_names: seat_names %>
 
-<% state.vote_rounds.each do |result| %>
+<% @seat_filter.rounds(state.vote_rounds).each do |result| %>
   <div class="mt-3">
     <p class="font-medium">
       <%= t("game_breakdowns.vote_round_kinds.#{result.round.kind}", number: result.round.number) %>
       <span class="text-gray-500 font-normal">— <%= breakdown_vote_outcome_label(result) %></span>
     </p>
 
-    <% result.round.justification_speeches.each do |speech| %>
+    <% @seat_filter.speeches(result.round.justification_speeches).each do |speech| %>
       <div class="mt-1 border-l-2 border-gray-300 pl-3">
         <div class="flex flex-wrap items-baseline gap-2">
           <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
           <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.justification") %></span>
         </div>
         <%= render "judge/breakdowns/view_speech_summary", speech: speech %>
-        <%= render "judge/breakdowns/view_moves", moves: speech.moves, seat_names: seat_names %>
+        <%= render "judge/breakdowns/view_moves", moves: @seat_filter.speech_moves(speech), seat_names: seat_names %>
       </div>
     <% end %>
 
-    <% if result.tally.any? %>
+    <% tally = @seat_filter.tally(result) %>
+    <% if tally.any? %>
       <div class="mt-1 overflow-x-auto">
         <table class="text-sm">
           <tbody>
-            <% result.tally.each do |key, voters| %>
+            <% tally.each do |key, voters| %>
               <tr>
                 <td class="pr-3 py-0.5 whitespace-nowrap"><%= breakdown_tally_label(result.round, key, seat_names) %></td>
                 <td class="pr-3 py-0.5 font-medium"><%= breakdown_tally_count(result, voters) %></td>
@@ -34,11 +35,11 @@
       </div>
     <% end %>
 
-    <%= render "judge/breakdowns/view_moves", moves: result.round.moves, seat_names: seat_names %>
+    <%= render "judge/breakdowns/view_moves", moves: @seat_filter.round_moves(result.round), seat_names: seat_names %>
   </div>
 <% end %>
 
-<%= render "judge/breakdowns/view_speeches", speeches: state.closing_speeches, seat_names: seat_names, spaced: true %>
+<%= render "judge/breakdowns/view_speeches", speeches: @seat_filter.speeches(state.closing_speeches), seat_names: seat_names, spaced: true %>
 
 <% if state.opening_speeches.empty? && state.vote_rounds.empty? && state.closing_speeches.empty? %>
   <p class="text-gray-500"><%= t("game_breakdowns.editor.day_placeholder") %></p>

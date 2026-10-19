@@ -424,7 +424,7 @@ en:
         result_title: "Result"
         result_description: "When every seat has a role the result is computed automatically. Otherwise choose it by hand at the bottom of the editor."
         view_title: "Reading a breakdown"
-        view_description: "A finished breakdown has its own read-only page: the seating with roles, a compact chronology, the warnings, the result and the conclusions."
+        view_description: "A finished breakdown has its own read-only page: the seating with roles, a compact chronology, the warnings, the result and the conclusions. Above the chronology you can pick a player: only the events involving them remain — their speeches and moves, other players' moves and votes about them, night events they took part in; phases without such events are hidden. The filtered page has its own address you can share."
       podcast-feed:
         title: "Podcast Feed Setup"
         summary: "How to add the podcast RSS feed to your listening app"
@@ -569,6 +569,8 @@ en:
       shot: "Mafia %{actor} → %{target}"
       no_shot: "Mafia %{actor} did not shoot"
       tactical_miss: "Mafia %{actor} — tactical miss"
+      seat_filter: "Player"
+      all_players: "all players"
       check: "%{role} → %{seat} (%{result})"
       don_check: "Don"
       sheriff_check: "Sheriff"

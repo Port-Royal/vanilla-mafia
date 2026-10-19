@@ -248,6 +248,11 @@ Hotwire (Turbo Frames + Turbo Streams); Stimulus only for small things (move for
 - **View** `/judge/breakdowns/:id` — read-only: header, seats with roles, compact chronology (speeches as move lines,
   votes as "candidate — votes (who)" tables, nights as one line, e.g. «Убит 4 · Дон → 7 · Шериф → 2 (чёрный)»),
   warnings, result, conclusion.
+  - **Player filter** `?seat=N` (seat chips plus «все игроки»; an invalid seat shows everything): keeps only events
+    involving that player — their speeches (whole, with the text) and moves anywhere, others' moves naming them
+    (target or best move), vote rows with their vote or the votes for them (a lift they are a candidate of in full),
+    their night shot/check, shots and checks of them, their night kill. Phases with none of these are hidden.
+    Built in one place: `GameBreakdown::SeatFilter` (with a pass-through `Everything` for the full view).
 
 ## Access, toggle, i18n, admin
 

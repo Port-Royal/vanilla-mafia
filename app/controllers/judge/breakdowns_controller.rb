@@ -28,6 +28,7 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
 
   def show
     load_timeline
+    @seat_filter = GameBreakdown::SeatFilter.for(@breakdown, params[:seat])
   end
 
   def edit

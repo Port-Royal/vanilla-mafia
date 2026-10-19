@@ -774,6 +774,23 @@ RSpec.describe GameBreakdownsHelper do
       end
     end
 
+    context "when the view is narrowed to one player" do
+      subject(:summary) do
+        helper.breakdown_night_summary(night, seat_names, roles_by_seat, filter: GameBreakdown::SeatFilter::Seat.new(7, {}))
+      end
+
+      let(:actions) do
+        [
+          build(:breakdown_night_action, breakdown_phase: nil, kind: "mafia_shot", actor_seat: 2, target_seat: 7),
+          build(:breakdown_night_action, breakdown_phase: nil, kind: "mafia_shot", actor_seat: 3, target_seat: 9)
+        ]
+      end
+
+      it "keeps only the lines involving that player" do
+        expect(summary).to eq([ I18n.t("game_breakdowns.view.shot", actor: 2, target: "7 — Лис") ])
+      end
+    end
+
     context "when nothing was recorded inside the night" do
       let(:actions) { [] }
 
