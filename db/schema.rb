@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_014844) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_022429) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -211,6 +211,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_014844) do
     t.datetime "created_at", null: false
     t.integer "game_id"
     t.string "judge_name"
+    t.text "mafia_acquaintance"
     t.string "manual_result"
     t.date "played_on"
     t.string "roles_mode", default: "open", null: false

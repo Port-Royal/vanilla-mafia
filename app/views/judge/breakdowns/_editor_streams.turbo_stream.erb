@@ -4,6 +4,9 @@
 <%= turbo_stream.replace "breakdown_seat_warnings" do %>
   <%= render "judge/breakdowns/seat_warnings" %>
 <% end %>
+<%= turbo_stream.replace "breakdown_mafia_acquaintance" do %>
+  <%= render "judge/breakdowns/mafia_acquaintance" %>
+<% end %>
 <%= turbo_stream.replace "breakdown_phases" do %>
   <%= render "judge/breakdowns/phases" %>
 <% end %>

@@ -42,6 +42,7 @@ en:
         played_on: "Played on"
         video_url: "Video URL"
         judge_name: "Judge"
+        mafia_acquaintance: "Mafia acquaintance"
         roles_mode: "Roles"
         game_id: "Club game"
         author: "Author"
@@ -613,6 +614,7 @@ en:
     create:
       success: "Breakdown created."
     editor:
+      mafia_acquaintance_hint: "Briefly: what the mafia agreed on during the acquaintance night"
       left_seat: "%{seat} (left)"
       back: "Back to breakdowns"
       header_panel: "Game information"
