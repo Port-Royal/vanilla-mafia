@@ -37,7 +37,11 @@ Write specs using `let_it_be`/`let`/`let!` declarations and nested `context` blo
 
 ## Mutation Testing
 
-This project uses two mutation testing tools:
+This project uses evilution for mutation testing. Mutant was dropped in #972 once evilution closed the reporting
+gaps that kept it (per-subject scores, failing runs on spec-less files, block-unwrap and hash-pair operators); the
+side-by-side data lives in `.artifacts.local/regular-evilution-feedback.log`. Dated plans and specs under
+`docs/superpowers/` that mention mutant are records of past work and are intentionally left as written — do not follow
+their mutant steps.
 
 ### Evilution
 
@@ -130,71 +134,41 @@ Survived mutants now include unified diffs in CLI output, JSON reports, and `uti
 #### Minitest Support (0.22.0)
 Full Minitest integration via `--integration minitest` / `integration: minitest` config option. RSpec remains the default and the framework used by this project.
 
-#### Key Differences from Mutant
-- Uses Prism parser (Ruby's official parser) instead of the `parser` gem
-- Supports line-range targeting for fast PR-level feedback
-- Per-mutation spec targeting — automatically resolves matching spec file for each source file
-- Structured JSON output designed for CI pipelines and AI agents
-- MIT license (no commercial restrictions)
+#### Choosing the spec (`--spec`)
+Evilution maps a source file to one spec by its path. Pass `--spec` (comma-separated) whenever the code is exercised
+by specs the path does not lead to, or the run reports survivors the suite actually kills:
+- a controller → its request specs (e.g. `spec/requests/judge/breakdowns_spec.rb,spec/requests/judge/breakdown_days_spec.rb`)
+- a class tested through another class's spec (e.g. `timeline/night_warnings.rb` → `spec/models/game_breakdown/timeline/warnings_spec.rb`)
+- a data migration → its spec under `spec/migrations/` (run `migration.migrate(:up)` there so `up` is exercised)
 
-### Mutant
-
-[Mutant](https://github.com/mbj/mutant) is an AST-based mutation testing tool.
-
-#### Test environment (`config/mutant.yml`)
-`config/mutant.yml` sets `environment_variables: { RAILS_ENV: test }`. Mutant applies it before loading
-`requires: ./config/environment`; without it Rails booted in **development**, and every kill fork ran specs
-against `storage/development.sqlite3`. Real rows there (roles `don`, `peace`, …) collided with spec data, which
-produced phantom `Neutral failure`s and **false kills**. Mutant results recorded before 2026-09-29 (vm-uuz) are
-inflated: with the fix, `SaveGameProtocolService` and `AutosaveGameProtocolService` show ~117 survivors that
-were hidden. Do not remove the setting.
-
-#### Scope
-Services, models, helpers and other POROs: run mutant on the changed class. Controllers: the phantom neutral
-once seen on every controller subject came from the development database, not from request specs
-(`Judge::ProtocolsController#index` is 17/17 with the fix). Mutant still costs far more than evilution on
-controllers (~1.5 min for one action), so run it only on the changed action (`'Foo::BarController#action'`),
-never a whole-controller sweep.
-
-#### Running Mutant
-- **Always `--jobs 1`**: parallel workers contend on the SQLite test database and invent phantom survivors
-  that change between runs (`-j 2` on one service reported 4–5 alive; `-j 1` on identical code reported 0)
-- **Eager load**: `CI=1 bundle exec mutant run ...` — eager-loads the app so namespace expressions (`Foo*`) match lazily autoloaded classes. `NO_COVERAGE=1` additionally skips SimpleCov, but does not prevent mutant timeouts on slow spec files; mutant counts timeouts as kills, so check `Killtime` in its summary
-- **Single class**: `bundle exec mutant run --jobs 1 -- 'YourClass'`
-- **Single method**: `bundle exec mutant run --jobs 1 -- 'YourClass#method_name'`
-- **After writing tests**: run mutant against the changed class (for a controller, the changed action) to verify test quality
-- **After an interrupted run**: `bin/rails db:test:prepare` — forked workers leave rows behind in the test
-  database on abnormal exit, which then breaks unrelated specs
+A file whose spec cannot kill `method_body_to_raise` is not exercised by that spec — fix the mapping first.
 
 ### Workflow
 1. Write or modify code
 2. Write RSpec tests that pass
-3. Run **evilution first** (via MCP tool or CLI) against the changed file(s) — fix any surviving mutants
-4. Run **mutant second** against the changed **services, models and helpers**, and against changed
-   **controller actions** one by one — fix any additional surviving mutants (see scope note above)
-4a. Run one mutation tool at a time — both share the SQLite test database, and running them concurrently
-   corrupts each other's results
-5. Compare results from both tools and append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
-6. In the PR description, note mutation testing results from both tools (evilution listed first)
+3. Run **evilution** (via MCP tool or CLI) against the changed file(s) with `NO_COVERAGE=1` — fix any surviving mutants
+4. Use `--jobs 1` when the specs touch the SQLite test database; after an interrupted run, `bin/rails db:test:prepare`
+5. Append detailed feedback to `.artifacts.local/regular-evilution-feedback.log`
+6. In the PR description, note the evilution result
 7. Aim for zero surviving mutants on all new/modified code
 
-### Data Collection (Mutant vs Evilution)
+### Data Collection
 
-In every PR, include mutation scores in the description:
+In every PR, include the mutation score in the description:
 ```
 - Evilution: X% (Y/Z mutants killed)
-- Mutant: X% (Y/Z mutants killed)
 ```
 
 After each mutation testing run, append a detailed entry to `.artifacts.local/regular-evilution-feedback.log` including:
 - Evilution version (from `bundle exec evilution --version` or gem lockfile)
-- What mutant does better (operators, precision, equivalent mutant detection)
+- Survivors and why each is equivalent, or the spec added to kill it
 - What evilution is missing or could improve
 - Suggestions for making evilution greater
 
 ### Limitations
-- Mutant only mutates `def` method bodies — Rails DSL (scopes, validations, associations) are not mutated
-- Evilution mutates at the file level including DSL code, but may generate different mutation operators
+- Evilution mutates at the file level including DSL code (scopes, validations, `enum` tables); a mutation that makes the
+  file fail to load is reported as killed or as an error, not a survivor
+- ERB templates and Stimulus controllers are not mutated — cover them with request and system specs
 - For scopes and validations, rely on RSpec + Shoulda Matchers for coverage
 
 ### Common Surviving Mutants to Watch For
