@@ -18,14 +18,9 @@ module GameBreakdownsHelper
     "#{number} — #{name}"
   end
 
-  # A new move starts as the speaker's own comment, dated to the last night the game has passed.
-  def breakdown_move_defaults(context, state)
-    { kind: "other", actor_seat: context.move_actor_seat, night_number: breakdown_passed_nights(state) }
-  end
-
-  def breakdown_passed_nights(state)
-    nights = state.phase.position / 2
-    nights if nights.positive?
+  # A new move starts as the speaker's own comment.
+  def breakdown_move_defaults(context)
+    { kind: "other", actor_seat: context.move_actor_seat }
   end
 
   def breakdown_move_summary(move, seat_names)
@@ -36,7 +31,6 @@ module GameBreakdownsHelper
     details = []
     details << breakdown_seat_label(seat_names, move.target_seat) if move.target_seat
     details << t("game_breakdowns.claimed_colors.#{move.claimed_color}") if move.claimed_color
-    details << t("game_breakdowns.editor.night_number", number: move.night_number) if move.night_number
     details << move.best_move_seats.join(", ") if move.best_move_seats
     details << t("game_breakdowns.removal_reasons.#{move.removal_reason}") if move.removal_reason
     details << move.text if move.text.present?

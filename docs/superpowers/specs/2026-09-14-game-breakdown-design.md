@@ -25,7 +25,7 @@ A breakdown records the flow of the game as a chronology of **phases**, **game e
 - Breakdown has a **roles mode**: `open` or `closed`.
   - `open`: night internals are recorded (each mafia shot on a miss, don check, sheriff check).
   - `closed`: only the night outcome known in the morning (killed seat / miss). Checks exist only as day moves
-    (`check_claim`), which may be false.
+    (`check_claim`, «Проверка в стол»), which may be false.
 - Phase names and alive counts are derived automatically from events.
 - Rule violations are **highlighted only** (warnings), never block saving — the breakdown records what actually happened.
 - Move type catalogue lives in code (enum). New types require development.
@@ -130,7 +130,6 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 | `actor_seat` | integer, not null | defaults to the speaker |
 | `target_seat` | integer, null | |
 | `claimed_color` | string, null | enum `red` / `black` |
-| `night_number` | integer, null | |
 | `best_move_seats` | json, null | array of 1..3 seat numbers |
 | `removal_reason` | string, null | enum `fouls` / `technical_fouls` / `disqualification` |
 | `text` | text, null | comment (any kind); required for `other` |
@@ -141,7 +140,7 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 |---|---|---|
 | `sheriff_reveal_table` | reveals as sheriff to the table | — |
 | `sheriff_reveal_to_player` | reveals as sheriff to a specific player | `target_seat` |
-| `check_claim` | voices a check ("my check is red" / "5 is black") | `claimed_color`, `night_number`; `target_seat` optional |
+| `check_claim` | «Проверка в стол»: a revealed sheriff shows a check to the table ("5 is black") | `target_seat` (checked player), `claimed_color` |
 | `nomination` | nominates for voting | `target_seat` |
 | `check_request` | asks to check a player | `target_seat` |
 | `split_break` | breaks a split | `target_seat` optional |
@@ -150,8 +149,7 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 | `removal` | removal / disqualification; actor = removed player | `removal_reason` |
 | `other` | anything else | `text` |
 
-`check_claim.night_number` defaults in the UI to the last passed night; editable (sheriffs may voice several hidden checks
-at once).
+A `check_claim` may name a player who has already left the table (a sheriff may voice an old check); it does not warn.
 
 ## Timeline (computed, not stored)
 
@@ -206,7 +204,6 @@ Each warning is attached to a phase/block and carries a rules reference.
   more than half of alive players as candidates (4.4.18).
 - Best move without the right: 2+ players left on the first day, or a miss on the first night (6.11.4); day best move after
   breaking into oneself (7.5.8).
-- `check_claim.night_number` greater than the number of passed nights.
 - `open` mode: a role needed for computation (mafia / don / sheriff) is missing; don/sheriff check by an eliminated seat.
 - A block that no longer matches the timeline (e.g. farewell speech of a seat that was not eliminated after a correction).
 

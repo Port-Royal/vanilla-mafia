@@ -52,7 +52,7 @@ class Judge::Breakdowns::MovesController < Judge::BreakdownBaseController
 
   def move_params
     permitted = params.require(:breakdown_move)
-                      .permit(:kind, :actor_seat, :target_seat, :claimed_color, :night_number,
+                      .permit(:kind, :actor_seat, :target_seat, :claimed_color,
                               :removal_reason, :text, best_move_seats: [])
     permitted.merge(best_move_seats: best_move_seats(permitted))
   end

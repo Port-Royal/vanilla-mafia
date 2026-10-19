@@ -47,32 +47,18 @@ RSpec.describe GameBreakdownsHelper do
   describe "#breakdown_move_defaults" do
     let(:breakdown) { create(:game_breakdown) }
     let(:phase) { breakdown.phases.find_by(position: 0) }
-    let(:state) { GameBreakdown::Timeline.new(breakdown).state_for(phase) }
     let(:speech) { create(:breakdown_speech, breakdown_phase: phase, speaker_seat: 6) }
 
     it "starts a move as a plain comment" do
-      expect(helper.breakdown_move_defaults(speech, state)[:kind]).to eq("other")
+      expect(helper.breakdown_move_defaults(speech)[:kind]).to eq("other")
     end
 
     it "credits the move to the speaker" do
-      expect(helper.breakdown_move_defaults(speech, state)[:actor_seat]).to eq(6)
+      expect(helper.breakdown_move_defaults(speech)[:actor_seat]).to eq(6)
     end
 
-    it "leaves the night blank in the zero round" do
-      expect(helper.breakdown_move_defaults(speech, state)[:night_number]).to be_nil
-    end
-
-    context "on a later day" do
-      let!(:night) { create(:breakdown_phase, game_breakdown: breakdown, position: 1, night_outcome: "miss") }
-      let(:phase) { create(:breakdown_phase, game_breakdown: breakdown, position: 4) }
-
-      before { create(:breakdown_phase, game_breakdown: breakdown, position: 2) }
-
-      it "dates the move to the last passed night" do
-        create(:breakdown_phase, game_breakdown: breakdown, position: 3, night_outcome: "miss")
-
-        expect(helper.breakdown_move_defaults(speech, state)[:night_number]).to eq(2)
-      end
+    it "sets nothing else" do
+      expect(helper.breakdown_move_defaults(speech).keys).to eq(%i[kind actor_seat])
     end
   end
 
@@ -82,6 +68,11 @@ RSpec.describe GameBreakdownsHelper do
     it "names the kind" do
       move = build(:breakdown_move, :sheriff_reveal_table, actor_seat: 1, text: nil)
       expect(helper.breakdown_move_summary(move, seat_names)).to eq(I18n.t("game_breakdowns.move_kinds.sheriff_reveal_table"))
+    end
+
+    it "reads a check to the table as kind, checked player and colour" do
+      move = build(:breakdown_move, :check_claim, actor_seat: 1, target_seat: 4, claimed_color: "red", text: nil)
+      expect(helper.breakdown_move_summary(move, seat_names)).to eq("Проверка в стол · 4 — Гость · красный")
     end
 
     it "appends the details after the kind" do
@@ -104,11 +95,9 @@ RSpec.describe GameBreakdownsHelper do
       expect(helper.breakdown_move_details(move, seat_names)).to eq("4 — Гость")
     end
 
-    it "names the claimed colour and the night" do
-      move = build(:breakdown_move, :check_claim, actor_seat: 1, target_seat: nil, claimed_color: "red", night_number: 2, text: nil)
-
-      expect(helper.breakdown_move_details(move, seat_names))
-        .to eq("#{I18n.t('game_breakdowns.claimed_colors.red')} · #{I18n.t('game_breakdowns.editor.night_number', number: 2)}")
+    it "names the checked player and the claimed colour" do
+      move = build(:breakdown_move, :check_claim, actor_seat: 1, target_seat: 4, claimed_color: "red", text: nil)
+      expect(helper.breakdown_move_details(move, seat_names)).to eq("4 — Гость · красный")
     end
 
     it "lists the best move seats" do

@@ -17,6 +17,10 @@ RSpec.describe "config/locales/ru.yml wording" do
     expect(strings.grep(/ведущ/i)).to be_empty
   end
 
+  it "names a sheriff's voiced check «Проверка в стол»" do
+    expect(I18n.t("game_breakdowns.move_kinds.check_claim", locale: :ru)).to eq("Проверка в стол")
+  end
+
   it "labels the judge fields «Судья»" do
     expect([ Game.human_attribute_name(:judge), GameBreakdown.human_attribute_name(:judge_name) ]).to all(eq("Судья"))
   end

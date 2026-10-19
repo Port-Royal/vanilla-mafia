@@ -23,7 +23,7 @@ FactoryBot.define do
     trait :check_claim do
       kind { "check_claim" }
       claimed_color { "red" }
-      night_number { 1 }
+      target_seat { 4 }
     end
 
     trait :nomination do

@@ -3,7 +3,7 @@ class BreakdownMove < ApplicationRecord
   REQUIRED_FIELDS = {
     "sheriff_reveal_table" => [],
     "sheriff_reveal_to_player" => %i[target_seat],
-    "check_claim" => %i[claimed_color night_number],
+    "check_claim" => %i[target_seat claimed_color],
     "nomination" => %i[target_seat],
     "check_request" => %i[target_seat],
     "split_break" => [],
@@ -38,7 +38,6 @@ class BreakdownMove < ApplicationRecord
   validates :position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :actor_seat, numericality: { in: GameBreakdown::SEAT_NUMBERS, only_integer: true }
   validates :target_seat, numericality: { in: GameBreakdown::SEAT_NUMBERS, only_integer: true }, allow_nil: true
-  validates :night_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :exactly_one_context
   validate :kind_required_fields
   validates :best_move_seats, best_move_seats: true
