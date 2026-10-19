@@ -14,7 +14,7 @@ A breakdown records the flow of the game as a chronology of **phases**, **game e
 
 - Phases: zero round → night 1 → round at N players → night 2 → … → «угадайка на троих».
 - Events: voting, mafia shots, don/sheriff checks, removals, farewell speeches of leaving players.
-- Moves: sheriff reveals, voiced checks, nominations, check requests, split breaks, «крышевание», best move, other.
+- Moves: sheriff reveals, voiced checks, nominations, check requests, broken votes («Слом голосования»), «крышевание», best move, other.
 
 ## Constraints and decisions
 
@@ -143,7 +143,7 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 | `check_claim` | «Проверка в стол»: a revealed sheriff shows a check to the table ("5 is black") | `target_seat` (checked player), `claimed_color` |
 | `nomination` | nominates for voting | `target_seat` |
 | `check_request` | asks to check a player | `target_seat` |
-| `split_break` | breaks a split | `target_seat` optional |
+| `split_break` | «Слом голосования»: votes differently from what the town agreed; may be added in a speech or in the vote round block | `target_seat` optional («В кого сломал»; the actor's own seat for 7.5.8) |
 | `protection` | «крышевание» | `target_seat` |
 | `best_move` | best move (night or day) | `best_move_seats` (1..3) |
 | `removal` | removal / disqualification; actor = removed player | `removal_reason` |
@@ -183,7 +183,7 @@ A `check_claim` may name a player who has already left the table (a sheriff may 
   cancels that day's voting (4.4.15).
 - **Farewell speeches.** Voted-out and night-killed players get a farewell speech; removed players do not.
 - **Best move.** Optional `best_move` in the farewell speech of the first night-killed player (4.5.10), or a day best move
-  of a player leaving the zero round by a split break (4.4.20).
+  of a player leaving the zero round after a broken vote («Слом голосования», 4.4.20); none if they broke it onto themselves (7.5.8).
 - **Result.**
   - Computable when every seat has a role: alive mafia = 0 → `city`; alive mafia ≥ alive red → `mafia`;
     alive count unchanged through three consecutive nights → `draw` (4.4.19).

@@ -23,6 +23,16 @@ module GameBreakdownsHelper
     { kind: "other", actor_seat: context.move_actor_seat }
   end
 
+  # Kinds whose meaning is not obvious from the name get a hint in the move form.
+  def breakdown_move_kind_hints
+    t("game_breakdowns.move_kind_hints").transform_keys(&:to_s)
+  end
+
+  # Labels for fields whose meaning depends on the move kind.
+  def breakdown_move_field_labels
+    t("game_breakdowns.move_field_labels").deep_stringify_keys
+  end
+
   def breakdown_move_summary(move, seat_names)
     [ t("game_breakdowns.move_kinds.#{move.kind}"), breakdown_move_details(move, seat_names) ].compact_blank.join(" · ")
   end

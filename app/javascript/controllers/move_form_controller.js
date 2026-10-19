@@ -1,20 +1,31 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Shows only the fields the selected move kind needs, plus the always-optional comment.
+// Shows the fields the selected move kind needs or may use, plus the always-optional comment,
+// with the kind's hint and any field labels that depend on the kind.
 export default class extends Controller {
-  static targets = ["kind", "field"]
-  static values = { required: Object }
+  static targets = ["kind", "field", "label", "hint"]
+  static values = { required: Object, optional: Object, hints: Object, labels: Object }
 
   connect() {
     this.kindChanged()
   }
 
   kindChanged() {
-    const required = this.requiredValue[this.kindTarget.value] || []
+    const kind = this.kindTarget.value
+    const shown = [...(this.requiredValue[kind] || []), ...(this.optionalValue[kind] || [])]
 
     this.fieldTargets.forEach((field) => {
       const name = field.dataset.field
-      field.hidden = !required.includes(name) && name !== "text"
+      field.hidden = !shown.includes(name) && name !== "text"
     })
+
+    const labels = this.labelsValue[kind] || {}
+    this.labelTargets.forEach((label) => {
+      label.textContent = labels[label.dataset.field] || label.dataset.defaultLabel
+    })
+
+    const hint = this.hintsValue[kind]
+    this.hintTarget.textContent = hint || ""
+    this.hintTarget.hidden = !hint
   }
 }

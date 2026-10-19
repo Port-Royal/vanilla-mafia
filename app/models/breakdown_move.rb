@@ -13,6 +13,9 @@ class BreakdownMove < ApplicationRecord
     "other" => %i[text]
   }.freeze
 
+  # Fields a kind may fill in without needing them; the form shows them next to the required ones.
+  OPTIONAL_FIELDS = { "split_break" => %i[target_seat] }.freeze
+
   CLAIMED_COLORS = {
     red: "red",
     black: "black"

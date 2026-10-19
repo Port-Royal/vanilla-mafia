@@ -68,7 +68,7 @@ class GameBreakdown::Timeline::DayWarnings
   end
 
   # Night best move: the first night-killed player, unless two or more players left the zero round (4.5.10, 6.11.4).
-  # Day best move: a player leaving the zero round after a split break (4.4.20), unless they broke it
+  # Day best move: a player leaving the zero round after a broken vote (4.4.20), unless they broke it
   # onto themselves and so engineered their own exit (7.5.8).
   def best_move_warning(move, speech)
     return unless move.best_move?
@@ -98,8 +98,9 @@ class GameBreakdown::Timeline::DayWarnings
     split_breaks.any? { |move| move.actor_seat == seat && move.target_seat == seat }
   end
 
+  # A broken vote is recorded in the speech or in the vote round block where it happened.
   def split_breaks
-    @split_breaks ||= @phase.speeches.flat_map(&:moves).select(&:split_break?)
+    @split_breaks ||= (@phase.speeches.flat_map(&:moves) + @phase.vote_rounds.flat_map(&:moves)).select(&:split_break?)
   end
 
   def opening_farewell?(speech)

@@ -21,6 +21,10 @@ RSpec.describe "config/locales/ru.yml wording" do
     expect(I18n.t("game_breakdowns.move_kinds.check_claim", locale: :ru)).to eq("Проверка в стол")
   end
 
+  it "names a broken vote «Слом голосования»" do
+    expect(I18n.t("game_breakdowns.move_kinds.split_break", locale: :ru)).to eq("Слом голосования")
+  end
+
   it "labels the judge fields «Судья»" do
     expect([ Game.human_attribute_name(:judge), GameBreakdown.human_attribute_name(:judge_name) ]).to all(eq("Судья"))
   end
