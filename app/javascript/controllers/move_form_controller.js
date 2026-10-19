@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Shows the fields the selected move kind needs or may use, plus the always-optional comment,
+// Shows the fields the selected move kind needs or may use, plus the text field (optional for most kinds, required for "other"),
 // with the kind's hint and any field labels that depend on the kind.
 export default class extends Controller {
   static targets = ["kind", "field", "label", "hint"]
