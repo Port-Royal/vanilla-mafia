@@ -361,6 +361,29 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
         end
       end
 
+      context "when the break is recorded in the vote round" do
+        let(:round_break) { { actor_seat: 8, target_seat: nil } }
+
+        before do
+          revote = vote(zero_round, "revote", [ 1, 2, 3, 4, 6, 8 ] => 5, [ 5, 7, 9, 10 ] => 3)
+          create(:breakdown_move, :split_break, :in_vote_round, breakdown_vote_round: revote, **round_break)
+        end
+
+        let!(:move) { best_move(zero_round, 5) }
+
+        it "gives the leaving player the best move right" do
+          expect(timeline.warnings_for(move)).to be_empty
+        end
+
+        context "when the leaving player broke it onto themselves" do
+          let(:round_break) { { actor_seat: 5, target_seat: 5 } }
+
+          it "warns about the move" do
+            expect(timeline.warnings_for(move)).to eq([ warning(:best_move_without_right, move, rule: "7.5.8") ])
+          end
+        end
+      end
+
       context "when a player who stayed makes it after a split break" do
         before do
           create(:breakdown_move, :split_break, breakdown_speech: speech(zero_round, 8), actor_seat: 8)

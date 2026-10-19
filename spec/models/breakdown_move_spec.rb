@@ -186,10 +186,22 @@ RSpec.describe BreakdownMove, type: :model do
       it { is_expected.to be_valid }
     end
 
+    context "when a broken vote names the player it was broken onto" do
+      subject { build(:breakdown_move, kind: "split_break", target_seat: 4) }
+
+      it { is_expected.to be_valid }
+    end
+
     context "when an other move has text" do
       subject { build(:breakdown_move, kind: "other", text: "поднял руку") }
 
       it { is_expected.to be_valid }
+    end
+  end
+
+  describe "optional fields" do
+    it "lets a broken vote name the player it was broken onto" do
+      expect(BreakdownMove::OPTIONAL_FIELDS).to eq("split_break" => %i[target_seat])
     end
   end
 

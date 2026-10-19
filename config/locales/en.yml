@@ -417,6 +417,7 @@ en:
         automatic_no_deletion: "Nothing is ever deleted automatically. If a correction leaves a block obsolete, it stays and is flagged with a warning; removing or editing it is up to you."
         warnings_title: "Warnings"
         warnings_description: "Rule violations are highlighted but never prevent saving: the point of a breakdown is to record what actually happened, violations included."
+        warnings_broken_vote: "When the vote in the zero round is broken (the \"Broken vote\" move, in a speech or in the vote round block), the player who leaves the table gets the right to a best move. A player who broke the vote onto themselves has no such right (7.5.8) — enter their own seat in \"Broken onto\"."
         result_title: "Result"
         result_description: "When every seat has a role the result is computed automatically. Otherwise choose it by hand at the bottom of the editor."
         view_title: "Reading a breakdown"
@@ -567,13 +568,18 @@ en:
       check: "%{role} → %{seat} (%{result})"
       don_check: "Don"
       sheriff_check: "Sheriff"
+    move_kind_hints:
+      split_break: "A player voted differently from what the town agreed. In the zero round this makes a player leave the table with the right to a best move — unless they broke the vote onto themselves."
+    move_field_labels:
+      split_break:
+        target_seat: "Broken onto"
     move_kinds:
       sheriff_reveal_table: "Sheriff reveal to the table"
       sheriff_reveal_to_player: "Sheriff reveal to a player"
       check_claim: "Check to the table"
       nomination: "Nomination"
       check_request: "Check request"
-      split_break: "Split break"
+      split_break: "Broken vote"
       protection: "Protection"
       best_move: "Best move"
       removal: "Removal"

@@ -62,6 +62,18 @@ RSpec.describe GameBreakdownsHelper do
     end
   end
 
+  describe "#breakdown_move_kind_hints" do
+    it "explains a broken vote" do
+      expect(helper.breakdown_move_kind_hints).to eq("split_break" => I18n.t("game_breakdowns.move_kind_hints.split_break"))
+    end
+  end
+
+  describe "#breakdown_move_field_labels" do
+    it "renames the target of a broken vote" do
+      expect(helper.breakdown_move_field_labels).to eq("split_break" => { "target_seat" => "В кого сломал" })
+    end
+  end
+
   describe "#breakdown_move_summary" do
     let(:seat_names) { { 4 => "Гость" } }
 

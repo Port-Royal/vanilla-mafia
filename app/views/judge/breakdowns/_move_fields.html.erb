@@ -1,5 +1,8 @@
 <div class="mt-2 grid gap-2 sm:grid-cols-2" data-controller="move-form"
-     data-move-form-required-value="<%= BreakdownMove::REQUIRED_FIELDS.to_json %>">
+     data-move-form-required-value="<%= BreakdownMove::REQUIRED_FIELDS.to_json %>"
+     data-move-form-optional-value="<%= BreakdownMove::OPTIONAL_FIELDS.to_json %>"
+     data-move-form-hints-value="<%= breakdown_move_kind_hints.to_json %>"
+     data-move-form-labels-value="<%= breakdown_move_field_labels.to_json %>">
   <label class="text-xs text-gray-600">
     <%= BreakdownMove.human_attribute_name(:kind) %>
     <%= form.select :kind,
@@ -8,6 +11,8 @@
           data: { move_form_target: "kind", action: "change->move-form#kindChanged" } %>
   </label>
 
+  <p class="text-xs text-gray-500 sm:col-span-2 sm:order-last" data-move-form-target="hint" hidden></p>
+
   <label class="text-xs text-gray-600">
     <%= BreakdownMove.human_attribute_name(:actor_seat) %>
     <%= form.select :actor_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
@@ -15,7 +20,9 @@
   </label>
 
   <label class="text-xs text-gray-600" data-move-form-target="field" data-field="target_seat">
-    <%= BreakdownMove.human_attribute_name(:target_seat) %>
+    <span data-move-form-target="label" data-field="target_seat" data-default-label="<%= BreakdownMove.human_attribute_name(:target_seat) %>">
+      <%= BreakdownMove.human_attribute_name(:target_seat) %>
+    </span>
     <%= form.select :target_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
           class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
   </label>
