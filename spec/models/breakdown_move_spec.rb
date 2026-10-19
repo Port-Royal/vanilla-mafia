@@ -16,7 +16,7 @@ RSpec.describe BreakdownMove, type: :model do
   describe "enums" do
     it "defines the move kind catalogue" do
       expect(described_class.kinds.keys).to eq(%w[
-        sheriff_reveal_table sheriff_reveal_to_player check_claim nomination check_request
+        sheriff_reveal_table check_claim nomination check_request
         split_break protection best_move removal other
       ])
     end
@@ -158,7 +158,6 @@ RSpec.describe BreakdownMove, type: :model do
   describe "kind-specific required fields" do
     {
       "sheriff_reveal_table" => [],
-      "sheriff_reveal_to_player" => %i[target_seat],
       "check_claim" => %i[claimed_color target_seat],
       "nomination" => %i[target_seat],
       "check_request" => %i[target_seat],

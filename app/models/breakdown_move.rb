@@ -2,7 +2,6 @@ class BreakdownMove < ApplicationRecord
   # Move catalogue: kind => attributes that must be filled for that kind.
   REQUIRED_FIELDS = {
     "sheriff_reveal_table" => [],
-    "sheriff_reveal_to_player" => %i[target_seat],
     "check_claim" => %i[target_seat claimed_color],
     "nomination" => %i[target_seat],
     "check_request" => %i[target_seat],

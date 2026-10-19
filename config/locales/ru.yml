@@ -549,8 +549,7 @@ ru:
       split_break:
         target_seat: "В кого сломал"
     move_kinds:
-      sheriff_reveal_table: "Раскрытие шерифом на стол"
-      sheriff_reveal_to_player: "Раскрытие шерифом игроку"
+      sheriff_reveal_table: "Вскрытие в стол"
       check_claim: "Проверка в стол"
       nomination: "Выставление"
       check_request: "Запрос проверки"

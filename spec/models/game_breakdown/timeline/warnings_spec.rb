@@ -155,7 +155,7 @@ RSpec.describe GameBreakdown::Timeline::Warnings do
       end
     end
 
-    %w[nomination check_request protection sheriff_reveal_to_player split_break].each do |kind|
+    %w[nomination check_request protection split_break].each do |kind|
       context "when a #{kind} targets an eliminated seat" do
         let!(:second_day) { day(2) }
         let!(:move) { create(:breakdown_move, kind.to_sym, breakdown_speech: speech(second_day, 1), actor_seat: 1, target_seat: 4) }
