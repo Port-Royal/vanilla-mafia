@@ -278,6 +278,28 @@ RSpec.describe GameBreakdown::SeatFilter do
       expect(filter.phase?(timeline.state_for(second_day))).to be false
     end
 
+    context "when the player is only named in someone's farewell after the voting" do
+      before do
+        farewell = speech(second_day, 7, kind: "farewell")
+        create(:breakdown_move, :best_move, breakdown_speech: farewell, actor_seat: 7, best_move_seats: [ 2 ])
+      end
+
+      it "keeps the day" do
+        expect(described_class.for(breakdown, "2").phase?(timeline.state_for(second_day))).to be true
+      end
+    end
+
+    context "when a day has a vote round the player has nothing to do with" do
+      before do
+        nominate(second_day, 5, 6)
+        vote(second_day, "main", [ 1, 2 ] => 6)
+      end
+
+      it "hides the day" do
+        expect(described_class.for(breakdown, "9").phase?(timeline.state_for(second_day))).to be false
+      end
+    end
+
     context "when the player only leaves after the voting" do
       before do
         nominate(second_day, 5, 3)

@@ -61,6 +61,10 @@ RSpec.describe "Judge::Breakdowns read-only view filtered by a player" do
 
     before { get judge_breakdown_path(breakdown) }
 
+    it "renders the page" do
+      expect(response).to have_http_status(:ok)
+    end
+
     it "shows the full view" do
       expect(response.body).to include("Речь пятого").and include("Речь девятого")
     end
