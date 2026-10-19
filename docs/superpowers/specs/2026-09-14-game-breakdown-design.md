@@ -82,7 +82,8 @@ from the game's participations by seat.
 | `breakdown_phase_id` | references, not null | |
 | `kind` | string, not null | enum `mafia_shot` / `don_check` / `sheriff_check` |
 | `actor_seat` | integer, null | shooter for `mafia_shot`; implied by role for checks |
-| `target_seat` | integer, null | null for `mafia_shot` = did not shoot |
+| `target_seat` | integer, null | null for `mafia_shot` = did not shoot, or a tactical miss when flagged |
+| `tactical_miss` | boolean, not null, default false | «тактический промах»: a deliberate, demonstrative miss; only on a `mafia_shot` with no target |
 
 `mafia_shot` rows are recorded per alive mafia member when the night is a miss. Check results are derived from the target
 seat's role (don: sheriff / not sheriff; sheriff: red / black).

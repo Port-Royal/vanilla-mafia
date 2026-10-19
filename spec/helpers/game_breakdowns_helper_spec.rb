@@ -498,6 +498,11 @@ RSpec.describe GameBreakdownsHelper do
       expect(helper.breakdown_shot_value(action)).to eq(SaveBreakdownNightService::NO_SHOT)
     end
 
+    it "marks a tactical miss as its own choice" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil, tactical_miss: true)
+      expect(helper.breakdown_shot_value(action)).to eq(SaveBreakdownNightService::TACTICAL_MISS)
+    end
+
     it "is blank when nothing was recorded" do
       expect(helper.breakdown_shot_value(nil)).to be_nil
     end
@@ -687,6 +692,11 @@ RSpec.describe GameBreakdownsHelper do
     it "reports a shooter who held fire" do
       action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil)
       expect(helper.breakdown_shot_summary(action, seat_names)).to eq(I18n.t("game_breakdowns.view.no_shot", actor: 2))
+    end
+
+    it "reports a tactical miss on its own line" do
+      action = build(:breakdown_night_action, kind: "mafia_shot", actor_seat: 2, target_seat: nil, tactical_miss: true)
+      expect(helper.breakdown_shot_summary(action, seat_names)).to eq("Мафия 2 — тактический промах")
     end
   end
 

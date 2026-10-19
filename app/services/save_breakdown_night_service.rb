@@ -1,10 +1,12 @@
 # Replaces the recorded internals of one night from the editor's night form.
 # A blank choice means nothing was recorded and removes the row; NO_SHOT records a mafia member who
-# deliberately did not shoot, which the schema stores as a shot with no target.
+# did not shoot, which the schema stores as a shot with no target; TACTICAL_MISS records a deliberate,
+# demonstrative miss — also a shot with no target, flagged as tactical.
 # Only open roles mode may hold these rows at all — BreakdownNightAction enforces that, so a day phase
 # or a closed-roles breakdown simply persists nothing.
 class SaveBreakdownNightService
   NO_SHOT = "none".freeze
+  TACTICAL_MISS = "tactical_miss".freeze
   CHECK_KINDS = %w[don_check sheriff_check].freeze
 
   def self.call(phase:, shots:, checks:)
@@ -29,14 +31,16 @@ class SaveBreakdownNightService
     action = @phase.night_actions.find_or_initialize_by(kind: "mafia_shot", actor_seat: actor_seat)
     return action.destroy if choice.blank?
 
-    action.update(target_seat: shot_target(choice))
+    action.update(shot_attributes(choice))
   end
 
-  # A mafia member who did not shoot is recorded as a shot with no target.
-  def shot_target(choice)
-    return if choice == NO_SHOT
-
-    choice
+  # Not shooting and a tactical miss are both shots with no target; every choice sets the flag, so a correction clears it.
+  def shot_attributes(choice)
+    case choice
+    when NO_SHOT then { target_seat: nil, tactical_miss: false }
+    when TACTICAL_MISS then { target_seat: nil, tactical_miss: true }
+    else { target_seat: choice, tactical_miss: false }
+    end
   end
 
   # Shots are only recorded on a miss — a kill says who the mafia hit — so any left from an earlier

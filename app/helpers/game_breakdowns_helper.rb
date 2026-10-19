@@ -158,6 +158,7 @@ module GameBreakdownsHelper
 
   def breakdown_shot_summary(action, seat_names)
     target = action.target_seat
+    return t("game_breakdowns.view.tactical_miss", actor: action.actor_seat) if action.tactical_miss?
     return t("game_breakdowns.view.no_shot", actor: action.actor_seat) if target.nil?
 
     t("game_breakdowns.view.shot", actor: action.actor_seat, target: breakdown_seat_label(seat_names, target))
@@ -207,6 +208,7 @@ module GameBreakdownsHelper
 
   def breakdown_shot_value(action)
     return if action.nil?
+    return SaveBreakdownNightService::TACTICAL_MISS if action.tactical_miss?
 
     action.target_seat.nil? ? SaveBreakdownNightService::NO_SHOT : action.target_seat.to_s
   end

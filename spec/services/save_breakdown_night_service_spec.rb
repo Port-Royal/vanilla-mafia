@@ -27,6 +27,37 @@ RSpec.describe SaveBreakdownNightService do
       end
     end
 
+    context "with the tactical-miss marker" do
+      let(:shots) { { "3" => described_class::TACTICAL_MISS } }
+
+      it "records a tactical miss with no target" do
+        save
+        expect(phase.night_actions.reload.map { |a| [ a.actor_seat, a.target_seat, a.tactical_miss ] }).to eq([ [ 3, nil, true ] ])
+      end
+    end
+
+    context "when a tactical miss is corrected" do
+      before { create(:breakdown_night_action, breakdown_phase: phase, kind: "mafia_shot", actor_seat: 3, target_seat: nil, tactical_miss: true) }
+
+      context "to a target" do
+        let(:shots) { { "3" => "7" } }
+
+        it "drops the tactical miss" do
+          save
+          expect(phase.night_actions.reload.map { |a| [ a.target_seat, a.tactical_miss ] }).to eq([ [ 7, false ] ])
+        end
+      end
+
+      context "to did not shoot" do
+        let(:shots) { { "3" => described_class::NO_SHOT } }
+
+        it "drops the tactical miss" do
+          save
+          expect(phase.night_actions.reload.map { |a| [ a.target_seat, a.tactical_miss ] }).to eq([ [ nil, false ] ])
+        end
+      end
+    end
+
     context "with a blank choice" do
       let(:shots) { { "3" => "" } }
 
