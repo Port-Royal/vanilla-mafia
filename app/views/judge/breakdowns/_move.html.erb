@@ -1,6 +1,6 @@
 <li id="<%= dom_id(move) %>" class="text-sm">
   <div class="flex flex-wrap items-baseline gap-2">
-    <span>· <%= breakdown_move_summary(move, seat_names) %></span>
+    <span>· <%= breakdown_move_summary(move, seat_names, foul_number: @timeline.foul_number(move)) %></span>
     <span class="text-xs text-gray-500"><%= t("game_breakdowns.editor.move_actor", seat: move.actor_seat) %></span>
     <span class="grow"></span>
     <%= button_to t("game_breakdowns.editor.delete_move"), judge_breakdown_move_path(@breakdown, move),

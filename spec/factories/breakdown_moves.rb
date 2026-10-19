@@ -45,6 +45,10 @@ FactoryBot.define do
       best_move_seats { [ 2, 3, 4 ] }
     end
 
+    trait :foul do
+      kind { "foul" }
+    end
+
     trait :removal do
       kind { "removal" }
       removal_reason { "fouls" }

@@ -38,6 +38,14 @@ class GameBreakdown::Timeline
       phase.speeches.select { |speech| post_vote_farewell?(speech) }
     end
 
+    # Moves in the order the day's blocks are shown: speeches before the voting, each vote round after its
+    # justification speeches, farewells after the voting.
+    def moves_in_order
+      opening_speeches.flat_map(&:moves) +
+        vote_rounds.flat_map { |result| result.round.justification_speeches.flat_map(&:moves) + result.round.moves } +
+        closing_speeches.flat_map(&:moves)
+    end
+
     def post_vote_farewell?(speech)
       speech.farewell? && speech.speaker_seat != farewell_seat
     end
@@ -49,6 +57,15 @@ class GameBreakdown::Timeline
     @breakdown = breakdown
     @phases = replay
     @computed_result = compute_result
+  end
+
+  def fouls_by_seat
+    fouls.map(&:actor_seat).tally
+  end
+
+  # The foul's running number for its player across the whole game, nil for any other move.
+  def foul_number(move)
+    foul_numbers[move.id]
   end
 
   def state_for(phase)
@@ -190,5 +207,13 @@ class GameBreakdown::Timeline
     return false if nights.size < DRAW_NIGHTS
 
     nights[-DRAW_NIGHTS].alive_at_start.size == nights.last.alive_at_end.size
+  end
+
+  def fouls
+    @fouls ||= phases.flat_map(&:moves_in_order).select(&:foul?)
+  end
+
+  def foul_numbers
+    @foul_numbers ||= fouls.group_by(&:actor_seat).values.flat_map { |moves| moves.each_with_index.map { |move, index| [ move.id, index + 1 ] } }.to_h
   end
 end

@@ -31,6 +31,7 @@
         <span class="w-8 shrink-0 font-semibold text-center"><%= seat.number %></span>
         <span class="grow"><%= seat.name.presence || "—" %></span>
         <span class="text-gray-500"><%= seat.role ? seat.role.name : "—" %></span>
+        <%= render "judge/breakdowns/seat_fouls", seat: seat %>
       </li>
     <% end %>
   </ul>

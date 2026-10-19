@@ -17,7 +17,7 @@ RSpec.describe BreakdownMove, type: :model do
     it "defines the move kind catalogue" do
       expect(described_class.kinds.keys).to eq(%w[
         sheriff_reveal_table check_claim nomination check_request
-        split_break protection best_move removal other
+        split_break protection best_move foul removal other
       ])
     end
 
@@ -164,6 +164,7 @@ RSpec.describe BreakdownMove, type: :model do
       "split_break" => [],
       "protection" => %i[target_seat],
       "best_move" => %i[best_move_seats],
+      "foul" => [],
       "removal" => %i[removal_reason],
       "other" => %i[text]
     }.each do |kind, required|
