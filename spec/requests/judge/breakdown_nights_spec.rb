@@ -84,6 +84,24 @@ RSpec.describe "Judge::Breakdowns night editing" do
       expect(response.body).to include('name="checks[don_check]"').and include('name="checks[sheriff_check]"')
     end
 
+    context "when a seat left before the night" do
+      let(:check_select) { response.body[%r{<select[^>]*name="checks\[don_check\]".*?</select>}m] }
+
+      before do
+        remove(breakdown.phases.find_by(position: 0), 6)
+        first_night.update!(night_outcome: "miss")
+        get edit_judge_breakdown_path(breakdown)
+      end
+
+      it "still offers the seat for a check, marked as left" do
+        expect(check_select).to include(%(<option value="6">#{I18n.t("game_breakdowns.editor.left_seat", seat: "6")}</option>))
+      end
+
+      it "keeps the seat out of the shots" do
+        expect(response.body[%r{<select[^>]*name="shots\[2\]".*?</select>}m]).not_to include('value="6"')
+      end
+    end
+
     it "hides a check whose role is not set" do
       breakdown.seats.where(number: 5).update_all(role_code: "peace")
 

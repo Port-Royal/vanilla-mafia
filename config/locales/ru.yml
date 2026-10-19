@@ -589,6 +589,7 @@ ru:
     create:
       success: "Разбор создан."
     editor:
+      left_seat: "%{seat} (выбыл)"
       back: "К списку разборов"
       header_panel: "Информация об игре"
       seats_panel: "Рассадка"

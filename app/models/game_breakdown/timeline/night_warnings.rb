@@ -24,8 +24,9 @@ class GameBreakdown::Timeline::NightWarnings
     eliminated_warning(:eliminated_checker, action, @role_seats.fetch(CHECKER_ROLES.fetch(action.kind), []).first)
   end
 
+  # A shot needs a player at the table; a check may target one who has already left.
   def target_warning(action)
-    eliminated_warning(:eliminated_target, action, action.target_seat)
+    eliminated_warning(:eliminated_target, action, action.target_seat) if action.mafia_shot?
   end
 
   def eliminated_warning(code, record, seat)

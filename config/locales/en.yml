@@ -614,6 +614,7 @@ en:
     create:
       success: "Breakdown created."
     editor:
+      left_seat: "%{seat} (left)"
       back: "Back to breakdowns"
       header_panel: "Game information"
       seats_panel: "Seating"
