@@ -21,6 +21,7 @@ class Avo::Resources::GameBreakdown < Avo::BaseResource
     field :judge_name, as: :text
     field :roles_mode, as: :select, enum: ::GameBreakdown.roles_modes
     field :manual_result, as: :select, enum: ::GameBreakdown.manual_results, include_blank: true
+    field :mafia_acquaintance, as: :textarea
     field :conclusion, as: :textarea
     field :author, as: :belongs_to
     field :game, as: :belongs_to

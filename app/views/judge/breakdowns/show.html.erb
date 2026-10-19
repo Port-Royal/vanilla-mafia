@@ -36,6 +36,15 @@
   </ul>
 </div>
 
+<% if @breakdown.open? && @breakdown.mafia_acquaintance.present? %>
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+    <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+      <%= GameBreakdown.human_attribute_name(:mafia_acquaintance) %>
+    </div>
+    <p class="px-4 py-3 text-sm whitespace-pre-line break-words"><%= @breakdown.mafia_acquaintance %></p>
+  </div>
+<% end %>
+
 <div class="space-y-4 mb-6">
   <% @timeline.phases.each do |state| %>
     <%= render "judge/breakdowns/view_phase", state: state, seat_names: seat_names, roles_by_seat: roles_by_seat %>

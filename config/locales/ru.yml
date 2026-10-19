@@ -16,6 +16,7 @@ ru:
         played_on: "Дата игры"
         video_url: "Ссылка на видео"
         judge_name: "Судья"
+        mafia_acquaintance: "Договорка мафии"
         roles_mode: "Роли"
         game_id: "Клубная игра"
         author: "Автор"
@@ -588,6 +589,7 @@ ru:
     create:
       success: "Разбор создан."
     editor:
+      mafia_acquaintance_hint: "Кратко: о чём мафия договорилась в ночь знакомства"
       left_seat: "%{seat} (выбыл)"
       back: "К списку разборов"
       header_panel: "Информация об игре"

@@ -1,0 +1,17 @@
+<%# What the mafia agreed on in the acquaintance night; only meaningful when roles are open. %>
+<div id="breakdown_mafia_acquaintance">
+  <% if @breakdown.open? %>
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+      <%= form_with model: @breakdown, url: judge_breakdown_path(@breakdown), method: :patch,
+            data: { controller: "autosave-form", action: "change->autosave-form#submit input->autosave-form#submitLater" } do |form| %>
+        <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+          <%= form.label :mafia_acquaintance %>
+        </div>
+        <div class="px-4 py-3">
+          <%= form.text_area :mafia_acquaintance, rows: 3, placeholder: t("game_breakdowns.editor.mafia_acquaintance_hint"),
+                class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
