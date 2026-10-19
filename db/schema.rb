@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_050358) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_014844) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -214,7 +214,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_050358) do
     t.string "manual_result"
     t.date "played_on"
     t.string "roles_mode", default: "open", null: false
-    t.string "source"
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.string "video_url"

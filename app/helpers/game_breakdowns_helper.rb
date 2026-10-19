@@ -98,7 +98,6 @@ module GameBreakdownsHelper
   def breakdown_view_metadata(breakdown)
     [
       [ GameBreakdown.human_attribute_name(:played_on), breakdown.played_on || "—" ],
-      [ GameBreakdown.human_attribute_name(:source), breakdown.source.presence || "—" ],
       [ GameBreakdown.human_attribute_name(:video_url), breakdown_video_link(breakdown) ],
       [ GameBreakdown.human_attribute_name(:judge_name), breakdown.judge_name.presence || "—" ],
       [ GameBreakdown.human_attribute_name(:roles_mode), t("game_breakdowns.roles_modes.#{breakdown.roles_mode}") ],

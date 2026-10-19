@@ -63,6 +63,6 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
 
   def breakdown_params
     params.require(:game_breakdown)
-          .permit(:title, :played_on, :source, :video_url, :judge_name, :roles_mode, :game_id, :manual_result, :conclusion)
+          .permit(:title, :played_on, :video_url, :judge_name, :roles_mode, :game_id, :manual_result, :conclusion)
   end
 end
