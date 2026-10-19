@@ -33,6 +33,22 @@ RSpec.describe "Judge::Breakdowns speech summaries" do
       end
     end
 
+    context "when the speech itself is invalid" do
+      before do
+        regular.update_column(:speaker_seat, 11)
+        patch judge_breakdown_speech_path(breakdown, regular),
+              params: params, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html, application/xhtml+xml" }
+      end
+
+      it "reports the error in the editor instead of failing" do
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "keeps the old summary" do
+        expect(regular.reload.summary).to be_nil
+      end
+    end
+
     context "when sent without JavaScript" do
       before { patch judge_breakdown_speech_path(breakdown, regular), params: params }
 
@@ -59,8 +75,7 @@ RSpec.describe "Judge::Breakdowns speech summaries" do
     end
 
     it "offers the summary field inside the speech block with the stored text" do
-      block = response.body[%r{<div id="#{ActionView::RecordIdentifier.dom_id(regular)}".*?Подозревает 7}m]
-      expect(block).to include(field)
+      expect(response.body).to match(%r{<div id="#{ActionView::RecordIdentifier.dom_id(regular)}".*?#{Regexp.escape(field)}[^>]*>\s*Подозревает 7}m)
     end
 
     it "gives the field an id unique to the speech" do
