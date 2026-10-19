@@ -574,8 +574,7 @@ en:
       split_break:
         target_seat: "Broken onto"
     move_kinds:
-      sheriff_reveal_table: "Sheriff reveal to the table"
-      sheriff_reveal_to_player: "Sheriff reveal to a player"
+      sheriff_reveal_table: "Reveal to the table"
       check_claim: "Check to the table"
       nomination: "Nomination"
       check_request: "Check request"

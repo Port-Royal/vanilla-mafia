@@ -14,7 +14,7 @@ A breakdown records the flow of the game as a chronology of **phases**, **game e
 
 - Phases: zero round → night 1 → round at N players → night 2 → … → «угадайка на троих».
 - Events: voting, mafia shots, don/sheriff checks, removals, farewell speeches of leaving players.
-- Moves: sheriff reveals, voiced checks, nominations, check requests, broken votes («Слом голосования»), «крышевание», best move, other.
+- Moves: sheriff reveal to the table («Вскрытие в стол»), voiced checks, nominations, check requests, broken votes («Слом голосования»), «крышевание», best move, other.
 
 ## Constraints and decisions
 
@@ -138,8 +138,7 @@ The final vote of each player is stored. Dynamics ("added a hand", "shouted to d
 
 | Kind | Meaning | Required fields |
 |---|---|---|
-| `sheriff_reveal_table` | reveals as sheriff to the table | — |
-| `sheriff_reveal_to_player` | reveals as sheriff to a specific player | `target_seat` |
+| `sheriff_reveal_table` | «Вскрытие в стол»: reveals as sheriff to the table | — |
 | `check_claim` | «Проверка в стол»: a revealed sheriff shows a check to the table ("5 is black") | `target_seat` (checked player), `claimed_color` |
 | `nomination` | nominates for voting | `target_seat` |
 | `check_request` | asks to check a player | `target_seat` |

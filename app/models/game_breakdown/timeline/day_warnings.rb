@@ -1,6 +1,6 @@
 # Warnings for a day phase's speeches and moves.
 class GameBreakdown::Timeline::DayWarnings
-  TARGETED_KINDS = %w[nomination check_request protection sheriff_reveal_to_player split_break].freeze
+  TARGETED_KINDS = %w[nomination check_request protection split_break].freeze
   FIRST_DAY_POSITION = 2
   EARLY_LEAVERS_LIMIT = 2
 

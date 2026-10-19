@@ -15,11 +15,6 @@ FactoryBot.define do
       kind { "sheriff_reveal_table" }
     end
 
-    trait :sheriff_reveal_to_player do
-      kind { "sheriff_reveal_to_player" }
-      target_seat { 2 }
-    end
-
     trait :check_claim do
       kind { "check_claim" }
       claimed_color { "red" }
