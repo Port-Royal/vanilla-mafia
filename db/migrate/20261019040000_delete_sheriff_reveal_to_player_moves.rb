@@ -4,8 +4,9 @@ class DeleteSheriffRevealToPlayerMoves < ActiveRecord::Migration[8.1]
     execute(delete_sql)
   end
 
+  # The deleted moves are not kept anywhere.
   def down
-    # Irreversible: the deleted moves are not kept anywhere
+    raise ActiveRecord::IrreversibleMigration
   end
 
   def delete_sql

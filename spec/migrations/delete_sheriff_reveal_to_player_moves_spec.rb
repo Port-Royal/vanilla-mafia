@@ -27,4 +27,10 @@ RSpec.describe DeleteSheriffRevealToPlayerMoves do
       expect(BreakdownMove.exists?(table_reveal.id)).to be true
     end
   end
+
+  describe "#down" do
+    it "refuses to roll back" do
+      expect { ActiveRecord::Migration.suppress_messages { migration.migrate(:down) } }.to raise_error(ActiveRecord::IrreversibleMigration)
+    end
+  end
 end
