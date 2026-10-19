@@ -93,6 +93,5 @@ group :test do
   gem "simplecov", require: false
   gem "database_cleaner-active_record"
   gem "evilution"
-  gem "mutant-rspec"
   gem "test-prof"
 end

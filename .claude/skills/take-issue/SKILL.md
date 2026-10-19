@@ -93,41 +93,30 @@ Examples:
 
 ## Phase 6: Mutation Testing
 
-12. **Run mutant first** on each changed **service, model or helper** (never a controller — mutant reports
-    a phantom neutral for every controller subject, reproducible on unchanged `master`):
+12. **Run evilution** via MCP tool or CLI on each changed file:
     ```
-    bundle exec mutant run --jobs 1 -- 'ClassName'
+    NO_COVERAGE=1 bundle exec evilution run <file> --format json --jobs 1 --spec <spec-file>
     ```
-    `--jobs 1` is required: parallel workers contend on the SQLite test database and invent survivors.
+    Pass `--spec` (comma-separated) whenever the code is exercised by a spec the file name does not map to — a
+    controller's request specs, a class under `timeline/` tested by `timeline/warnings_spec.rb`, a migration spec.
 
-13. **Run evilution second** via MCP tool or CLI on each changed file:
-    ```
-    bundle exec evilution run <file> --format json --jobs 4 --spec <spec-file>
-    ```
+13. **Kill surviving mutants** — improve tests until no real (non-equivalent) mutants survive.
 
-14. **Compare results** from both tools.
-
-15. **Kill surviving mutants** — improve tests until no real (non-equivalent) mutants survive.
-
-16. **Append detailed feedback** to `.artifacts.local/regular-evilution-feedback.log`:
+14. **Append detailed feedback** to `.artifacts.local/regular-evilution-feedback.log`:
     ```
     ### <date> — <ClassName> (<file path>)
     **Evilution version:** <version>
-    **Results:**
-    - Mutant: X% (Y/Z killed)
-    - Evilution: X% (Y/Z killed)
-    **What mutant does better:** <specifics>
-    **What evilution does well:** <specifics>
+    **Results:** X% (Y/Z killed); survivors and why they are equivalent
     **What could make evilution greater:** <suggestions>
     ```
 
 ## Phase 7: Commit, Push & PR
 
-17. **Run rubocop** one final time on all changed files. Fix any offenses.
+15. **Run rubocop** one final time on all changed files. Fix any offenses.
 
-18. **Run specs** one final time to confirm everything passes.
+16. **Run specs** one final time to confirm everything passes.
 
-19. **Commit** with a descriptive message referencing the beads ID:
+17. **Commit** with a descriptive message referencing the beads ID:
     ```
     git add <specific-files>
     git commit -m "<beads-number>: <summary>
@@ -136,14 +125,13 @@ Examples:
 
     Closes #<gh-number>
 
-    - Mutant: X% (Y/Z killed)
     - Evilution: X% (Y/Z killed)
 
     Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
     ```
     IMPORTANT: Get the correct GH number from `bd show <beads-id>` → `External: gh-NNN`.
 
-20. **Push and create PR**:
+18. **Push and create PR**:
     ```
     git push -u origin <beads-id>
     gh pr create --repo Port-Royal/vanilla-mafia --title "<beads-number>: <title>" --body "..."
@@ -154,7 +142,6 @@ Examples:
     <bullet points>
 
     ## Mutation Testing
-    - Mutant: X% (Y/Z killed)
     - Evilution: X% (Y/Z killed)
 
     Closes #<gh-number>
@@ -165,12 +152,12 @@ Examples:
     🤖 Generated with [Claude Code](https://claude.com/claude-code)
     ```
 
-21. **Assign the PR** to `@marinazzio`:
+19. **Assign the PR** to `@marinazzio`:
     ```
     gh api repos/Port-Royal/vanilla-mafia/issues/<pr-number> --method PATCH -f "assignees[]=marinazzio"
     ```
 
-22. **Close the beads issue and sync**:
+20. **Close the beads issue and sync**:
     ```
     bd close <beads-id>
     bd sync

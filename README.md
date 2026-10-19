@@ -31,12 +31,14 @@ bundle exec rspec
 
 ### Mutation testing
 
+Mutation testing uses [evilution](https://github.com/marinazzio/evilution):
+
 ```bash
-bundle exec mutant run --jobs 1 -- 'ClassName'
+NO_COVERAGE=1 bundle exec evilution run app/models/class_name.rb --jobs 1
 ```
 
-Mutant is run against services, models and helpers only — on controllers it reports a phantom neutral for
-every subject. Controllers are covered by evilution plus request specs.
+Pass `--spec` (comma-separated) when the code is exercised by specs its path does not map to, e.g. a controller's
+request specs.
 
 ## Deployment
 

@@ -258,7 +258,7 @@ Hotwire (Turbo Frames + Turbo Streams); Stimulus only for small things (move for
   result computation incl. draw, best move eligibility, each warning).
 - Request specs: access (guest / user / judge / admin), toggle off → 404, CRUD of blocks.
 - System spec: main editor flow (create → seats → zero round with nominations and a split → night → next day).
-- Mutation testing: evilution then mutant on models and timeline.
+- Mutation testing: evilution on models and timeline.
 
 ## Delivery (sub-issues)
 

@@ -1,4 +1,4 @@
-# NO_COVERAGE=1 skips SimpleCov — mutation tools (evilution, mutant) load this file in every forked child.
+# NO_COVERAGE=1 skips SimpleCov — evilution loads this file in every forked mutation child.
 unless ENV['NO_COVERAGE']
   require 'simplecov'
   SimpleCov.start 'rails' do

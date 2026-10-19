@@ -20,7 +20,6 @@ class GameBreakdown::Timeline
       outcome == :pending && tally.any?
     end
   end
-  # A named subclass rather than a `Data.define` block, so mutant can match its methods.
   class PhaseState < Data.define(
     :phase, :label, :alive_at_start, :alive_at_end, :eliminations, :starter, :speech_order, :farewell_seat,
     :nominations, :candidates, :vote_rounds, :voting_cancelled, :expected_steps

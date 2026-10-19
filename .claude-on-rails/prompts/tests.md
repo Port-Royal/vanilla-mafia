@@ -81,66 +81,38 @@ end
 2. **Watch it fail** — confirm the test fails for the right reason
 3. **Write the minimal implementation** to make the test pass
 4. **Refactor** while keeping tests green
-5. **Run mutation testing** — run evilution first, then mutant on services/models/helpers; fix survivors from each (see below)
+5. **Run mutation testing** — run evilution on the changed files and fix survivors (see below)
 6. **Repeat** for the next acceptance criterion
 
 ## Mutation Testing (Required)
 
-After writing or modifying tests, run evilution against the changed files and fix survivors. Then run mutant against the changed **services, models and helpers** and fix any additional survivors — mutant is not run against controllers (see Step 2).
-
-### Step 1: Evilution (run first — fast, file-level targeting)
+After writing or modifying tests, run evilution against the changed files and fix survivors.
 
 ```bash
-# Test a single file
-bundle exec evilution run app/models/class_name.rb
+# Test a single file (NO_COVERAGE=1 keeps SimpleCov out of the forked children)
+NO_COVERAGE=1 bundle exec evilution run app/models/class_name.rb
 
 # Test specific lines
-bundle exec evilution run app/models/class_name.rb:15-30
+NO_COVERAGE=1 bundle exec evilution run app/models/class_name.rb:15-30
 
 # Test a specific method
-bundle exec evilution run app/models/class_name.rb --target ClassName#method_name
+NO_COVERAGE=1 bundle exec evilution run app/models/class_name.rb --target ClassName#method_name
+
+# Point at the specs that exercise the code when the file name does not map to them
+# (a controller's request specs, a class tested through another class's spec, a migration spec)
+NO_COVERAGE=1 bundle exec evilution run app/controllers/foo_controller.rb --spec spec/requests/foo_spec.rb,spec/requests/foo_bar_spec.rb
 
 # JSON output for structured results
-bundle exec evilution run app/models/class_name.rb --format json --timeout 30
+NO_COVERAGE=1 bundle exec evilution run app/models/class_name.rb --format json --timeout 30
 ```
 
-### Step 2: Mutant (run second — services, models and helpers only)
+Use `--jobs 1` when the specs hit the SQLite test database: parallel workers contend on it and invent survivors.
+If a run is interrupted, follow it with `bin/rails db:test:prepare` before trusting the suite.
 
-**Do not run mutant against controllers.** It reports a phantom `Neutral failure` for every subject of a
-request-spec-driven controller — reproducible on unchanged `master` code — so it can never reach 100%
-there, and a controller sweep costs ~35 minutes. Controllers are covered by evilution plus request specs.
-
-Always `--jobs 1`: parallel workers contend on the SQLite test database and invent survivors that change
-between runs.
-
-```bash
-# Test a single class
-bundle exec mutant run --jobs 1 -- 'ClassName'
-
-# Test a single method
-bundle exec mutant run --jobs 1 -- 'ClassName#method_name'
-```
-
-Run one mutation tool at a time — both use the same test database. If a run is interrupted, follow it with
-`bin/rails db:test:prepare` before trusting the suite.
-
-### After both tools
-
-- If mutants survive in either tool, add or strengthen assertions to kill them
+- Add or strengthen assertions until no real (non-equivalent) mutant survives
 - Aim for zero surviving mutants on all new/modified code
 - Common survivors: missing boundary assertions, untested return values, conditional branches without dedicated tests
-- Do not skip evilution. Do not skip mutant on a service, model or helper — we are still collecting data to
-  compare them, and mutant is still finding defects evilution scores 100% on
-
-### Data Collection
-
-In the PR description, always include mutation testing results from both tools:
-```
-- Evilution: X% (Y/Z mutants killed)
-- Mutant: X% (Y/Z mutants killed)
-- Additional mutants caught by mutant only: N
-```
-This helps evaluate whether mutant catches meaningful gaps that evilution misses.
+- A file whose spec cannot kill `method_body_to_raise` is not exercised by that spec — check the spec mapping
 
 ## Test Organization
 
