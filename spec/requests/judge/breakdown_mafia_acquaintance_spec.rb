@@ -17,13 +17,16 @@ RSpec.describe "Judge::Breakdowns mafia acquaintance" do
     before { get edit_judge_breakdown_path(breakdown) }
 
     context "when roles are open" do
+      let(:positions) do
+        [ I18n.t("game_breakdowns.editor.seats_panel"), field, %(id="#{ActionView::RecordIdentifier.dom_id(zero_round)}") ]
+          .map { |marker| response.body.index(marker) }
+      end
+
       it "offers the field with the stored text" do
         expect(response.body).to include(field).and include(acquaintance)
       end
 
       it "places the block after the seats and before the zero round" do
-        positions = [ I18n.t("game_breakdowns.editor.seats_panel"), field, %(id="#{ActionView::RecordIdentifier.dom_id(zero_round)}") ]
-                    .map { |marker| response.body.index(marker) }
         expect(positions).to eq(positions.compact.sort)
       end
     end
