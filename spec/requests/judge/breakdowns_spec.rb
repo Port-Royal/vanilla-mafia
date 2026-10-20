@@ -295,6 +295,41 @@ RSpec.describe "Judge::Breakdowns" do
         .and include('target="breakdown_footer"')
     end
 
+    context "when only the conclusion changes" do
+      it "answers with no content so the field being typed in is not re-rendered" do
+        patch judge_breakdown_path(breakdown),
+              params: { game_breakdown: { conclusion: "Скрышевали шерифа", manual_result: "" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it "redirects a plain request back to the editor" do
+        patch judge_breakdown_path(breakdown), params: { game_breakdown: { conclusion: "Скрышевали шерифа" } }
+        expect(response).to redirect_to(edit_judge_breakdown_path(breakdown))
+      end
+    end
+
+    context "when the conclusion changes together with the manual result" do
+      it "streams the footer" do
+        patch judge_breakdown_path(breakdown),
+              params: { game_breakdown: { conclusion: "Скрышевали шерифа", manual_result: "mafia" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('target="breakdown_footer"')
+      end
+    end
+
+    context "when nothing changes in a stream request" do
+      it "still streams the editor" do
+        patch judge_breakdown_path(breakdown),
+              params: { game_breakdown: { title: breakdown.title } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('target="breakdown_footer"')
+      end
+    end
+
     context "when the attributes are invalid" do
       it "does not update the breakdown" do
         patch judge_breakdown_path(breakdown), params: { game_breakdown: { title: "" } }

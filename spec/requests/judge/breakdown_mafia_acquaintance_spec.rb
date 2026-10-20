@@ -55,6 +55,18 @@ RSpec.describe "Judge::Breakdowns mafia acquaintance" do
 
       expect(response.body).to include('target="breakdown_mafia_acquaintance"')
     end
+
+    context "when only the text changes in a stream request" do
+      before do
+        patch judge_breakdown_path(breakdown),
+              params: { game_breakdown: { mafia_acquaintance: "Первым стреляем 5" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      end
+
+      it "answers with no content so the field being typed in is not re-rendered" do
+        expect(response).to have_http_status(:no_content)
+      end
+    end
   end
 
   describe "GET /judge/breakdowns/:id" do
