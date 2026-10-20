@@ -1,5 +1,7 @@
 class Judge::BreakdownsController < Judge::BreakdownBaseController
   GAME_OPTIONS_LIMIT = 200
+  # Free-text notes change nothing else on the page.
+  NOTE_ATTRIBUTES = %w[conclusion mafia_acquaintance].freeze
 
   before_action :set_breakdown, only: [ :edit, :update ]
   before_action :set_breakdown_with_roles, only: [ :show ]
@@ -37,11 +39,26 @@ class Judge::BreakdownsController < Judge::BreakdownBaseController
 
   def update
     return render_invalid unless @breakdown.update(breakdown_params)
+    return respond_with_note_saved if notes_only_saved?
 
     respond_with_editor
   end
 
   private
+
+  def notes_only_saved?
+    changed = @breakdown.saved_changes.keys - [ "updated_at" ]
+    changed.any? && (changed - NOTE_ATTRIBUTES).empty?
+  end
+
+  # Re-rendering would replace the textarea the judge is typing in and throw the caret back to the start,
+  # so a stream request gets no content back.
+  def respond_with_note_saved
+    respond_to do |format|
+      format.turbo_stream { head :no_content }
+      format.html { redirect_to editor_path }
+    end
+  end
 
   def render_invalid
     load_editor_data
