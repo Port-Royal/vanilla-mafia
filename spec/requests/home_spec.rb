@@ -259,7 +259,7 @@ RSpec.describe HomeController do
       before { get root_path }
 
       it "renders the draw label" do
-        expect(response.body).to include("Ничья")
+        expect(response.body).to include(I18n.t("activerecord.attributes.game.results.draw"))
       end
     end
 

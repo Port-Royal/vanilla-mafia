@@ -12,7 +12,7 @@ RSpec.describe GamesController do
       before { get game_path(draw_game) }
 
       it "renders the draw label" do
-        assert_select "p", text: "Ничья"
+        assert_select "p", text: I18n.t("games.show.result.draw")
       end
     end
 

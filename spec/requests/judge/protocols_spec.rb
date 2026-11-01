@@ -394,7 +394,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       it "offers a draw result with its label" do
-        assert_select "label", text: /Ничья/ do
+        assert_select "label", text: /#{I18n.t("activerecord.attributes.game.results.draw")}/ do
           assert_select "input[type=radio][name='game[result]'][value=draw]"
         end
       end
