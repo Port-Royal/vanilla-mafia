@@ -393,6 +393,12 @@ RSpec.describe "Judge::Protocols" do
         expect(response).to have_http_status(:ok)
       end
 
+      it "offers a draw result with its label" do
+        assert_select "label", text: /Ничья/ do
+          assert_select "input[type=radio][name='game[result]'][value=draw]"
+        end
+      end
+
       it "renders the edit form with game data" do
         expect(response.body).to include(I18n.t("game_protocols.edit.title"))
       end

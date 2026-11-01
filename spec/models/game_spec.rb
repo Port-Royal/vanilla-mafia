@@ -105,6 +105,32 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe 'draw result' do
+    let(:game) { build(:game, result: "draw") }
+
+    it 'is valid' do
+      expect(game).to be_valid
+    end
+
+    it 'exposes the draw value' do
+      expect(described_class::RESULTS[:draw]).to eq("draw")
+    end
+  end
+
+  describe '.finished' do
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:draw_game) { create(:game, competition:, game_number: 1, result: "draw") }
+    let_it_be(:running_game) { create(:game, competition:, game_number: 2, result: "in_progress") }
+
+    it 'includes a draw' do
+      expect(described_class.finished).to include(draw_game)
+    end
+
+    it 'excludes a game in progress' do
+      expect(described_class.finished).not_to include(running_game)
+    end
+  end
+
   describe '.for_competition' do
     let_it_be(:competition) { create(:competition, :series) }
     let_it_be(:other_competition) { create(:competition, :series) }

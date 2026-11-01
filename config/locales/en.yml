@@ -92,6 +92,7 @@ en:
           in_progress: "In progress"
           peace_victory: "Peace victory"
           mafia_victory: "Mafia victory"
+          draw: "Draw"
       news:
         title: "Title"
         content: "Content"
@@ -465,6 +466,7 @@ en:
         in_progress: "In progress"
         peace_victory: "City wins"
         mafia_victory: "Mafia wins"
+        draw: "Draw"
     overlay:
       role_badge:
         sheriff: "S"
