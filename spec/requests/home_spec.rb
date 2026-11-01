@@ -249,6 +249,20 @@ RSpec.describe HomeController do
   end
 
   describe "recent games block" do
+    context "when a recent game is a draw" do
+      let_it_be(:competition) { create(:competition, :season, name: "Season 9", ended_on: nil) }
+      let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series 1") }
+      let_it_be(:game) do
+        create(:game, competition: child, played_on: Date.new(2026, 3, 20), result: "draw", game_number: 1)
+      end
+
+      before { get root_path }
+
+      it "renders the draw label" do
+        expect(response.body).to include(I18n.t("activerecord.attributes.game.results.draw"))
+      end
+    end
+
     context "when games exist" do
       let_it_be(:competition) { create(:competition, :season, name: "Season 8", ended_on: nil) }
       let_it_be(:child) { create(:competition, :series, parent: competition, name: "Series 1") }

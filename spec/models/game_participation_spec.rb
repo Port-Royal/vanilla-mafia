@@ -241,6 +241,28 @@ RSpec.describe GameParticipation, type: :model do
       end
     end
 
+    context 'when game is a draw' do
+      let(:game_result) { "draw" }
+
+      %w[peace sheriff mafia don].each do |code|
+        context "when player is #{code}" do
+          let(:role_code) { code }
+
+          it 'returns draw' do
+            expect(participation.result).to eq("draw")
+          end
+        end
+      end
+
+      context 'when role_code is blank' do
+        let(:role_code) { nil }
+
+        it 'returns nil' do
+          expect(participation.result).to be_nil
+        end
+      end
+    end
+
     context 'when mafia wins' do
       let(:game_result) { "mafia_victory" }
 

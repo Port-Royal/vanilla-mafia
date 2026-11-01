@@ -25,6 +25,7 @@ class GameParticipation < ApplicationRecord
 
   def result
     return nil if game.in_progress? || role_code.blank?
+    return "draw" if game.draw?
 
     case game.result
     when "peace_victory"

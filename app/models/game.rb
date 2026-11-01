@@ -5,7 +5,8 @@ class Game < ApplicationRecord
   RESULTS = {
     in_progress: "in_progress",
     peace_victory: "peace_victory",
-    mafia_victory: "mafia_victory"
+    mafia_victory: "mafia_victory",
+    draw: "draw"
   }.freeze
 
   enum :result, RESULTS, validate: true

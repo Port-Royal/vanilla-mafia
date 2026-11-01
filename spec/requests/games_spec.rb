@@ -6,6 +6,16 @@ RSpec.describe GamesController do
     let_it_be(:series) { create(:competition, :series, name: "Серия 1", parent: season) }
     let_it_be(:game) { create(:game, competition: series, game_number: 1) }
 
+    context "when game is a draw" do
+      let_it_be(:draw_game) { create(:game, competition: series, game_number: 2, result: "draw") }
+
+      before { get game_path(draw_game) }
+
+      it "renders the draw label" do
+        assert_select "p", text: I18n.t("games.show.result.draw")
+      end
+    end
+
     context "when game exists" do
       let_it_be(:role) { create(:role, code: "peace", name: "Мирный") }
       let_it_be(:participation) { create(:game_participation, game: game, role_code: "peace", plus: 2.0, minus: 0.5, seat: 3) }

@@ -70,6 +70,7 @@ ru:
           in_progress: "В процессе"
           peace_victory: "Победа мирных"
           mafia_victory: "Победа мафии"
+          draw: "Ничья"
       game_participation:
         role_code: "Роль"
         win: "Победа"
@@ -279,6 +280,7 @@ ru:
         in_progress: "Игра в процессе"
         peace_victory: "Победа мирных"
         mafia_victory: "Победа мафии"
+        draw: "Ничья"
     overlay:
       role_badge:
         sheriff: "Ш"
