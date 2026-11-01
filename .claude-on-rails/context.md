@@ -168,8 +168,19 @@ After each mutation testing run, append a detailed entry to `.artifacts.local/re
 ### Limitations
 - Evilution mutates at the file level including DSL code (scopes, validations, `enum` tables); a mutation that makes the
   file fail to load is reported as killed or as an error, not a survivor
-- ERB templates and Stimulus controllers are not mutated — cover them with request and system specs
+- ERB templates are not mutated — cover them with request and system specs. JS is covered by Stryker, see below
 - For scopes and validations, rely on RSpec + Shoulda Matchers for coverage
+
+### JavaScript: Vitest and Stryker
+JS tooling is development only: production JS is served through importmap, with no bundler and no npm packages at
+runtime. Install with `npm ci --ignore-scripts`; the Node version is in `.node-version`.
+
+- **Tests**: `npm test` runs `test/javascript/**/*.test.js`, in jsdom; `npm run test:watch` for watch mode. CI runs them
+- **Mutation**: `npx stryker run --mutate app/javascript/path/to/file.js`. Always pass `--mutate`: the default covers
+  all of `app/javascript`. Add `--incremental` to reuse earlier results. Stryker does not run in CI
+- **Report**: `tmp/stryker-report/index.html`
+- **Results**: append to `.artifacts.local/regular-evilution-feedback.log`, same rules as evilution, never to GitHub
+- Modules under `app/javascript` must stay valid plain ESM, loadable by both the browser and Vitest
 
 ### Common Surviving Mutants to Watch For
 - Missing boundary/edge case assertions (e.g., `>` vs `>=`)

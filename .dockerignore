@@ -7,6 +7,15 @@
 # Ignore bundler config.
 /.bundle
 
+# Ignore JS test tooling, production JS is served through importmap.
+/node_modules/
+/package.json
+/package-lock.json
+/stryker.config.json
+/vitest.config.js
+/.node-version
+/test/javascript/
+
 # Ignore all environment files.
 /.env*
 

@@ -6,7 +6,7 @@
 
 **Architecture:** Все правила игры лежат в чистом JS-модуле `machine.js`: действие судьи превращается в события, состояние считается повтором журнала. Сервер хранит события, проверяет их форму и применяет явно указанные исходы к `game_participations` и `games`. Stimulus-контроллер рисует экран и ведёт очередь отправки.
 
-**Tech Stack:** Rails 8.1.2, Ruby 4.0.1, Stimulus, importmap, Action Cable, RSpec, `node --test` без зависимостей.
+**Tech Stack:** Rails 8.1.2, Ruby 4.0.1, Stimulus, importmap, Action Cable, RSpec, Vitest и Stryker (только для разработки).
 
 **Spec:** `docs/superpowers/specs/2026-11-01-live-judge-protocol-design.md`. Вид экрана: прототип https://claude.ai/artifact/W6Rtk5CHFYSsugaCCGkbNV, код из него не переносить.
 
@@ -18,6 +18,7 @@
 - Журнал не уходит в `GameProtocolChannel`. При `hide_roles` роли и проверки не отдаются публично.
 - Без `&.`, без `and return`. Спеки: `let_it_be`, `context`, без переменных внутри `it`.
 - Ruby-код: `NO_COVERAGE=1 bundle exec evilution run <file> --jobs 1`, результат только в `.artifacts.local/regular-evilution-feedback.log`, не в GitHub.
+- JS-код: `npx stryker run --mutate <file>`, результат только в `.artifacts.local/regular-evilution-feedback.log`, не в GitHub.
 - Коммиты, ветки, push и PR только с разрешения пользователя. Ветка на задачу: `vanilla-mafia-<N>` от `master`.
 
 ## Review Focus
@@ -97,15 +98,15 @@
 ## Task 4: Machine, setup and speeches
 
 **Files:**
-- Create: `app/javascript/live_protocol/machine.js`, `test/javascript/live_protocol/machine_speech.test.mjs`
-- Modify: `config/importmap.rb` (`pin_all_from "app/javascript/live_protocol", under: "live_protocol"`), `.github/workflows/ci.yml` (шаг `node --test test/javascript/`)
+- Create: `app/javascript/live_protocol/machine.js`, `test/javascript/live_protocol/machine_speech.test.js`
+- Modify: `config/importmap.rb` (`pin_all_from "app/javascript/live_protocol", under: "live_protocol"`), `.github/workflows/ci.yml` (шаг `npm test`)
 
 **Interfaces:**
 - Produces: `replay(players, events) -> state`; `decide(state, action) -> {events: [event], error: string|null}`. `action` это `{type, seats?, text?}`. `event` это `{kind, phase, day_number, actor_seat, target_seats, text, metadata}`. Без обращений к DOM и сети.
 - Produces, поля состояния: `stage` (`roles deal speech vote leaving best_move night_shot night_miss night_don night_sheriff finished`), `day`, `speaker`, `firstSpeaker`, `candidates`, `players[seat] {role, fouls, tech, out, outReason}`, `round`, `nights`, `leaving`, `noVoteDay`, `pendingResult`, `log`.
 
 - [ ] **Step 1:** Падающие тесты, значения из раздела спека «Речь» и «Роли судьи»: раздача требует ровно 1 дона, 1 шерифа, 2 мафии; договорка хранит статику/динамику, шерифа, текст; речь начинает игрок 1, в следующий день следующий живой; второе выставление того же игрока и выставление уже выставленного дают `error`; снятие кандидатуры снова разрешает выставить; `Space` на последнем запускает голосование; первый говорящий удалён, круг всё равно заканчивается.
-- [ ] **Step 2:** `node --test test/javascript/`: FAIL.
+- [ ] **Step 2:** `npm test`: FAIL.
 - [ ] **Step 3:** Реализовать.
 - [ ] **Step 4:** Запуск: PASS. Коммит с разрешения.
 
@@ -113,7 +114,7 @@
 
 **Files:**
 - Modify: `app/javascript/live_protocol/machine.js`
-- Test: `test/javascript/live_protocol/machine_vote.test.mjs`
+- Test: `test/javascript/live_protocol/machine_vote.test.js`
 
 **Interfaces:**
 - Produces: `voteDecided(round, aliveSeats) -> boolean`.
@@ -136,7 +137,7 @@
 **Files:**
 - Modify: `app/javascript/live_protocol/machine.js`
 - Create: `app/javascript/live_protocol/will_parser.js`
-- Test: `test/javascript/live_protocol/machine_night.test.mjs`, `test/javascript/live_protocol/will_parser.test.mjs`
+- Test: `test/javascript/live_protocol/machine_night.test.js`, `test/javascript/live_protocol/will_parser.test.js`
 
 **Interfaces:**
 - Produces: `parseWill(raw) -> {red: number[], black: number[], sheriff: number[], plan: string}`.
@@ -170,7 +171,7 @@
 ## Task 8: Send queue and restore
 
 **Files:**
-- Create: `app/javascript/live_protocol/send_queue.js`, `test/javascript/live_protocol/send_queue.test.mjs`
+- Create: `app/javascript/live_protocol/send_queue.js`, `test/javascript/live_protocol/send_queue.test.js`
 - Modify: `app/javascript/controllers/live_protocol_controller.js`
 - Test: `spec/system/judge/live_protocol_offline_spec.rb`
 
@@ -181,12 +182,12 @@
 - [ ] **Step 2:** Системный спек: события отправлены, страница перезагружена, игра на том же этапе; локальные неотправленные события применяются поверх журнала сервера без дублей по `client_id`.
 - [ ] **Step 3:** Запуск: FAIL.
 - [ ] **Step 4:** Реализовать, показать статус связи на экране.
-- [ ] **Step 5:** `node --test test/javascript/` и системный спек: PASS. Коммит с разрешения.
+- [ ] **Step 5:** `npm test` и системный спек: PASS. Коммит с разрешения.
 
 ## Task 9: Game record tab and protection of the form
 
 **Files:**
-- Create: `app/javascript/live_protocol/game_sheet.js`, `test/javascript/live_protocol/game_sheet.test.mjs`
+- Create: `app/javascript/live_protocol/game_sheet.js`, `test/javascript/live_protocol/game_sheet.test.js`
 - Modify: `app/javascript/controllers/live_protocol_controller.js`, `app/services/autosave_game_protocol_service.rb`, `app/services/save_game_protocol_service.rb`
 - Test: `spec/services/autosave_game_protocol_service_spec.rb`, `spec/requests/judge/protocols_spec.rb`
 
@@ -231,7 +232,7 @@
 ## Task 12: Filter events by player after the game
 
 **Files:**
-- Create: `app/javascript/live_protocol/player_events.js`, `test/javascript/live_protocol/player_events.test.mjs`
+- Create: `app/javascript/live_protocol/player_events.js`, `test/javascript/live_protocol/player_events.test.js`
 - Modify: `app/javascript/controllers/live_protocol_controller.js`
 - Test: `spec/system/judge/live_protocol_spec.rb`
 
@@ -243,4 +244,4 @@
 - [ ] **Step 2:** Падающий системный спек: завершённая игра, номер показывает блоки выбранного игрока, `0` выбирает место 10, `Esc` снимает фильтр; у незавершённой игры цифры фильтр не включают; повторное открытие завершённой игры фильтр сохраняет как возможность.
 - [ ] **Step 3:** Запуск обоих: FAIL.
 - [ ] **Step 4:** Реализовать.
-- [ ] **Step 5:** `node --test test/javascript/` и системный спек: PASS. Коммит с разрешения.
+- [ ] **Step 5:** `npm test` и системный спек: PASS. Коммит с разрешения.
