@@ -117,6 +117,28 @@ jobs:
           # REDIS_URL: redis://localhost:6379/0
         run: bundle exec rspec --exclude-pattern "spec/system/**/*_spec.rb"
 
+  javascript-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install development dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Scan development dependencies for serious vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: Run JS tests
+        run: npm test
+
   system-test:
     runs-on: ubuntu-latest
 

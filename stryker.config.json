@@ -1,0 +1,9 @@
+{
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": ["app/javascript/**/*.js"],
+  "reporters": ["clear-text", "progress", "html"],
+  "tempDirName": "tmp/stryker",
+  "htmlReporter": { "fileName": "tmp/stryker-report/index.html" },
+  "incrementalFile": "tmp/stryker-incremental.json"
+}

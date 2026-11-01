@@ -57,6 +57,9 @@ coverage/*
 .claude/projects/
 .mutant/
 
+# JS test tooling (development only)
+/node_modules/
+
 # Brakeman SARIF output (generated in CI)
 /brakeman.sarif
 .claude/scheduled_tasks.lock
