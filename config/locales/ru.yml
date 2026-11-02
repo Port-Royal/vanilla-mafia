@@ -295,6 +295,7 @@ ru:
         sheriff: "Ш"
         don: "Д"
         mafia: "М"
+        peace: "К"
       table: "Стол %{number}"
       game: "Игра %{number}"
       game_of_total: "Игра %{number}/%{total}"

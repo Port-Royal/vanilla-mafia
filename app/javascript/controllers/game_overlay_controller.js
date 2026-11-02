@@ -121,7 +121,11 @@ export default class extends Controller {
 
   updateRoleBadge(seat, roleCode) {
     const badge = this.seatTarget(this.roleBadgeTargets, seat)
-    if (badge) badge.textContent = Object.hasOwn(this.roleBadgesValue, roleCode) ? this.roleBadgesValue[roleCode] : ""
+    if (!badge) return
+    const shown = Object.hasOwn(this.roleBadgesValue, roleCode)
+    badge.textContent = shown ? this.roleBadgesValue[roleCode] : ""
+    if (shown) badge.dataset.role = roleCode
+    else delete badge.dataset.role
   }
 
   updateStatus(seat, status) {
@@ -138,7 +142,10 @@ export default class extends Controller {
   forgetRoles() {
     this.renderChecks([])
     this.seatRoles = {}
-    this.roleBadgeTargets.forEach((badge) => { badge.textContent = "" })
+    this.roleBadgeTargets.forEach((badge) => {
+      badge.textContent = ""
+      delete badge.dataset.role
+    })
     this.bestMoveTargets.forEach((strip) => {
       strip.querySelectorAll("[data-named-seat]").forEach((cell) => this.colourBestMoveCell(cell))
     })

@@ -695,6 +695,7 @@ en:
         sheriff: "S"
         don: "D"
         mafia: "M"
+        peace: "C"
       table: "Table %{number}"
       game: "Game %{number}"
       game_of_total: "Game %{number}/%{total}"

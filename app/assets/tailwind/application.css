@@ -180,15 +180,37 @@
     height: 1.6em;
   }
 
+  /* Read on stream at a glance: a solid colour per role and a large letter. */
   .overlay-role-badge {
     left: 0.3em;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 1.9em;
+    height: 1.9em;
+    border: 0.08em solid rgb(255 255 255 / 0.9);
     border-radius: 0.3em;
-    background: rgb(0 0 0 / 0.75);
-    font-weight: 700;
+    background: #111;
+    color: #fff;
+    font-size: 1.15em;
+    font-weight: 800;
     line-height: 1;
+    box-shadow: 0 0.05em 0.3em rgb(0 0 0 / 0.6);
+  }
+
+  .overlay-role-badge[data-role="sheriff"] {
+    background: #facc15;
+    color: #111;
+  }
+
+  .overlay-role-badge[data-role="peace"] {
+    background: #dc2626;
+    color: #fff;
+  }
+
+  .overlay-role-badge[data-role="don"] {
+    border-color: #facc15;
+    color: #facc15;
   }
 
   .overlay-role-badge:empty {
