@@ -658,7 +658,7 @@ en:
         setting_css: "Custom CSS"
         display_title: "Display settings"
         display_description: "The judge chooses what the overlay shows in the game protocol, in the “Overlay” row. Changes appear on the overlay immediately; there is no need to reload the source in OBS."
-        display_hide_roles: "While the game runs, roles do not reach the overlay at all: no badges, no colours of the best move, nominees or shots, no checks. After the game everything is revealed."
+        display_hide_roles: "While the game runs, roles do not reach the overlay: there are no role badges and no checks, and the best move, the nominees and the shots show without team colours. After the game everything is revealed."
         display_hide_game_info: "Hides the “Game N/M” block at the top centre."
         display_hide_table_info: "Hides the “Table N” block at the top left. The judge at the top right is always shown."
         display_game_number: "“Game N/M” comes from the protocol’s “Game number” and “Total games” fields; until the total is set, the overlay shows “Game N”."

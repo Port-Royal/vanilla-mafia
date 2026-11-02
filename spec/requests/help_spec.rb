@@ -196,6 +196,20 @@ RSpec.describe HelpController do
         expect(response.body).not_to include(I18n.t("help.pages.live-protocol.title"))
       end
     end
+
+    context "when the toggle was never set" do
+      it "returns not found" do
+        get help_path(slug: "live-protocol")
+
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "is not listed on the index" do
+        get help_index_path
+
+        expect(response.body).not_to include(I18n.t("help.pages.live-protocol.title"))
+      end
+    end
   end
 
   describe "GET /help/obs-overlay" do
