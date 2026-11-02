@@ -334,9 +334,22 @@
     visibility: hidden;
   }
 
+  .overlay-photo {
+    transition: translate 0.4s ease, opacity 0.4s ease;
+  }
+
+  /* An eliminated player's photo sinks by a third of the tile, under the name bar, so the drop
+     reads on stream while the seat keeps its place in the row. */
   .overlay-tile--eliminated .overlay-photo {
+    translate: 0 calc(var(--overlay-tile-width) * 4 / 3 * 0.3);
     opacity: 0.4;
     filter: grayscale(1);
+  }
+
+  .overlay-best-move,
+  .overlay-bottom {
+    position: relative;
+    z-index: 1;
   }
 
 }
