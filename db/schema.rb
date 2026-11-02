@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_060001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -243,6 +243,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_060001) do
     t.index ["game_id"], name: "index_game_participations_on_game_id"
     t.index ["player_id"], name: "index_game_participations_on_player_id"
     t.index ["status"], name: "index_game_participations_on_status"
+  end
+
+  create_table "game_protocol_events", force: :cascade do |t|
+    t.string "action_id", null: false
+    t.integer "actor_seat"
+    t.string "client_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "day_number", null: false
+    t.integer "game_id", null: false
+    t.string "kind", null: false
+    t.json "metadata", default: {}, null: false
+    t.string "phase", null: false
+    t.integer "position", null: false
+    t.json "target_seats", default: [], null: false
+    t.text "text"
+    t.datetime "updated_at", null: false
+    t.index ["game_id", "action_id"], name: "index_game_protocol_events_on_game_id_and_action_id"
+    t.index ["game_id", "client_id"], name: "index_game_protocol_events_on_game_id_and_client_id", unique: true
+    t.index ["game_id", "position"], name: "index_game_protocol_events_on_game_id_and_position", unique: true
   end
 
   create_table "games", force: :cascade do |t|
@@ -490,6 +509,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_060001) do
   add_foreign_key "game_participations", "games"
   add_foreign_key "game_participations", "players"
   add_foreign_key "game_participations", "roles", column: "role_code", primary_key: "code"
+  add_foreign_key "game_protocol_events", "games"
   add_foreign_key "games", "competitions"
   add_foreign_key "news", "competitions"
   add_foreign_key "news", "games"
