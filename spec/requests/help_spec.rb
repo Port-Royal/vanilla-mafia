@@ -110,7 +110,15 @@ RSpec.describe HelpController do
           expect(page_text).to include(I18n.t("help.pages.obs-overlay.step_set_size"), I18n.t("help.pages.obs-overlay.step_position"))
         end
 
-        it "shows the overlay URL for a game slug" do
+        it "recommends the table overlay URL" do
+          expect(page_text).to include("https://vanilla-mafia.ru/overlay", "/overlay/tables/2")
+        end
+
+        it "explains how the table overlay follows the games" do
+          expect(page_text).to include(I18n.t("help.pages.obs-overlay.table_follow"))
+        end
+
+        it "still shows the overlay URL for a single game" do
           expect(page_text).to include("https://vanilla-mafia.ru/games/season-6-series-1-game-3/overlay")
         end
 

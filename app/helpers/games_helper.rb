@@ -78,6 +78,12 @@ module GamesHelper
     }
   end
 
+  # The static OBS URL of the game's table; table 1 gets the short /overlay.
+  def table_overlay_url_for(game)
+    table = game.table_key
+    table == Game::DEFAULT_TABLE ? overlay_url : table_overlay_url(number: table)
+  end
+
   def overlay_canvas_class(game)
     class_names(
       "overlay-canvas text-white",

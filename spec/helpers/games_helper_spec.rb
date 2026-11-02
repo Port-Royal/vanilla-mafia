@@ -86,6 +86,28 @@ RSpec.describe GamesHelper do
     end
   end
 
+  describe "#table_overlay_url_for" do
+    subject { helper.table_overlay_url_for(build(:game, table_number:)) }
+
+    context "with table 1" do
+      let(:table_number) { 1 }
+
+      it { is_expected.to eq("http://test.host/overlay") }
+    end
+
+    context "without a table number" do
+      let(:table_number) { nil }
+
+      it { is_expected.to eq("http://test.host/overlay") }
+    end
+
+    context "with another table" do
+      let(:table_number) { 3 }
+
+      it { is_expected.to eq("http://test.host/overlay/tables/3") }
+    end
+  end
+
   describe "#overlay_status_icon" do
     let(:icon) { Nokogiri::HTML5.fragment(helper.overlay_status_icon(status)).at_css("svg") }
 

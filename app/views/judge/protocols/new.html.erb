@@ -1,5 +1,12 @@
 <h1 class="text-2xl font-bold mb-6"><%= t("game_protocols.new.title") %></h1>
 
+<% if @unfinished_game %>
+  <div id="unfinished-game" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+    <%= t("game_protocols.unfinished_game.message", table: @unfinished_game.table_key, date: l(@unfinished_game.played_on, format: :long), game: @unfinished_game.in_season_name) %>
+    <%= link_to t("game_protocols.unfinished_game.link"), edit_judge_protocol_path(@unfinished_game), class: "font-semibold underline" %>
+  </div>
+<% end %>
+
 <%= form_with url: judge_protocols_path, method: :post, local: true do %>
   <%= render "form", submit_label: t("game_protocols.form.submit_create") %>
 <% end %>

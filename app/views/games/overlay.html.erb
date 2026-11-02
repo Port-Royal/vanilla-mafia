@@ -18,7 +18,7 @@
   <div class="overlay-header">
     <div id="overlay-header-start" class="justify-self-start">
       <div id="overlay-table" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
-      <%= render "night_block", rows: overlay_night_rows(@shots, @checks) %>
+      <%= render "games/night_block", rows: overlay_night_rows(@shots, @checks) %>
     </div>
     <div id="overlay-game-number" class="justify-self-center"
          data-game-overlay-target="gameNumber"

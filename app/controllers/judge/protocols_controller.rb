@@ -16,6 +16,15 @@ class Judge::ProtocolsController < ApplicationController
 
   def create
     @game = Game.new
+    @unfinished_game = unfinished_game_at_table
+    if @unfinished_game
+      @game.assign_attributes(game_params.except(:stage_id, :new_stage_name))
+      @participations = build_participations_from_params
+      load_form_data
+      render :new, status: :unprocessable_content
+      return
+    end
+
     resolved_params = resolve_competition(game_params)
     result = SaveGameProtocolService.call(
       game: @game,
@@ -107,6 +116,13 @@ class Judge::ProtocolsController < ApplicationController
       GameProtocolChannel.broadcast_to(@game, { scope: "game", field: "hide_roles", value: "1" })
       GameProtocolChannel.broadcast_to(@game, { scope: "checks", checks: [] })
     end
+  end
+
+  # A game left in progress on a past day blocks its table: the judge sets its result first, so the
+  # table overlay never has two games competing for "current".
+  def unfinished_game_at_table
+    table = game_params[:table_number].present? ? game_params[:table_number].to_i : Game::DEFAULT_TABLE
+    Game.unfinished_from_past_day.at_table(table).order(:played_on, :id).first
   end
 
   def after_create_path(game)

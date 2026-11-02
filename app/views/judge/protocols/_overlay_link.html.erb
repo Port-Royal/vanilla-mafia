@@ -3,7 +3,7 @@
   <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
     <input type="text"
            readonly
-           value="<%= overlay_game_url(game) %>"
+           value="<%= table_overlay_url_for(game) %>"
            data-clipboard-target="source"
            class="w-full sm:w-auto sm:flex-1 min-w-0 text-sm bg-white border border-gray-300 rounded px-3 py-2 text-gray-600 select-all">
     <button type="button"
@@ -12,12 +12,14 @@
             class="px-3 py-2 bg-maroon text-white text-sm rounded hover:bg-maroon/90 transition-colors shrink-0">
       <%= t("game_protocols.edit.overlay_link.copy") %>
     </button>
-    <%= link_to t("game_protocols.edit.overlay_link.open"), overlay_game_url(game),
+    <%= link_to t("game_protocols.edit.overlay_link.open"), table_overlay_url_for(game),
                 target: "_blank", rel: "noopener",
                 class: "px-3 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors shrink-0" %>
   </div>
   <p class="text-xs text-gray-500 mt-2">
     <%= t("game_protocols.edit.overlay_link.hint") %>
+    <%= link_to t("game_protocols.edit.overlay_link.game_only"), overlay_game_url(game),
+                target: "_blank", rel: "noopener", class: "text-maroon hover:underline" %>
     <%= link_to t("game_protocols.edit.overlay_link.help"), help_path(slug: "obs-overlay"), class: "text-maroon hover:underline" %>
   </p>
 </div>
