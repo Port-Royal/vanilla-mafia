@@ -59,7 +59,7 @@ Rails.application.routes.draw do
       get :overlay
     end
   end
-  get "overlay", to: "table_overlays#show", defaults: { number: Game::DEFAULT_TABLE }, as: :overlay
+  get "overlay", to: "table_overlays#show", as: :overlay
   get "overlay/tables/:number", to: "table_overlays#show", as: :table_overlay, constraints: { number: /[1-9]\d*/ }
   resources :players, only: [ :show ], param: :slug do
     resource :claim, only: [ :create ], controller: "player_claims"

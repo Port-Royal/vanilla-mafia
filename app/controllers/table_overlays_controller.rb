@@ -6,7 +6,7 @@ class TableOverlaysController < ApplicationController
   layout "overlay"
 
   def show
-    @table = params[:number].to_i
+    @table = params.fetch(:number, Game::DEFAULT_TABLE).to_i
     game = Game.current_at_table(@table)
     load_game_overlay(game) if game
   end
