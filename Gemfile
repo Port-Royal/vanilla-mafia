@@ -21,6 +21,8 @@ gem "tailwindcss-rails"
 gem "bcrypt", "~> 3.1.22"
 
 gem "avo"
+# prop_initializer 0.5 names a module "Properties(Extension)", which breaks view_component 4.20 at boot with eager loading (PR #1103).
+gem "prop_initializer", "< 0.5"
 gem "devise"
 gem "omniauth-google-oauth2"
 gem "omniauth-rails_csrf_protection"
