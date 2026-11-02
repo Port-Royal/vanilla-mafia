@@ -53,12 +53,25 @@ class AutosaveGameProtocolService
 
   def update_player_name
     name = @value.to_s.strip
+    return seat_locked if seat_locked?(name)
 
     if name.blank?
       remove_participation
     else
       upsert_participation(name)
     end
+  end
+
+  # Journal events refer to seats, so the player on a seat is fixed once the journal has started.
+  def seat_locked?(name)
+    return false unless @game.journal_started?
+
+    participation = @game.game_participations.find_by(seat: @seat)
+    participation.present? && participation.player.name != name
+  end
+
+  def seat_locked
+    Result.new(success: false, errors: [ I18n.t("game_protocols.seat_locked", seat: @seat) ])
   end
 
   def remove_participation

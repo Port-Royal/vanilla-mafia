@@ -398,6 +398,28 @@ RSpec.describe "Judge::Protocols" do
     end
   end
 
+  describe "PATCH /judge/protocols/:id with a started journal" do
+    let(:journal_game) { create(:game) }
+    let!(:seated) { create(:game_participation, game: journal_game, player: create(:player, name: "На месте"), seat: 2) }
+
+    before do
+      create(:game_protocol_event, game: journal_game)
+      sign_in admin
+      patch judge_protocol_path(journal_game), params: {
+        game: { game_number: journal_game.game_number, competition_id: journal_game.competition_id },
+        participations: { "2" => { player_name: "Другой" } }
+      }
+    end
+
+    it "shows the reason" do
+      expect(response.body).to include(I18n.t("game_protocols.seat_locked", seat: 2))
+    end
+
+    it "answers as a refused form" do
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+  end
+
   describe "GET /judge/protocols/:id/edit" do
     context "with the live protocol toggle" do
       let(:live_game) { create(:game) }

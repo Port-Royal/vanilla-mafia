@@ -27,6 +27,11 @@ RSpec.describe "Breakdown vote autosave keeps the focus" do
 
     sign_in admin
     visit edit_judge_breakdown_path(breakdown)
+    # A change made before Stimulus connects the form's controller is never submitted.
+    page.document.synchronize do
+      connected = page.evaluate_script(%(!!window.Stimulus?.getControllerForElementAndIdentifier(document.getElementById("#{select_id}").form, "autosave-form")))
+      raise Capybara::ExpectationNotMet, "autosave form is not connected" unless connected
+    end
     find("##{select_id}").find("option[value='2']").select_option
   end
 

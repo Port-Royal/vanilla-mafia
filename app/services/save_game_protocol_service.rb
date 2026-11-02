@@ -1,5 +1,6 @@
 class SaveGameProtocolService
   Result = Data.define(:success, :game, :errors)
+  SeatLocked = Class.new(StandardError)
 
   def self.call(game:, game_params:, participations_params:)
     new(game, game_params, participations_params).call
@@ -18,13 +19,14 @@ class SaveGameProtocolService
       save_participations!
       Result.new(success: true, game: @game, errors: [])
     end
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique, SeatLocked => e
     Result.new(success: false, game: @game, errors: [ e.message ])
   end
 
   private
 
   def save_participations!
+    keep_seats_of_journal!
     assign_seats_to_legacy_participations!
 
     @participations_params.each do |seat, attrs|
@@ -47,6 +49,18 @@ class SaveGameProtocolService
     end
 
     remove_cleared_seats!
+  end
+
+  # Journal events refer to seats, so the player on a seat is fixed once the journal has started.
+  # A legacy participation with no seat was never part of the journal.
+  def keep_seats_of_journal!
+    return unless @game.journal_started?
+
+    @game.game_participations.where.not(seat: nil).includes(:player).find_each do |participation|
+      attrs = @participations_params[participation.seat.to_s]
+      name = attrs ? attrs[:player_name].to_s.strip : ""
+      raise SeatLocked, I18n.t("game_protocols.seat_locked", seat: participation.seat) if name != participation.player.name
+    end
   end
 
   def assign_seats_to_legacy_participations!
