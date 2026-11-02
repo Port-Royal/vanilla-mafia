@@ -27,7 +27,7 @@ RSpec.describe GameProtocolEvent do
   it "knows every kind of the protocol" do
     expect(described_class::KINDS).to eq(%w[
       roles deal speaker suspect red team check_request nominate nomination_cancelled note vote round_closed
-      round_cancelled vote_skipped shot miss_shot don_check sheriff_check night_closed best_move will foul tech
+      round_cancelled vote_skipped leaving_closed shot miss_shot don_check sheriff_check night_closed best_move will foul tech
       sanction_cancelled player_left player_restored game_finished
     ])
   end
