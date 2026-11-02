@@ -12,13 +12,15 @@ export default class extends Controller {
     judgeTemplate: String,
     gameTemplate: String,
     gameOfTotalTemplate: String,
-    checkTemplate: String,
-    checkLabels: Object
+    shots: Array,
+    checks: Array
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "checks", "checksList"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "night", "nightNumbers", "shotsRow", "shotsCells", "donRow", "donCells", "sheriffRow", "sheriffCells"]
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
+    this.shots = this.shotsValue
+    this.checks = this.checksValue
     this.subscription = createConsumer().subscriptions.create(
       { channel: "GameProtocolChannel", game_id: this.gameIdValue },
       { received: (data) => this.handleUpdate(data) }
@@ -38,8 +40,12 @@ export default class extends Controller {
       this.updateHeader(data)
     } else if (data.scope === "nominees") {
       this.renderNominees(data.seats)
+    } else if (data.scope === "shots") {
+      this.shots = data.shots
+      this.renderNight()
     } else if (data.scope === "checks") {
-      this.renderChecks(data.checks)
+      this.checks = data.checks
+      this.renderNight()
     }
   }
 
@@ -140,7 +146,8 @@ export default class extends Controller {
 
   // Roles already delivered must not stay readable in the page once they are hidden.
   forgetRoles() {
-    this.renderChecks([])
+    this.checks = []
+    this.renderNight()
     this.seatRoles = {}
     this.roleBadgeTargets.forEach((badge) => {
       badge.textContent = ""
@@ -191,23 +198,53 @@ export default class extends Controller {
     this.nomineesTarget.hidden = seats.length === 0
   }
 
-  renderChecks(checks) {
-    if (!this.hasChecksTarget) return
-    const labels = this.checkLabelsValue
-    const entries = checks.map((check) => {
-      const values = {
-        NIGHT: check.night,
-        WHO: labels[check.kind],
-        SEAT: check.target_seat,
-        RESULT: labels[check.result]
-      }
-      const entry = document.createElement("span")
-      entry.className = "overlay-check overlay-nominee"
-      entry.textContent = this.checkTemplateValue.replace(/%(NIGHT|WHO|SEAT|RESULT)%/g, (_marker, name) => values[name])
-      return entry
+  // Mirrors GamesHelper#overlay_night_rows: one cell per night so the rows line up.
+  renderNight() {
+    if (!this.hasNightTarget) return
+    const nights = Math.max(0, ...[...this.shots, ...this.checks].map((entry) => entry.night))
+    const row = (entries, cellOf) => Array.from({ length: nights }, (_unused, index) => {
+      const entry = entries.find((candidate) => candidate.night === index + 1)
+      return entry ? cellOf(entry) : { text: "", colour: "none" }
     })
-    this.checksListTarget.replaceChildren(...entries)
-    this.checksTarget.hidden = checks.length === 0
+    const checkRow = (kind) => (this.checks.length ? row(this.checks.filter((check) => check.kind === kind), (check) => this.checkCell(check)) : [])
+
+    this.nightNumbersTarget.replaceChildren(...Array.from({ length: nights }, (_unused, index) => {
+      const number = document.createElement("span")
+      number.className = "overlay-night-number"
+      number.textContent = String(index + 1)
+      return number
+    }))
+    this.fillNightRow(this.shotsCellsTarget, row(this.shots, (shot) => this.shotCell(shot)))
+    const don = checkRow("don")
+    const sheriff = checkRow("sheriff")
+    this.fillNightRow(this.donCellsTarget, don)
+    this.fillNightRow(this.sheriffCellsTarget, sheriff)
+    this.donRowTarget.hidden = don.length === 0
+    this.sheriffRowTarget.hidden = sheriff.length === 0
+    this.nightTarget.hidden = nights === 0
+  }
+
+  shotCell(shot) {
+    if (!shot.target_seat) return { text: "×", colour: "empty" }
+    return { text: String(shot.target_seat), colour: shot.team || "neutral" }
+  }
+
+  checkCell(check) {
+    if (!check.target_seat) return { text: "×", colour: "empty" }
+    const text = String(check.target_seat)
+    if (check.kind === "sheriff") return { text, colour: check.result }
+    return check.result === "sheriff" ? { text, colour: "red", mark: "sheriff" } : { text, colour: check.team || "neutral" }
+  }
+
+  fillNightRow(target, cells) {
+    target.replaceChildren(...cells.map(({ text, colour, mark }) => {
+      const cell = document.createElement("span")
+      cell.className = "overlay-night-cell"
+      cell.textContent = text
+      cell.dataset.colour = colour
+      if (mark) cell.dataset.mark = mark
+      return cell
+    }))
   }
 
   seatTarget(targets, seat) {

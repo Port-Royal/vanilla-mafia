@@ -58,13 +58,19 @@ module GamesHelper
     "#{seat} #{participation.player.name}"
   end
 
-  def overlay_check_label(check)
-    t("games.overlay.checks.entry", night: check[:night], who: t("games.overlay.checks.#{check[:kind]}"),
-                                    seat: check[:target_seat], result: t("games.overlay.checks.#{check[:result]}"))
-  end
+  OVERLAY_EMPTY_NIGHT = { text: "", colour: "none", mark: nil }.freeze
+  OVERLAY_SKIPPED_NIGHT = { text: "×", colour: "empty", mark: nil }.freeze
 
-  def overlay_check_labels
-    t("games.overlay.checks").except(:entry, :title)
+  # Rows of the night block, one cell per night so the rows line up. Mirrors renderNight in
+  # game_overlay_controller.js.
+  def overlay_night_rows(shots, checks)
+    nights = (shots + checks).map { |entry| entry[:night] }.max || 0
+    {
+      nights:,
+      shots: overlay_night_row(shots, nights) { |shot| overlay_shot_cell(shot) },
+      don: overlay_check_row(checks, "don", nights),
+      sheriff: overlay_check_row(checks, "sheriff", nights)
+    }
   end
 
   def overlay_canvas_class(game)
@@ -92,5 +98,36 @@ module GamesHelper
     return if game.judge.blank?
 
     t("games.overlay.judge", name: game.judge)
+  end
+
+  private
+
+  def overlay_night_row(entries, nights)
+    (1..nights).map do |night|
+      entry = entries.find { |candidate| candidate[:night] == night }
+      entry ? yield(entry) : OVERLAY_EMPTY_NIGHT
+    end
+  end
+
+  def overlay_check_row(checks, kind, nights)
+    return [] if checks.empty?
+
+    overlay_night_row(checks.select { |check| check[:kind] == kind }, nights) { |check| overlay_check_cell(check) }
+  end
+
+  def overlay_shot_cell(shot)
+    return OVERLAY_SKIPPED_NIGHT unless shot[:target_seat]
+
+    { text: shot[:target_seat].to_s, colour: shot[:team] || "neutral", mark: nil }
+  end
+
+  def overlay_check_cell(check)
+    return OVERLAY_SKIPPED_NIGHT unless check[:target_seat]
+
+    text = check[:target_seat].to_s
+    return { text:, colour: check[:result], mark: nil } if check[:kind] == "sheriff"
+    return { text:, colour: "red", mark: "sheriff" } if check[:result] == "sheriff"
+
+    { text:, colour: check[:team] || "neutral", mark: nil }
   end
 end

@@ -682,14 +682,10 @@ en:
         mafia_victory: "Mafia wins"
         draw: "Draw"
     overlay:
-      checks:
-        title: "Checks"
-        entry: "Night %{night}: %{who} → %{seat}, %{result}"
-        don: "don"
-        sheriff: "sheriff"
-        not_sheriff: "not the sheriff"
-        red: "red"
-        black: "black"
+      night:
+        shots: "Shooting"
+        don: "Don's checks"
+        sheriff: "Sheriff's checks"
       nominees: "Up for the vote"
       role_badge:
         sheriff: "S"

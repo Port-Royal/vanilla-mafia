@@ -33,7 +33,7 @@ RSpec.describe BroadcastOverlayRolesService do
       allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| messages << [ target, payload ] }
       described_class.call(game: open_game)
 
-      expect(messages.last).to eq([ open_game, { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 3, result: "not_sheriff" } ] } ])
+      expect(messages.last).to eq([ open_game, { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 3, result: "not_sheriff", team: nil } ] } ])
     end
   end
 end

@@ -49,7 +49,7 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
         expect(sent).to eq([
           { scope: "game", field: "hide_roles", value: "0" },
           { scope: "participation", seat: 3, field: "role_code", value: "peace" },
-          { scope: "checks", checks: [ { night: 1, kind: "sheriff", target_seat: 3, result: "red" } ] }
+          { scope: "checks", checks: [ { night: 1, kind: "sheriff", target_seat: 3, result: "red", team: "red" } ] }
         ])
       end
     end

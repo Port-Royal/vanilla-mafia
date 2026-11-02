@@ -9,6 +9,7 @@ class GamesController < ApplicationController
     @participations_by_seat = @game.game_participations.includes(:player, :role).index_by(&:seat)
     @nominees = @game.current_nominees
     @checks = @game.public_checks
+    @shots = @game.public_shots
     render layout: "overlay"
   end
 end
