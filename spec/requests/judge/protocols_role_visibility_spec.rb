@@ -40,10 +40,17 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
     end
 
     context "when the judge switches hiding off" do
-      before { autosave.call(scope: "game", field: "hide_roles", value: "0") }
+      before do
+        create(:game_protocol_event, game:, kind: "sheriff_check", phase: "night", day_number: 0, target_seats: [ 3 ], metadata: { "result" => "red" })
+        autosave.call(scope: "game", field: "hide_roles", value: "0")
+      end
 
       it "sends the roles after the setting" do
-        expect(sent.last).to eq(scope: "participation", seat: 3, field: "role_code", value: "peace")
+        expect(sent).to include({ scope: "participation", seat: 3, field: "role_code", value: "peace" })
+      end
+
+      it "sends the checks gathered so far" do
+        expect(sent.last).to eq(scope: "checks", checks: [ { night: 1, kind: "sheriff", target_seat: 3, result: "red" } ])
       end
     end
 
@@ -117,8 +124,8 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
     context "when the judge switches hiding on" do
       before { autosave.call(scope: "game", field: "hide_roles", value: "1") }
 
-      it "sends only the setting" do
-        expect(sent).to eq([ { scope: "game", field: "hide_roles", value: "1" } ])
+      it "sends the setting and empties the checks" do
+        expect(sent).to eq([ { scope: "game", field: "hide_roles", value: "1" }, { scope: "checks", checks: [] } ])
       end
     end
 
@@ -128,11 +135,11 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
       before { autosave.call(scope: "game", field: "result", value: "in_progress") }
 
       it "tells the overlay to hide roles" do
-        expect(sent.last).to eq(scope: "game", field: "hide_roles", value: "1")
+        expect(sent).to include({ scope: "game", field: "hide_roles", value: "1" })
       end
 
       it "addresses the message to this game" do
-        expect(GameProtocolChannel).to have_received(:broadcast_to).with(game, { scope: "game", field: "hide_roles", value: "1" })
+        expect(GameProtocolChannel).to have_received(:broadcast_to).with(game, { scope: "checks", checks: [] })
       end
     end
   end

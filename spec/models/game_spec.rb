@@ -148,6 +148,43 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#public_checks' do
+    let(:checked_game) { create(:game, hide_roles:, result:) }
+    let(:hide_roles) { false }
+    let(:result) { "in_progress" }
+
+    before do
+      create(:game_protocol_event, game: checked_game, position: 3, kind: "sheriff_check", phase: "night", day_number: 1, actor_seat: 2, target_seats: [ 4 ], metadata: { "result" => "black" })
+      create(:game_protocol_event, game: checked_game, position: 1, kind: "don_check", phase: "night", day_number: 0, actor_seat: 1, target_seats: [ 2 ], metadata: { "result" => "sheriff" })
+      create(:game_protocol_event, game: checked_game, position: 2, kind: "don_check", phase: "night", day_number: 1, actor_seat: 1, target_seats: [], metadata: { "result" => nil })
+      create(:game_protocol_event, position: 1, kind: "don_check", phase: "night", day_number: 0, target_seats: [ 5 ], metadata: { "result" => "not_sheriff" })
+    end
+
+    it "lists the checks of this game in order, skipping a night with no check" do
+      expect(checked_game.public_checks).to eq([
+        { night: 1, kind: "don", target_seat: 2, result: "sheriff" },
+        { night: 2, kind: "sheriff", target_seat: 4, result: "black" }
+      ])
+    end
+
+    context "when roles are hidden in a running game" do
+      let(:hide_roles) { true }
+
+      it "gives nothing" do
+        expect(checked_game.public_checks).to eq([])
+      end
+    end
+
+    context "when roles are hidden in a finished game" do
+      let(:hide_roles) { true }
+      let(:result) { "draw" }
+
+      it "gives the checks" do
+        expect(checked_game.public_checks.size).to eq(2)
+      end
+    end
+  end
+
   describe '.finished' do
     let_it_be(:competition) { create(:competition, :series) }
     let_it_be(:draw_game) { create(:game, competition:, game_number: 1, result: "draw") }

@@ -8,6 +8,7 @@ class GamesController < ApplicationController
     @game = Game.find_by!(slug: params[:slug])
     @participations_by_seat = @game.game_participations.includes(:player, :role).index_by(&:seat)
     @nominees = @game.current_nominees
+    @checks = @game.public_checks
     render layout: "overlay"
   end
 end

@@ -399,4 +399,34 @@ RSpec.describe "Games#overlay" do
       expect(response.parsed_body.at_css("#overlay-nominees")["hidden"]).not_to be_nil
     end
   end
+
+  describe "checks on load" do
+    let(:checked_game) { create(:game, hide_roles:) }
+    let(:entries) { response.parsed_body.css("#overlay-checks .overlay-check").map { |node| node.text.squish } }
+
+    before do
+      create(:game_protocol_event, game: checked_game, kind: "sheriff_check", phase: "night", day_number: 0, target_seats: [ 4 ], metadata: { "result" => "black" })
+      get overlay_game_path(checked_game)
+    end
+
+    context "when roles are public" do
+      let(:hide_roles) { false }
+
+      it "lists the checks" do
+        expect(entries).to eq([ I18n.t("games.overlay.checks.entry", night: 1, who: I18n.t("games.overlay.checks.sheriff"), seat: 4, result: I18n.t("games.overlay.checks.black")) ])
+      end
+    end
+
+    context "when roles are hidden" do
+      let(:hide_roles) { true }
+
+      it "leaves them out of the page" do
+        expect(entries).to eq([])
+      end
+
+      it "hides the block" do
+        expect(response.parsed_body.at_css("#overlay-checks")["hidden"]).not_to be_nil
+      end
+    end
+  end
 end

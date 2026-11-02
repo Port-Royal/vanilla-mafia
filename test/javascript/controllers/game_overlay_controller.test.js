@@ -151,3 +151,65 @@ describe("GameOverlayController nominees", () => {
     expect(names()).toEqual(["9"])
   })
 })
+
+describe("GameOverlayController checks", () => {
+  let application
+  let controller
+
+  const entries = () => [...document.querySelectorAll("#overlay-checks .overlay-check")].map((node) => node.textContent)
+  const block = () => document.getElementById("overlay-checks")
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay"
+           data-game-overlay-check-template-value="Ночь %NIGHT%: %WHO% → %SEAT%, %RESULT%"
+           data-game-overlay-check-labels-value='{"don":"дон","sheriff":"шериф","black":"чёрный","red":"красный","not_sheriff":"не шериф"}'>
+        <div id="overlay-checks" data-game-overlay-target="checks" hidden>
+          <div data-game-overlay-target="checksList"></div>
+        </div>
+      </div>
+    `
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+  })
+
+  it("lists the checks with their results", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 2, result: "sheriff" }, { night: 1, kind: "sheriff", target_seat: 4, result: "black" }] })
+
+    expect(entries()).toEqual(["Ночь 1: дон → 2, шериф", "Ночь 1: шериф → 4, чёрный"])
+  })
+
+  it("shows the block", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+
+    expect(block().hidden).toBe(false)
+  })
+
+  it("empties and hides the block for an empty list", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+    controller.handleUpdate({ scope: "checks", checks: [] })
+
+    expect([block().hidden, entries()]).toEqual([true, []])
+  })
+
+  it("forgets the checks when roles are hidden", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+    controller.handleUpdate({ scope: "game", field: "hide_roles", value: "1" })
+
+    expect([block().hidden, entries()]).toEqual([true, []])
+  })
+
+  it("keeps a template marker typed in a label as text", () => {
+    controller.checkLabelsValue = { ...controller.checkLabelsValue, don: "%SEAT%" }
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 2, result: "not_sheriff" }] })
+
+    expect(entries()).toEqual(["Ночь 1: %SEAT% → 2, не шериф"])
+  })
+})
