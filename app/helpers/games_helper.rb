@@ -51,11 +51,11 @@ module GamesHelper
     participation.best_move_seats.to_a.map { |seat| [ seat, overlay_best_move_colour(seat_roles[seat]) ] }
   end
 
-  def overlay_nominee_label(seat, participations_by_seat)
-    participation = participations_by_seat[seat]
-    return seat.to_s unless participation
+  # The colour of a seat's team, from a role the page may show. Mirrors seatColour in game_overlay_controller.js.
+  def overlay_seat_colour(role_code)
+    return "neutral" if role_code.nil?
 
-    "#{seat} #{participation.player.name}"
+    %w[don mafia].include?(role_code) ? "black" : "red"
   end
 
   OVERLAY_EMPTY_NIGHT = { text: "", colour: "none", mark: nil }.freeze

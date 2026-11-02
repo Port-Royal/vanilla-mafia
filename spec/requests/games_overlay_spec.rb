@@ -53,7 +53,11 @@ RSpec.describe "Games#overlay" do
       end
 
       it "renders header slots for the table with the night block, the game number and the judge" do
-        expect(header_slots.map(&:first)).to eq(%w[overlay-header-start overlay-game-number overlay-judge])
+        expect(header_slots.map(&:first)).to eq(%w[overlay-header-start overlay-game-number overlay-header-end])
+      end
+
+      it "keeps the judge label first in the right slot" do
+        expect(document.at_css("#overlay-header-end > div")["id"]).to eq("overlay-judge")
       end
 
       it "keeps the table label first in its slot" do
@@ -373,26 +377,37 @@ RSpec.describe "Games#overlay" do
   end
 
   describe "nominees on load" do
-    let(:nominated_game) { create(:game) }
-    let(:names) { response.parsed_body.css("#overlay-nominees .overlay-nominee").map { |node| node.text.squish } }
+    let(:nominated_game) { create(:game, hide_roles:) }
+    let(:hide_roles) { false }
+    let(:cells) { response.parsed_body.css("#overlay-nominees .overlay-night-cell").map { |cell| [ cell.text.strip, cell["data-colour"] ] } }
 
     before do
-      create(:game_participation, game: nominated_game, seat: 5, player: create(:player, name: "Пятый"))
-      create(:game_participation, game: nominated_game, seat: 3, player: create(:player, name: "Третий"))
+      %w[mafia peace].each { |code| create(:role, code:) unless Role.exists?(code:) }
+      create(:game_participation, game: nominated_game, seat: 5, role_code: "mafia")
+      create(:game_participation, game: nominated_game, seat: 3, role_code: "peace")
       create(:game_protocol_event, game: nominated_game, position: 1, kind: "nominate", actor_seat: 1, target_seats: [ 5 ])
       create(:game_protocol_event, game: nominated_game, position: 2, kind: "nominate", actor_seat: 2, target_seats: [ 3 ])
+      get overlay_game_path(nominated_game)
     end
 
-    it "lists them in nomination order with their names" do
-      get overlay_game_path(nominated_game)
+    it "lists them in nomination order in their team's colour" do
+      expect(cells).to eq([ %w[5 black], %w[3 red] ])
+    end
 
-      expect(names).to eq([ "5 Пятый", "3 Третий" ])
+    it "sits in the right of the header" do
+      expect(response.parsed_body.at_css(".overlay-header #overlay-nominees")).to be_present
     end
 
     it "shows the block" do
-      get overlay_game_path(nominated_game)
-
       expect(response.parsed_body.at_css("#overlay-nominees")["hidden"]).to be_nil
+    end
+
+    context "when roles are hidden" do
+      let(:hide_roles) { true }
+
+      it "shows them in a neutral colour" do
+        expect(cells).to eq([ %w[5 neutral], %w[3 neutral] ])
+      end
     end
   end
 

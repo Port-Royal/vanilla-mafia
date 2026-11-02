@@ -12,6 +12,7 @@ export default class extends Controller {
     judgeTemplate: String,
     gameTemplate: String,
     gameOfTotalTemplate: String,
+    nominees: Array,
     shots: Array,
     checks: Array
   }
@@ -19,6 +20,7 @@ export default class extends Controller {
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
+    this.nominees = this.nomineesValue
     this.shots = this.shotsValue
     this.checks = this.checksValue
     this.subscription = createConsumer().subscriptions.create(
@@ -39,7 +41,8 @@ export default class extends Controller {
     } else if (data.scope === "game") {
       this.updateHeader(data)
     } else if (data.scope === "nominees") {
-      this.renderNominees(data.seats)
+      this.nominees = data.seats
+      this.renderNominees()
     } else if (data.scope === "shots") {
       this.shots = data.shots
       this.renderNight()
@@ -149,6 +152,7 @@ export default class extends Controller {
     this.checks = []
     this.renderNight()
     this.seatRoles = {}
+    this.renderNominees()
     this.roleBadgeTargets.forEach((badge) => {
       badge.textContent = ""
       delete badge.dataset.role
@@ -161,6 +165,7 @@ export default class extends Controller {
   // Cells naming this seat change colour with its player's role.
   updateSeatRole(seat, roleCode) {
     this.seatRoles[seat] = roleCode
+    this.renderNominees()
     this.bestMoveTargets.forEach((strip) => {
       strip.querySelectorAll(`[data-named-seat="${seat}"]`).forEach((cell) => this.colourBestMoveCell(cell))
     })
@@ -186,16 +191,17 @@ export default class extends Controller {
     cell.dataset.colour = Object.hasOwn(this.bestMoveColoursValue, roleCode) ? this.bestMoveColoursValue[roleCode] : "neutral"
   }
 
-  renderNominees(seats) {
-    const entries = seats.map((seat) => {
-      const entry = document.createElement("span")
-      entry.className = "overlay-nominee"
-      const name = (this.seatTarget(this.playerNameTargets, seat)?.textContent || "").trim()
-      entry.textContent = name ? `${seat} ${name}` : String(seat)
-      return entry
-    })
-    this.nomineesListTarget.replaceChildren(...entries)
-    this.nomineesTarget.hidden = seats.length === 0
+  renderNominees() {
+    if (!this.hasNomineesTarget) return
+    this.fillNightRow(this.nomineesListTarget, this.nominees.map((seat) => ({ text: String(seat), colour: this.seatColour(seat) })))
+    this.nomineesTarget.hidden = this.nominees.length === 0
+  }
+
+  // Mirrors GamesHelper#overlay_seat_colour.
+  seatColour(seat) {
+    const roleCode = this.seatRoles[seat]
+    if (!roleCode) return "neutral"
+    return ["don", "mafia"].includes(roleCode) ? "black" : "red"
   }
 
   // Mirrors GamesHelper#overlay_night_rows: one cell per night so the rows line up.
