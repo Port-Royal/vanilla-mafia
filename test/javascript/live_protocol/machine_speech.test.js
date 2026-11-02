@@ -19,6 +19,7 @@ const errorAfter = (actions, action) => decide(stateAfter(actions), action)
 
 const assignRoles = { type: "assign_roles", seats: [1, 2, 3, 4] }
 const startGame = [assignRoles, { type: "finish_deal" }]
+const twoCandidates = [{ type: "nominate", seats: [5] }, { type: "next_speaker" }, { type: "nominate", seats: [6] }, { type: "set_speaker", seats: [1] }]
 const closeNight = { kind: "night_closed", phase: "night", day_number: 0, actor_seat: null, target_seats: [], text: null, metadata: {} }
 
 describe("replay of an empty journal", () => {
@@ -29,7 +30,7 @@ describe("replay of an empty journal", () => {
   })
 
   it("lists every seated player alive with no sanctions", () => {
-    expect(state.players[3]).toEqual({ name: "Игрок 3", role: null, fouls: 0, tech: 0, out: false, outReason: null })
+    expect(state.players[3]).toEqual({ name: "Игрок 3", role: null, fouls: 0, tech: 0, out: false, outReason: null, removedBy: null })
   })
 
   it("leaves empty seats out", () => {
@@ -45,7 +46,7 @@ describe("replay of an empty journal", () => {
   })
 
   it("has an empty day state", () => {
-    expect(state).toMatchObject({ day: 0, speaker: null, firstSpeaker: null, candidates: [], nominatedBy: {}, log: [] })
+    expect(state).toMatchObject({ day: 0, speaker: null, firstSpeaker: null, candidates: [], nominatedBy: {}, round: null, leaving: [], noVoteDay: null, log: [] })
   })
 })
 
@@ -355,7 +356,7 @@ describe("next_speaker", () => {
   })
 
   it("starts the vote after the last player of the circle", () => {
-    const toLast = [...startGame, ...seats.slice(1).map(() => ({ type: "next_speaker" }))]
+    const toLast = [...startGame, ...twoCandidates, ...seats.slice(1).map(() => ({ type: "next_speaker" }))]
     const state = stateAfter([...toLast, { type: "next_speaker" }])
 
     expect([state.stage, state.speaker]).toEqual(["vote", null])
@@ -406,7 +407,7 @@ describe("set_speaker", () => {
 
 describe("start_vote", () => {
   it("goes to the vote before the end of the circle", () => {
-    expect(stateAfter([...startGame, { type: "start_vote" }]).stage).toBe("vote")
+    expect(stateAfter([...startGame, ...twoCandidates, { type: "start_vote" }]).stage).toBe("vote")
   })
 
   it("is written like the automatic move", () => {
@@ -434,7 +435,7 @@ describe("remove_player", () => {
   })
 
   it("refuses anything but one seat", () => {
-    expect(errorAfter(startGame, { type: "remove_player", seats: [] }).error).toBe("one_seat_required")
+    expect(errorAfter(startGame, { type: "remove_player", seats: [1, 2] }).error).toBe("one_seat_required")
   })
 
   it("passes the word on when the speaker is removed", () => {
@@ -449,17 +450,17 @@ describe("remove_player", () => {
     const toLast = [...startGame, { type: "remove_player", seats: [1] }, ...seats.slice(2).map(() => ({ type: "next_speaker" }))]
     const atLast = stateAfter(toLast)
 
-    expect([atLast.speaker, stateAfter([...toLast, { type: "next_speaker" }]).stage]).toEqual([10, "vote"])
+    expect([atLast.speaker, stateAfter([...toLast, { type: "next_speaker" }]).stage]).toEqual([10, "night_shot"])
   })
 
-  it("starts the vote when the last speaker is removed", () => {
+  it("ends the speeches when the last speaker is removed", () => {
     const toLast = [...startGame, ...seats.slice(1).map(() => ({ type: "next_speaker" }))]
 
-    expect(stateAfter([...toLast, { type: "remove_player", seats: [10] }])).toMatchObject({ stage: "vote", speaker: null })
+    expect(stateAfter([...toLast, { type: "remove_player", seats: [10] }])).toMatchObject({ stage: "night_shot", speaker: null })
   })
 
   it("does not move the speaker outside the speech", () => {
-    const voting = [...startGame, { type: "start_vote" }, { type: "remove_player", seats: [1] }]
+    const voting = [...startGame, ...twoCandidates, { type: "start_vote" }, { type: "vote_for", seats: [2, 3, 4, 7, 8, 9] }, { type: "remove_player", seats: [1] }]
 
     expect(stateAfter(voting)).toMatchObject({ stage: "vote", speaker: null })
   })
@@ -527,7 +528,7 @@ describe("purity", () => {
   })
 
   it("logs a kind it has no rule for", () => {
-    const state = replay(players, [{ ...closeNight, kind: "foul" }])
+    const state = replay(players, [{ ...closeNight, kind: "suspect" }])
 
     expect([state.stage, state.log.length]).toEqual(["roles", 1])
   })
