@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <%# A working screen without the site navigation: the page takes the whole window. %>
+  <body class="h-screen overflow-hidden bg-white font-sans" data-controller="time-zone">
+    <main class="flex h-full min-h-0 flex-col px-4 py-3">
+      <%= yield %>
+    </main>
+
+    <% if flash.any? { |_type, message| message.present? } %>
+      <div class="focus-toast fixed top-4 right-4 z-50 max-w-sm shadow-lg" role="status">
+        <%= render "devise/shared/flash" %>
+      </div>
+    <% end %>
+  </body>
+</html>

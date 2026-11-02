@@ -105,6 +105,7 @@ en:
   hello: "Hello world"
   live_protocols:
     edit_link: "Protocol form"
+    list_link: "Back to protocols"
     live_link: "Live protocol"
     screen:
       filter:

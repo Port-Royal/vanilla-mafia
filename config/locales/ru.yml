@@ -799,6 +799,7 @@ ru:
       next: "Вперёд"
   live_protocols:
     edit_link: "Форма протокола"
+    list_link: "К списку протоколов"
     live_link: "Живой протокол"
     screen:
       filter:

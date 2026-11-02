@@ -1,4 +1,6 @@
 class Judge::LiveProtocolsController < Judge::LiveProtocolBaseController
+  layout "focus"
+
   def show
     @players = @game.game_participations.includes(:player).where.not(seat: nil).order(:seat).map do |participation|
       { seat: participation.seat, name: participation.player.name, role_code: participation.role_code, status: participation.status }
