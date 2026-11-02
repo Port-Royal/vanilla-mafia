@@ -105,6 +105,9 @@
 - Produces: `replay(players, events) -> state`; `decide(state, action) -> {events: [event], error: string|null}`. `action` это `{type, seats?, text?}`. `event` это `{kind, phase, day_number, actor_seat, target_seats, text, metadata}`. Без обращений к DOM и сети.
 - Produces, поля состояния: `stage` (`roles deal speech vote leaving best_move night_shot night_miss night_don night_sheriff finished`), `day`, `speaker`, `firstSpeaker`, `candidates`, `players[seat] {role, fouls, tech, out, outReason}`, `round`, `nights`, `leaving`, `noVoteDay`, `pendingResult`, `log`.
 
+- Соглашения журнала: `position` назначает сервер, клиент его не шлёт. Игрока в `player_left` и `player_restored` называет `target_seats`. Переход к голосованию пишется событием `speaker` с `actor_seat: null`. Коды ошибок `decide` переводятся на экране (Task 7).
+- Действия: `assign_roles` (`seats` это дон, шериф, две мафии; без `seats` подтверждает роли из формы), `finish_deal` (`mode`, `shot`, `seats` это заявленный шериф, `text`), `suspect`, `red`, `team`, `check_request`, `nominate`, `cancel_nomination`, `note`, `next_speaker`, `set_speaker`, `start_vote`, `remove_player`.
+
 - [ ] **Step 1:** Падающие тесты, значения из раздела спека «Речь» и «Роли судьи»: раздача требует ровно 1 дона, 1 шерифа, 2 мафии; договорка хранит статику/динамику, шерифа, текст; речь начинает игрок 1, в следующий день следующий живой; второе выставление того же игрока и выставление уже выставленного дают `error`; снятие кандидатуры снова разрешает выставить; `Space` на последнем запускает голосование; первый говорящий удалён, круг всё равно заканчивается.
 - [ ] **Step 2:** `npm test`: FAIL.
 - [ ] **Step 3:** Реализовать.
