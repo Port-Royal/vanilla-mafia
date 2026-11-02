@@ -118,7 +118,7 @@
               <td><%= game.played_on %></td>
               <td><%= link_to game.competition.name, competition_path(slug: game.competition.slug), class: "text-maroon hover:underline" %></td>
               <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
-              <td><%= participation&.role&.name %></td>
+              <td><%= participation&.role&.name if game.roles_public? %></td>
               <td><%= participation&.result %></td>
               <td><%= participation&.total %></td>
             </tr>
