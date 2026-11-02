@@ -24,7 +24,7 @@ class Judge::ProtocolsController < ApplicationController
     )
 
     if result.success
-      redirect_to after_save_path(@game), notice: t("game_protocols.create.success")
+      redirect_to after_create_path(@game), notice: t("game_protocols.create.success")
     else
       @participations = build_participations_from_params
       load_form_data
@@ -106,6 +106,12 @@ class Judge::ProtocolsController < ApplicationController
     else
       GameProtocolChannel.broadcast_to(@game, { scope: "game", field: "hide_roles", value: "1" })
     end
+  end
+
+  def after_create_path(game)
+    return live_judge_protocol_path(game) if game.in_progress? && FeatureToggle.enabled?("live_protocol")
+
+    after_save_path(game)
   end
 
   def after_save_path(game)

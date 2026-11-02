@@ -34,6 +34,31 @@ RSpec.describe SyncProtocolEventService do
       end
     end
 
+    context "when the event remembers the previous roles" do
+      let(:attrs) { { kind: "roles", phase: "deal", metadata: { "roles" => { "1" => "peace", "2" => "peace" }, "previous_roles" => { "1" => nil, "2" => "don" } } } }
+
+      before { create(:role, code: "peace") }
+
+      it "writes them back on revert" do
+        seat_one.update!(role_code: "peace")
+        seat_two.update!(role_code: "peace")
+
+        described_class.revert(event)
+
+        expect([ seat_one.reload.role_code, seat_two.reload.role_code ]).to eq([ nil, "don" ])
+      end
+
+      context "when roles are hidden" do
+        let(:hide_roles) { true }
+
+        it "broadcasts nothing on revert" do
+          described_class.revert(event)
+
+          expect(sent).to be_empty
+        end
+      end
+    end
+
     context "when roles are hidden" do
       let(:hide_roles) { true }
 

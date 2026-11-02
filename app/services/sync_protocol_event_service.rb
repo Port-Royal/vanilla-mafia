@@ -30,7 +30,7 @@ class SyncProtocolEventService
 
   def revert
     case @event.kind
-    when "roles" then write_roles(@event.metadata["roles"].transform_values { nil })
+    when "roles" then write_roles(previous_roles)
     when "player_left" then write_statuses("alive")
     when "player_restored" then write_statuses("banned")
     when "best_move" then write(@event.actor_seat, "best_move_seats", nil)
@@ -39,6 +39,11 @@ class SyncProtocolEventService
   end
 
   private
+
+  # Journals written before previous_roles existed just clear the roles.
+  def previous_roles
+    @event.metadata["previous_roles"] || @event.metadata["roles"].transform_values { nil }
+  end
 
   def write_roles(role_codes)
     role_codes.each { |seat, role_code| write(seat.to_i, "role_code", role_code) }
