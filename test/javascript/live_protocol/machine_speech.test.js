@@ -162,6 +162,10 @@ describe("finish_deal", () => {
     expect(decide(replay(players.slice(0, 5), play([assignRoles], players.slice(0, 5))), { type: "finish_deal", seats: [9] }).error).toBe("seat_empty")
   })
 
+  it("refuses more than one claimed sheriff", () => {
+    expect(errorAfter(dealt, { type: "finish_deal", seats: [5, 6] })).toEqual({ events: [], error: "one_seat_required" })
+  })
+
   it("refuses a shot nobody sits on", () => {
     expect(decide(replay(players.slice(0, 5), play([assignRoles], players.slice(0, 5))), { type: "finish_deal", shot: 9 }).error).toBe("seat_empty")
   })

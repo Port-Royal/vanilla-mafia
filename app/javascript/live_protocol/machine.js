@@ -193,6 +193,7 @@ function finishDeal(state, action) {
   if (state.stage !== "deal") return refuse("wrong_stage")
   const shot = action.shot ?? null
   const seats = action.seats ?? []
+  if (seats.length > 1) return refuse("one_seat_required")
   if (![...seats, ...(shot === null ? [] : [shot])].every((seat) => state.players[seat])) return refuse("seat_empty")
   return write(state, "deal", { target_seats: seats, text: action.text, metadata: { mode: action.mode ?? null, shot } })
 }
