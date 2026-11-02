@@ -45,6 +45,7 @@ export default class extends Controller {
     }
     if (displaySettingClasses[data.field]) {
       this.element.classList.toggle(displaySettingClasses[data.field], data.value === "1")
+      if (data.field === "hide_roles" && data.value === "1") this.forgetRoles()
       return
     }
 
@@ -125,6 +126,15 @@ export default class extends Controller {
 
     const slot = this.seatTarget(this.statusTargets, seat)
     if (slot) slot.replaceChildren(...(iconTemplate ? [iconTemplate.content.cloneNode(true)] : []))
+  }
+
+  // Roles already delivered must not stay readable in the page once they are hidden.
+  forgetRoles() {
+    this.seatRoles = {}
+    this.roleBadgeTargets.forEach((badge) => { badge.textContent = "" })
+    this.bestMoveTargets.forEach((strip) => {
+      strip.querySelectorAll("[data-named-seat]").forEach((cell) => this.colourBestMoveCell(cell))
+    })
   }
 
   // Cells naming this seat change colour with its player's role.

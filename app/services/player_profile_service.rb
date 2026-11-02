@@ -51,7 +51,7 @@ class PlayerProfileService
 
   def build_role_stats(participations)
     participations
-      .select { |p| p.role_code.present? }
+      .select { |p| p.role_code.present? && p.game.roles_public? }
       .group_by(&:role_code)
       .map do |role_code, role_participations|
         games = role_participations.size

@@ -1,4 +1,4 @@
-<% seat_roles = overlay_seat_roles(@participations_by_seat) %>
+<% seat_roles = @game.roles_public? ? overlay_seat_roles(@participations_by_seat) : {} %>
 
 <div id="game-overlay"
      data-controller="game-overlay"
@@ -48,7 +48,7 @@
           <% end %>
         </div>
 
-        <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>"><%= overlay_role_badge(participation ? participation.role_code : nil) %></div>
+        <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>"><%= overlay_role_badge(seat_roles[seat]) %></div>
 
         <div class="overlay-status-icon" data-game-overlay-target="status" data-seat="<%= seat %>"><%= overlay_status_icon(status) %></div>
 
