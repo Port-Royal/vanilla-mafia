@@ -166,6 +166,14 @@ RSpec.describe Game, type: :model do
       expect(shot_game.public_shots).to eq([ { night: 1, target_seat: nil, team: nil }, { night: 2, target_seat: 5, team: "black" } ])
     end
 
+    it "gives a target with a role outside the game's four no team" do
+      create(:role, code: "maf") unless Role.exists?(code: "maf")
+      create(:game_participation, game: shot_game, seat: 6, role_code: "maf")
+      night_event.call(4, "shot", 2, [ 6 ])
+
+      expect(shot_game.public_shots.last).to eq(night: 3, target_seat: 6, team: nil)
+    end
+
     it "gives a civilian target the red team" do
       create(:role, code: "peace") unless Role.exists?(code: "peace")
       create(:game_participation, game: shot_game, seat: 6, role_code: "peace")

@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import { createConsumer } from "@rails/actioncable"
 
+// Mirrors Game::TEAMS.
+const TEAMS = { don: "black", mafia: "black", sheriff: "red", peace: "red" }
+
 export default class extends Controller {
   static values = {
     gameId: Number,
@@ -199,9 +202,7 @@ export default class extends Controller {
 
   // Mirrors GamesHelper#overlay_seat_colour.
   seatColour(seat) {
-    const roleCode = this.seatRoles[seat]
-    if (!roleCode) return "neutral"
-    return ["don", "mafia"].includes(roleCode) ? "black" : "red"
+    return TEAMS[this.seatRoles[seat]] || "neutral"
   }
 
   // Mirrors GamesHelper#overlay_night_rows: one cell per night so the rows line up.

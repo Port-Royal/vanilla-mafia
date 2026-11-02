@@ -295,7 +295,7 @@ RSpec.describe GamesHelper do
   end
 
   describe "#overlay_seat_colour" do
-    { "don" => "black", "mafia" => "black", "sheriff" => "red", "peace" => "red", nil => "neutral" }.each do |role_code, colour|
+    { "don" => "black", "mafia" => "black", "sheriff" => "red", "peace" => "red", nil => "neutral", "maf" => "neutral" }.each do |role_code, colour|
       it "gives #{colour} for #{role_code.inspect}" do
         expect(helper.overlay_seat_colour(role_code)).to eq(colour)
       end

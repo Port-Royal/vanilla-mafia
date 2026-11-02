@@ -135,6 +135,13 @@ describe("GameOverlayController nominees", () => {
     expect(cells()).toEqual([["9", "neutral"]])
   })
 
+  it("shows a seat with a role outside the game's four in a neutral colour", () => {
+    controller.handleUpdate({ scope: "participation", seat: 9, field: "role_code", value: "maf" })
+    controller.handleUpdate({ scope: "nominees", seats: [9] })
+
+    expect(cells()).toEqual([["9", "neutral"]])
+  })
+
   it("shows the block", () => {
     controller.handleUpdate({ scope: "nominees", seats: [3] })
 
