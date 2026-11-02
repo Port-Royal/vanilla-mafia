@@ -148,6 +148,25 @@ RSpec.describe GameProtocolEvent do
       end
     end
 
+    {
+      [ "foul", [ 3 ], {} ] => true,
+      [ "foul", [], {} ] => false,
+      [ "tech", [ 3, 4 ], {} ] => false,
+      [ "sanction_cancelled", [ 3 ], { "sanction" => "foul" } ] => true,
+      [ "sanction_cancelled", [ 3 ], { "sanction" => "tech" } ] => true,
+      [ "sanction_cancelled", [ 3 ], { "sanction" => "bogus" } ] => false,
+      [ "sanction_cancelled", [ 3 ], {} ] => false,
+      [ "sanction_cancelled", [], { "sanction" => "foul" } ] => false
+    }.each do |(kind, targets, metadata), valid|
+      context "when #{kind} names #{targets.inspect} with #{metadata.inspect}" do
+        let(:attrs) { { kind:, target_seats: targets, metadata: } }
+
+        it "is #{valid ? 'valid' : 'invalid'}" do
+          expect(event.valid?).to be(valid)
+        end
+      end
+    end
+
     context "when a check has no result key" do
       let(:attrs) { { kind: "sheriff_check", phase: "night", target_seats: [ 2 ], metadata: {} } }
 

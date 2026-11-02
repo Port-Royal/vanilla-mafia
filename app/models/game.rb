@@ -52,7 +52,8 @@ class Game < ApplicationRecord
     game_protocol_events.where(kind: %w[foul tech sanction_cancelled]).order(:position).each do |event|
       seat = event.target_seats.first
       if event.kind == "sanction_cancelled"
-        counts[seat][SANCTION_COUNTERS.fetch(event.metadata["sanction"])] -= 1
+        counter = SANCTION_COUNTERS.fetch(event.metadata["sanction"])
+        counts[seat][counter] = [ counts[seat][counter] - 1, 0 ].max
       else
         counts[seat][SANCTION_COUNTERS.fetch(event.kind)] += 1
       end

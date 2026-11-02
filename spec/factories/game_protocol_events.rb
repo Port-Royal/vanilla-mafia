@@ -7,5 +7,7 @@ FactoryBot.define do
     kind { "note" }
     phase { "day" }
     day_number { 1 }
+    # A sanction must name the player it belongs to.
+    target_seats { %w[foul tech].include?(kind) ? [ 1 ] : [] }
   end
 end

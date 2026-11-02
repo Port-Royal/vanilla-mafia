@@ -164,6 +164,12 @@ RSpec.describe Game, type: :model do
       create(:game_protocol_event, position: 1, kind: "foul", target_seats: [ 9 ])
     end
 
+    it "never counts below zero for a cancellation with nothing to cancel" do
+      sanction.call(9, "sanction_cancelled", 8, { "sanction" => "foul" })
+
+      expect(fouled_game.public_fouls).not_to have_key(8)
+    end
+
     it "counts each seat's fouls and technical fouls, cancellations included, even with roles hidden" do
       expect(fouled_game.public_fouls).to eq(3 => { fouls: 2, tech: 1 }, 5 => { fouls: 0, tech: 1 })
     end
