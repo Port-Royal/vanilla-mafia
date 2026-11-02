@@ -23,7 +23,7 @@ RSpec.describe "Game overlay live tiles" do
         return {
           name: tile.querySelector(".overlay-name").textContent.trim(),
           badge: tile.querySelector(".overlay-role-badge").textContent.trim(),
-          badgeRole: tile.querySelector(".overlay-role-badge").dataset.role || null,
+          badgeRole: tile.querySelector(".overlay-role-badge").dataset.role ?? null,
           badgeColour: getComputedStyle(tile.querySelector(".overlay-role-badge")).backgroundColor,
           icon: icon ? icon.dataset.status : null,
           dimmed: tile.classList.contains("overlay-tile--eliminated"),
