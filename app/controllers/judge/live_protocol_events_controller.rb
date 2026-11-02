@@ -44,8 +44,8 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
     :no_content
   end
 
-  # Viewers see who stands for the vote and, with roles public, the checks. A change to either
-  # goes out once the write commits.
+  # Viewers see who stands for the vote, the shots and, with roles public, the checks. A change
+  # to any of them goes out once the write commits.
   def with_overlay_broadcasts
     before = overlay_lists
     result = yield

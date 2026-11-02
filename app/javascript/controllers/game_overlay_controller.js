@@ -233,7 +233,7 @@ export default class extends Controller {
     if (!check.target_seat) return { text: "×", colour: "empty" }
     const text = String(check.target_seat)
     if (check.kind === "sheriff") return { text, colour: check.result }
-    return check.result === "sheriff" ? { text, colour: "red", mark: "sheriff" } : { text, colour: "neutral" }
+    return check.result === "sheriff" ? { text, colour: "red", mark: "sheriff" } : { text, colour: check.team || "neutral" }
   }
 
   fillNightRow(target, cells) {

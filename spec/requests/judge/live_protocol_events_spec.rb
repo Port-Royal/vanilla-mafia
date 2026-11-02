@@ -338,7 +338,7 @@ RSpec.describe "Judge live protocol" do
   describe "check broadcasts" do
     let(:sent) { [] }
     let(:check) { event.merge(kind: "don_check", phase: "night", day_number: 0, actor_seat: 1, target_seats: [ 2 ], metadata: { result: "not_sheriff" }) }
-    let(:public_check) { { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 2, result: "not_sheriff" } ] } }
+    let(:public_check) { { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 2, result: "not_sheriff", team: nil } ] } }
 
     before do
       allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| sent << [ target, payload ] }

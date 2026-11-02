@@ -128,6 +128,6 @@ module GamesHelper
     return { text:, colour: check[:result], mark: nil } if check[:kind] == "sheriff"
     return { text:, colour: "red", mark: "sheriff" } if check[:result] == "sheriff"
 
-    { text:, colour: "neutral", mark: nil }
+    { text:, colour: check[:team] || "neutral", mark: nil }
   end
 end

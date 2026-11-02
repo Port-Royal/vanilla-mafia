@@ -212,10 +212,22 @@ describe("GameOverlayController night block", () => {
     ])
   })
 
-  it("shows a don's check that is not the sheriff in a neutral colour", () => {
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 7, result: "not_sheriff" }] })
+  it("shows a don's check that is not the sheriff in the target's colour", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 7, result: "not_sheriff", team: "red" }] })
 
-    expect(cells("don")).toEqual([["7", "neutral", null]])
+    expect(cells("don")).toEqual([["7", "red", null]])
+  })
+
+  it("shows the don checking his own mafia in black", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 3, result: "not_sheriff", team: "black" }] })
+
+    expect(cells("don")).toEqual([["3", "black", null]])
+  })
+
+  it("falls back to a neutral colour when the target's team is unknown", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 3, result: "not_sheriff", team: null }] })
+
+    expect(cells("don")).toEqual([["3", "neutral", null]])
   })
 
   it("shows the check rows only with checks", () => {

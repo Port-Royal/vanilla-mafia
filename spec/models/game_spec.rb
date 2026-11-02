@@ -166,6 +166,14 @@ RSpec.describe Game, type: :model do
       expect(shot_game.public_shots).to eq([ { night: 1, target_seat: nil, team: nil }, { night: 2, target_seat: 5, team: "black" } ])
     end
 
+    it "gives a civilian target the red team" do
+      create(:role, code: "peace") unless Role.exists?(code: "peace")
+      create(:game_participation, game: shot_game, seat: 6, role_code: "peace")
+      night_event.call(4, "shot", 2, [ 6 ])
+
+      expect(shot_game.public_shots.last).to eq(night: 3, target_seat: 6, team: "red")
+    end
+
     context "when roles are hidden" do
       let(:hide_roles) { true }
 
@@ -187,11 +195,16 @@ RSpec.describe Game, type: :model do
       create(:game_protocol_event, position: 1, kind: "don_check", phase: "night", day_number: 0, target_seats: [ 5 ], metadata: { "result" => "not_sheriff" })
     end
 
-    it "lists the checks of this game in order, a skipped check with no seat" do
+    before do
+      create(:role, code: "mafia") unless Role.exists?(code: "mafia")
+      create(:game_participation, game: checked_game, seat: 4, role_code: "mafia")
+    end
+
+    it "lists the checks of this game in order, a skipped check with no seat, with the target's team" do
       expect(checked_game.public_checks).to eq([
-        { night: 1, kind: "don", target_seat: 2, result: "sheriff" },
-        { night: 2, kind: "don", target_seat: nil, result: nil },
-        { night: 2, kind: "sheriff", target_seat: 4, result: "black" }
+        { night: 1, kind: "don", target_seat: 2, result: "sheriff", team: nil },
+        { night: 2, kind: "don", target_seat: nil, result: nil, team: nil },
+        { night: 2, kind: "sheriff", target_seat: 4, result: "black", team: "black" }
       ])
     end
 

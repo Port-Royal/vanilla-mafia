@@ -39,17 +39,19 @@ class Game < ApplicationRecord
     return [] unless roles_public?
 
     game_protocol_events.where(kind: CHECK_KINDS.keys).order(:position).map do |event|
-      { night: event.day_number + 1, kind: CHECK_KINDS.fetch(event.kind), target_seat: event.target_seats.first, result: event.metadata["result"] }
+      target = event.target_seats.first
+      { night: event.day_number + 1, kind: CHECK_KINDS.fetch(event.kind), target_seat: target, result: event.metadata["result"], team: target && public_team(target) }
     end
   end
 
-  # A kill shows on the player's tile anyway, so shots are public. The target's team is not.
+  # A kill shows on the player's tile anyway, so shots are public. The target's team comes only
+  # while roles are public.
   def public_shots
     by_night = game_protocol_events.where(kind: %w[shot miss_shot]).order(:position).group_by { |event| event.day_number + 1 }
     by_night.map do |night, events|
       shot = events.find { |event| event.kind == "shot" }
       target = shot ? shot.target_seats.first : nil
-      { night:, target_seat: target, team: target && shot_team(target) }
+      { night:, target_seat: target, team: target && public_team(target) }
     end
   end
 
@@ -76,7 +78,7 @@ class Game < ApplicationRecord
 
   private
 
-  def shot_team(seat)
+  def public_team(seat)
     return unless roles_public?
 
     participation = game_participations.find_by(seat:)

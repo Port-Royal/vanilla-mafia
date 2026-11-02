@@ -308,7 +308,7 @@ RSpec.describe GamesHelper do
 
   describe "#overlay_night_rows" do
     let(:shots) { [ { night: 1, target_seat: 5, team: "black" }, { night: 3, target_seat: nil, team: nil } ] }
-    let(:checks) { [ { night: 1, kind: "don", target_seat: 7, result: "not_sheriff" }, { night: 2, kind: "sheriff", target_seat: 3, result: "red" } ] }
+    let(:checks) { [ { night: 1, kind: "don", target_seat: 7, result: "not_sheriff", team: "red" }, { night: 2, kind: "sheriff", target_seat: 3, result: "red", team: "red" } ] }
     let(:rows) { helper.overlay_night_rows(shots, checks) }
 
     it "counts the nights from every entry" do
@@ -319,12 +319,33 @@ RSpec.describe GamesHelper do
       expect(rows[:shots]).to eq([ { text: "5", colour: "black", mark: nil }, { text: "", colour: "none", mark: nil }, { text: "×", colour: "empty", mark: nil } ])
     end
 
-    it "shows a don's check that is not the sheriff in a neutral colour" do
-      expect(rows[:don].first).to eq(text: "7", colour: "neutral", mark: nil)
+    it "shows a don's check that is not the sheriff in the target's colour" do
+      expect(rows[:don].first).to eq(text: "7", colour: "red", mark: nil)
     end
 
-    it "colours a sheriff's check by its result" do
-      expect(rows[:sheriff][1]).to eq(text: "3", colour: "red", mark: nil)
+    it "shows the don checking his own mafia in black" do
+      own = helper.overlay_night_rows([], [ { night: 1, kind: "don", target_seat: 3, result: "not_sheriff", team: "black" } ])
+
+      expect(own[:don]).to eq([ { text: "3", colour: "black", mark: nil } ])
+    end
+
+    it "falls back to a neutral colour when the target's team is unknown" do
+      unknown = helper.overlay_night_rows([], [ { night: 1, kind: "don", target_seat: 3, result: "not_sheriff", team: nil } ])
+
+      expect(unknown[:don]).to eq([ { text: "3", colour: "neutral", mark: nil } ])
+    end
+
+    it "keeps each kind of check in its own row" do
+      expect(rows.values_at(:don, :sheriff)).to eq([
+        [ { text: "7", colour: "red", mark: nil }, { text: "", colour: "none", mark: nil }, { text: "", colour: "none", mark: nil } ],
+        [ { text: "", colour: "none", mark: nil }, { text: "3", colour: "red", mark: nil }, { text: "", colour: "none", mark: nil } ]
+      ])
+    end
+
+    it "shows a skipped check as a cross" do
+      skipped = helper.overlay_night_rows([], [ { night: 1, kind: "sheriff", target_seat: nil, result: nil } ])
+
+      expect(skipped[:sheriff]).to eq([ { text: "×", colour: "empty", mark: nil } ])
     end
 
     it "marks the don finding the sheriff" do
