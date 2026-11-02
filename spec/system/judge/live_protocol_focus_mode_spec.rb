@@ -28,10 +28,13 @@ RSpec.describe "Live protocol focus mode" do
       end
     end
 
-    it "spreads the console over the full window width" do
-      console_width = page.evaluate_script("document.getElementById('live-protocol').getBoundingClientRect().width")
-      window_width = page.evaluate_script("window.innerWidth")
-      expect(console_width).to be >= window_width - 48
+    context "with the console width measured" do
+      let(:console_width) { page.evaluate_script("document.getElementById('live-protocol').getBoundingClientRect().width") }
+      let(:window_width) { page.evaluate_script("window.innerWidth") }
+
+      it "spreads the console over the full window width" do
+        expect(console_width).to be >= window_width - 48
+      end
     end
 
     it "fits the console in the window height" do
