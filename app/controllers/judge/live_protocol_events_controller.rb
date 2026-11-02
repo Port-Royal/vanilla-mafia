@@ -6,13 +6,13 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
   rescue_from(*REJECTED) { |error| render json: { errors: [ error.message ] }, status: :unprocessable_content }
 
   def create
-    return head :conflict unless @game.with_lock { save_new_events }
+    return head :conflict unless @game.with_lock { with_nominee_broadcast { save_new_events } }
 
     render json: { saved: event_params.pluck(:client_id).uniq }
   end
 
   def destroy
-    status = @game.with_lock { destroy_action }
+    status = @game.with_lock { with_nominee_broadcast { destroy_action } }
     return head status unless status == :unprocessable_content
 
     render json: { errors: [ "action cannot be deleted" ] }, status:
@@ -42,6 +42,17 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
       event.destroy!
     end
     :no_content
+  end
+
+  # Viewers see who stands for the vote, so any change to that list goes out once the write commits.
+  def with_nominee_broadcast
+    before = @game.current_nominees
+    result = yield
+    after = @game.current_nominees
+    if after != before
+      ActiveRecord.after_all_transactions_commit { GameProtocolChannel.broadcast_to(@game, { scope: "nominees", seats: after }) }
+    end
+    result
   end
 
   def event_params

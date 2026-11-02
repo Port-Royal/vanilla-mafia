@@ -674,6 +674,7 @@ en:
         mafia_victory: "Mafia wins"
         draw: "Draw"
     overlay:
+      nominees: "Up for the vote"
       role_badge:
         sheriff: "S"
         don: "D"

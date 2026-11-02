@@ -134,6 +134,20 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#current_nominees' do
+    let_it_be(:nominated_game) { create(:game) }
+
+    before do
+      create(:game_protocol_event, game: nominated_game, position: 2, kind: "nominate", actor_seat: 2, target_seats: [ 3 ])
+      create(:game_protocol_event, game: nominated_game, position: 1, kind: "nominate", actor_seat: 1, target_seats: [ 5 ])
+      create(:game_protocol_event, position: 1, kind: "nominate", actor_seat: 1, target_seats: [ 8 ])
+    end
+
+    it "replays this game's journal in position order" do
+      expect(nominated_game.current_nominees).to eq([ 5, 3 ])
+    end
+  end
+
   describe '.finished' do
     let_it_be(:competition) { create(:competition, :series) }
     let_it_be(:draw_game) { create(:game, competition:, game_number: 1, result: "draw") }

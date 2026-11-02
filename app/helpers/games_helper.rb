@@ -46,6 +46,13 @@ module GamesHelper
     participation.best_move_seats.to_a.map { |seat| [ seat, overlay_best_move_colour(seat_roles[seat]) ] }
   end
 
+  def overlay_nominee_label(seat, participations_by_seat)
+    participation = participations_by_seat[seat]
+    return seat.to_s unless participation
+
+    "#{seat} #{participation.player.name}"
+  end
+
   def overlay_canvas_class(game)
     class_names(
       "overlay-canvas text-white",

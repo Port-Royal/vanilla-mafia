@@ -263,6 +263,53 @@ RSpec.describe "Judge live protocol" do
     end
   end
 
+  describe "nominee broadcasts" do
+    let(:sent) { [] }
+    let(:nomination) { event.merge(kind: "nominate", actor_seat: 1, target_seats: [ 2 ]) }
+
+    before do
+      allow(GameProtocolChannel).to receive(:broadcast_to) { |_game, payload| sent << payload }
+    end
+
+    it "sends the list after a nomination" do
+      post_events.call(nomination)
+
+      expect(sent).to eq([ { scope: "nominees", seats: [ 2 ] } ])
+    end
+
+    it "addresses the list to this game" do
+      post_events.call(nomination)
+
+      expect(GameProtocolChannel).to have_received(:broadcast_to).with(game, { scope: "nominees", seats: [ 2 ] })
+    end
+
+    it "sends nothing when the list stays the same" do
+      post_events.call(event)
+
+      expect(sent).to be_empty
+    end
+
+    it "sends the list after its deletion" do
+      post_events.call(nomination)
+      delete live_event_judge_protocol_path(game, "a1"), as: :json
+
+      expect(sent.last).to eq(scope: "nominees", seats: [])
+    end
+
+    it "sends nothing for a retried request" do
+      post_events.call(nomination)
+      post_events.call(nomination)
+
+      expect(sent.size).to eq(1)
+    end
+
+    it "sends nothing for a rejected batch" do
+      post_events.call(nomination, event.merge(client_id: "c2", kind: "bogus"))
+
+      expect(sent).to be_empty
+    end
+  end
+
   describe "DELETE /judge/protocols/:id/live/events/:action_id" do
     let(:delete_action) { ->(action_id) { delete live_event_judge_protocol_path(game, action_id), as: :json } }
 
