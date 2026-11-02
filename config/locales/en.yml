@@ -1007,6 +1007,7 @@ en:
     messages:
       already_claimed: "is already claimed"
       not_claimed: "is not claimed by anyone"
+      taken_on_day: "is already taken in this competition at this table on this day"
       content_type: "has an unsupported file type"
       file_size: "is too large (maximum is %{count} MB)"
       too_many: "are too many (maximum is %{count})"
