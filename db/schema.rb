@@ -279,7 +279,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_140001) do
     t.string "slug", null: false
     t.integer "table_number"
     t.datetime "updated_at", null: false
-    t.index ["competition_id", "played_on", "table_number", "game_number"], name: "index_games_on_competition_day_table_and_number", unique: true
+    t.index "competition_id, COALESCE(played_on, ''), COALESCE(table_number, 0), game_number", name: "index_games_on_competition_day_table_and_number", unique: true
     t.index ["competition_id"], name: "index_games_on_competition_id"
     t.index ["played_on", "game_number"], name: "index_games_on_played_on_and_game_number"
     t.index ["slug"], name: "index_games_on_slug", unique: true

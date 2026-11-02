@@ -141,6 +141,14 @@ RSpec.describe Game, type: :model do
           game.validate
           expect(game.errors.of_kind?(:game_number, :taken)).to be(true)
         end
+
+        context "when validation is skipped" do
+          subject(:game) { build(:game, competition: undated.competition, game_number: 2, played_on: nil, table_number: 1, slug: "undated-duplicate") }
+
+          it "is refused by the database" do
+            expect { game.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+          end
+        end
       end
     end
 
@@ -152,6 +160,14 @@ RSpec.describe Game, type: :model do
       it "is invalid with a taken error on game_number" do
         game.validate
         expect(game.errors.of_kind?(:game_number, :taken)).to be(true)
+      end
+
+      context "when validation is skipped" do
+        subject(:game) { build(:game, competition: existing.competition, game_number: 3, played_on: existing.played_on, slug: "tableless-duplicate") }
+
+        it "is refused by the database" do
+          expect { game.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+        end
       end
     end
 
