@@ -23,6 +23,8 @@ RSpec.describe "Game overlay live tiles" do
         return {
           name: tile.querySelector(".overlay-name").textContent.trim(),
           badge: tile.querySelector(".overlay-role-badge").textContent.trim(),
+          badgeRole: tile.querySelector(".overlay-role-badge").dataset.role || null,
+          badgeColour: getComputedStyle(tile.querySelector(".overlay-role-badge")).backgroundColor,
           icon: icon ? icon.dataset.status : null,
           dimmed: tile.classList.contains("overlay-tile--eliminated"),
           photo: tile.querySelector(".overlay-photo img").getAttribute("src")
@@ -45,15 +47,31 @@ RSpec.describe "Game overlay live tiles" do
     let(:payloads) { [ { scope: "participation", seat: 1, field: "role_code", value: "don" } ] }
 
     it "shows the don badge" do
-      expect(seat_one["badge"]).to eq("Д")
+      expect(seat_one.values_at("badge", "badgeRole")).to eq([ "Д", "don" ])
     end
   end
 
   context "when the role changes to peace" do
     let(:payloads) { [ { scope: "participation", seat: 1, field: "role_code", value: "peace" } ] }
 
-    it "removes the badge" do
-      expect(seat_one["badge"]).to eq("")
+    it "shows the civilian badge in red" do
+      expect(seat_one.values_at("badge", "badgeRole", "badgeColour")).to eq([ "К", "peace", "rgb(220, 38, 38)" ])
+    end
+  end
+
+  context "when the sheriff is shown" do
+    let(:payloads) { [] }
+
+    it "paints the badge yellow" do
+      expect(seat_one.values_at("badge", "badgeColour")).to eq([ "Ш", "rgb(250, 204, 21)" ])
+    end
+  end
+
+  context "when the role is cleared" do
+    let(:payloads) { [ { scope: "participation", seat: 1, field: "role_code", value: nil } ] }
+
+    it "removes the badge and its colour" do
+      expect(seat_one.values_at("badge", "badgeRole")).to eq([ "", nil ])
     end
   end
 
@@ -78,7 +96,8 @@ RSpec.describe "Game overlay live tiles" do
 
     it "clears the tile" do
       expect(seat_one).to eq(
-        "name" => "", "badge" => "", "icon" => nil, "dimmed" => false, "photo" => Player::DEFAULT_PHOTO_PATH
+        "name" => "", "badge" => "", "badgeRole" => nil, "badgeColour" => "rgb(17, 17, 17)",
+        "icon" => nil, "dimmed" => false, "photo" => Player::DEFAULT_PHOTO_PATH
       )
     end
   end

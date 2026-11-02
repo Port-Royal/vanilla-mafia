@@ -60,7 +60,7 @@
           <% end %>
         </div>
 
-        <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>"><%= overlay_role_badge(seat_roles[seat]) %></div>
+        <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>" <%= tag.attributes(data: { role: overlay_role_badge_role(seat_roles[seat]) }) %>><%= overlay_role_badge(seat_roles[seat]) %></div>
 
         <div class="overlay-status-icon" data-game-overlay-target="status" data-seat="<%= seat %>"><%= overlay_status_icon(status) %></div>
 

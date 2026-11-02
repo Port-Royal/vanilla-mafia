@@ -213,3 +213,51 @@ describe("GameOverlayController checks", () => {
     expect(entries()).toEqual(["Ночь 1: %SEAT% → 2, не шериф"])
   })
 })
+
+describe("GameOverlayController role badge colours", () => {
+  let application
+  let controller
+
+  const badge = () => document.querySelector('[data-game-overlay-target="roleBadge"]')
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay" data-game-overlay-role-badges-value='{"don":"Д","peace":"К"}'>
+        <div data-game-overlay-target="roleBadge" data-seat="1"></div>
+      </div>
+    `
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+  })
+
+  it("marks the badge with its role", () => {
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "peace" })
+
+    expect([badge().textContent, badge().dataset.role]).toEqual(["К", "peace"])
+  })
+
+  it("drops the mark for a role with no badge", () => {
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "don" })
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: null })
+
+    expect([badge().textContent, badge().dataset.role]).toEqual(["", undefined])
+  })
+
+  it("ignores a seat with no badge on the page", () => {
+    expect(() => controller.handleUpdate({ scope: "participation", seat: 9, field: "role_code", value: "peace" })).not.toThrow()
+  })
+
+  it("drops the mark when roles are hidden", () => {
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "don" })
+    controller.handleUpdate({ scope: "game", field: "hide_roles", value: "1" })
+
+    expect(badge().dataset.role).toBeUndefined()
+  })
+})

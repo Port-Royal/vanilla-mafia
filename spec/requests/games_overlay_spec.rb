@@ -150,18 +150,18 @@ RSpec.describe "Games#overlay" do
 
       before { get overlay_game_path(tile_game) }
 
-      { 1 => "Ш", 2 => "Д", 3 => "М" }.each do |seat, letter|
+      { 1 => [ "Ш", "sheriff" ], 2 => [ "Д", "don" ], 3 => [ "М", "mafia" ], 4 => [ "К", "peace" ] }.each do |seat, (letter, role)|
         it "shows the #{letter} badge on seat #{seat}" do
           expect(badge.(seat).text.strip).to eq(letter)
         end
-      end
 
-      it "shows no badge for a civilian" do
-        expect(badge.(4).text.strip).to eq("")
+        it "colours the badge on seat #{seat} as #{role}" do
+          expect(badge.(seat)["data-role"]).to eq(role)
+        end
       end
 
       it "shows no badge for a player without a role" do
-        expect(badge.(5).text.strip).to eq("")
+        expect([ badge.(5).text.strip, badge.(5)["data-role"] ]).to eq([ "", nil ])
       end
 
       it "renders no role icons" do
@@ -225,7 +225,7 @@ RSpec.describe "Games#overlay" do
 
       it "exposes the role badge letters and the default photo for live updates" do
         expect(document.at_css("#game-overlay").to_h).to include(
-          "data-game-overlay-role-badges-value" => { sheriff: "Ш", don: "Д", mafia: "М" }.to_json,
+          "data-game-overlay-role-badges-value" => { sheriff: "Ш", don: "Д", mafia: "М", peace: "К" }.to_json,
           "data-game-overlay-default-photo-value" => Player::DEFAULT_PHOTO_PATH
         )
       end

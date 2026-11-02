@@ -1,5 +1,5 @@
 module GamesHelper
-  OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia].freeze
+  OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia peace].freeze
   OVERLAY_ELIMINATED_STATUSES = %i[killed_by_mafia voted_out banned].freeze
   OVERLAY_STATUS_ICONS_DIR = Rails.root.join("app/assets/images/overlay/status")
   # Best move cells: black when the named player is mafia (a hit), red when a civilian (a miss).
@@ -16,6 +16,11 @@ module GamesHelper
     return unless OVERLAY_ROLE_BADGE_CODES.include?(role_code)
 
     t("games.overlay.role_badge.#{role_code}")
+  end
+
+  # The badge's colour comes from its role, so only roles with a badge are named.
+  def overlay_role_badge_role(role_code)
+    role_code if OVERLAY_ROLE_BADGE_CODES.include?(role_code)
   end
 
   def overlay_eliminated?(status)
