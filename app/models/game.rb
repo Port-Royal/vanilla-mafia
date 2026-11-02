@@ -29,6 +29,10 @@ class Game < ApplicationRecord
   scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
   scope :finished, -> { where.not(result: "in_progress") }
 
+  def roles_public?
+    !(in_progress? && hide_roles?)
+  end
+
   def full_name
     parts = [ played_on, competition.parent&.name, competition.name, "#{I18n.t('common.game')} #{game_number}", name ].compact
     parts.join(" ")

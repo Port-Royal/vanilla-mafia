@@ -39,7 +39,10 @@ RSpec.describe "Game overlay live display settings" do
 
   context "when every setting is switched off" do
     let(:settings) { { hide_roles: true, hide_game_info: true, hide_table_info: true } }
-    let(:payloads) { %w[hide_roles hide_game_info hide_table_info].map { |field| { scope: "game", field: field, value: "0" } } }
+    let(:payloads) do
+      %w[hide_roles hide_game_info hide_table_info].map { |field| { scope: "game", field: field, value: "0" } } +
+        [ { scope: "participation", seat: 1, field: "role_code", value: "sheriff" } ]
+    end
 
     it "shows every block again" do
       expect(shown).to eq([ true, true, true, true ])

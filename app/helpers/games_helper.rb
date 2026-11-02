@@ -49,7 +49,7 @@ module GamesHelper
   def overlay_canvas_class(game)
     class_names(
       "overlay-canvas text-white",
-      "overlay-canvas--hide-roles" => game.hide_roles,
+      "overlay-canvas--hide-roles" => !game.roles_public?,
       "overlay-canvas--hide-game-info" => game.hide_game_info,
       "overlay-canvas--hide-table-info" => game.hide_table_info
     )

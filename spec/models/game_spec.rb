@@ -117,6 +117,23 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#roles_public?' do
+    {
+      [ "in_progress", true ] => false,
+      [ "in_progress", false ] => true,
+      [ "draw", true ] => true,
+      [ "peace_victory", false ] => true
+    }.each do |(result, hide_roles), expected|
+      context "when result is #{result} and hide_roles is #{hide_roles}" do
+        let(:game) { build(:game, result:, hide_roles:) }
+
+        it "returns #{expected}" do
+          expect(game.roles_public?).to be(expected)
+        end
+      end
+    end
+  end
+
   describe '.finished' do
     let_it_be(:competition) { create(:competition, :series) }
     let_it_be(:draw_game) { create(:game, competition:, game_number: 1, result: "draw") }

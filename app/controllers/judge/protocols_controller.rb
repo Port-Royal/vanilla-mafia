@@ -39,6 +39,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def autosave
+    roles_were_public = @game.roles_public?
     result = AutosaveGameProtocolService.call(
       game: @game,
       scope: params[:scope],
@@ -49,6 +50,7 @@ class Judge::ProtocolsController < ApplicationController
 
     if result.success
       broadcast_protocol_update
+      broadcast_role_visibility_change(roles_were_public)
 
       render json: { success: true }
     else
@@ -57,6 +59,7 @@ class Judge::ProtocolsController < ApplicationController
   end
 
   def update
+    roles_were_public = @game.roles_public?
     resolved_params = resolve_competition(game_params)
     result = SaveGameProtocolService.call(
       game: @game,
@@ -65,6 +68,7 @@ class Judge::ProtocolsController < ApplicationController
     )
 
     if result.success
+      broadcast_role_visibility_change(roles_were_public)
       redirect_to after_save_path(@game), notice: t("game_protocols.update.success")
     else
       @participations = build_participations_from_params
@@ -77,9 +81,31 @@ class Judge::ProtocolsController < ApplicationController
   private
 
   def broadcast_protocol_update
+    return unless publicly_broadcastable?
+
     payload = { scope: params[:scope], field: params[:field], value: params[:value] }
     payload[:seat] = params[:seat].to_i if params[:seat].present?
     GameProtocolChannel.broadcast_to(@game, payload)
+  end
+
+  # GameProtocolChannel admits anyone while the game runs. hide_roles reaches the overlay
+  # through broadcast_role_visibility_change, which knows whether roles are really public.
+  def publicly_broadcastable?
+    case params[:field]
+    when "role_code" then @game.roles_public?
+    when "hide_roles" then false
+    else true
+    end
+  end
+
+  def broadcast_role_visibility_change(roles_were_public)
+    return if @game.roles_public? == roles_were_public
+
+    if @game.roles_public?
+      BroadcastOverlayRolesService.call(game: @game)
+    else
+      GameProtocolChannel.broadcast_to(@game, { scope: "game", field: "hide_roles", value: "1" })
+    end
   end
 
   def after_save_path(game)
