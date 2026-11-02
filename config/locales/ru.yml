@@ -800,6 +800,10 @@ ru:
   live_protocols:
     edit_link: "Форма протокола"
     list_link: "К списку протоколов"
+    overlay_link:
+      copy: "Скопировать ссылку на оверлей"
+      copied: "Скопировано"
+      open: "Открыть оверлей"
     live_link: "Живой протокол"
     screen:
       filter:
