@@ -70,6 +70,44 @@ RSpec.describe "Judge live protocol" do
   end
 
   describe "POST /judge/protocols/:id/live/events" do
+    context "when a retry was waiting for the lock" do
+      let(:left) { event.merge(kind: "player_left", target_seats: [ 2 ], metadata: { reason: "killed" }) }
+
+      before do
+        allow_any_instance_of(Game).to receive(:with_lock).and_wrap_original do |original, &block|
+          create(:game_protocol_event, game:, client_id: "c1", position: 1)
+          original.call(&block)
+        end
+        post_events.call(left)
+      end
+
+      it "answers saved" do
+        expect(response.parsed_body).to eq("saved" => [ "c1" ])
+      end
+
+      it "does not apply the outcome again" do
+        expect(seat_two.reload.status).to eq("alive")
+      end
+    end
+
+    context "when the game finished while the request waited for the lock" do
+      before do
+        allow_any_instance_of(Game).to receive(:with_lock).and_wrap_original do |original, &block|
+          Game.where(id: game.id).update_all(result: "draw")
+          original.call(&block)
+        end
+        post_events.call(event)
+      end
+
+      it "answers 409" do
+        expect(response).to have_http_status(:conflict)
+      end
+
+      it "saves nothing" do
+        expect(journal.count).to eq(0)
+      end
+    end
+
     context "with new events" do
       before do
         post_events.call(event, event.merge(client_id: "c2", kind: "foul", actor_seat: 2, target_seats: [ 2 ], metadata: { x: [ 1 ] }))
@@ -267,6 +305,26 @@ RSpec.describe "Judge live protocol" do
         delete_action.call("a1")
 
         expect(seat_two.reload.status).to eq("alive")
+      end
+    end
+
+    context "when a repeated delete was waiting for the lock" do
+      before do
+        create(:game_protocol_event, game:, action_id: "a1", kind: "player_left", target_seats: [ 2 ], metadata: { "reason" => "voted" })
+        allow_any_instance_of(Game).to receive(:with_lock).and_wrap_original do |original, &block|
+          GameProtocolEvent.where(action_id: "a1").delete_all
+          seat_two.update!(status: "banned")
+          original.call(&block)
+        end
+        delete_action.call("a1")
+      end
+
+      it "answers no content" do
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it "does not revert again" do
+        expect(seat_two.reload.status).to eq("banned")
       end
     end
 
