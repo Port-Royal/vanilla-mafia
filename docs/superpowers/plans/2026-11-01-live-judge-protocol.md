@@ -72,7 +72,7 @@
 **Interfaces:**
 - Produces, таблица `game_protocol_events`: `game_id`, `client_id` (string, unique `[game_id, client_id]`), `action_id` (string, indexed), `position` (integer, unique `[game_id, position]`), `kind` (string), `phase` (`deal|day|night`), `day_number` (integer), `actor_seat` (integer, null), `target_seats` (json, default `[]`), `text` (text), `metadata` (json, default `{}`), timestamps.
 - Produces, маршруты: `GET /judge/protocols/:id/live`; `POST /judge/protocols/:id/live/events` с `{events: [...]}` отвечает `{saved: [client_id]}`; `DELETE /judge/protocols/:id/live/events/:action_id`.
-- Produces: `GameProtocolEvent::KINDS` — `roles deal speaker suspect red team check_request nominate nomination_cancelled note vote round_closed round_cancelled vote_skipped shot miss_shot don_check sheriff_check night_closed best_move will foul tech sanction_cancelled player_left player_restored game_finished`.
+- Produces: `GameProtocolEvent::KINDS` — `roles deal speaker suspect red team check_request nominate nomination_cancelled note vote round_closed round_cancelled vote_skipped leaving_closed shot miss_shot don_check sheriff_check night_closed best_move will foul tech sanction_cancelled player_left player_restored game_finished`.
 - Produces: `GameProtocolEvent::DELETABLE_FROM_MIDDLE` — `suspect red team check_request note will best_move`, плюс `nominate`, если в дне нет событий `vote`.
 - Produces: `SyncProtocolEventService.apply(event)` и `.revert(event)`.
 
@@ -145,6 +145,8 @@
 **Interfaces:**
 - Produces: `parseWill(raw) -> {red: number[], black: number[], sheriff: number[], plan: string}`.
 - Produces: действие `finish_game` с `result` (`peace_victory`, `mafia_victory`, `draw`) выдаёт `game_finished`.
+- Действия: `shoot`, `miss_shot` (`seats` или `miss`: `no_shot`, `tactical`), `don_check`, `sheriff_check`, `best_move`, `will`, `finish_leaving` (пишет `leaving_closed`, вид добавлен в `GameProtocolEvent::KINDS`).
+- `parseWill` не вызывается из `machine.js`: `will` хранит исходный текст, а разбирает его экран и бланк. Импорт в браузере только через пин `live_protocol/will_parser`, относительный путь не проходит через importmap.
 
 - [ ] **Step 1:** Падающие тесты:
   - `parseWill`: `234к, 67ч, 9ш` и `2 3 4 r 6 7 b 9 s` дают `[2,3,4]`, `[6,7]`, `[9]`; `10к, 1ч` даёт `[10]`, `[1]`; `210к стреляйте в 8 завтра` даёт `[2,10]` и план; `просто план` только план;
