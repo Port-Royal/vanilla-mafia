@@ -33,6 +33,10 @@ RSpec.describe FeatureToggle, type: :model do
       )
     end
 
+    it "includes live protocol toggle key" do
+      expect(described_class::KEYS).to include("live_protocol")
+    end
+
     it "includes game breakdown toggle key" do
       expect(described_class::KEYS).to include("game_breakdown")
     end

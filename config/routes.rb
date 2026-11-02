@@ -6,6 +6,9 @@ Rails.application.routes.draw do
       resources :protocols, only: [ :index, :new, :create, :edit, :update ] do
         member do
           patch :autosave
+          get :live, to: "live_protocols#show"
+          post "live/events", to: "live_protocol_events#create", as: :live_events
+          delete "live/events/:action_id", to: "live_protocol_events#destroy", as: :live_event
         end
       end
 

@@ -13,6 +13,7 @@ class Game < ApplicationRecord
 
   belongs_to :competition
   has_many :game_participations, dependent: :destroy
+  has_many :game_protocol_events, dependent: :destroy
   has_many :news, dependent: :nullify
   has_many :game_breakdowns, dependent: :nullify
   has_many :players, through: :game_participations
