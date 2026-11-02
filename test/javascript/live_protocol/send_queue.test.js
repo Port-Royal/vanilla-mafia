@@ -205,6 +205,12 @@ describe("SendQueue", () => {
     expect(queue.items).toEqual([])
   })
 
+  it.each(["0", "{}", "null", '"text"'])("starts empty when the storage holds %s", (stored) => {
+    storage = memoryStorage({ queue: stored })
+
+    expect(build().items).toEqual([])
+  })
+
   it("keeps working when the storage refuses to write", async () => {
     storage.setItem = () => { throw new Error("quota") }
     const queue = build()

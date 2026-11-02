@@ -88,7 +88,8 @@ export class SendQueue {
 
   load() {
     try {
-      return JSON.parse(this.storage.getItem(this.storageKey)) ?? []
+      const stored = JSON.parse(this.storage.getItem(this.storageKey))
+      return Array.isArray(stored) ? stored : []
     } catch {
       return []
     }
