@@ -572,6 +572,71 @@ en:
     index:
       title: "Help"
     pages:
+      live-protocol:
+        title: "Live protocol"
+        summary: "How to run a game from the keyboard: roles, speeches, votes, nights and the end of the game"
+        intro: "The live protocol records the game at the table. Every action of the judge becomes a journal record, and roles, statuses, the best move and the result reach the protocol and the overlay by themselves."
+        start_title: "Getting started"
+        start:
+          - "Create a protocol in the usual form: tournament, game number, players by seat. Roles are optional."
+          - "A new game in progress opens in the live protocol. The edit form links to it as well."
+          - "Deal the roles and record the mafia deal, then the game goes stage by stage."
+        keys_title: "Keys"
+        keys_intro: "An action key first, then seat numbers. 0 is seat 10. An action with one seat saves at once, with several on Enter. Esc cancels. Keys work in any keyboard layout. Everything works with the mouse too: every button shows its key."
+        key: "Key"
+        action: "Action"
+        stages:
+          all: "At any stage of the game"
+          roles: "Dealing roles"
+          deal: "Mafia deal"
+          speech: "Speeches"
+          vote: "Vote"
+          night: "Night"
+          leaving: "Best move and leaving speech"
+        rows:
+          all:
+            - ["F, G, X", "foul, technical foul, removal; a seat or Enter for the speaker"]
+            - ["Shift+F, Shift+G", "cancel the last foul or technical foul"]
+            - ["Ctrl+Z", "undo the last action"]
+            - ["H", "hold to see the roles"]
+            - ["Q", "finish the game once the result is known"]
+            - ["Shift+D", "finish the game as a draw"]
+          roles:
+            - ["seats", "don, sheriff, mafia, mafia"]
+            - ["Enter", "save; with no seats, confirm the roles from the form"]
+          deal:
+            - ["S, D", "static or dynamic"]
+            - ["seat", "who will claim sheriff"]
+            - ["W", "text field"]
+            - ["Enter", "start the zero circle"]
+          speech:
+            - ["S, R, T, C", "suspect, red, team, check request; seats and Enter"]
+            - ["N", "nominate a player"]
+            - ["Shift+N", "cancel a nomination"]
+            - ["M", "note"]
+            - ["Space", "next player"]
+            - ["V", "go to the vote before the circle ends"]
+            - ["click a seat", "make that player the speaker"]
+          vote:
+            - ["seats", "mark the voters for the current candidate"]
+            - ["Enter", "next candidate or the result"]
+          night:
+            - ["seat", "who all the blacks shot"]
+            - ["M", "miss: then a seat, − \"did not shoot\" or T \"tactical\" for each shooter"]
+            - ["seat or Enter", "the don's and the sheriff's check, or no check"]
+          leaving:
+            - ["three seats", "best move; Enter with none means \"named nobody\""]
+            - ["text and Enter", "will: 234к, 67ч, 9ш"]
+            - ["Enter on an empty field", "move on"]
+            - ["B", "record a best move that was not offered"]
+        undo_title: "Fixing mistakes"
+        undo: "Ctrl+Z undoes the last action as a whole, with everything it caused. A record in the middle can be deleted with the cross in the game record if nothing depends on it: suspicions, notes, wills, best moves, nominations before the vote."
+        roles_title: "Hiding roles"
+        roles: "By day the screen shows no roles, checks or deal, so nobody at the table sees them. Hold H to look. At night and during the deal roles show: the players wear masks. After the game everything is open. The \"Hide roles\" setting in the form only affects the overlay."
+        network_title: "Connection"
+        network: "Records go to the server one by one and survive a lost connection or a reload. The state shows in the top right. If the server refuses a record, the screen says so: reload the page."
+        after_title: "After the game"
+        after: "\"Finish the game\" records the result and opens the form for points. The Sheet tab gathers shooting, checks, votes, wills and best moves. When you open a finished game again, a seat number or a click shows one player's events."
       obs-overlay:
         title: "OBS Overlay Setup"
         summary: "How to set up the game overlay as an OBS browser source"
@@ -593,7 +658,7 @@ en:
         setting_css: "Custom CSS"
         display_title: "Display settings"
         display_description: "The judge chooses what the overlay shows in the game protocol, in the “Overlay” row. Changes appear on the overlay immediately; there is no need to reload the source in OBS."
-        display_hide_roles: "Hides the role letters on the tiles and the best move cell colours."
+        display_hide_roles: "While the game runs, roles do not reach the overlay at all: no badges, no colours of the best move, nominees or shots, no checks. After the game everything is revealed."
         display_hide_game_info: "Hides the “Game N/M” block at the top centre."
         display_hide_table_info: "Hides the “Table N” block at the top left. The judge at the top right is always shown."
         display_game_number: "“Game N/M” comes from the protocol’s “Game number” and “Total games” fields; until the total is set, the overlay shows “Game N”."
@@ -602,6 +667,14 @@ en:
         judge_step_enable: "Enable the LIVE autosave toggle in the protocol form."
         judge_step_fill: "Fill in player names, roles, statuses and best move seats as the game goes."
         judge_step_auto: "Changes are saved and broadcast to the overlay automatically."
+        blocks_title: "What the overlay shows"
+        blocks_description: "Besides the player tiles, the overlay takes data from the live protocol:"
+        block_badges: "Role badges on the tiles: the sheriff yellow, civilians red, mafia and don black."
+        block_fouls: "Fouls as yellow dots, technical fouls as red diamonds at the top of the tile."
+        block_eliminated: "An eliminated player's photo dims and sinks under the name bar."
+        block_best_move: "The best move at the bottom of the tile: red and black cells by the roles of the named players."
+        block_nominees: "Top right, \"Nominated\": the day's candidates in nomination order. Cleared when the night begins."
+        block_night: "Top left, nights by column: the shot, the don's checks and the sheriff's checks. A miss and a skipped check show as a cross."
         realtime_title: "Real-Time Updates"
         realtime_description: "The overlay receives live updates via WebSocket. As soon as the judge saves a change in the protocol, it appears on the overlay — no page refresh needed."
       game-breakdown:

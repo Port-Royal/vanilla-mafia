@@ -1,0 +1,35 @@
+<p class="text-gray-700 mb-8"><%= t(".intro") %></p>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".start_title") %></h2>
+
+<ol class="list-decimal list-inside space-y-3 mb-8">
+  <% t(".start").each do |step| %>
+    <li><%= step %></li>
+  <% end %>
+</ol>
+
+<h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".keys_title") %></h2>
+
+<p class="text-gray-700 mb-4"><%= t(".keys_intro") %></p>
+
+<% %w[all roles deal speech vote night leaving].each do |stage| %>
+  <h3 class="text-lg font-semibold mb-2"><%= t(".stages.#{stage}") %></h3>
+  <table class="data-table mb-6">
+    <thead>
+      <tr><th><%= t(".key") %></th><th><%= t(".action") %></th></tr>
+    </thead>
+    <tbody>
+      <% t(".rows.#{stage}").each do |key, action| %>
+        <tr>
+          <td class="font-mono font-medium whitespace-nowrap"><%= key %></td>
+          <td><%= action %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<% %w[undo roles network after].each do |section| %>
+  <h2 class="text-2xl font-bold text-maroon mb-4"><%= t(".#{section}_title") %></h2>
+  <p class="text-gray-700 mb-8"><%= t(".#{section}") %></p>
+<% end %>

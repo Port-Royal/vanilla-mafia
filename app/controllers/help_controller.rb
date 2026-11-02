@@ -1,9 +1,9 @@
 class HelpController < ApplicationController
-  PAGES = %w[obs-overlay podcast-feed game-breakdown].freeze
+  PAGES = %w[obs-overlay podcast-feed game-breakdown live-protocol].freeze
 
   # A page documenting a feature that is switched off would describe something the reader cannot reach,
   # so it is hidden with the feature, exactly like the menu entry.
-  TOGGLED_PAGES = { "game-breakdown" => "game_breakdown" }.freeze
+  TOGGLED_PAGES = { "game-breakdown" => "game_breakdown", "live-protocol" => "live_protocol" }.freeze
 
   def index
     @pages = PAGES.select { |slug| available?(slug) }
