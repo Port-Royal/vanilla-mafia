@@ -310,6 +310,41 @@ RSpec.describe "Judge live protocol" do
     end
   end
 
+  describe "check broadcasts" do
+    let(:sent) { [] }
+    let(:check) { event.merge(kind: "don_check", phase: "night", day_number: 0, actor_seat: 1, target_seats: [ 2 ], metadata: { result: "not_sheriff" }) }
+    let(:public_check) { { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 2, result: "not_sheriff" } ] } }
+
+    before do
+      allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| sent << [ target, payload ] }
+    end
+
+    context "when roles are public" do
+      it "sends the checks after a check" do
+        post_events.call(check)
+
+        expect(sent).to eq([ [ game, public_check ] ])
+      end
+
+      it "sends the list without it after an undo" do
+        post_events.call(check)
+        delete live_event_judge_protocol_path(game, "a1"), as: :json
+
+        expect(sent.last).to eq([ game, { scope: "checks", checks: [] } ])
+      end
+    end
+
+    context "when roles are hidden" do
+      let(:game) { create(:game, hide_roles: true) }
+
+      it "sends nothing" do
+        post_events.call(check)
+
+        expect(sent).to be_empty
+      end
+    end
+  end
+
   describe "DELETE /judge/protocols/:id/live/events/:action_id" do
     let(:delete_action) { ->(action_id) { delete live_event_judge_protocol_path(game, action_id), as: :json } }
 

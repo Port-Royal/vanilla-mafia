@@ -282,6 +282,14 @@ ru:
         mafia_victory: "Победа мафии"
         draw: "Ничья"
     overlay:
+      checks:
+        title: "Проверки"
+        entry: "Ночь %{night}: %{who} → %{seat}, %{result}"
+        don: "дон"
+        sheriff: "шериф"
+        not_sheriff: "не шериф"
+        red: "красный"
+        black: "чёрный"
       nominees: "На голосовании"
       role_badge:
         sheriff: "Ш"

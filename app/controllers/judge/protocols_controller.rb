@@ -105,6 +105,7 @@ class Judge::ProtocolsController < ApplicationController
       BroadcastOverlayRolesService.call(game: @game)
     else
       GameProtocolChannel.broadcast_to(@game, { scope: "game", field: "hide_roles", value: "1" })
+      GameProtocolChannel.broadcast_to(@game, { scope: "checks", checks: [] })
     end
   end
 

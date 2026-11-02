@@ -30,6 +30,19 @@ class Game < ApplicationRecord
   scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
   scope :finished, -> { where.not(result: "in_progress") }
 
+  CHECK_KINDS = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
+
+  # Checks give roles away, so viewers get them only while roles are public.
+  def public_checks
+    return [] unless roles_public?
+
+    game_protocol_events.where(kind: CHECK_KINDS.keys).order(:position).filter_map do |event|
+      next if event.target_seats.empty?
+
+      { night: event.day_number + 1, kind: CHECK_KINDS.fetch(event.kind), target_seat: event.target_seats.first, result: event.metadata["result"] }
+    end
+  end
+
   def current_nominees
     GameProtocolEvent::Nominees.call(game_protocol_events.order(:position))
   end

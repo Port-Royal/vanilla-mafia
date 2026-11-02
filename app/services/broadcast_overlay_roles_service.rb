@@ -13,5 +13,6 @@ class BroadcastOverlayRolesService
     @game.game_participations.where.not(seat: nil).order(:seat).each do |participation|
       GameProtocolChannel.broadcast_to(@game, { scope: "participation", seat: participation.seat, field: "role_code", value: participation.role_code })
     end
+    GameProtocolChannel.broadcast_to(@game, { scope: "checks", checks: @game.public_checks })
   end
 end

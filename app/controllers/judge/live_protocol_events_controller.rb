@@ -6,13 +6,13 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
   rescue_from(*REJECTED) { |error| render json: { errors: [ error.message ] }, status: :unprocessable_content }
 
   def create
-    return head :conflict unless @game.with_lock { with_nominee_broadcast { save_new_events } }
+    return head :conflict unless @game.with_lock { with_overlay_broadcasts { save_new_events } }
 
     render json: { saved: event_params.pluck(:client_id).uniq }
   end
 
   def destroy
-    status = @game.with_lock { with_nominee_broadcast { destroy_action } }
+    status = @game.with_lock { with_overlay_broadcasts { destroy_action } }
     return head status unless status == :unprocessable_content
 
     render json: { errors: [ "action cannot be deleted" ] }, status:
@@ -44,15 +44,21 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
     :no_content
   end
 
-  # Viewers see who stands for the vote, so any change to that list goes out once the write commits.
-  def with_nominee_broadcast
-    before = @game.current_nominees
+  # Viewers see who stands for the vote and, with roles public, the checks. A change to either
+  # goes out once the write commits.
+  def with_overlay_broadcasts
+    before = overlay_lists
     result = yield
-    after = @game.current_nominees
-    if after != before
-      ActiveRecord.after_all_transactions_commit { GameProtocolChannel.broadcast_to(@game, { scope: "nominees", seats: after }) }
+    overlay_lists.each do |scope, payload|
+      next if payload == before[scope]
+
+      ActiveRecord.after_all_transactions_commit { GameProtocolChannel.broadcast_to(@game, { scope: scope }.merge(payload)) }
     end
     result
+  end
+
+  def overlay_lists
+    { "nominees" => { seats: @game.current_nominees }, "checks" => { checks: @game.public_checks } }
   end
 
   def event_params

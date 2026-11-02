@@ -11,9 +11,11 @@ export default class extends Controller {
     tableTemplate: String,
     judgeTemplate: String,
     gameTemplate: String,
-    gameOfTotalTemplate: String
+    gameOfTotalTemplate: String,
+    checkTemplate: String,
+    checkLabels: Object
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "checks", "checksList"]
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
@@ -36,6 +38,8 @@ export default class extends Controller {
       this.updateHeader(data)
     } else if (data.scope === "nominees") {
       this.renderNominees(data.seats)
+    } else if (data.scope === "checks") {
+      this.renderChecks(data.checks)
     }
   }
 
@@ -132,6 +136,7 @@ export default class extends Controller {
 
   // Roles already delivered must not stay readable in the page once they are hidden.
   forgetRoles() {
+    this.renderChecks([])
     this.seatRoles = {}
     this.roleBadgeTargets.forEach((badge) => { badge.textContent = "" })
     this.bestMoveTargets.forEach((strip) => {
@@ -177,6 +182,25 @@ export default class extends Controller {
     })
     this.nomineesListTarget.replaceChildren(...entries)
     this.nomineesTarget.hidden = seats.length === 0
+  }
+
+  renderChecks(checks) {
+    if (!this.hasChecksTarget) return
+    const labels = this.checkLabelsValue
+    const entries = checks.map((check) => {
+      const values = {
+        NIGHT: check.night,
+        WHO: labels[check.kind],
+        SEAT: check.target_seat,
+        RESULT: labels[check.result]
+      }
+      const entry = document.createElement("span")
+      entry.className = "overlay-check overlay-nominee"
+      entry.textContent = this.checkTemplateValue.replace(/%(NIGHT|WHO|SEAT|RESULT)%/g, (_marker, name) => values[name])
+      return entry
+    })
+    this.checksListTarget.replaceChildren(...entries)
+    this.checksTarget.hidden = checks.length === 0
   }
 
   seatTarget(targets, seat) {

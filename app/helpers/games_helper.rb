@@ -53,6 +53,15 @@ module GamesHelper
     "#{seat} #{participation.player.name}"
   end
 
+  def overlay_check_label(check)
+    t("games.overlay.checks.entry", night: check[:night], who: t("games.overlay.checks.#{check[:kind]}"),
+                                    seat: check[:target_seat], result: t("games.overlay.checks.#{check[:result]}"))
+  end
+
+  def overlay_check_labels
+    t("games.overlay.checks").except(:entry, :title)
+  end
+
   def overlay_canvas_class(game)
     class_names(
       "overlay-canvas text-white",

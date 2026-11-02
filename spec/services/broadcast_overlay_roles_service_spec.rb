@@ -19,7 +19,21 @@ RSpec.describe BroadcastOverlayRolesService do
     expect(sent).to eq([
       [ game, { scope: "game", field: "hide_roles", value: "0" } ],
       [ game, { scope: "participation", seat: 1, field: "role_code", value: "don" } ],
-      [ game, { scope: "participation", seat: 5, field: "role_code", value: nil } ]
+      [ game, { scope: "participation", seat: 5, field: "role_code", value: nil } ],
+      [ game, { scope: "checks", checks: [] } ]
     ])
+  end
+
+  context "with checks recorded" do
+    let_it_be(:open_game) { create(:game, hide_roles: false) }
+    let_it_be(:check) { create(:game_protocol_event, game: open_game, kind: "don_check", phase: "night", day_number: 0, target_seats: [ 3 ], metadata: { "result" => "not_sheriff" }) }
+
+    it "sends them last" do
+      messages = []
+      allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| messages << [ target, payload ] }
+      described_class.call(game: open_game)
+
+      expect(messages.last).to eq([ open_game, { scope: "checks", checks: [ { night: 1, kind: "don", target_seat: 3, result: "not_sheriff" } ] } ])
+    end
   end
 end

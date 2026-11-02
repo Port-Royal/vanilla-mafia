@@ -127,6 +127,37 @@ RSpec.describe GameProtocolEvent do
       end
     end
 
+    {
+      [ "don_check", [ 2 ], "sheriff" ] => true,
+      [ "don_check", [ 2 ], "not_sheriff" ] => true,
+      [ "don_check", [ 2 ], "red" ] => false,
+      [ "don_check", [ 2 ], nil ] => false,
+      [ "don_check", [], nil ] => true,
+      [ "don_check", [], "sheriff" ] => false,
+      [ "sheriff_check", [ 2 ], "red" ] => true,
+      [ "sheriff_check", [ 2 ], "black" ] => true,
+      [ "sheriff_check", [ 2 ], "sheriff" ] => false,
+      [ "sheriff_check", [], nil ] => true
+    }.each do |(kind, targets, result), valid|
+      context "when #{kind} on #{targets.inspect} gives #{result.inspect}" do
+        let(:attrs) { { kind:, phase: "night", target_seats: targets, metadata: { "result" => result } } }
+
+        it "is #{valid ? 'valid' : 'invalid'}" do
+          expect(event.valid?).to be(valid)
+        end
+      end
+    end
+
+    context "when a check has no result key" do
+      let(:attrs) { { kind: "sheriff_check", phase: "night", target_seats: [ 2 ], metadata: {} } }
+
+      it "names the metadata" do
+        event.valid?
+
+        expect(event.errors.attribute_names).to eq([ :metadata ])
+      end
+    end
+
     context "when roles carries no roles hash" do
       let(:attrs) { { kind: "roles", metadata: { "roles" => "don" } } }
 

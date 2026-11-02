@@ -290,4 +290,14 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_nominee_label(9, participations_by_seat)).to eq("9")
     end
   end
+
+  describe "#overlay_check_label" do
+    it "describes a don's check" do
+      expect(helper.overlay_check_label({ night: 2, kind: "don", target_seat: 7, result: "not_sheriff" })).to eq("Ночь 2: дон → 7, не шериф")
+    end
+
+    it "describes a sheriff's check" do
+      expect(helper.overlay_check_label({ night: 1, kind: "sheriff", target_seat: 3, result: "red" })).to eq("Ночь 1: шериф → 3, красный")
+    end
+  end
 end
