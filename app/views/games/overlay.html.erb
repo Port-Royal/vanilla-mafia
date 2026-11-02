@@ -3,6 +3,7 @@
 <div id="game-overlay"
      data-controller="game-overlay"
      data-game-overlay-game-id-value="<%= @game.id %>"
+     data-game-overlay-nominees-value="<%= @nominees.to_json %>"
      data-game-overlay-shots-value="<%= @shots.to_json %>"
      data-game-overlay-checks-value="<%= @checks.to_json %>"
      data-game-overlay-role-badges-value="<%= GamesHelper::OVERLAY_ROLE_BADGE_CODES.index_with { |code| overlay_role_badge(code) }.to_json %>"
@@ -23,13 +24,15 @@
          data-game-overlay-target="gameNumber"
          data-number="<%= @game.game_number %>"
          data-total="<%= @game.games_total %>"><%= overlay_game_label(@game) %></div>
-    <div id="overlay-judge" class="justify-self-end" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
+    <div id="overlay-header-end" class="justify-self-end">
+      <div id="overlay-judge" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
+      <div id="overlay-nominees" class="overlay-night-row overlay-nominees" data-game-overlay-target="nominees" <%= "hidden" if @nominees.empty? %>>
+        <span class="overlay-nominees-title"><%= t("games.overlay.nominees") %></span>
+        <span class="overlay-night-cells" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><%= tag.span(seat, class: "overlay-night-cell", data: { colour: overlay_seat_colour(seat_roles[seat]) }) %><% end %></span>
+      </div>
+    </div>
   </div>
 
-  <div id="overlay-nominees" class="overlay-nominees" data-game-overlay-target="nominees" <%= "hidden" if @nominees.empty? %>>
-    <span class="overlay-nominees-title"><%= t("games.overlay.nominees") %></span>
-    <div class="overlay-nominees-list" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><span class="overlay-nominee"><%= overlay_nominee_label(seat, @participations_by_seat) %></span><% end %></div>
-  </div>
 
 
   <% GamesHelper::OVERLAY_ELIMINATED_STATUSES.each do |status| %>

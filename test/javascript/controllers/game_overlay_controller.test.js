@@ -101,17 +101,14 @@ describe("GameOverlayController nominees", () => {
   let application
   let controller
 
-  const names = () => [...document.querySelectorAll("#overlay-nominees .overlay-nominee")].map((node) => node.textContent)
+  const cells = () => [...document.querySelectorAll("#overlay-nominees .overlay-night-cell")].map((cell) => [cell.textContent, cell.dataset.colour])
   const block = () => document.getElementById("overlay-nominees")
 
   beforeEach(async () => {
     document.body.innerHTML = `
-      <div id="game-overlay" data-controller="game-overlay">
-        <div data-game-overlay-target="playerName" data-seat="3">Третий</div>
-        <div data-game-overlay-target="playerName" data-seat="5">&lt;Пятый&gt;</div>
+      <div id="game-overlay" data-controller="game-overlay" data-game-overlay-seat-roles-value='{"5":"mafia","3":"peace"}'>
         <div id="overlay-nominees" data-game-overlay-target="nominees" hidden>
-          <span class="overlay-nominees-title">На голосовании</span>
-          <div class="overlay-nominees-list" data-game-overlay-target="nomineesList"></div>
+          <span data-game-overlay-target="nomineesList"></span>
         </div>
       </div>
     `
@@ -126,10 +123,23 @@ describe("GameOverlayController nominees", () => {
     document.body.innerHTML = ""
   })
 
-  it("lists the seats in order with their names", () => {
+  it("lists the seats in order in their team's colour", () => {
     controller.handleUpdate({ scope: "nominees", seats: [5, 3] })
 
-    expect(names()).toEqual(["5 <Пятый>", "3 Третий"])
+    expect(cells()).toEqual([["5", "black"], ["3", "red"]])
+  })
+
+  it("shows a seat with no known role in a neutral colour", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [9] })
+
+    expect(cells()).toEqual([["9", "neutral"]])
+  })
+
+  it("shows a seat with a role outside the game's four in a neutral colour", () => {
+    controller.handleUpdate({ scope: "participation", seat: 9, field: "role_code", value: "maf" })
+    controller.handleUpdate({ scope: "nominees", seats: [9] })
+
+    expect(cells()).toEqual([["9", "neutral"]])
   })
 
   it("shows the block", () => {
@@ -142,13 +152,33 @@ describe("GameOverlayController nominees", () => {
     controller.handleUpdate({ scope: "nominees", seats: [3] })
     controller.handleUpdate({ scope: "nominees", seats: [] })
 
-    expect([block().hidden, names()]).toEqual([true, []])
+    expect([block().hidden, cells()]).toEqual([true, []])
   })
 
-  it("names an empty seat by its number only", () => {
+  it("recolours a candidate when a role arrives", () => {
     controller.handleUpdate({ scope: "nominees", seats: [9] })
+    controller.handleUpdate({ scope: "participation", seat: 9, field: "role_code", value: "don" })
 
-    expect(names()).toEqual(["9"])
+    expect(cells()).toEqual([["9", "black"]])
+  })
+
+  it("turns the candidates neutral when roles are hidden", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [5, 3] })
+    controller.handleUpdate({ scope: "game", field: "hide_roles", value: "1" })
+
+    expect(cells()).toEqual([["5", "neutral"], ["3", "neutral"]])
+  })
+
+  it("starts from what the page rendered", async () => {
+    application.stop()
+    document.getElementById("game-overlay").dataset.gameOverlayNomineesValue = "[3]"
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+    controller.handleUpdate({ scope: "participation", seat: 3, field: "role_code", value: "sheriff" })
+
+    expect(cells()).toEqual([["3", "red"]])
   })
 })
 

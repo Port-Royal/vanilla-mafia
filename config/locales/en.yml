@@ -686,7 +686,7 @@ en:
         shots: "Shooting"
         don: "Don's checks"
         sheriff: "Sheriff's checks"
-      nominees: "Up for the vote"
+      nominees: "Nominated"
       role_badge:
         sheriff: "S"
         don: "D"

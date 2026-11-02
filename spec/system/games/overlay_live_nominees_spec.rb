@@ -18,7 +18,7 @@ RSpec.describe "Game overlay live nominees" do
   it "shows the list a broadcast brings" do
     page.execute_script("#{controller_js}.handleUpdate({ scope: 'nominees', seats: [4] })")
 
-    expect(page).to have_css("#overlay-nominees .overlay-nominee", text: "4 Четвёртый")
+    expect(page).to have_css("#overlay-nominees .overlay-night-cell", exact_text: "4")
   end
 
   it "hides the block when the night clears the list" do

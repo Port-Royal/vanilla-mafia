@@ -286,7 +286,7 @@ ru:
         shots: "Отстрел"
         don: "Проверки дона"
         sheriff: "Проверки шерифа"
-      nominees: "На голосовании"
+      nominees: "Выставлены"
       role_badge:
         sheriff: "Ш"
         don: "Д"

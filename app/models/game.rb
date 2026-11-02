@@ -32,7 +32,7 @@ class Game < ApplicationRecord
 
   CHECK_KINDS = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
 
-  BLACK_ROLES = %w[don mafia].freeze
+  TEAMS = { "don" => "black", "mafia" => "black", "sheriff" => "red", "peace" => "red" }.freeze
 
   # Checks give roles away, so viewers get them only while roles are public. A skipped check has no seat.
   def public_checks
@@ -82,9 +82,7 @@ class Game < ApplicationRecord
     return unless roles_public?
 
     participation = game_participations.find_by(seat:)
-    return if participation.nil? || participation.role_code.nil?
-
-    BLACK_ROLES.include?(participation.role_code) ? "black" : "red"
+    TEAMS[participation.role_code] if participation
   end
 
   def slug_base
