@@ -21,7 +21,12 @@
           <tr>
             <td class="px-4 py-3"><%= game.game_number %></td>
             <td class="px-4 py-3"><%= game.competition.name %></td>
-            <td class="px-4 py-3"><%= game.played_on %></td>
+            <td class="px-4 py-3">
+              <%= game.played_on %>
+              <% if game.unfinished_from_past_day? %>
+                <span class="unfinished-flag ml-2 rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800"><%= t("game_protocols.unfinished_game.flag") %></span>
+              <% end %>
+            </td>
             <td class="px-4 py-3"><%= game.judge %></td>
             <td class="px-4 py-3 text-right">
               <%= link_to t("game_protocols.index.edit"), edit_judge_protocol_path(game), class: "text-maroon hover:underline" %>

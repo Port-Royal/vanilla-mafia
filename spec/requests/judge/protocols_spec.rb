@@ -38,6 +38,22 @@ RSpec.describe "Judge::Protocols" do
         get judge_protocols_path
         expect(response.body).to include(edit_judge_protocol_path(game))
       end
+
+      context "with games in progress from today and from a past day" do
+        let!(:stale) { create(:game, game_number: 81, played_on: Date.current - 1, competition:) }
+        let!(:today) { create(:game, game_number: 82, played_on: Date.current, competition:) }
+        let(:flagged) { response.parsed_body.css("tr:has(.unfinished-flag) a").pluck("href") }
+
+        before { get judge_protocols_path }
+
+        it "flags only the game from a past day" do
+          expect(flagged).to eq([ edit_judge_protocol_path(stale) ])
+        end
+
+        it "explains the flag" do
+          expect(response.parsed_body.at_css(".unfinished-flag").text.strip).to eq(I18n.t("game_protocols.unfinished_game.flag"))
+        end
+      end
     end
 
     context "when user is regular user" do
@@ -199,6 +215,84 @@ RSpec.describe "Judge::Protocols" do
     context "when user is admin" do
       before { sign_in admin }
 
+      context "with a game left unfinished from a past day" do
+        let!(:stale) { create(:game, table_number: stale_table, played_on: Date.current - 2, result: "in_progress") }
+        let(:stale_table) { nil }
+        let(:table_number) { "" }
+        let(:game_params) { { game_number: 1, played_on: Date.current.iso8601, table_number:, result: "in_progress", competition_id: competition.id } }
+        let(:create_protocol) { -> { post judge_protocols_path, params: { game: game_params, participations: valid_participations_params } } }
+
+        context "when the new protocol is at the same table" do
+          it "does not create the game" do
+            expect { create_protocol.call }.not_to change(Game, :count)
+          end
+
+          it "explains why" do
+            create_protocol.call
+            expect([ response.status, response.parsed_body.at_css("#unfinished-game").text.squish ])
+              .to eq([ 422, I18n.t("game_protocols.unfinished_game.message", table: 1, date: I18n.l(stale.played_on, format: :long), game: stale.in_season_name) + " " + I18n.t("game_protocols.unfinished_game.link") ])
+          end
+
+          it "links to the unfinished game" do
+            create_protocol.call
+            expect(response.parsed_body.at_css("#unfinished-game a")["href"]).to eq(edit_judge_protocol_path(stale))
+          end
+
+          it "keeps the entered players" do
+            create_protocol.call
+            expect(response.body).to include("Тестовый")
+          end
+
+          context "with a judge and a new stage entered" do
+            let(:game_params) { { game_number: 1, played_on: Date.current.iso8601, table_number:, judge: "Судья Вечера", result: "in_progress", competition_id: competition.id, new_stage_name: "Финал", stage_id: "" } }
+
+            it "keeps the entered judge" do
+              create_protocol.call
+              expect(response.parsed_body.at_css("input[name='game[judge]']")["value"]).to eq("Судья Вечера")
+            end
+
+            it "creates no stage" do
+              expect { create_protocol.call }.not_to change(Competition, :count)
+            end
+          end
+        end
+
+        context "when the table is given explicitly as 1" do
+          let(:table_number) { "1" }
+
+          it "does not create the game" do
+            expect { create_protocol.call }.not_to change(Game, :count)
+          end
+        end
+
+        context "when the new protocol is at another table" do
+          let(:table_number) { "2" }
+
+          it "creates the game" do
+            expect { create_protocol.call }.to change(Game, :count).by(1)
+          end
+        end
+
+        context "when the unfinished game is at another table" do
+          let(:stale_table) { 3 }
+
+          it "creates the game" do
+            expect { create_protocol.call }.to change(Game, :count).by(1)
+          end
+        end
+      end
+
+      context "with a game still in progress today at the same table" do
+        let!(:running) { create(:game, table_number: 1, played_on: Date.current, result: "in_progress") }
+        let(:game_params) { { game_number: 2, played_on: Date.current.iso8601, table_number: "1", result: "in_progress", competition_id: competition.id } }
+
+        it "creates the game" do
+          expect {
+            post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+          }.to change(Game, :count).by(1)
+        end
+      end
+
       context "with valid params" do
         let(:game_params) { { game_number: 99, played_on: "2026-01-15", judge: "Иван", result: "peace_victory", competition_id: competition.id } }
 
@@ -312,7 +406,7 @@ RSpec.describe "Judge::Protocols" do
       end
 
       context "with a game number already played in the competition" do
-        let!(:existing) { create(:game, competition:, game_number: 5, played_on: Date.new(2026, 1, 14), table_number: 1) }
+        let!(:existing) { create(:game, competition:, game_number: 5, played_on: Date.new(2026, 1, 14), table_number: 1, result: "peace_victory") }
         let(:table_number) { "1" }
         let(:game_params) { { game_number: 5, played_on:, table_number:, result: "peace_victory", competition_id: competition.id } }
 
@@ -533,8 +627,8 @@ RSpec.describe "Judge::Protocols" do
       context "with the overlay link" do
         let(:block) { response.parsed_body.at_css("[data-controller='clipboard']") }
 
-        it "shows the absolute overlay URL in a read-only input" do
-          expect(block.at_css("input[readonly][data-clipboard-target='source']")["value"]).to eq(overlay_game_url(game))
+        it "shows the absolute overlay URL of the game's table in a read-only input" do
+          expect(block.at_css("input[readonly][data-clipboard-target='source']")["value"]).to eq(overlay_url)
         end
 
         it "renders the copy button" do
@@ -542,8 +636,13 @@ RSpec.describe "Judge::Protocols" do
             .to eq(I18n.t("game_protocols.edit.overlay_link.copy"))
         end
 
-        it "links to the overlay in a new tab" do
-          expect(block.at_css("a[target='_blank'][href='#{overlay_game_url(game)}']")).to be_present
+        it "links to the table overlay in a new tab" do
+          expect(block.at_css("a[target='_blank'][href='#{overlay_url}']")).to be_present
+        end
+
+        it "links to the overlay of this game alone in a new tab" do
+          expect(block.at_css("a[target='_blank'][href='#{overlay_game_url(game)}']").text.strip)
+            .to eq(I18n.t("game_protocols.edit.overlay_link.game_only"))
         end
 
         it "keeps the link out of the protocol form" do

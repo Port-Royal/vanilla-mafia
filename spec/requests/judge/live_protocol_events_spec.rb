@@ -50,8 +50,8 @@ RSpec.describe "Judge live protocol" do
       let(:copier) { css_select("#live-protocol-bar [data-controller='clipboard']").first }
       let(:open_link) { css_select("#live-protocol-bar a[href='#{overlay_game_url(game)}']").first }
 
-      it "hands the overlay URL to the copy button" do
-        expect(copier["data-clipboard-text-value"]).to eq(overlay_game_url(game))
+      it "hands the table overlay URL to the copy button" do
+        expect(copier["data-clipboard-text-value"]).to eq(overlay_url)
       end
 
       it "confirms the copy with a translated word" do
@@ -63,13 +63,31 @@ RSpec.describe "Judge live protocol" do
           .to eq(I18n.t("live_protocols.overlay_link.copy"))
       end
 
-      it "opens the overlay in a new tab" do
+      it "opens the overlay of this game alone in a new tab" do
         expect(open_link.attributes.slice("target", "rel").transform_values(&:value)).to eq("target" => "_blank", "rel" => "noopener")
       end
+
+      it "labels the link to this game's overlay" do
+        expect(open_link.text.strip).to eq(I18n.t("live_protocols.overlay_link.game_only"))
+      end
+    end
+
+    it "does not flag a game of today" do
+      expect(css_select("#live-protocol-bar .unfinished-flag")).to be_empty
     end
 
     it "shows no toast without a flash message" do
       expect(css_select(".focus-toast")).to be_empty
+    end
+  end
+
+  describe "GET /judge/protocols/:id/live for a game left unfinished from a past day" do
+    let(:game) { create(:game, played_on: Date.current - 1) }
+
+    before { get live_judge_protocol_path(game) }
+
+    it "flags it in the header" do
+      expect(css_select("#live-protocol-bar .unfinished-flag").text.strip).to eq(I18n.t("game_protocols.unfinished_game.flag"))
     end
   end
 

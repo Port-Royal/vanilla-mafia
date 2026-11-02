@@ -107,9 +107,9 @@ en:
     edit_link: "Protocol form"
     list_link: "Back to protocols"
     overlay_link:
-      copy: "Copy overlay link"
+      copy: "Copy table overlay link"
       copied: "Copied"
-      open: "Open overlay"
+      game_only: "This game's overlay"
     live_link: "Live protocol"
     screen:
       filter:
@@ -322,6 +322,10 @@ en:
         unknown_action: "Unknown action"
         cannot_delete: "This record can only be undone with Ctrl+Z, step by step"
   game_protocols:
+    unfinished_game:
+      message: "Table %{table} has an unfinished game from %{date}: %{game}. Set its result before starting a new game at this table."
+      link: "Open the protocol"
+      flag: "unfinished from a past day"
     seat_locked: "The journal has started: the player on seat %{seat} cannot change. Events refer to seats."
     index:
       title: "In-Progress Protocols"
@@ -337,7 +341,8 @@ en:
         title: "Overlay link for OBS"
         copy: "Copy"
         open: "Open"
-        hint: "Paste the link into an OBS Browser source."
+        hint: "Paste the link into an OBS Browser source: it switches to the next game at this table by itself."
+        game_only: "Link to this game only"
         help: "How to set up the overlay"
     edit_link: "Edit protocol"
     form:
@@ -648,9 +653,12 @@ en:
         setup_title: "Setup in OBS"
         step_open_obs: "Open OBS Studio and go to the scene where you want the overlay."
         step_add_source: "Click + in the Sources panel and choose Browser."
-        step_enter_url: "Enter the overlay URL for the game:"
-        url_example: "https://vanilla-mafia.ru/games/season-6-series-1-game-3/overlay"
-        url_hint: "This is the game page address with /overlay at the end."
+        step_enter_url: "Enter the overlay URL of the table:"
+        url_example: "https://vanilla-mafia.ru/overlay"
+        url_hint: "This is table 1, which also takes games without a table number. For other tables: /overlay/tables/2, /overlay/tables/3 and so on. The protocol has a button that copies the table link."
+        table_follow: "The table link follows the games by itself: it shows today's game in progress at that table, keeps it on screen after the final reveal until the next game starts, and switches without editing the OBS source. While the table has no game, the overlay stays transparent."
+        game_url_hint: "A single game's overlay is still available at the game page address with /overlay at the end:"
+        game_url_example: "https://vanilla-mafia.ru/games/season-6-series-1-game-3/overlay"
         step_set_size: "Set the width and height to the OBS canvas base resolution (Settings → Video), for example 1920×1080."
         step_position: "Right-click the source → Transform → Reset Transform so it covers the whole canvas from 0,0. Do not stretch the source frame by hand: the overlay positions the header and player tiles itself, and tiles keep their proportions at any size."
         step_done: "Click OK. The overlay will update in real time as the judge fills in the protocol."

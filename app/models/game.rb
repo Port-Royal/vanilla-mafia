@@ -26,10 +26,29 @@ class Game < ApplicationRecord
   validates :games_total, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :games_total_covers_game_number
 
+  # A per-table overlay reloads onto the table's current game, which these changes can move.
+  TABLE_SLOT_ATTRIBUTES = %w[table_number played_on result].freeze
+
+  after_commit :announce_table, on: [ :create, :destroy ]
+  after_commit :announce_moved_tables, on: :update
+
   scope :for_competition, ->(competition) { where(competition: competition) }
   scope :ordered, -> { order(played_on: :asc, game_number: :asc) }
   scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
   scope :finished, -> { where.not(result: "in_progress") }
+  scope :unfinished_from_past_day, -> { in_progress.where(played_on: ...Date.current) }
+
+  # A game without a table number counts as table 1: most evenings run one table and leave the field blank.
+  DEFAULT_TABLE = 1
+
+  scope :at_table, ->(number) { where(table_number: number == DEFAULT_TABLE ? [ number, nil ] : number) }
+
+  # The game an overlay of the table shows: the latest started game in progress today, otherwise
+  # the last game of today, so the final reveal stays on screen until the next game starts.
+  def self.current_at_table(number)
+    today = at_table(number).where(played_on: Date.current).order(created_at: :desc, id: :desc)
+    today.in_progress.first || today.first
+  end
 
   CHECK_KINDS = { "don_check" => "don", "sheriff_check" => "sheriff" }.freeze
 
@@ -81,6 +100,14 @@ class Game < ApplicationRecord
     game_protocol_events.exists?
   end
 
+  def table_key
+    table_number || DEFAULT_TABLE
+  end
+
+  def unfinished_from_past_day?
+    in_progress? && played_on.present? && played_on < Date.current
+  end
+
   def roles_public?
     !(in_progress? && hide_roles?)
   end
@@ -95,6 +122,18 @@ class Game < ApplicationRecord
   end
 
   private
+
+  def announce_table
+    TableOverlayChannel.broadcast_current(table_key)
+  end
+
+  def announce_moved_tables
+    return unless TABLE_SLOT_ATTRIBUTES.any? { |attribute| saved_change_to_attribute?(attribute) }
+
+    [ table_number_before_last_save || DEFAULT_TABLE, table_key ].uniq.each do |table|
+      TableOverlayChannel.broadcast_current(table)
+    end
+  end
 
   def public_team(seat)
     return unless roles_public?

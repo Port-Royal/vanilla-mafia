@@ -1,0 +1,6 @@
+<div id="table-overlay"
+     data-controller="table-overlay"
+     data-table-overlay-table-value="<%= @table %>"
+     data-table-overlay-game-id-value="<%= @game ? @game.id : "" %>">
+  <%= render template: "games/overlay" if @game %>
+</div>

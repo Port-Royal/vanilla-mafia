@@ -382,6 +382,187 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#table_key' do
+    context 'with a table number' do
+      subject { build(:game, table_number: 3).table_key }
+
+      it { is_expected.to eq(3) }
+    end
+
+    context 'without a table number' do
+      subject { build(:game, table_number: nil).table_key }
+
+      it { is_expected.to eq(1) }
+    end
+  end
+
+  describe '.at_table' do
+    let_it_be(:first_table) { create(:game, table_number: 1) }
+    let_it_be(:no_table) { create(:game, table_number: nil) }
+    let_it_be(:second_table) { create(:game, table_number: 2) }
+
+    it 'counts a game without a table number as table 1' do
+      expect(described_class.at_table(1)).to contain_exactly(first_table, no_table)
+    end
+
+    it 'keeps other tables to themselves' do
+      expect(described_class.at_table(2)).to contain_exactly(second_table)
+    end
+  end
+
+  describe '.current_at_table' do
+    subject(:current) { described_class.current_at_table(1) }
+
+    let_it_be(:today) { Date.current }
+
+    context 'with no games' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'with games in progress and finished today' do
+      let_it_be(:finished) { create(:game, table_number: 1, played_on: today, result: "peace_victory", created_at: 1.minute.ago) }
+      let_it_be(:older_running) { create(:game, table_number: 1, played_on: today, created_at: 3.hours.ago) }
+      let_it_be(:newer_running) { create(:game, table_number: nil, played_on: today, created_at: 1.hour.ago) }
+
+      it 'picks the most recently started game in progress' do
+        expect(current).to eq(newer_running)
+      end
+    end
+
+    context 'with only finished games today' do
+      let_it_be(:earlier) { create(:game, table_number: 1, played_on: today, result: "draw", created_at: 2.hours.ago) }
+      let_it_be(:latest) { create(:game, table_number: 1, played_on: today, result: "mafia_victory", created_at: 1.hour.ago) }
+
+      it 'keeps the last game of the table' do
+        expect(current).to eq(latest)
+      end
+    end
+
+    context 'with games started at the same moment' do
+      let_it_be(:moment) { 1.hour.ago }
+      let_it_be(:first) { create(:game, table_number: 1, played_on: today, created_at: moment) }
+      let_it_be(:second) { create(:game, table_number: 1, played_on: today, created_at: moment) }
+
+      it 'breaks the tie by the later record' do
+        expect(current).to eq(second)
+      end
+    end
+
+    context 'with a game in progress from a past day' do
+      let_it_be(:stale) { create(:game, table_number: 1, played_on: today - 1, created_at: 1.minute.ago) }
+      let_it_be(:finished_today) { create(:game, table_number: 1, played_on: today, result: "draw", created_at: 1.hour.ago) }
+
+      it 'ignores it' do
+        expect(current).to eq(finished_today)
+      end
+    end
+
+    context 'with an undated game in progress' do
+      let_it_be(:undated) { create(:game, table_number: 1, played_on: nil) }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'with a game today at another table' do
+      let_it_be(:elsewhere) { create(:game, table_number: 2, played_on: today) }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'table overlay broadcasts' do
+    let(:stream) { ->(table) { TableOverlayChannel.stream_name(table) } }
+
+    context 'when a game is created at a table' do
+      it 'announces the table' do
+        expect { create(:game, table_number: 2, played_on: Date.current) }.to have_broadcasted_to(stream.(2))
+      end
+    end
+
+    context 'when a game is created without a table number' do
+      it 'announces table 1' do
+        expect { create(:game, table_number: nil, played_on: Date.current) }.to have_broadcasted_to(stream.(1))
+      end
+    end
+
+    context 'with a saved game' do
+      let!(:game) { create(:game, table_number: 2, played_on: Date.current) }
+
+      it 'announces the old and the new table when the table changes' do
+        expect { game.update!(table_number: 3) }
+          .to have_broadcasted_to(stream.(2)).and have_broadcasted_to(stream.(3))
+      end
+
+      it 'announces the table when the result changes' do
+        expect { game.update!(result: "draw") }.to have_broadcasted_to(stream.(2)).exactly(:once)
+      end
+
+      it 'announces the table when the date changes' do
+        expect { game.update!(played_on: Date.current - 1) }.to have_broadcasted_to(stream.(2))
+      end
+
+      it 'stays quiet on other changes' do
+        expect { game.update!(judge: "Другой судья") }.not_to have_broadcasted_to(stream.(2))
+      end
+
+      it 'announces the table when the game is deleted' do
+        expect { game.destroy! }.to have_broadcasted_to(stream.(2))
+      end
+    end
+
+    context 'with a saved game without a table number' do
+      let!(:game) { create(:game, table_number: nil, played_on: Date.current) }
+
+      it 'announces table 1 and the new table when a table number is set' do
+        expect { game.update!(table_number: 2) }
+          .to have_broadcasted_to(stream.(1)).and have_broadcasted_to(stream.(2))
+      end
+    end
+  end
+
+  describe '#unfinished_from_past_day?' do
+    subject { build(:game, played_on:, result:).unfinished_from_past_day? }
+
+    context 'when in progress from yesterday' do
+      let(:played_on) { Date.current - 1 }
+      let(:result) { "in_progress" }
+
+      it { is_expected.to be(true) }
+    end
+
+    context 'when in progress today' do
+      let(:played_on) { Date.current }
+      let(:result) { "in_progress" }
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when in progress without a date' do
+      let(:played_on) { nil }
+      let(:result) { "in_progress" }
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when finished yesterday' do
+      let(:played_on) { Date.current - 1 }
+      let(:result) { "draw" }
+
+      it { is_expected.to be(false) }
+    end
+  end
+
+  describe '.unfinished_from_past_day' do
+    let_it_be(:stale) { create(:game, played_on: Date.current - 1) }
+    let_it_be(:running_today) { create(:game, played_on: Date.current) }
+    let_it_be(:finished_yesterday) { create(:game, played_on: Date.current - 1, result: "draw") }
+    let_it_be(:undated) { create(:game, played_on: nil) }
+
+    it 'lists only games in progress from a past day' do
+      expect(described_class.unfinished_from_past_day).to contain_exactly(stale)
+    end
+  end
+
   describe '.for_competition' do
     let_it_be(:competition) { create(:competition, :series) }
     let_it_be(:other_competition) { create(:competition, :series) }

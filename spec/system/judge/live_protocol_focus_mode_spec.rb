@@ -34,9 +34,9 @@ RSpec.describe "Live protocol focus mode" do
         expect(page).to have_button(I18n.t("live_protocols.overlay_link.copied"))
       end
 
-      it "puts the overlay URL on the clipboard" do
+      it "puts the table overlay URL on the clipboard" do
         expect(page).to have_button(I18n.t("live_protocols.overlay_link.copied"))
-        expect(page.evaluate_script("window.copiedText")).to end_with(overlay_game_path(game))
+        expect(URI(page.evaluate_script("window.copiedText")).path).to eq(overlay_path)
       end
 
       it "keeps the console keys working while the button has focus" do
