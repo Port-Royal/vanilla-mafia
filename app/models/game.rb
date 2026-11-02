@@ -30,6 +30,10 @@ class Game < ApplicationRecord
   scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
   scope :finished, -> { where.not(result: "in_progress") }
 
+  def journal_started?
+    game_protocol_events.exists?
+  end
+
   def roles_public?
     !(in_progress? && hide_roles?)
   end

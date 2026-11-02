@@ -409,5 +409,55 @@ RSpec.describe AutosaveGameProtocolService do
         end
       end
     end
+
+    context "when the live protocol journal has started" do
+      let_it_be(:journal_game) { create(:game) }
+      let_it_be(:seated_player) { create(:player, name: "На месте") }
+      let_it_be(:role_don_for_journal) { create(:role, code: "don_journal") }
+      let_it_be(:seated) { create(:game_participation, game: journal_game, player: seated_player, seat: 3, role_code: nil) }
+      let_it_be(:event) { create(:game_protocol_event, game: journal_game) }
+
+      let(:autosave) { ->(field, value, seat = 3) { described_class.call(game: journal_game, scope: "participation", field:, value:, seat:) } }
+
+      it "refuses to change the player" do
+        expect(autosave.call("player_name", "Другой").errors).to eq([ I18n.t("game_protocols.seat_locked", seat: 3) ])
+      end
+
+      it "keeps the player" do
+        autosave.call("player_name", "Другой")
+
+        expect(seated.reload.player).to eq(seated_player)
+      end
+
+      it "does not create the other player" do
+        expect { autosave.call("player_name", "Другой") }.not_to change(Player, :count)
+      end
+
+      it "refuses to remove the player" do
+        expect(autosave.call("player_name", " ").success).to be(false)
+      end
+
+      it "keeps the seat when removal is refused" do
+        autosave.call("player_name", "")
+
+        expect(seated.reload).to be_persisted
+      end
+
+      it "allows the same player again" do
+        expect(autosave.call("player_name", " На месте ").success).to be(true)
+      end
+
+      it "allows a player on an empty seat" do
+        expect(autosave.call("player_name", "Новый", 5).success).to be(true)
+      end
+
+      it "allows clearing an empty seat" do
+        expect(autosave.call("player_name", "", 5).success).to be(true)
+      end
+
+      it "still edits the role" do
+        expect(autosave.call("role_code", "don_journal").success).to be(true)
+      end
+    end
   end
 end

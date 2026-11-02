@@ -107,3 +107,35 @@ describe("the connection status", () => {
     expect(renderScreen(stateAfter(dayActions), emptyUi(), texts, "", "saved")).not.toContain("lp-status--bad")
   })
 })
+
+describe("the tabs", () => {
+  const checked = [...dayActions, { type: "start_vote" }, { type: "shoot", seats: [5] }, { type: "don_check", seats: [2] }, { type: "sheriff_check", seats: [3] }, { type: "best_move" }, { type: "will", text: "<u>план</u>" }, { type: "finish_leaving" }]
+
+  it("offers both tabs", () => {
+    expect(renderScreen(stateAfter(dayActions), emptyUi(), texts).match(/data-tab="/g)).toHaveLength(2)
+  })
+
+  it("shows the record by default", () => {
+    expect(renderScreen(stateAfter(dayActions), emptyUi(), texts)).toContain('class="lp-log"')
+  })
+
+  it("shows the sheet when chosen", () => {
+    expect(renderScreen(stateAfter(dayActions), { ...emptyUi(), tab: "sheet" }, texts)).toContain('class="lp-sheet"')
+  })
+
+  it("keeps secrets out of the sheet by day", () => {
+    const html = renderScreen(stateAfter(checked), { ...emptyUi(), tab: "sheet" }, texts)
+
+    expect([html.includes("тайный план"), html.includes("sheet.check_black")]).toEqual([false, false])
+  })
+
+  it("shows them while H is held", () => {
+    const html = renderScreen(stateAfter(checked), { ...emptyUi(), tab: "sheet", reveal: true }, texts)
+
+    expect([html.includes("тайный план"), html.includes("sheet.check_black")]).toEqual([true, true])
+  })
+
+  it("escapes a will in the sheet", () => {
+    expect(renderScreen(stateAfter(checked), { ...emptyUi(), tab: "sheet" }, texts)).toContain("&lt;u&gt;план&lt;/u&gt;")
+  })
+})

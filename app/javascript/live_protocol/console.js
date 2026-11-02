@@ -15,7 +15,8 @@ export function emptyUi() {
     deal: { mode: null, sheriff: null, text: "" },
     will: "",
     miss: false,
-    reveal: false
+    reveal: false,
+    tab: "log"
   }
 }
 

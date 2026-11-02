@@ -35,6 +35,14 @@ RSpec.describe "Live protocol console" do
     expect(game.reload.result).to eq("peace_victory")
   end
 
+  it "shows the sheet in its tab" do
+    start_game.call
+    click_button I18n.t("live_protocols.screen.sheet.title")
+    expect(page).to have_css(".lp-sheet", text: I18n.t("live_protocols.screen.sheet.shots"))
+    click_button I18n.t("live_protocols.screen.log.title")
+    expect(page).to have_css(".lp-log")
+  end
+
   it "reads 0 as seat 10" do
     start_game.call
     press.call("n", "0")

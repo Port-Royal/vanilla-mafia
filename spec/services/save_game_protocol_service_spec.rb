@@ -413,5 +413,72 @@ RSpec.describe SaveGameProtocolService do
         end
       end
     end
+
+    context "when the live protocol journal has started" do
+      let_it_be(:journal_game) { create(:game) }
+      let_it_be(:seated_player) { create(:player, name: "На месте") }
+      let_it_be(:seated) { create(:game_participation, game: journal_game, player: seated_player, seat: 3, role_code: nil) }
+      let_it_be(:event) { create(:game_protocol_event, game: journal_game) }
+
+      let(:params_for) { ->(seats) { ActionController::Parameters.new(seats).permit! } }
+      let(:save) { ->(seats) { described_class.call(game: journal_game, game_params: { judge: "Новый судья" }, participations_params: params_for.call(seats)) } }
+
+      it "refuses to change the player" do
+        expect(save.call("3" => { player_name: "Другой" }).errors).to eq([ I18n.t("game_protocols.seat_locked", seat: 3) ])
+      end
+
+      it "keeps the player" do
+        save.call("3" => { player_name: "Другой" })
+
+        expect(seated.reload.player).to eq(seated_player)
+      end
+
+      it "saves nothing else" do
+        save.call("3" => { player_name: "Другой" })
+
+        expect(journal_game.reload.judge).not_to eq("Новый судья")
+      end
+
+      it "refuses to clear the seat" do
+        expect(save.call("3" => { player_name: "" }).errors).to eq([ I18n.t("game_protocols.seat_locked", seat: 3) ])
+      end
+
+      it "refuses a form that leaves the seat out" do
+        expect(save.call({}).success).to be(false)
+      end
+
+      it "keeps the seat when clearing is refused" do
+        save.call("3" => { player_name: "" })
+
+        expect(seated.reload).to be_persisted
+      end
+
+      it "still edits the role of the same player" do
+        role = create(:role, code: "don_journal_form")
+        save.call("3" => { player_name: "На месте", role_code: role.code })
+
+        expect(seated.reload.role_code).to eq(role.code)
+      end
+
+      it "allows the same player with stray spaces" do
+        expect(save.call("3" => { player_name: " На месте " }).success).to be(true)
+      end
+
+      it "allows a player on an empty seat" do
+        expect(save.call("3" => { player_name: "На месте" }, "5" => { player_name: "Новый" }).success).to be(true)
+      end
+    end
+
+    context "when the journal has not started" do
+      let_it_be(:free_game) { create(:game) }
+      let_it_be(:seated) { create(:game_participation, game: free_game, player: create(:player, name: "Был"), seat: 3) }
+
+      it "lets the form change the player" do
+        params = ActionController::Parameters.new("3" => { player_name: "Стал" }).permit!
+        described_class.call(game: free_game, game_params: {}, participations_params: params)
+
+        expect(seated.reload.player.name).to eq("Стал")
+      end
+    end
   end
 end

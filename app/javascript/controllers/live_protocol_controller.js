@@ -141,6 +141,12 @@ export default class extends Controller {
   }
 
   click(event) {
+    const tab = event.target.closest("[data-tab]")
+    if (tab) {
+      this.ui = { ...this.ui, tab: tab.dataset.tab }
+      this.render()
+      return
+    }
     const cancel = event.target.closest("[data-cancel]")
     if (cancel) {
       event.preventDefault()

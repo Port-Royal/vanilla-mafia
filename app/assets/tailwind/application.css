@@ -54,7 +54,13 @@
   .lp-cnt { @apply text-center font-mono text-xl font-semibold; }
   .lp-warn { @apply rounded bg-amber-100 px-2 py-1 text-sm text-amber-800; }
   .lp-good { @apply rounded bg-green-100 px-2 py-1 text-sm text-green-800; }
-  .lp-tab { @apply border-b border-gray-300 p-2 text-sm font-semibold; }
+  .lp-tabs { @apply sticky top-0 flex border-b border-gray-300 bg-white; }
+  .lp-tab { @apply flex-1 p-2 text-sm font-semibold text-gray-500; }
+  .lp-tab--on { @apply text-gray-900; box-shadow: inset 0 -2px 0 var(--color-maroon); }
+  .lp-sheet { @apply flex flex-col gap-3 p-2 text-sm; }
+  .lp-sheet h4 { @apply mb-1 text-xs font-semibold text-gray-500; }
+  .lp-sheet table { @apply w-full border-collapse; }
+  .lp-sheet td { @apply border border-gray-300 px-1.5 py-0.5 align-top; }
   .lp-log { @apply flex flex-col gap-0.5 p-2 text-sm; }
   .lp-entry { @apply grid items-baseline gap-1.5; grid-template-columns: 24px minmax(0, 1fr) 18px; }
   .lp-a { @apply text-right font-mono font-semibold; }
