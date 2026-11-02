@@ -484,4 +484,24 @@ RSpec.describe "Games#overlay" do
       expect(response.parsed_body.at_css("#overlay-night")["hidden"]).not_to be_nil
     end
   end
+
+  describe "fouls on load" do
+    let(:fouled_game) { create(:game) }
+    let(:pips) { ->(seat) { response.parsed_body.css("#seat-#{seat} .overlay-fouls span").map { |pip| pip["class"] } } }
+
+    before do
+      create(:game_protocol_event, game: fouled_game, position: 1, kind: "foul", target_seats: [ 3 ])
+      create(:game_protocol_event, game: fouled_game, position: 2, kind: "foul", target_seats: [ 3 ])
+      create(:game_protocol_event, game: fouled_game, position: 3, kind: "tech", target_seats: [ 3 ])
+      get overlay_game_path(fouled_game)
+    end
+
+    it "shows a pip per foul and a mark per technical foul" do
+      expect(pips.(3)).to eq(%w[overlay-foul overlay-foul overlay-tech])
+    end
+
+    it "shows nothing on a clean seat" do
+      expect(pips.(4)).to eq([])
+    end
+  end
 end

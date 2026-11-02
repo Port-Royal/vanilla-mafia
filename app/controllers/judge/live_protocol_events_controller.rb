@@ -58,7 +58,8 @@ class Judge::LiveProtocolEventsController < Judge::LiveProtocolBaseController
   end
 
   def overlay_lists
-    { "nominees" => { seats: @game.current_nominees }, "shots" => { shots: @game.public_shots }, "checks" => { checks: @game.public_checks } }
+    { "nominees" => { seats: @game.current_nominees }, "shots" => { shots: @game.public_shots }, "checks" => { checks: @game.public_checks },
+      "fouls" => { fouls: @game.public_fouls } }
   end
 
   def event_params

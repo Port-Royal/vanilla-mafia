@@ -310,6 +310,25 @@ RSpec.describe "Judge live protocol" do
     end
   end
 
+  describe "foul broadcasts" do
+    let(:sent) { [] }
+
+    before do
+      allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| sent << [ target, payload ] }
+      post_events.call(event.merge(kind: "foul", target_seats: [ 2 ]))
+    end
+
+    it "sends every seat's counters after a foul" do
+      expect(sent).to eq([ [ game, { scope: "fouls", fouls: { 2 => { fouls: 1, tech: 0 } } } ] ])
+    end
+
+    it "sends them again after an undo" do
+      delete live_event_judge_protocol_path(game, "a1"), as: :json
+
+      expect(sent.last).to eq([ game, { scope: "fouls", fouls: {} } ])
+    end
+  end
+
   describe "shot broadcasts" do
     let(:sent) { [] }
     let(:shot) { event.merge(kind: "shot", phase: "night", day_number: 0, target_seats: [ 2 ]) }

@@ -19,7 +19,7 @@ export default class extends Controller {
     shots: Array,
     checks: Array
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "night", "nightNumbers", "shotsRow", "shotsCells", "donRow", "donCells", "sheriffRow", "sheriffCells"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "night", "nightNumbers", "shotsRow", "shotsCells", "donRow", "donCells", "sheriffRow", "sheriffCells", "fouls"]
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
@@ -52,6 +52,8 @@ export default class extends Controller {
     } else if (data.scope === "checks") {
       this.checks = data.checks
       this.renderNight()
+    } else if (data.scope === "fouls") {
+      this.renderFouls(data.fouls)
     }
   }
 
@@ -203,6 +205,19 @@ export default class extends Controller {
   // Mirrors GamesHelper#overlay_seat_colour.
   seatColour(seat) {
     return TEAMS[this.seatRoles[seat]] || "neutral"
+  }
+
+  // Mirrors GamesHelper#overlay_foul_pips. A seat missing from the list has no sanctions left.
+  renderFouls(fouls) {
+    this.foulsTargets.forEach((target) => {
+      const count = fouls[target.dataset.seat] || { fouls: 0, tech: 0 }
+      const kinds = [...Array(count.fouls).fill("foul"), ...Array(count.tech).fill("tech")]
+      target.replaceChildren(...kinds.map((kind) => {
+        const pip = document.createElement("span")
+        pip.className = `overlay-${kind}`
+        return pip
+      }))
+    })
   }
 
   // Mirrors GamesHelper#overlay_night_rows: one cell per night so the rows line up.

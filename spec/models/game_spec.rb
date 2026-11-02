@@ -148,6 +148,27 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#public_fouls' do
+    let(:fouled_game) { create(:game, hide_roles: true) }
+    let(:sanction) { ->(position, kind, seat, metadata = {}) { create(:game_protocol_event, game: fouled_game, position:, kind:, target_seats: [ seat ], metadata:) } }
+
+    before do
+      sanction.call(1, "foul", 3)
+      sanction.call(2, "foul", 3)
+      sanction.call(3, "tech", 3)
+      sanction.call(4, "foul", 7)
+      sanction.call(5, "sanction_cancelled", 7, { "sanction" => "foul" })
+      sanction.call(6, "tech", 5)
+      sanction.call(7, "tech", 5)
+      sanction.call(8, "sanction_cancelled", 5, { "sanction" => "tech" })
+      create(:game_protocol_event, position: 1, kind: "foul", target_seats: [ 9 ])
+    end
+
+    it "counts each seat's fouls and technical fouls, cancellations included, even with roles hidden" do
+      expect(fouled_game.public_fouls).to eq(3 => { fouls: 2, tech: 1 }, 5 => { fouls: 0, tech: 1 })
+    end
+  end
+
   describe '#public_shots' do
     let(:shot_game) { create(:game, hide_roles:) }
     let(:hide_roles) { false }

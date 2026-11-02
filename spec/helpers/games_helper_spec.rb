@@ -362,4 +362,14 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_night_rows([], [])[:nights]).to eq(0)
     end
   end
+
+  describe "#overlay_foul_pips" do
+    it "gives a foul pip per foul and a tech mark per technical foul" do
+      expect(helper.overlay_foul_pips({ fouls: 2, tech: 1 })).to eq(%w[foul foul tech])
+    end
+
+    it "gives nothing for a clean seat" do
+      expect(helper.overlay_foul_pips(nil)).to eq([])
+    end
+  end
 end
