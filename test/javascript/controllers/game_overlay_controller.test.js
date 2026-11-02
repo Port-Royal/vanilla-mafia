@@ -341,3 +341,40 @@ describe("GameOverlayController role badge colours", () => {
     expect(badge().dataset.role).toBeUndefined()
   })
 })
+
+describe("GameOverlayController fouls", () => {
+  let application
+  let controller
+
+  const pips = (seat) => [...document.querySelectorAll(`[data-game-overlay-target="fouls"][data-seat="${seat}"] span`)].map((pip) => pip.className)
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay">
+        <div class="overlay-fouls" data-game-overlay-target="fouls" data-seat="3"><span class="overlay-foul"></span></div>
+        <div class="overlay-fouls" data-game-overlay-target="fouls" data-seat="4"></div>
+      </div>
+    `
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+  })
+
+  it("draws a pip per foul and a mark per technical foul", () => {
+    controller.handleUpdate({ scope: "fouls", fouls: { 4: { fouls: 2, tech: 1 } } })
+
+    expect(pips(4)).toEqual(["overlay-foul", "overlay-foul", "overlay-tech"])
+  })
+
+  it("clears a seat that is no longer listed", () => {
+    controller.handleUpdate({ scope: "fouls", fouls: { 4: { fouls: 1, tech: 0 } } })
+
+    expect(pips(3)).toEqual([])
+  })
+})

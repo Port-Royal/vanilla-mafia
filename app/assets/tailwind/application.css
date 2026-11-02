@@ -285,6 +285,33 @@
     right: 0.3em;
   }
 
+  /* Fouls as yellow pips, technical fouls as red diamonds, between the role badge and the status icon. */
+  .overlay-fouls {
+    position: absolute;
+    top: 0.5em;
+    left: 50%;
+    display: flex;
+    gap: 0.2em;
+    translate: -50% 0;
+  }
+
+  .overlay-foul,
+  .overlay-tech {
+    width: 0.55em;
+    height: 0.55em;
+    box-shadow: 0 0 0.15em rgb(0 0 0 / 0.9);
+  }
+
+  .overlay-foul {
+    border-radius: 50%;
+    background: #facc15;
+  }
+
+  .overlay-tech {
+    background: #dc2626;
+    rotate: 45deg;
+  }
+
   .overlay-best-move {
     display: flex;
     gap: 0.15em;

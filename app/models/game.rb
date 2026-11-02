@@ -44,6 +44,23 @@ class Game < ApplicationRecord
     end
   end
 
+  SANCTION_COUNTERS = { "foul" => :fouls, "tech" => :tech }.freeze
+
+  # Fouls are given out loud at the table, so viewers see them whatever the role setting.
+  def public_fouls
+    counts = Hash.new { |hash, seat| hash[seat] = { fouls: 0, tech: 0 } }
+    game_protocol_events.where(kind: %w[foul tech sanction_cancelled]).order(:position).each do |event|
+      seat = event.target_seats.first
+      if event.kind == "sanction_cancelled"
+        counter = SANCTION_COUNTERS.fetch(event.metadata["sanction"])
+        counts[seat][counter] = [ counts[seat][counter] - 1, 0 ].max
+      else
+        counts[seat][SANCTION_COUNTERS.fetch(event.kind)] += 1
+      end
+    end
+    counts.reject { |_seat, count| count.values.all?(&:zero?) }
+  end
+
   # A kill shows on the player's tile anyway, so shots are public. The target's team comes only
   # while roles are public.
   def public_shots

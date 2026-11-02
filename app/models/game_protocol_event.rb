@@ -8,6 +8,7 @@ class GameProtocolEvent < ApplicationRecord
   DELETABLE_FROM_MIDDLE = %w[suspect red team check_request note will best_move].freeze
   LEFT_REASONS = %w[killed voted removed].freeze
   FINISHED_RESULTS = %w[peace_victory mafia_victory draw].freeze
+  SANCTIONS = %w[foul tech].freeze
   CHECK_RESULTS = { "don_check" => %w[sheriff not_sheriff], "sheriff_check" => %w[red black] }.freeze
   SEATS = (1..10)
 
@@ -64,7 +65,15 @@ class GameProtocolEvent < ApplicationRecord
       errors.add(:metadata, :invalid) unless FINISHED_RESULTS.include?(metadata["result"])
     when *CHECK_RESULTS.keys
       check_has_result
+    when *SANCTIONS, "sanction_cancelled"
+      sanction_names_one_seat
     end
+  end
+
+  # A sanction belongs to one player, and a cancellation says which sanction it takes back.
+  def sanction_names_one_seat
+    errors.add(:target_seats, :invalid) unless target_seats.size == 1
+    errors.add(:metadata, :invalid) if kind == "sanction_cancelled" && !SANCTIONS.include?(metadata["sanction"])
   end
 
   # A check with a target shows its result to viewers, and a skipped check has none.

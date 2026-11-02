@@ -51,6 +51,13 @@ module GamesHelper
     participation.best_move_seats.to_a.map { |seat| [ seat, overlay_best_move_colour(seat_roles[seat]) ] }
   end
 
+  # A pip per foul and a mark per technical foul. Mirrors renderFouls in game_overlay_controller.js.
+  def overlay_foul_pips(count)
+    return [] unless count
+
+    Array.new(count[:fouls], "foul") + Array.new(count[:tech], "tech")
+  end
+
   # The colour of a seat's team, from a role the page may show. Mirrors seatColour in game_overlay_controller.js.
   def overlay_seat_colour(role_code)
     Game::TEAMS.fetch(role_code, "neutral")

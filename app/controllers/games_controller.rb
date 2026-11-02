@@ -10,6 +10,7 @@ class GamesController < ApplicationController
     @nominees = @game.current_nominees
     @checks = @game.public_checks
     @shots = @game.public_shots
+    @fouls = @game.public_fouls
     render layout: "overlay"
   end
 end

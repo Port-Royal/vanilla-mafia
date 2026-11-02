@@ -64,6 +64,8 @@
 
         <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>" <%= tag.attributes(data: { role: overlay_role_badge_role(seat_roles[seat]) }) %>><%= overlay_role_badge(seat_roles[seat]) %></div>
 
+        <div class="overlay-fouls" data-game-overlay-target="fouls" data-seat="<%= seat %>"><% overlay_foul_pips(@fouls[seat]).each do |pip| %><span class="overlay-<%= pip %>"></span><% end %></div>
+
         <div class="overlay-status-icon" data-game-overlay-target="status" data-seat="<%= seat %>"><%= overlay_status_icon(status) %></div>
 
         <div class="overlay-best-move" data-game-overlay-target="bestMove" data-seat="<%= seat %>"><% overlay_best_move_cells(participation, seat_roles).each do |named_seat, colour| %><span class="overlay-best-move-cell" data-named-seat="<%= named_seat %>" data-colour="<%= colour %>"><%= named_seat %></span><% end %></div>
