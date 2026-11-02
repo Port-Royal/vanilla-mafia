@@ -1,6 +1,7 @@
-<div class="mb-2 flex flex-wrap items-baseline gap-4">
+<div id="live-protocol-bar" class="mb-2 flex flex-wrap items-baseline gap-4">
   <h1 class="text-xl font-bold text-maroon"><%= @game.full_name %></h1>
   <%= link_to t("live_protocols.edit_link"), edit_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
+  <%= link_to t("live_protocols.list_link"), judge_protocols_path, class: "text-maroon hover:underline text-sm" %>
 </div>
 <div id="live-protocol"
      class="live-protocol"

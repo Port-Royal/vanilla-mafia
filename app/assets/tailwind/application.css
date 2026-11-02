@@ -8,14 +8,15 @@
 }
 
 @layer components {
-  .live-protocol { @apply flex flex-col gap-2; min-height: 75vh; }
+  .live-protocol { @apply flex min-h-0 flex-1 flex-col gap-2; }
   .lp-top { @apply flex justify-end gap-4 text-sm text-gray-500; }
   .lp-status { @apply text-green-800; }
   .lp-status--bad { @apply font-semibold text-red-700; }
   .lp-steps { @apply flex gap-1 overflow-x-auto; }
   .lp-step { @apply flex-none rounded px-2 py-1 text-sm whitespace-nowrap bg-gray-100 text-gray-500; }
   .lp-step--now { @apply bg-maroon font-semibold text-white; }
-  .lp-main { @apply grid gap-2; grid-template-columns: minmax(330px, 390px) minmax(0, 1fr) minmax(280px, 340px); }
+  /* Seats keep a fixed width, the record column grows a little with the window, the centre takes the rest. */
+  .lp-main { @apply grid min-h-0 flex-1 gap-2; grid-template-columns: 360px minmax(0, 1fr) clamp(280px, 24vw, 420px); }
   .lp-col { @apply flex min-w-0 flex-col overflow-auto rounded border border-gray-300 bg-white; }
   .lp-work { @apply gap-4 p-4; }
   .lp-seat { @apply grid w-full items-center gap-2 border-b border-gray-200 px-2 text-left; grid-template-columns: 30px minmax(0, 1fr) 28px auto auto; min-height: 44px; }
@@ -69,6 +70,7 @@
   .lp-x { @apply invisible text-gray-500; }
   .lp-entry:hover .lp-x { @apply visible; }
   .lp-flash { @apply fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-sm text-white; }
+  .focus-toast { animation: focus-toast-out 0.4s ease-in 6s forwards; }
 
   .data-table {
     @apply w-full border-collapse text-sm;
@@ -379,4 +381,8 @@
     z-index: 1;
   }
 
+}
+
+@keyframes focus-toast-out {
+  to { opacity: 0; visibility: hidden; }
 }

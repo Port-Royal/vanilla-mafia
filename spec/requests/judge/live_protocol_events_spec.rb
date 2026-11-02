@@ -33,6 +33,39 @@ RSpec.describe "Judge live protocol" do
       node = css_select("#live-protocol").first
       expect(JSON.parse(node["data-live-protocol-events-value"]).map { |row| row["client_id"] }).to eq([ "saved" ])
     end
+
+    it "renders without the site sidebar" do
+      expect(css_select("#site-sidebar")).to be_empty
+    end
+
+    it "renders without the mobile header" do
+      expect(css_select("#site-mobile-header")).to be_empty
+    end
+
+    it "links back to the protocols list" do
+      expect(css_select("#live-protocol-bar a[href='#{judge_protocols_path}']")).to be_present
+    end
+
+    it "shows no toast without a flash message" do
+      expect(css_select(".focus-toast")).to be_empty
+    end
+  end
+
+  describe "GET /judge/protocols/:id/live after a protocol is created" do
+    let(:competition) { create(:competition, :series) }
+
+    before do
+      post judge_protocols_path, params: { game: { game_number: 1, result: "in_progress", competition_id: competition.id }, participations: { "1" => { player_name: "Живой игрок", role_code: "" } } }
+      follow_redirect!
+    end
+
+    it "opens the live protocol" do
+      expect(css_select("#live-protocol")).to be_present
+    end
+
+    it "shows the flash message as a toast" do
+      expect(css_select(".focus-toast").text).to include(I18n.t("game_protocols.create.success"))
+    end
   end
 
   describe "GET /judge/protocols/:id/live with seats and events out of order" do

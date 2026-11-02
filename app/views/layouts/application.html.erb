@@ -1,33 +1,12 @@
 <!DOCTYPE html>
 <html lang="<%= I18n.locale %>">
   <head>
-    <title><%= content_for(:title) || "Vanilla Mafia" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Vanilla Mafia">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "actiontext", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-    <%= Sentry.get_trace_propagation_meta.html_safe %>
+    <%= render "layouts/head" %>
   </head>
 
   <body class="min-h-screen bg-white font-sans" data-controller="menu time-zone">
     <%# Mobile top bar %>
-    <header class="lg:hidden flex items-center justify-between bg-neutral-900 px-4 py-3">
+    <header id="site-mobile-header" class="lg:hidden flex items-center justify-between bg-neutral-900 px-4 py-3">
       <%= link_to root_path do %>
         <img src="/img/chi_light.png" alt="Vanilla Mafia" class="h-10">
       <% end %>
@@ -122,7 +101,7 @@
 
     <div class="lg:flex lg:min-h-screen">
       <%# Desktop sidebar %>
-      <aside class="hidden lg:flex lg:flex-col lg:w-56 lg:flex-shrink-0 bg-neutral-900 bg-repeat bg-top text-gray-300"
+      <aside id="site-sidebar" class="hidden lg:flex lg:flex-col lg:w-56 lg:flex-shrink-0 bg-neutral-900 bg-repeat bg-top text-gray-300"
              style="background-image: url('/img/back.jpg')">
         <div class="flex flex-col items-center px-4 py-8 bg-neutral-900/80 min-h-screen">
           <%= link_to root_path, class: "mb-8" do %>

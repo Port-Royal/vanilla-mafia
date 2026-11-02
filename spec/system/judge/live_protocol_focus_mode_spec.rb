@@ -1,0 +1,49 @@
+require "rails_helper"
+
+RSpec.describe "Live protocol focus mode" do
+  let_it_be(:admin) { create(:user, :admin) }
+  let_it_be(:toggle) { create(:feature_toggle, key: "live_protocol", enabled: true) }
+  let_it_be(:game) { create(:game) }
+
+  before { sign_in admin }
+
+  context "when on the live protocol" do
+    before do
+      visit live_judge_protocol_path(game)
+      expect(page).to have_css("#lp-work")
+    end
+
+    it "hides the site sidebar" do
+      expect(page).to have_no_css("#site-sidebar", visible: :all)
+    end
+
+    it "hides the mobile header" do
+      expect(page).to have_no_css("#site-mobile-header", visible: :all)
+    end
+
+    it "keeps a way back to the protocol form and the protocols list" do
+      within("#live-protocol-bar") do
+        expect(page).to have_link(I18n.t("live_protocols.edit_link"), href: edit_judge_protocol_path(game))
+        expect(page).to have_link(I18n.t("live_protocols.list_link"), href: judge_protocols_path)
+      end
+    end
+
+    it "spreads the console over the full window width" do
+      console_width = page.evaluate_script("document.getElementById('live-protocol').getBoundingClientRect().width")
+      window_width = page.evaluate_script("window.innerWidth")
+      expect(console_width).to be >= window_width - 48
+    end
+
+    it "fits the console in the window height" do
+      expect(page.evaluate_script("document.documentElement.scrollHeight <= window.innerHeight")).to be(true)
+    end
+  end
+
+  context "when on the protocol form" do
+    before { visit edit_judge_protocol_path(game) }
+
+    it "shows the site sidebar" do
+      expect(page).to have_css("#site-sidebar")
+    end
+  end
+end
