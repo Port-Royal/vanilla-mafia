@@ -116,6 +116,28 @@ describe("ClipboardController", () => {
     })
   })
 
+  describe("with nothing to copy", () => {
+    beforeEach(async () => {
+      await mount(`
+        <div data-controller="clipboard" data-clipboard-copied-value="Copied">
+          <button data-action="click->clipboard#copy" data-clipboard-target="button">Copy link</button>
+        </div>
+      `)
+    })
+
+    it("does not touch the clipboard", async () => {
+      await click()
+
+      expect(writeText).not.toHaveBeenCalled()
+    })
+
+    it("keeps the label", async () => {
+      await click()
+
+      expect(button().textContent).toBe("Copy link")
+    })
+  })
+
   describe("when the clipboard refuses the write", () => {
     beforeEach(async () => {
       writeText.mockImplementation(() => Promise.reject(new Error("denied")))

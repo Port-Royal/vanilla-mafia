@@ -7,6 +7,7 @@ export default class extends Controller {
 
   async copy() {
     const text = this.hasSourceTarget ? this.sourceTarget.value : this.textValue
+    if (!text) return
     try {
       await navigator.clipboard.writeText(text)
     } catch {
