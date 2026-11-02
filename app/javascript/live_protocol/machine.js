@@ -381,7 +381,8 @@ function assignRoles(state, action) {
   if (state.stage !== "roles") return refuse("wrong_stage")
   const roles = action.seats ? rolesFromSeats(state, action.seats) : formRoles(state)
   if (!roles) return refuse("roles_incomplete")
-  return write(state, "roles", { metadata: { roles } })
+  const previous = Object.fromEntries(Object.entries(state.players).map(([seat, player]) => [seat, player.role]))
+  return write(state, "roles", { metadata: { roles, previous_roles: previous } })
 }
 
 function finishDeal(state, action) {

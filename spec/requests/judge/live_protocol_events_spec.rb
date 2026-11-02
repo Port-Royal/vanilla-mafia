@@ -286,6 +286,20 @@ RSpec.describe "Judge live protocol" do
       end
     end
 
+    context "with roles confirmed from the form" do
+      let!(:role_don) { create(:role, code: "don") }
+      let(:roles) { event.merge(kind: "roles", phase: "deal", metadata: { roles: { "2" => "don" }, previous_roles: { "2" => "don" } }) }
+
+      before { seat_two.update!(role_code: "don") }
+
+      it "keeps the form's role through confirm and undo" do
+        post_events.call(roles)
+        delete_action.call("a1")
+
+        expect(seat_two.reload.role_code).to eq("don")
+      end
+    end
+
     context "with a group that has outcomes" do
       let(:left) { event.merge(kind: "player_left", target_seats: [ 2 ], metadata: { reason: "voted" }) }
 

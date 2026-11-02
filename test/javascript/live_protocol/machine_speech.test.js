@@ -61,7 +61,10 @@ describe("assign_roles", () => {
       actor_seat: null,
       target_seats: [],
       text: null,
-      metadata: { roles: { 1: "don", 2: "sheriff", 3: "mafia", 4: "mafia", 5: "peace" } }
+      metadata: {
+        roles: { 1: "don", 2: "sheriff", 3: "mafia", 4: "mafia", 5: "peace" },
+        previous_roles: { 1: null, 2: null, 3: null, 4: null, 5: null }
+      }
     }])
   })
 
@@ -531,5 +534,14 @@ describe("purity", () => {
     const state = replay(players, [{ ...closeNight, kind: "suspect" }])
 
     expect([state.stage, state.log.length]).toEqual(["roles", 1])
+  })
+})
+
+describe("previous roles", () => {
+  it("keep what the seats held before the event", () => {
+    const filled = players.slice(0, 5).map((player) => ({ ...player, role_code: player.seat === 5 ? "don" : null }))
+
+    expect(decide(replay(filled, []), { type: "assign_roles", seats: [1, 2, 3, 4] }).events[0].metadata.previous_roles)
+      .toEqual({ 1: null, 2: null, 3: null, 4: null, 5: "don" })
   })
 })

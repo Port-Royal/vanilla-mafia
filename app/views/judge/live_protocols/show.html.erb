@@ -1,5 +1,10 @@
-<div id="live-protocol"
-     data-live-protocol-players-value="<%= @players.to_json %>"
-     data-live-protocol-events-value="<%= @events.to_json %>">
-  <h1 class="text-3xl font-bold text-maroon"><%= @game.full_name %></h1>
+<div class="mb-2 flex flex-wrap items-baseline gap-4">
+  <h1 class="text-xl font-bold text-maroon"><%= @game.full_name %></h1>
+  <%= link_to t("live_protocols.edit_link"), edit_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
 </div>
+<div id="live-protocol"
+     class="live-protocol"
+     data-controller="live-protocol"
+     data-live-protocol-players-value="<%= @players.to_json %>"
+     data-live-protocol-events-value="<%= @events.to_json %>"
+     data-live-protocol-texts-value="<%= t("live_protocols.screen").to_json %>"></div>

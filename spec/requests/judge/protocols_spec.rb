@@ -177,6 +177,25 @@ RSpec.describe "Judge::Protocols" do
   end
 
   describe "POST /judge/protocols" do
+    context "when the live protocol toggle is on" do
+      before do
+        create(:feature_toggle, key: "live_protocol", enabled: true)
+        sign_in admin
+      end
+
+      it "opens a new game in progress in the live protocol" do
+        post judge_protocols_path, params: { game: { game_number: 77, played_on: "2026-01-15", result: "in_progress", competition_id: competition.id }, participations: { "1" => { player_name: "Живой игрок", role_code: "" } } }
+
+        expect(response).to redirect_to(live_judge_protocol_path(Game.last))
+      end
+
+      it "still shows a game entered as finished" do
+        post judge_protocols_path, params: { game: { game_number: 78, played_on: "2026-01-15", result: "draw", competition_id: competition.id }, participations: { "1" => { player_name: "Живой игрок", role_code: "" } } }
+
+        expect(response).to redirect_to(game_path(Game.last))
+      end
+    end
+
     context "when user is admin" do
       before { sign_in admin }
 
@@ -380,6 +399,25 @@ RSpec.describe "Judge::Protocols" do
   end
 
   describe "GET /judge/protocols/:id/edit" do
+    context "with the live protocol toggle" do
+      let(:live_game) { create(:game) }
+
+      before { sign_in admin }
+
+      it "links to the live protocol when it is on" do
+        create(:feature_toggle, key: "live_protocol", enabled: true)
+        get edit_judge_protocol_path(live_game)
+
+        assert_select "a[href=?]", live_judge_protocol_path(live_game)
+      end
+
+      it "hides the link when it is off" do
+        get edit_judge_protocol_path(live_game)
+
+        assert_select "a[href=?]", live_judge_protocol_path(live_game), count: 0
+      end
+    end
+
     let_it_be(:game) { create(:game, game_number: 50, games_total: 60, judge: "Судья", hide_game_info: true) }
     let_it_be(:participation) { create(:game_participation, game: game, player: player, seat: 1, best_move_seats: [ 3, 7 ]) }
 

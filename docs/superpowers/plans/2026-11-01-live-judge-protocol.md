@@ -80,7 +80,7 @@
 
 | Событие | `apply` | `revert` |
 |---|---|---|
-| `roles` (`metadata.roles` `{seat: code}`) | `role_code` | очистить `role_code` |
+| `roles` (`metadata.roles` `{seat: code}`, `metadata.previous_roles`) | `role_code` | вернуть `previous_roles`; события без этого ключа очищают `role_code` |
 | `player_left` (`metadata.reason`: `killed`, `voted`, `removed`) | `status`: `killed_by_mafia`, `voted_out`, `banned` | `alive` |
 | `player_restored` | `alive` | `banned` |
 | `best_move` | `best_move_seats` у `actor_seat` | очистить |

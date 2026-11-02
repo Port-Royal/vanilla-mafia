@@ -8,6 +8,58 @@
 }
 
 @layer components {
+  .live-protocol { @apply flex flex-col gap-2; min-height: 75vh; }
+  .lp-top { @apply flex justify-end text-sm text-gray-500; }
+  .lp-steps { @apply flex gap-1 overflow-x-auto; }
+  .lp-step { @apply flex-none rounded px-2 py-1 text-sm whitespace-nowrap bg-gray-100 text-gray-500; }
+  .lp-step--now { @apply bg-maroon font-semibold text-white; }
+  .lp-main { @apply grid gap-2; grid-template-columns: minmax(330px, 390px) minmax(0, 1fr) minmax(280px, 340px); }
+  .lp-col { @apply flex min-w-0 flex-col overflow-auto rounded border border-gray-300 bg-white; }
+  .lp-work { @apply gap-4 p-4; }
+  .lp-seat { @apply grid w-full items-center gap-2 border-b border-gray-200 px-2 text-left; grid-template-columns: 30px minmax(0, 1fr) 28px auto auto; min-height: 44px; }
+  .lp-seat--speaking { background: #f6e3e4; box-shadow: inset 3px 0 0 var(--color-maroon); }
+  .lp-seat--picked { @apply bg-maroon text-white; }
+  .lp-seat--out { @apply opacity-50; }
+  .lp-n { @apply text-center font-mono font-semibold; }
+  .lp-name { @apply truncate font-medium; }
+  .lp-sub { @apply block truncate text-xs font-normal text-gray-500; }
+  .lp-role { @apply grid h-6 w-7 place-items-center rounded font-mono text-xs font-semibold; }
+  .lp-role--sheriff { @apply bg-red-700 text-white; }
+  .lp-role--don, .lp-role--mafia { @apply bg-gray-800 text-white; }
+  .lp-dots { @apply flex items-center gap-0.5; }
+  .lp-dot { @apply inline-block h-4 w-3 rounded-sm border border-gray-300; }
+  .lp-dot--tech { @apply rounded-full; }
+  .lp-dot--on { @apply cursor-pointer border-amber-600 bg-amber-600; }
+  .lp-eyebrow { @apply text-xs text-gray-500; }
+  .lp-headline { @apply m-0 text-2xl font-bold; }
+  .lp-num { @apply font-mono text-maroon; }
+  .lp-actions { @apply grid gap-1.5; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .lp-act { @apply flex min-h-10 items-center gap-2 rounded border border-gray-300 bg-gray-50 px-2 py-1 text-left; }
+  .lp-act:hover { @apply border-maroon; }
+  .lp-act--big, .lp-act--on { @apply border-maroon bg-maroon font-semibold text-white; }
+  .lp-key { @apply inline-grid h-5 min-w-5 flex-none place-items-center rounded border border-current px-1 font-mono text-xs font-semibold opacity-75; }
+  .lp-prompt { @apply rounded p-3; background: #f6e3e4; }
+  .lp-picks { @apply min-h-7 font-mono text-xl font-semibold; }
+  .lp-input { @apply mt-1 w-full rounded border border-gray-300 bg-white p-2; }
+  .lp-preview { @apply mt-1 min-h-5; }
+  .lp-group { @apply flex flex-col gap-1.5; }
+  .lp-group h3 { @apply m-0 text-xs font-medium text-gray-500; }
+  .lp-chips { @apply flex flex-wrap items-center gap-1; }
+  .lp-chip { @apply rounded border border-gray-300 bg-gray-50 px-2 font-mono font-semibold; }
+  .lp-bar { @apply mt-auto flex flex-wrap gap-1.5 pt-1; }
+  .lp-vote { @apply grid items-center gap-2 rounded border border-gray-300 bg-gray-50 px-3 py-2; grid-template-columns: minmax(120px, 170px) 36px minmax(0, 1fr); }
+  .lp-vote--now { @apply border-maroon; box-shadow: inset 3px 0 0 var(--color-maroon); }
+  .lp-cnt { @apply text-center font-mono text-xl font-semibold; }
+  .lp-warn { @apply rounded bg-amber-100 px-2 py-1 text-sm text-amber-800; }
+  .lp-good { @apply rounded bg-green-100 px-2 py-1 text-sm text-green-800; }
+  .lp-tab { @apply border-b border-gray-300 p-2 text-sm font-semibold; }
+  .lp-log { @apply flex flex-col gap-0.5 p-2 text-sm; }
+  .lp-entry { @apply grid items-baseline gap-1.5; grid-template-columns: 24px minmax(0, 1fr) 18px; }
+  .lp-a { @apply text-right font-mono font-semibold; }
+  .lp-x { @apply invisible text-gray-500; }
+  .lp-entry:hover .lp-x { @apply visible; }
+  .lp-flash { @apply fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-sm text-white; }
+
   .data-table {
     @apply w-full border-collapse text-sm;
   }
