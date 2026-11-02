@@ -16,7 +16,8 @@ export function emptyUi() {
     will: "",
     miss: false,
     reveal: false,
-    tab: "log"
+    tab: "log",
+    filter: null
   }
 }
 
@@ -99,6 +100,9 @@ const STAGES = {
     }
     return key.code === "Enter" && ui.marks.length === 0 ? fire(ui, { type: "best_move", seats: [] }) : { ui }
   },
+  finished(ui, key, seat) {
+    return seat === null ? { ui } : { ui: { ...ui, filter: seat } }
+  },
   leaving(ui, key, seat) {
     if (seat !== null) return { ui, hint: "choose_action" }
     if (key.code === "KeyB") return open(ui, "best_move", "three")
@@ -125,7 +129,7 @@ export function handleKey(ui, state, key) {
   if (key.repeat) return { ui }
   if (key.ctrl) return key.code === "KeyZ" ? { ui, undo: true } : { ui }
   if (key.code === "KeyH") return { ui: { ...ui, reveal: true } }
-  if (key.code === "Escape") return { ui: { ...ui, pending: null, marks: [], miss: false } }
+  if (key.code === "Escape") return { ui: { ...ui, pending: null, marks: [], miss: false, filter: null } }
   if (ui.pending) return pendingKey(ui, key)
 
   const general = sanctionKey(ui, state, key)

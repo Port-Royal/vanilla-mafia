@@ -43,6 +43,44 @@ RSpec.describe "Live protocol console" do
     expect(page).to have_css(".lp-log")
   end
 
+  context "with a finished game" do
+    before do
+      start_game.call
+      press.call("s", "4", :enter)
+      find("body").send_keys([ :shift, "d" ])
+      expect(page).to have_current_path(edit_judge_protocol_path(game))
+      visit live_judge_protocol_path(game)
+      expect(page).to have_text(I18n.t("live_protocols.screen.finish.done"))
+    end
+
+    it "shows the chosen player's blocks" do
+      press.call("4")
+      expect(page).to have_css(".lp-filter", text: "4 Игрок4")
+      expect(page).to have_text(I18n.t("live_protocols.screen.filter.received"))
+    end
+
+    it "reads 0 as seat 10" do
+      press.call("0")
+      expect(page).to have_css(".lp-filter", text: "10 Игрок10")
+    end
+
+    it "drops the filter on Esc" do
+      press.call("4", :escape)
+      expect(page).to have_no_css(".lp-filter")
+    end
+
+    it "picks the player by mouse" do
+      find("[data-seat='4']").click
+      expect(page).to have_css(".lp-filter", text: "4 Игрок4")
+    end
+  end
+
+  it "does not filter during the game" do
+    start_game.call
+    press.call("4")
+    expect(page).to have_no_css(".lp-filter")
+  end
+
   it "reads 0 as seat 10" do
     start_game.call
     press.call("n", "0")

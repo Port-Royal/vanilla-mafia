@@ -107,6 +107,14 @@ en:
     edit_link: "Protocol form"
     live_link: "Live protocol"
     screen:
+      filter:
+        hint: "Press a seat or click it to see only that player's events. Esc clears the choice."
+        actions: "Their actions"
+        received: "Aimed at them"
+        outcome_win: "win"
+        outcome_lose: "loss"
+        outcome_draw: "draw"
+        empty_seat: "Nobody sits there"
       sheet:
         title: "Sheet"
         deal: "Deal"
