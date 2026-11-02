@@ -2,15 +2,25 @@ import { Controller } from "@hotwired/stimulus"
 import { decide, replay } from "live_protocol/machine"
 import { canDelete, emptyUi, handleKey, restorePlayers, stamp, undoGroup } from "live_protocol/console"
 import { renderScreen, willPreview } from "live_protocol/screen"
+import { applyQueued, PermanentError, SendQueue } from "live_protocol/send_queue"
 
 const FOCUS_TARGETS = { deal_text: "lp-deal-text", pending_text: "lp-pending-text" }
 
 export default class extends Controller {
-  static values = { players: Array, events: Array, texts: Object }
+  static values = { players: Array, events: Array, texts: Object, gameId: Number, eventsUrl: String, afterFinishUrl: String }
 
   connect() {
-    this.players = this.playersValue
-    this.events = this.eventsValue
+    this.connection = "saved"
+    this.queue = new SendQueue({
+      post: (events) => this.request(this.eventsUrlValue, "POST", { events }),
+      remove: (actionId) => this.request(`${this.eventsUrlValue}/${encodeURIComponent(actionId)}`, "DELETE"),
+      storage: window.localStorage,
+      storageKey: `live_protocol_queue_${this.gameIdValue}`,
+      onStatus: (status) => this.connectionChanged(status)
+    })
+    const { events, removed } = applyQueued(this.eventsValue, this.queue.items)
+    this.players = restorePlayers(this.playersValue, removed)
+    this.events = events
     this.ui = emptyUi()
     this.willBlurred = false
     this.onKeydown = this.keydown.bind(this)
@@ -24,6 +34,7 @@ export default class extends Controller {
     this.element.addEventListener("click", this.onClick)
     this.element.addEventListener("input", this.onInput)
     this.render()
+    this.queue.flush()
   }
 
   disconnect() {
@@ -38,9 +49,44 @@ export default class extends Controller {
     return replay(this.players, this.events)
   }
 
-  // Sending to the server arrives with the send queue.
-  send() {}
-  remove() {}
+  send(events) {
+    this.queue.enqueue(events)
+  }
+
+  remove(actionId) {
+    this.queue.enqueueDelete(actionId)
+  }
+
+  // A network failure or a server error is worth repeating. Anything else the server refused
+  // will be refused again, so the queue stops and the screen says so.
+  async request(url, method, body) {
+    const token = document.querySelector("meta[name='csrf-token']")?.content
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": token },
+      body: body && JSON.stringify(body)
+    })
+    if (response.ok) return
+    if (response.status < 500) throw new PermanentError(response.status)
+    throw new Error(`Server error: ${response.status}`)
+  }
+
+  connectionChanged(status) {
+    this.connection = status
+    if (status === "saved" && this.finishing) {
+      window.location.assign(this.afterFinishUrlValue)
+      return
+    }
+    this.renderStatus()
+  }
+
+  // Rebuilding the screen would take the cursor out of the field the judge is typing in.
+  renderStatus() {
+    const badge = this.element.querySelector(".lp-status")
+    if (!badge) return
+    badge.textContent = this.textsValue.connection[this.connection]
+    badge.classList.toggle("lp-status--bad", ["offline", "rejected"].includes(this.connection))
+  }
 
   keydown(event) {
     if (event.target.matches?.("input")) {
@@ -141,6 +187,7 @@ export default class extends Controller {
     const stamped = stamp(events, () => crypto.randomUUID())
     this.events = [...this.events, ...stamped]
     this.willBlurred = false
+    this.finishing = stamped.some((event) => event.kind === "game_finished")
     this.send(stamped)
   }
 
@@ -168,7 +215,7 @@ export default class extends Controller {
 
   render(focus) {
     const { state } = this
-    this.element.innerHTML = renderScreen(state, this.ui, this.textsValue, this.hint)
+    this.element.innerHTML = renderScreen(state, this.ui, this.textsValue, this.hint, this.connection)
     const field = this.fieldToFocus(state, focus)
     if (field) {
       field.focus()

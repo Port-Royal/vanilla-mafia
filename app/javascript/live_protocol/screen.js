@@ -193,10 +193,11 @@ function logEntry(state, ui, texts, event) {
   return `<div class="lp-entry"><span class="lp-a">${actor}</span><span>${escapeHtml(body)}</span><button type="button" class="lp-x" data-delete="${escapeHtml(event.action_id)}" aria-label="${escapeHtml(texts.log.delete)}">×</button></div>`
 }
 
-export function renderScreen(state, ui, texts, hint = "") {
+export function renderScreen(state, ui, texts, hint = "", connection = "saved") {
   const log = state.log.map((event) => logEntry(state, ui, texts, event)).join("")
   const status = rolesShown(state, ui) ? texts.common.roles_shown : texts.common.roles_hidden
-  return `<div class="lp-top"><span class="lp-meta">${escapeHtml(status)}</span></div>
+  const problem = connection === "offline" || connection === "rejected"
+  return `<div class="lp-top"><span class="lp-status${problem ? " lp-status--bad" : ""}" role="status">${escapeHtml(texts.connection[connection])}</span><span class="lp-meta">${escapeHtml(status)}</span></div>
     <div class="lp-steps">${stripHtml(state, texts)}</div>
     <div class="lp-main">
       <div class="lp-col">${SEATS.map((seat) => seatHtml(state, ui, texts, seat)).join("")}</div>

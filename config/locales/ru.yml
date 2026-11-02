@@ -721,6 +721,11 @@ ru:
     edit_link: "Форма протокола"
     live_link: "Живой протокол"
     screen:
+      connection:
+        saved: "Сохранено"
+        saving: "Сохраняется…"
+        offline: "Нет связи, запись не потеряется"
+        rejected: "Сервер отклонил запись, обновите страницу"
       common:
         roles_shown: "Роли видны"
         roles_hidden: "Роли скрыты, удерживай H"

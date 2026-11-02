@@ -9,7 +9,9 @@
 
 @layer components {
   .live-protocol { @apply flex flex-col gap-2; min-height: 75vh; }
-  .lp-top { @apply flex justify-end text-sm text-gray-500; }
+  .lp-top { @apply flex justify-end gap-4 text-sm text-gray-500; }
+  .lp-status { @apply text-green-800; }
+  .lp-status--bad { @apply font-semibold text-red-700; }
   .lp-steps { @apply flex gap-1 overflow-x-auto; }
   .lp-step { @apply flex-none rounded px-2 py-1 text-sm whitespace-nowrap bg-gray-100 text-gray-500; }
   .lp-step--now { @apply bg-maroon font-semibold text-white; }

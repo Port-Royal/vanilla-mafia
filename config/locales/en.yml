@@ -107,6 +107,11 @@ en:
     edit_link: "Protocol form"
     live_link: "Live protocol"
     screen:
+      connection:
+        saved: "Saved"
+        saving: "Saving…"
+        offline: "No connection, nothing is lost"
+        rejected: "The server refused a record, reload the page"
       common:
         roles_shown: "Roles visible"
         roles_hidden: "Roles hidden, hold H"

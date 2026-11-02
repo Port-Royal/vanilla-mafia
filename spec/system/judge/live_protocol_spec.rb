@@ -31,7 +31,8 @@ RSpec.describe "Live protocol console" do
     press.call("x", "1", "x", "4")
     expect(page).to have_text(I18n.t("live_protocols.screen.results.peace_victory"))
     press.call("q")
-    expect(page).to have_text(I18n.t("live_protocols.screen.finish.done"))
+    expect(page).to have_current_path(edit_judge_protocol_path(game))
+    expect(game.reload.result).to eq("peace_victory")
   end
 
   it "reads 0 as seat 10" do
@@ -91,10 +92,13 @@ RSpec.describe "Live protocol console" do
     end
   end
 
-  it "reveals everything at the end of the game" do
+  it "opens a finished game read-only with everything revealed" do
     start_game.call
     find("body").send_keys([ :shift, "d" ])
+    expect(page).to have_current_path(edit_judge_protocol_path(game))
+    visit live_judge_protocol_path(game)
     expect(page).to have_css("[data-role='don']")
+    expect(page).to have_text(I18n.t("live_protocols.screen.finish.done"))
   end
 
   it "focuses the will field in the leaving speech" do

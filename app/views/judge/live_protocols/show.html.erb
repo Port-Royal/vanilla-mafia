@@ -5,6 +5,9 @@
 <div id="live-protocol"
      class="live-protocol"
      data-controller="live-protocol"
+     data-live-protocol-game-id-value="<%= @game.id %>"
+     data-live-protocol-events-url-value="<%= live_events_judge_protocol_path(@game) %>"
+     data-live-protocol-after-finish-url-value="<%= edit_judge_protocol_path(@game) %>"
      data-live-protocol-players-value="<%= @players.to_json %>"
      data-live-protocol-events-value="<%= @events.to_json %>"
      data-live-protocol-texts-value="<%= t("live_protocols.screen").to_json %>"></div>
