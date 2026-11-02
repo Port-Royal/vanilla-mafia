@@ -52,8 +52,12 @@ RSpec.describe "Games#overlay" do
         expect(document.css("#game-overlay.overlay-canvas").size).to eq(1)
       end
 
-      it "renders header slots for the table, the game number and the judge" do
-        expect(header_slots.map(&:first)).to eq(%w[overlay-table overlay-game-number overlay-judge])
+      it "renders header slots for the table with the night block, the game number and the judge" do
+        expect(header_slots.map(&:first)).to eq(%w[overlay-header-start overlay-game-number overlay-judge])
+      end
+
+      it "keeps the table label first in its slot" do
+        expect(document.at_css("#overlay-header-start > div")["id"]).to eq("overlay-table")
       end
 
       it "renders every seat card as a fixed-aspect tile in the bottom row" do
@@ -400,33 +404,69 @@ RSpec.describe "Games#overlay" do
     end
   end
 
-  describe "checks on load" do
-    let(:checked_game) { create(:game, hide_roles:) }
-    let(:entries) { response.parsed_body.css("#overlay-checks .overlay-check").map { |node| node.text.squish } }
+  describe "night block on load" do
+    let(:night_game) { create(:game, hide_roles:) }
+    let(:document) { response.parsed_body }
+    let(:row) { ->(name) { document.at_css("#overlay-night [data-row='#{name}']") } }
+    let(:cells) { ->(name) { row.(name).css(".overlay-night-cell").map { |cell| [ cell.text.strip, cell["data-colour"], cell["data-mark"] ] } } }
 
     before do
-      create(:game_protocol_event, game: checked_game, kind: "sheriff_check", phase: "night", day_number: 0, target_seats: [ 4 ], metadata: { "result" => "black" })
-      get overlay_game_path(checked_game)
+      create(:role, code: "peace") unless Role.exists?(code: "peace")
+      create(:game_participation, game: night_game, seat: 5, role_code: "peace")
+      create(:game_protocol_event, game: night_game, position: 1, kind: "shot", phase: "night", day_number: 0, target_seats: [ 5 ])
+      create(:game_protocol_event, game: night_game, position: 2, kind: "don_check", phase: "night", day_number: 0, target_seats: [ 2 ], metadata: { "result" => "sheriff" })
+      create(:game_protocol_event, game: night_game, position: 3, kind: "sheriff_check", phase: "night", day_number: 0, target_seats: [ 4 ], metadata: { "result" => "black" })
+      create(:game_protocol_event, game: night_game, position: 4, kind: "miss_shot", phase: "night", day_number: 1, target_seats: [], metadata: { "miss" => "no_shot" })
+      create(:game_protocol_event, game: night_game, position: 5, kind: "don_check", phase: "night", day_number: 1, target_seats: [], metadata: { "result" => nil })
+      get overlay_game_path(night_game)
     end
 
     context "when roles are public" do
       let(:hide_roles) { false }
 
-      it "lists the checks" do
-        expect(entries).to eq([ I18n.t("games.overlay.checks.entry", night: 1, who: I18n.t("games.overlay.checks.sheriff"), seat: 4, result: I18n.t("games.overlay.checks.black")) ])
+      it "sits in the left of the header" do
+        expect(document.at_css(".overlay-header #overlay-night")).to be_present
+      end
+
+      it "numbers the nights" do
+        expect(row.("nights").css(".overlay-night-number").map(&:text)).to eq(%w[1 2])
+      end
+
+      it "shows a shot in the target's colour and a miss as a cross" do
+        expect(cells.("shots")).to eq([ [ "5", "red", nil ], [ "×", "empty", nil ] ])
+      end
+
+      it "shows the don finding the sheriff and a skipped check" do
+        expect(cells.("don")).to eq([ [ "2", "red", "sheriff" ], [ "×", "empty", nil ] ])
+      end
+
+      it "keeps the sheriff's row aligned by night" do
+        expect(cells.("sheriff")).to eq([ [ "4", "black", nil ], [ "", "none", nil ] ])
       end
     end
 
     context "when roles are hidden" do
       let(:hide_roles) { true }
 
-      it "leaves them out of the page" do
-        expect(entries).to eq([])
+      it "shows the shots in a neutral colour" do
+        expect(cells.("shots")).to eq([ [ "5", "neutral", nil ], [ "×", "empty", nil ] ])
       end
 
-      it "hides the block" do
-        expect(response.parsed_body.at_css("#overlay-checks")["hidden"]).not_to be_nil
+      it "leaves the checks out of the page" do
+        expect([ row.("don"), row.("sheriff") ].map { |node| node.css(".overlay-night-cell").size }).to eq([ 0, 0 ])
       end
+
+      it "hides the check rows" do
+        expect([ row.("don")["hidden"], row.("sheriff")["hidden"] ]).not_to include(nil)
+      end
+    end
+  end
+
+  describe "night block with nothing recorded" do
+    before { get overlay_game_path(game) }
+
+    it "hides the block" do
+      expect(response.parsed_body.at_css("#overlay-night")["hidden"]).not_to be_nil
     end
   end
 end

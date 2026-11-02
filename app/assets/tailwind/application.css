@@ -130,6 +130,86 @@
     gap: 1em;
   }
 
+  .overlay-night {
+    display: grid;
+    gap: 0.25em;
+    margin-top: 0.4em;
+  }
+
+  .overlay-night[hidden],
+  .overlay-night-row[hidden] {
+    display: none;
+  }
+
+  .overlay-night-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .overlay-night-icon {
+    width: 1.3em;
+    height: 1.3em;
+    flex: none;
+  }
+
+  .overlay-night-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .overlay-night-cells {
+    display: flex;
+    gap: 0.2em;
+  }
+
+  .overlay-night-number,
+  .overlay-night-cell {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 1.5em;
+    height: 1.7em;
+    font-weight: 800;
+  }
+
+  .overlay-night-number {
+    height: 1em;
+    font-size: 0.7em;
+    width: calc(1.5em / 0.7);
+    opacity: 0.6;
+  }
+
+  .overlay-night-cell {
+    border-radius: 0.2em;
+  }
+
+  .overlay-night-cell[data-colour="red"] {
+    background: #dc2626;
+  }
+
+  .overlay-night-cell[data-colour="black"] {
+    background: #111;
+    box-shadow: inset 0 0 0 0.08em rgb(255 255 255 / 0.6);
+  }
+
+  .overlay-night-cell[data-colour="neutral"] {
+    background: rgb(255 255 255 / 0.25);
+  }
+
+  .overlay-night-cell[data-colour="empty"] {
+    box-shadow: inset 0 0 0 0.08em rgb(255 255 255 / 0.4);
+    font-weight: 400;
+  }
+
+  .overlay-night-cell[data-mark="sheriff"]::after {
+    content: "★";
+    position: absolute;
+    bottom: -0.1em;
+    font-size: 0.55em;
+    color: #facc15;
+  }
+
   .overlay-nominees {
     display: flex;
     flex-wrap: wrap;

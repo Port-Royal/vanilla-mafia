@@ -3,8 +3,8 @@
 <div id="game-overlay"
      data-controller="game-overlay"
      data-game-overlay-game-id-value="<%= @game.id %>"
-     data-game-overlay-check-template-value="<%= t("games.overlay.checks.entry", night: "%NIGHT%", who: "%WHO%", seat: "%SEAT%", result: "%RESULT%") %>"
-     data-game-overlay-check-labels-value="<%= overlay_check_labels.to_json %>"
+     data-game-overlay-shots-value="<%= @shots.to_json %>"
+     data-game-overlay-checks-value="<%= @checks.to_json %>"
      data-game-overlay-role-badges-value="<%= GamesHelper::OVERLAY_ROLE_BADGE_CODES.index_with { |code| overlay_role_badge(code) }.to_json %>"
      data-game-overlay-default-photo-value="<%= Player::DEFAULT_PHOTO_PATH %>"
      data-game-overlay-seat-roles-value="<%= seat_roles.to_json %>"
@@ -15,7 +15,10 @@
      data-game-overlay-game-of-total-template-value="<%= t("games.overlay.game_of_total", number: "%NUMBER%", total: "%TOTAL%") %>"
      class="<%= overlay_canvas_class(@game) %>">
   <div class="overlay-header">
-    <div id="overlay-table" class="justify-self-start" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
+    <div id="overlay-header-start" class="justify-self-start">
+      <div id="overlay-table" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
+      <%= render "night_block", rows: overlay_night_rows(@shots, @checks) %>
+    </div>
     <div id="overlay-game-number" class="justify-self-center"
          data-game-overlay-target="gameNumber"
          data-number="<%= @game.game_number %>"
@@ -28,10 +31,6 @@
     <div class="overlay-nominees-list" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><span class="overlay-nominee"><%= overlay_nominee_label(seat, @participations_by_seat) %></span><% end %></div>
   </div>
 
-  <div id="overlay-checks" class="overlay-nominees" data-game-overlay-target="checks" <%= "hidden" if @checks.empty? %>>
-    <span class="overlay-nominees-title"><%= t("games.overlay.checks.title") %></span>
-    <div class="overlay-nominees-list" data-game-overlay-target="checksList"><% @checks.each do |check| %><span class="overlay-check overlay-nominee"><%= overlay_check_label(check) %></span><% end %></div>
-  </div>
 
   <% GamesHelper::OVERLAY_ELIMINATED_STATUSES.each do |status| %>
     <template data-game-overlay-target="statusIconTemplate" data-status="<%= status %>"><%= overlay_status_icon(status) %></template>

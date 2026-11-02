@@ -310,6 +310,31 @@ RSpec.describe "Judge live protocol" do
     end
   end
 
+  describe "shot broadcasts" do
+    let(:sent) { [] }
+    let(:shot) { event.merge(kind: "shot", phase: "night", day_number: 0, target_seats: [ 2 ]) }
+
+    before do
+      allow(GameProtocolChannel).to receive(:broadcast_to) { |target, payload| sent << [ target, payload ] }
+    end
+
+    it "sends the shots after a shot" do
+      post_events.call(shot)
+
+      expect(sent).to eq([ [ game, { scope: "shots", shots: [ { night: 1, target_seat: 2, team: nil } ] } ] ])
+    end
+
+    context "when roles are hidden" do
+      let(:game) { create(:game, hide_roles: true) }
+
+      it "still sends them" do
+        post_events.call(shot)
+
+        expect(sent.map(&:last)).to eq([ { scope: "shots", shots: [ { night: 1, target_seat: 2, team: nil } ] } ])
+      end
+    end
+  end
+
   describe "check broadcasts" do
     let(:sent) { [] }
     let(:check) { event.merge(kind: "don_check", phase: "night", day_number: 0, actor_seat: 1, target_seats: [ 2 ], metadata: { result: "not_sheriff" }) }

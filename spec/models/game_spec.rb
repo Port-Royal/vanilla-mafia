@@ -148,6 +148,33 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '#public_shots' do
+    let(:shot_game) { create(:game, hide_roles:) }
+    let(:hide_roles) { false }
+    let(:night_event) { ->(position, kind, day, targets, metadata = {}) { create(:game_protocol_event, game: shot_game, position:, kind:, phase: "night", day_number: day, target_seats: targets, metadata:) } }
+
+    before do
+      create(:role, code: "mafia") unless Role.exists?(code: "mafia")
+      create(:game_participation, game: shot_game, seat: 5, role_code: "mafia")
+      night_event.call(3, "shot", 1, [ 5 ])
+      night_event.call(1, "miss_shot", 0, [ 7 ], { "miss" => nil })
+      night_event.call(2, "miss_shot", 0, [], { "miss" => "no_shot" })
+      create(:game_protocol_event, kind: "shot", phase: "night", day_number: 0, target_seats: [ 9 ])
+    end
+
+    it "gives one entry per night of this game, a miss with no seat, the target's team" do
+      expect(shot_game.public_shots).to eq([ { night: 1, target_seat: nil, team: nil }, { night: 2, target_seat: 5, team: "black" } ])
+    end
+
+    context "when roles are hidden" do
+      let(:hide_roles) { true }
+
+      it "still gives the shots, since a kill is public, without the team" do
+        expect(shot_game.public_shots).to eq([ { night: 1, target_seat: nil, team: nil }, { night: 2, target_seat: 5, team: nil } ])
+      end
+    end
+  end
+
   describe '#public_checks' do
     let(:checked_game) { create(:game, hide_roles:, result:) }
     let(:hide_roles) { false }
@@ -160,9 +187,10 @@ RSpec.describe Game, type: :model do
       create(:game_protocol_event, position: 1, kind: "don_check", phase: "night", day_number: 0, target_seats: [ 5 ], metadata: { "result" => "not_sheriff" })
     end
 
-    it "lists the checks of this game in order, skipping a night with no check" do
+    it "lists the checks of this game in order, a skipped check with no seat" do
       expect(checked_game.public_checks).to eq([
         { night: 1, kind: "don", target_seat: 2, result: "sheriff" },
+        { night: 2, kind: "don", target_seat: nil, result: nil },
         { night: 2, kind: "sheriff", target_seat: 4, result: "black" }
       ])
     end
@@ -180,7 +208,7 @@ RSpec.describe Game, type: :model do
       let(:result) { "draw" }
 
       it "gives the checks" do
-        expect(checked_game.public_checks.size).to eq(2)
+        expect(checked_game.public_checks.size).to eq(3)
       end
     end
   end

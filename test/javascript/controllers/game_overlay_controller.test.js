@@ -152,20 +152,23 @@ describe("GameOverlayController nominees", () => {
   })
 })
 
-describe("GameOverlayController checks", () => {
+describe("GameOverlayController night block", () => {
   let application
   let controller
 
-  const entries = () => [...document.querySelectorAll("#overlay-checks .overlay-check")].map((node) => node.textContent)
-  const block = () => document.getElementById("overlay-checks")
+  const cells = (name) => [...document.querySelectorAll(`[data-row="${name}"] .overlay-night-cell`)].map((cell) => [cell.textContent, cell.dataset.colour, cell.dataset.mark ?? null])
+  const numbers = () => [...document.querySelectorAll(".overlay-night-number")].map((node) => node.textContent)
+  const row = (name) => document.querySelector(`[data-row="${name}"]`)
+  const block = () => document.getElementById("overlay-night")
 
   beforeEach(async () => {
     document.body.innerHTML = `
-      <div id="game-overlay" data-controller="game-overlay"
-           data-game-overlay-check-template-value="Ночь %NIGHT%: %WHO% → %SEAT%, %RESULT%"
-           data-game-overlay-check-labels-value='{"don":"дон","sheriff":"шериф","black":"чёрный","red":"красный","not_sheriff":"не шериф"}'>
-        <div id="overlay-checks" data-game-overlay-target="checks" hidden>
-          <div data-game-overlay-target="checksList"></div>
+      <div id="game-overlay" data-controller="game-overlay">
+        <div id="overlay-night" data-game-overlay-target="night" hidden>
+          <div data-row="nights"><span data-game-overlay-target="nightNumbers"></span></div>
+          <div data-row="shots" data-game-overlay-target="shotsRow"><span data-game-overlay-target="shotsCells"></span></div>
+          <div data-row="don" data-game-overlay-target="donRow" hidden><span data-game-overlay-target="donCells"></span></div>
+          <div data-row="sheriff" data-game-overlay-target="sheriffRow" hidden><span data-game-overlay-target="sheriffCells"></span></div>
         </div>
       </div>
     `
@@ -180,37 +183,72 @@ describe("GameOverlayController checks", () => {
     document.body.innerHTML = ""
   })
 
-  it("lists the checks with their results", () => {
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 2, result: "sheriff" }, { night: 1, kind: "sheriff", target_seat: 4, result: "black" }] })
+  const checks = [{ night: 1, kind: "don", target_seat: 2, result: "sheriff" }, { night: 2, kind: "don", target_seat: null, result: null }, { night: 1, kind: "sheriff", target_seat: 4, result: "black" }]
 
-    expect(entries()).toEqual(["Ночь 1: дон → 2, шериф", "Ночь 1: шериф → 4, чёрный"])
+  it("puts each shot in its night with the target's colour and a miss as a cross", () => {
+    controller.handleUpdate({ scope: "shots", shots: [{ night: 1, target_seat: 5, team: "red" }, { night: 2, target_seat: null, team: null }] })
+
+    expect(cells("shots")).toEqual([["5", "red", null], ["×", "empty", null]])
   })
 
-  it("shows the block", () => {
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+  it("numbers the nights", () => {
+    controller.handleUpdate({ scope: "shots", shots: [{ night: 2, target_seat: 5, team: null }] })
 
-    expect(block().hidden).toBe(false)
+    expect(numbers()).toEqual(["1", "2"])
   })
 
-  it("empties and hides the block for an empty list", () => {
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+  it("keeps the rows aligned by night", () => {
+    controller.handleUpdate({ scope: "shots", shots: [{ night: 2, target_seat: 5, team: null }] })
+
+    expect(cells("shots")).toEqual([["", "none", null], ["5", "neutral", null]])
+  })
+
+  it("splits the checks into the don's row and the sheriff's row", () => {
+    controller.handleUpdate({ scope: "checks", checks })
+
+    expect([cells("don"), cells("sheriff")]).toEqual([
+      [["2", "red", "sheriff"], ["×", "empty", null]],
+      [["4", "black", null], ["", "none", null]]
+    ])
+  })
+
+  it("shows a don's check that is not the sheriff in a neutral colour", () => {
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 7, result: "not_sheriff" }] })
+
+    expect(cells("don")).toEqual([["7", "neutral", null]])
+  })
+
+  it("shows the check rows only with checks", () => {
+    controller.handleUpdate({ scope: "checks", checks })
+
+    expect([row("don").hidden, row("sheriff").hidden, block().hidden]).toEqual([false, false, false])
+  })
+
+  it("hides the block with nothing recorded", () => {
+    controller.handleUpdate({ scope: "checks", checks })
     controller.handleUpdate({ scope: "checks", checks: [] })
 
-    expect([block().hidden, entries()]).toEqual([true, []])
+    expect([row("don").hidden, block().hidden]).toEqual([true, true])
   })
 
-  it("forgets the checks when roles are hidden", () => {
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
+  it("keeps the shots when roles are hidden and drops the checks", () => {
+    controller.handleUpdate({ scope: "shots", shots: [{ night: 1, target_seat: 5, team: null }] })
+    controller.handleUpdate({ scope: "checks", checks })
     controller.handleUpdate({ scope: "game", field: "hide_roles", value: "1" })
 
-    expect([block().hidden, entries()]).toEqual([true, []])
+    expect([cells("shots"), cells("don"), row("sheriff").hidden, block().hidden]).toEqual([[["5", "neutral", null]], [], true, false])
   })
 
-  it("keeps a template marker typed in a label as text", () => {
-    controller.checkLabelsValue = { ...controller.checkLabelsValue, don: "%SEAT%" }
-    controller.handleUpdate({ scope: "checks", checks: [{ night: 1, kind: "don", target_seat: 2, result: "not_sheriff" }] })
+  it("starts from what the page rendered", async () => {
+    application.stop()
+    document.getElementById("game-overlay").dataset.gameOverlayShotsValue = JSON.stringify([{ night: 1, target_seat: 5, team: null }])
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+    controller.handleUpdate({ scope: "checks", checks: [{ night: 2, kind: "sheriff", target_seat: 4, result: "red" }] })
 
-    expect(entries()).toEqual(["Ночь 1: %SEAT% → 2, не шериф"])
+    expect(cells("shots")).toEqual([["5", "neutral", null], ["", "none", null]])
   })
 })
 
