@@ -152,4 +152,72 @@ RSpec.describe HelpController do
       end
     end
   end
+
+  describe "GET /help/live-protocol" do
+    context "when the toggle is on" do
+      let!(:toggle) { create(:feature_toggle, key: "live_protocol", enabled: true) }
+
+      it "is listed on the index" do
+        get help_index_path
+
+        expect(response.body).to include(I18n.t("help.pages.live-protocol.title"))
+      end
+
+      it "renders every section" do
+        get help_path(slug: "live-protocol")
+
+        expect(response.body).to include(I18n.t("help.pages.live-protocol.start_title"))
+          .and include(I18n.t("help.pages.live-protocol.keys_title"))
+          .and include(I18n.t("help.pages.live-protocol.undo_title"))
+          .and include(I18n.t("help.pages.live-protocol.roles_title"))
+          .and include(I18n.t("help.pages.live-protocol.network_title"))
+          .and include(I18n.t("help.pages.live-protocol.after_title"))
+      end
+
+      it "lists the keys of every stage" do
+        get help_path(slug: "live-protocol")
+
+        expect(response.body).to include(I18n.t("help.pages.live-protocol.stages.speech")).and include(I18n.t("help.pages.live-protocol.stages.night"))
+      end
+    end
+
+    context "when the toggle is off" do
+      let!(:toggle) { create(:feature_toggle, key: "live_protocol", enabled: false) }
+
+      it "returns not found" do
+        get help_path(slug: "live-protocol")
+
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "is not listed on the index" do
+        get help_index_path
+
+        expect(response.body).not_to include(I18n.t("help.pages.live-protocol.title"))
+      end
+    end
+
+    context "when the toggle was never set" do
+      it "returns not found" do
+        get help_path(slug: "live-protocol")
+
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "is not listed on the index" do
+        get help_index_path
+
+        expect(response.body).not_to include(I18n.t("help.pages.live-protocol.title"))
+      end
+    end
+  end
+
+  describe "GET /help/obs-overlay" do
+    it "describes the overlay blocks" do
+      get help_path(slug: "obs-overlay")
+
+      expect(response.body).to include(I18n.t("help.pages.obs-overlay.blocks_title"))
+        .and include(I18n.t("help.pages.obs-overlay.block_night"))
+    end
+  end
 end
