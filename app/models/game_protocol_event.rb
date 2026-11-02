@@ -8,6 +8,7 @@ class GameProtocolEvent < ApplicationRecord
   DELETABLE_FROM_MIDDLE = %w[suspect red team check_request note will best_move].freeze
   LEFT_REASONS = %w[killed voted removed].freeze
   FINISHED_RESULTS = %w[peace_victory mafia_victory draw].freeze
+  CHECK_RESULTS = { "don_check" => %w[sheriff not_sheriff], "sheriff_check" => %w[red black] }.freeze
   SEATS = (1..10)
 
   belongs_to :game
@@ -61,6 +62,14 @@ class GameProtocolEvent < ApplicationRecord
       errors.add(:target_seats, :blank) if target_seats.blank?
     when "game_finished"
       errors.add(:metadata, :invalid) unless FINISHED_RESULTS.include?(metadata["result"])
+    when *CHECK_RESULTS.keys
+      check_has_result
     end
+  end
+
+  # A check with a target shows its result to viewers, and a skipped check has none.
+  def check_has_result
+    allowed = target_seats.empty? ? [ nil ] : CHECK_RESULTS.fetch(kind)
+    errors.add(:metadata, :invalid) unless allowed.include?(metadata["result"])
   end
 end

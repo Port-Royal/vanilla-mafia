@@ -45,12 +45,12 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
         autosave.call(scope: "game", field: "hide_roles", value: "0")
       end
 
-      it "sends the roles after the setting" do
-        expect(sent).to include({ scope: "participation", seat: 3, field: "role_code", value: "peace" })
-      end
-
-      it "sends the checks gathered so far" do
-        expect(sent.last).to eq(scope: "checks", checks: [ { night: 1, kind: "sheriff", target_seat: 3, result: "red" } ])
+      it "sends the setting, then the roles, then the checks gathered so far" do
+        expect(sent).to eq([
+          { scope: "game", field: "hide_roles", value: "0" },
+          { scope: "participation", seat: 3, field: "role_code", value: "peace" },
+          { scope: "checks", checks: [ { night: 1, kind: "sheriff", target_seat: 3, result: "red" } ] }
+        ])
       end
     end
 
@@ -134,8 +134,8 @@ RSpec.describe "Judge::Protocols role visibility broadcasts" do
 
       before { autosave.call(scope: "game", field: "result", value: "in_progress") }
 
-      it "tells the overlay to hide roles" do
-        expect(sent).to include({ scope: "game", field: "hide_roles", value: "1" })
+      it "tells the overlay to hide roles, then empties the checks" do
+        expect(sent.last(2)).to eq([ { scope: "game", field: "hide_roles", value: "1" }, { scope: "checks", checks: [] } ])
       end
 
       it "addresses the message to this game" do
