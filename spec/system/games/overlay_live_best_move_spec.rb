@@ -31,6 +31,37 @@ RSpec.describe "Game overlay live best move strip" do
     page.execute_script("arguments[0].forEach((payload) => #{controller_js}.handleUpdate(payload))", payloads)
   end
 
+  context "with the strip as rendered" do
+    let(:payloads) { [] }
+    let(:backgrounds) do
+      page.evaluate_script('Array.from(document.querySelectorAll("#seat-1 .overlay-best-move-cell")).map((cell) => getComputedStyle(cell).backgroundColor)')
+    end
+
+    it "paints a black seat black and a red seat bright red" do
+      expect(backgrounds).to eq([ "rgb(17, 17, 17)", "rgb(220, 38, 38)" ])
+    end
+  end
+
+  context "when a live update names a civilian" do
+    let(:payloads) { [ { scope: "participation", seat: 1, field: "best_move_seats", value: [ "4" ] } ] }
+    let(:background) { page.evaluate_script('getComputedStyle(document.querySelector("#seat-1 .overlay-best-move-cell")).backgroundColor') }
+
+    it "paints the cell bright red" do
+      expect(background).to eq("rgb(220, 38, 38)")
+    end
+  end
+
+  context "when roles are hidden and then shown again" do
+    let(:payloads) do
+      [ { scope: "game", field: "hide_roles", value: "1" }, { scope: "game", field: "hide_roles", value: "0" },
+        { scope: "participation", seat: 2, field: "role_code", value: "don" }, { scope: "participation", seat: 3, field: "role_code", value: "sheriff" } ]
+    end
+
+    it "restores the colours" do
+      expect(strip.(1)).to eq([ %w[2 black], %w[3 red] ])
+    end
+  end
+
   context "when the best move seats change" do
     let(:payloads) { [ { scope: "participation", seat: 1, field: "best_move_seats", value: [ "4", "2", "9" ] } ] }
 
