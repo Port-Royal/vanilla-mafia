@@ -93,3 +93,17 @@ describe("renderScreen", () => {
     expect(html).toContain("speech.no_vote")
   })
 })
+
+describe("the connection status", () => {
+  it.each(["saved", "saving", "offline", "rejected"])("shows %s", (status) => {
+    expect(renderScreen(stateAfter(dayActions), emptyUi(), texts, "", status)).toContain(`connection.${status}`)
+  })
+
+  it("marks the problem states", () => {
+    expect(renderScreen(stateAfter(dayActions), emptyUi(), texts, "", "offline")).toContain("lp-status--bad")
+  })
+
+  it("does not mark saved as a problem", () => {
+    expect(renderScreen(stateAfter(dayActions), emptyUi(), texts, "", "saved")).not.toContain("lp-status--bad")
+  })
+})
