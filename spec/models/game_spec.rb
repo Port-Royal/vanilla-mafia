@@ -13,7 +13,7 @@ RSpec.describe Game, type: :model do
 
     it { is_expected.to validate_presence_of(:game_number) }
     it { is_expected.to validate_numericality_of(:game_number).only_integer }
-    it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:competition_id) }
+    it { is_expected.to validate_uniqueness_of(:game_number).scoped_to(:competition_id, :played_on, :table_number).with_message(:taken_on_day) }
     it { is_expected.to define_enum_for(:result).with_values(described_class::RESULTS).backed_by_column_of_type(:string) }
     it { is_expected.to validate_numericality_of(:table_number).only_integer.is_greater_than(0).allow_nil }
 
@@ -70,6 +70,113 @@ RSpec.describe Game, type: :model do
           expect(game.errors.added?(:games_total, :greater_than_or_equal_to, count: 3)).to be(true)
         end
       end
+    end
+
+    context "with game_number already taken in the competition" do
+      subject(:game) { build(:game, competition: existing.competition, game_number: existing.game_number, played_on:, table_number:) }
+
+      let_it_be(:existing) { create(:game, game_number: 1, played_on: Date.new(2026, 11, 1), table_number: 1) }
+      let(:table_number) { 1 }
+
+      context "when played on another day" do
+        let(:played_on) { Date.new(2026, 11, 2) }
+
+        it { is_expected.to be_valid }
+
+        it "saves to the database" do
+          expect { game.save! }.to change(Game, :count).by(1)
+        end
+      end
+
+      context "when played on the same day" do
+        let(:played_on) { existing.played_on }
+
+        it "is invalid with a taken error on game_number" do
+          game.validate
+          expect(game.errors.of_kind?(:game_number, :taken)).to be(true)
+        end
+
+        it "explains the error in full" do
+          game.validate
+          expect(game.errors.full_messages_for(:game_number)).to eq([ "Номер игры уже есть в этом соревновании за этим столом в этот день" ])
+        end
+
+        context "when validation is skipped" do
+          subject(:game) { build(:game, competition: existing.competition, game_number: 1, played_on:, table_number:, slug: "same-day-duplicate") }
+
+          it "is refused by the database" do
+            expect { game.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+          end
+        end
+
+        context "when played at another table" do
+          let(:table_number) { 2 }
+
+          it { is_expected.to be_valid }
+
+          it "saves to the database" do
+            expect { game.save! }.to change(Game, :count).by(1)
+          end
+        end
+
+        context "when the table is blank" do
+          let(:table_number) { nil }
+
+          it { is_expected.to be_valid }
+        end
+      end
+
+      context "when played on is blank" do
+        let(:played_on) { nil }
+
+        it { is_expected.to be_valid }
+      end
+
+      context "when played on is blank for both games" do
+        let_it_be(:undated) { create(:game, competition: existing.competition, game_number: 2, played_on: nil, table_number: 1) }
+
+        subject(:game) { build(:game, competition: undated.competition, game_number: 2, played_on: nil, table_number: 1) }
+
+        it "is invalid with a taken error on game_number" do
+          game.validate
+          expect(game.errors.of_kind?(:game_number, :taken)).to be(true)
+        end
+
+        context "when validation is skipped" do
+          subject(:game) { build(:game, competition: undated.competition, game_number: 2, played_on: nil, table_number: 1, slug: "undated-duplicate") }
+
+          it "is refused by the database" do
+            expect { game.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+          end
+        end
+      end
+    end
+
+    context "with the same game_number on the same day and both tables blank" do
+      subject(:game) { build(:game, competition: existing.competition, game_number: 3, played_on: existing.played_on) }
+
+      let_it_be(:existing) { create(:game, game_number: 3, played_on: Date.new(2026, 11, 1), table_number: nil) }
+
+      it "is invalid with a taken error on game_number" do
+        game.validate
+        expect(game.errors.of_kind?(:game_number, :taken)).to be(true)
+      end
+
+      context "when validation is skipped" do
+        subject(:game) { build(:game, competition: existing.competition, game_number: 3, played_on: existing.played_on, slug: "tableless-duplicate") }
+
+        it "is refused by the database" do
+          expect { game.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+        end
+      end
+    end
+
+    context "with the same game_number on the same day in another competition" do
+      subject(:game) { build(:game, game_number: existing.game_number, played_on: existing.played_on) }
+
+      let_it_be(:existing) { create(:game, game_number: 1, played_on: Date.new(2026, 11, 1)) }
+
+      it { is_expected.to be_valid }
     end
 
     context "when game_number is blank and games_total is set" do

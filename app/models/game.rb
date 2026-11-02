@@ -20,7 +20,8 @@ class Game < ApplicationRecord
 
   validates :game_number, presence: true, numericality: { only_integer: true }
   validates :result, presence: true
-  validates :game_number, uniqueness: { scope: :competition_id }
+  # Each table numbers its games from 1 every day, so a number repeats across days and tables.
+  validates :game_number, uniqueness: { scope: [ :competition_id, :played_on, :table_number ], message: :taken_on_day }
   validates :table_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validates :games_total, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :games_total_covers_game_number

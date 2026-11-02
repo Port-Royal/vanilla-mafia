@@ -311,6 +311,48 @@ RSpec.describe "Judge::Protocols" do
         end
       end
 
+      context "with a game number already played in the competition" do
+        let!(:existing) { create(:game, competition:, game_number: 5, played_on: Date.new(2026, 1, 14), table_number: 1) }
+        let(:table_number) { "1" }
+        let(:game_params) { { game_number: 5, played_on:, table_number:, result: "peace_victory", competition_id: competition.id } }
+
+        context "when the new game is on another day" do
+          let(:played_on) { "2026-01-15" }
+
+          it "creates the game" do
+            expect {
+              post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+            }.to change(Game, :count).by(1)
+          end
+        end
+
+        context "when the new game is on the same day at another table" do
+          let(:played_on) { existing.played_on.iso8601 }
+          let(:table_number) { "2" }
+
+          it "creates the game" do
+            expect {
+              post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+            }.to change(Game, :count).by(1)
+          end
+        end
+
+        context "when the new game is on the same day at the same table" do
+          let(:played_on) { existing.played_on.iso8601 }
+
+          it "does not create the game" do
+            expect {
+              post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+            }.not_to change(Game, :count)
+          end
+
+          it "explains that the number is taken on that day" do
+            post judge_protocols_path, params: { game: game_params, participations: valid_participations_params }
+            expect(response.body).to include("Номер игры уже есть в этом соревновании за этим столом в этот день")
+          end
+        end
+      end
+
       context "with invalid result" do
         let(:game_params) { { game_number: 96, result: "invalid", competition_id: competition.id } }
 
