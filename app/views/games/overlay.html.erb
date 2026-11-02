@@ -21,6 +21,11 @@
     <div id="overlay-judge" class="justify-self-end" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
   </div>
 
+  <div id="overlay-nominees" class="overlay-nominees" data-game-overlay-target="nominees" <%= "hidden" if @nominees.empty? %>>
+    <span class="overlay-nominees-title"><%= t("games.overlay.nominees") %></span>
+    <div class="overlay-nominees-list" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><span class="overlay-nominee"><%= overlay_nominee_label(seat, @participations_by_seat) %></span><% end %></div>
+  </div>
+
   <% GamesHelper::OVERLAY_ELIMINATED_STATUSES.each do |status| %>
     <template data-game-overlay-target="statusIconTemplate" data-status="<%= status %>"><%= overlay_status_icon(status) %></template>
   <% end %>

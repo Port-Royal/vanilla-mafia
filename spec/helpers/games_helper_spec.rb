@@ -278,4 +278,16 @@ RSpec.describe GamesHelper do
       end
     end
   end
+
+  describe "#overlay_nominee_label" do
+    let(:participations_by_seat) { { 5 => GameParticipation.new(seat: 5, player: Player.new(name: "Пятый")) } }
+
+    it "gives the seat and the name" do
+      expect(helper.overlay_nominee_label(5, participations_by_seat)).to eq("5 Пятый")
+    end
+
+    it "gives the seat alone when nobody sits there" do
+      expect(helper.overlay_nominee_label(9, participations_by_seat)).to eq("9")
+    end
+  end
 end

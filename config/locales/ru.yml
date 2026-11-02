@@ -282,6 +282,7 @@ ru:
         mafia_victory: "Победа мафии"
         draw: "Ничья"
     overlay:
+      nominees: "На голосовании"
       role_badge:
         sheriff: "Ш"
         don: "Д"

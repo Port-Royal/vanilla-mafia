@@ -128,6 +128,35 @@
     gap: 1em;
   }
 
+  .overlay-nominees {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .overlay-nominees[hidden] {
+    display: none;
+  }
+
+  .overlay-nominees-title {
+    opacity: 0.75;
+  }
+
+  .overlay-nominees-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+  }
+
+  .overlay-nominee {
+    padding: 0.1em 0.5em;
+    border-radius: 0.3em;
+    background: rgb(0 0 0 / 0.6);
+    font-weight: 600;
+  }
+
   .overlay-tiles {
     display: flex;
     justify-content: center;

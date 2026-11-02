@@ -30,6 +30,10 @@ class Game < ApplicationRecord
   scope :recent, -> { where.not(played_on: nil).order(played_on: :desc, game_number: :desc) }
   scope :finished, -> { where.not(result: "in_progress") }
 
+  def current_nominees
+    GameProtocolEvent::Nominees.call(game_protocol_events.order(:position))
+  end
+
   def journal_started?
     game_protocol_events.exists?
   end

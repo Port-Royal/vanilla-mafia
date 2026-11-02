@@ -96,3 +96,58 @@ describe("GameOverlayController role hiding", () => {
     })
   })
 })
+
+describe("GameOverlayController nominees", () => {
+  let application
+  let controller
+
+  const names = () => [...document.querySelectorAll("#overlay-nominees .overlay-nominee")].map((node) => node.textContent)
+  const block = () => document.getElementById("overlay-nominees")
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay">
+        <div data-game-overlay-target="playerName" data-seat="3">Третий</div>
+        <div data-game-overlay-target="playerName" data-seat="5">&lt;Пятый&gt;</div>
+        <div id="overlay-nominees" data-game-overlay-target="nominees" hidden>
+          <span class="overlay-nominees-title">На голосовании</span>
+          <div class="overlay-nominees-list" data-game-overlay-target="nomineesList"></div>
+        </div>
+      </div>
+    `
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+  })
+
+  it("lists the seats in order with their names", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [5, 3] })
+
+    expect(names()).toEqual(["5 <Пятый>", "3 Третий"])
+  })
+
+  it("shows the block", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [3] })
+
+    expect(block().hidden).toBe(false)
+  })
+
+  it("hides the block when the list is empty", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [3] })
+    controller.handleUpdate({ scope: "nominees", seats: [] })
+
+    expect([block().hidden, names()]).toEqual([true, []])
+  })
+
+  it("names an empty seat by its number only", () => {
+    controller.handleUpdate({ scope: "nominees", seats: [9] })
+
+    expect(names()).toEqual(["9"])
+  })
+})

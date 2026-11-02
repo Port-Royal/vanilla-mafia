@@ -13,7 +13,7 @@ export default class extends Controller {
     gameTemplate: String,
     gameOfTotalTemplate: String
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList"]
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
@@ -34,6 +34,8 @@ export default class extends Controller {
       this.updateParticipation(data)
     } else if (data.scope === "game") {
       this.updateHeader(data)
+    } else if (data.scope === "nominees") {
+      this.renderNominees(data.seats)
     }
   }
 
@@ -163,6 +165,18 @@ export default class extends Controller {
   colourBestMoveCell(cell) {
     const roleCode = this.seatRoles[cell.dataset.namedSeat]
     cell.dataset.colour = Object.hasOwn(this.bestMoveColoursValue, roleCode) ? this.bestMoveColoursValue[roleCode] : "neutral"
+  }
+
+  renderNominees(seats) {
+    const entries = seats.map((seat) => {
+      const entry = document.createElement("span")
+      entry.className = "overlay-nominee"
+      const name = (this.seatTarget(this.playerNameTargets, seat)?.textContent || "").trim()
+      entry.textContent = name ? `${seat} ${name}` : String(seat)
+      return entry
+    })
+    this.nomineesListTarget.replaceChildren(...entries)
+    this.nomineesTarget.hidden = seats.length === 0
   }
 
   seatTarget(targets, seat) {

@@ -367,4 +367,36 @@ RSpec.describe "Games#overlay" do
       end
     end
   end
+
+  describe "nominees on load" do
+    let(:nominated_game) { create(:game) }
+    let(:names) { response.parsed_body.css("#overlay-nominees .overlay-nominee").map { |node| node.text.squish } }
+
+    before do
+      create(:game_participation, game: nominated_game, seat: 5, player: create(:player, name: "Пятый"))
+      create(:game_participation, game: nominated_game, seat: 3, player: create(:player, name: "Третий"))
+      create(:game_protocol_event, game: nominated_game, position: 1, kind: "nominate", actor_seat: 1, target_seats: [ 5 ])
+      create(:game_protocol_event, game: nominated_game, position: 2, kind: "nominate", actor_seat: 2, target_seats: [ 3 ])
+    end
+
+    it "lists them in nomination order with their names" do
+      get overlay_game_path(nominated_game)
+
+      expect(names).to eq([ "5 Пятый", "3 Третий" ])
+    end
+
+    it "shows the block" do
+      get overlay_game_path(nominated_game)
+
+      expect(response.parsed_body.at_css("#overlay-nominees")["hidden"]).to be_nil
+    end
+  end
+
+  describe "with no nominees" do
+    before { get overlay_game_path(game) }
+
+    it "hides the block" do
+      expect(response.parsed_body.at_css("#overlay-nominees")["hidden"]).not_to be_nil
+    end
+  end
 end
