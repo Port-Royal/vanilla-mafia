@@ -730,6 +730,14 @@ ru:
     edit_link: "Форма протокола"
     live_link: "Живой протокол"
     screen:
+      filter:
+        hint: "Нажми номер игрока или кликни по месту, чтобы увидеть только его события. Esc снимает выбор."
+        actions: "Его действия"
+        received: "В его адрес"
+        outcome_win: "победа"
+        outcome_lose: "поражение"
+        outcome_draw: "ничья"
+        empty_seat: "На этом месте никого нет"
       sheet:
         title: "Бланк"
         deal: "Договорка"

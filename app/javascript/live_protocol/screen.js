@@ -2,6 +2,7 @@
 // markup entirely rather than hidden with styles.
 import { rolesShown } from "live_protocol/console"
 import { buildSheet } from "live_protocol/game_sheet"
+import { playerEvents } from "live_protocol/player_events"
 import { parseWill } from "live_protocol/will_parser"
 
 const SECRET_KINDS = ["roles", "deal", "don_check", "sheriff_check", "miss_shot"]
@@ -174,7 +175,7 @@ const STAGE_VIEWS = {
       <div class="lp-bar">${button("Enter", "Enter", texts.leaving.next, { big: true })}${finishHtml(state, texts)}</div>`
   },
   finished(state, ui, texts) {
-    return heading(texts.finish.eyebrow, escapeHtml(texts.finish.done))
+    return `${heading(texts.finish.eyebrow, escapeHtml(texts.finish.done))}<div class="lp-group">${escapeHtml(texts.filter.hint)}</div>`
   }
 }
 
@@ -253,6 +254,49 @@ function tabsHtml(ui, texts) {
   return `<div class="lp-tabs">${tab("log", texts.log.title)}${tab("sheet", texts.sheet.title)}</div>`
 }
 
+function stageLabel(event, texts) {
+  if (event.phase === "deal") return texts.strip.deal
+  if (event.phase === "night") return fill(texts.strip.night, { number: event.day_number + 1 })
+  return event.day_number === 0 ? texts.strip.zero : fill(texts.strip.day, { number: event.day_number })
+}
+
+function filteredBlock(state, ui, texts, title, events) {
+  let current = null
+  const rows = events.map((event) => {
+    const label = stageLabel(event, texts)
+    const header = label === current ? "" : `<h4 class="lp-stage">${escapeHtml(label)}</h4>`
+    current = label
+    return header + logEntry(state, ui, texts, event)
+  }).join("")
+  return `<div class="lp-group"><h3>${escapeHtml(title)}</h3>${rows || escapeHtml(texts.sheet.nothing)}</div>`
+}
+
+function outcomeOf(state, seat) {
+  const result = state.log.findLast((event) => event.kind === "game_finished")?.metadata.result
+  if (result === "draw") return "draw"
+  const black = ["don", "mafia"].includes(state.players[seat].role)
+  return (result === "mafia_victory") === black ? "win" : "lose"
+}
+
+function filteredLog(state, ui, texts) {
+  const seat = ui.filter
+  const player = state.players[seat]
+  if (!player) return `<div class="lp-log">${escapeHtml(texts.filter.empty_seat)}</div>`
+  const { actions, received } = playerEvents(state, seat)
+  return `<div class="lp-log">
+    <div class="lp-filter"><b>${seat} ${nameOf(state, seat)}</b>
+      <span class="lp-role lp-role--${player.role}" data-role="${player.role}">${escapeHtml(texts.roles[player.role])}</span>
+      <span>${escapeHtml(texts.filter[`outcome_${outcomeOf(state, seat)}`])}</span></div>
+    ${filteredBlock(state, ui, texts, texts.filter.actions, actions)}
+    ${filteredBlock(state, ui, texts, texts.filter.received, received)}
+  </div>`
+}
+
+function logPanel(state, ui, texts, log) {
+  if (ui.filter && state.stage === "finished") return filteredLog(state, ui, texts)
+  return `<div class="lp-log">${log}</div>`
+}
+
 export function renderScreen(state, ui, texts, hint = "", connection = "saved") {
   const log = state.log.map((event) => logEntry(state, ui, texts, event)).join("")
   const status = rolesShown(state, ui) ? texts.common.roles_shown : texts.common.roles_hidden
@@ -262,7 +306,7 @@ export function renderScreen(state, ui, texts, hint = "", connection = "saved") 
     <div class="lp-main">
       <div class="lp-col">${SEATS.map((seat) => seatHtml(state, ui, texts, seat)).join("")}</div>
       <div class="lp-col lp-work" id="lp-work">${STAGE_VIEWS[state.stage](state, ui, texts)}</div>
-      <div class="lp-col">${tabsHtml(ui, texts)}${ui.tab === "sheet" ? renderSheet(state, ui, texts) : `<div class="lp-log">${log}</div>`}</div>
+      <div class="lp-col">${tabsHtml(ui, texts)}${ui.tab === "sheet" ? renderSheet(state, ui, texts) : logPanel(state, ui, texts, log)}</div>
     </div>
     ${hint ? `<div class="lp-flash" role="status">${escapeHtml(hint)}</div>` : ""}`
 }

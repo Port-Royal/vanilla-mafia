@@ -515,3 +515,27 @@ describe("the last details", () => {
     expect(undoGroup([{ action_id: "a" }, { action_id: "b" }, { action_id: "c" }]).actionId).toBe("c")
   })
 })
+
+describe("the player filter after the game", () => {
+  const over = () => session([{ type: "assign_roles", seats: [1, 2, 3, 4] }, { type: "finish_deal" }, { type: "finish_game", result: "draw" }])
+
+  it("a number picks the player", () => {
+    expect(press(emptyUi(), over(), "Digit4").ui.filter).toBe(4)
+  })
+
+  it("0 picks seat 10", () => {
+    expect(press(emptyUi(), over(), "Digit0").ui.filter).toBe(10)
+  })
+
+  it("Esc drops the filter", () => {
+    expect(press(emptyUi(), over(), "Digit4", "Escape").ui.filter).toBeNull()
+  })
+
+  it("has no filter during the game", () => {
+    expect(press(emptyUi(), speech(), "Digit4").ui.filter).toBeNull()
+  })
+
+  it("starts with no filter", () => {
+    expect(emptyUi().filter).toBeNull()
+  })
+})

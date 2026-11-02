@@ -139,3 +139,33 @@ describe("the tabs", () => {
     expect(renderScreen(stateAfter(checked), { ...emptyUi(), tab: "sheet" }, texts)).toContain("&lt;u&gt;план&lt;/u&gt;")
   })
 })
+
+describe("the player filter", () => {
+  const over = [...dayActions, { type: "suspect", seats: [4] }, { type: "finish_game", result: "draw" }]
+
+  it("shows the two blocks for the chosen player", () => {
+    const html = renderScreen(stateAfter(over), { ...emptyUi(), filter: 4 }, texts)
+
+    expect([html.includes("filter.actions"), html.includes("filter.received")]).toEqual([true, true])
+  })
+
+  it("shows the player's role and outcome", () => {
+    const html = renderScreen(stateAfter(over), { ...emptyUi(), filter: 4 }, texts)
+
+    expect([html.includes('data-role="mafia"'), html.includes("filter.outcome_draw")]).toEqual([true, true])
+  })
+
+  it("leaves out records about others", () => {
+    const html = renderScreen(stateAfter([...over.slice(0, -1), { type: "note", text: "чужая заметка" }, over.at(-1)]), { ...emptyUi(), filter: 4 }, texts)
+
+    expect(html).not.toContain("чужая заметка")
+  })
+
+  it("groups the records by stage", () => {
+    expect(renderScreen(stateAfter(over), { ...emptyUi(), filter: 4 }, texts)).toContain("strip.zero")
+  })
+
+  it("offers the filter hint on the finished screen", () => {
+    expect(renderScreen(stateAfter(over), emptyUi(), texts)).toContain("filter.hint")
+  })
+})
