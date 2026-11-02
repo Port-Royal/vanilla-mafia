@@ -6,10 +6,10 @@
 
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold"><%= t("game_protocols.edit.title") %></h1>
-    <% if FeatureToggle.enabled?("live_protocol") %>
-      <%= link_to t("live_protocols.live_link"), live_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
-    <% end %>
     <div class="flex items-center gap-3">
+      <% if FeatureToggle.enabled?("live_protocol") %>
+        <%= link_to t("live_protocols.live_link"), live_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
+      <% end %>
       <span data-protocol-autosave-target="status" class="text-sm font-medium"></span>
       <button type="button"
               data-protocol-autosave-target="toggle"

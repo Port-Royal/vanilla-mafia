@@ -101,7 +101,7 @@ const STAGES = {
   leaving(ui, key, seat) {
     if (seat !== null) return { ui, hint: "choose_action" }
     if (key.code === "KeyB") return open(ui, "best_move", "three")
-    if (key.code === "Enter" && ui.will) return { ...fire(ui, { type: "will", text: ui.will }), ui: { ...fire(ui).ui, will: "" } }
+    if (key.code === "Enter" && ui.will) return fire({ ...ui, will: "" }, { type: "will", text: ui.will })
     return key.code === "Enter" || key.code === "Space" ? fire(ui, { type: "finish_leaving" }) : { ui }
   }
 }
