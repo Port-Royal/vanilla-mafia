@@ -460,6 +460,18 @@ RSpec.describe SaveGameProtocolService do
         expect(seated.reload.role_code).to eq(role.code)
       end
 
+      context "with a legacy participation that has no seat" do
+        let!(:legacy) { create(:game_participation, game: journal_game, player: create(:player, name: "Без места"), seat: nil) }
+
+        it "does not lock it when the form leaves it out" do
+          expect(save.call("3" => { player_name: "На месте" }).success).to be(true)
+        end
+
+        it "still locks the seated player" do
+          expect(save.call("3" => { player_name: "Другой" }).success).to be(false)
+        end
+      end
+
       it "allows the same player with stray spaces" do
         expect(save.call("3" => { player_name: " На месте " }).success).to be(true)
       end

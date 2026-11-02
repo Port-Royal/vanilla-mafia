@@ -26,8 +26,8 @@ class SaveGameProtocolService
   private
 
   def save_participations!
-    assign_seats_to_legacy_participations!
     keep_seats_of_journal!
+    assign_seats_to_legacy_participations!
 
     @participations_params.each do |seat, attrs|
       player_name = attrs[:player_name].to_s.strip
@@ -52,10 +52,11 @@ class SaveGameProtocolService
   end
 
   # Journal events refer to seats, so the player on a seat is fixed once the journal has started.
+  # A legacy participation with no seat was never part of the journal.
   def keep_seats_of_journal!
     return unless @game.journal_started?
 
-    @game.game_participations.includes(:player).find_each do |participation|
+    @game.game_participations.where.not(seat: nil).includes(:player).find_each do |participation|
       attrs = @participations_params[participation.seat.to_s]
       name = attrs ? attrs[:player_name].to_s.strip : ""
       raise SeatLocked, I18n.t("game_protocols.seat_locked", seat: participation.seat) if name != participation.player.name
