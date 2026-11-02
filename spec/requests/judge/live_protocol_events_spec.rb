@@ -46,6 +46,28 @@ RSpec.describe "Judge live protocol" do
       expect(css_select("#live-protocol-bar a[href='#{judge_protocols_path}']")).to be_present
     end
 
+    context "with the overlay link" do
+      let(:copier) { css_select("#live-protocol-bar [data-controller='clipboard']").first }
+      let(:open_link) { css_select("#live-protocol-bar a[href='#{overlay_game_url(game)}']").first }
+
+      it "hands the overlay URL to the copy button" do
+        expect(copier["data-clipboard-text-value"]).to eq(overlay_game_url(game))
+      end
+
+      it "confirms the copy with a translated word" do
+        expect(copier["data-clipboard-copied-value"]).to eq(I18n.t("live_protocols.overlay_link.copied"))
+      end
+
+      it "labels the copy button" do
+        expect(copier.at_css("button[type='button'][data-action='click->clipboard#copy'][data-clipboard-target='button']").text.strip)
+          .to eq(I18n.t("live_protocols.overlay_link.copy"))
+      end
+
+      it "opens the overlay in a new tab" do
+        expect(open_link.attributes.slice("target", "rel").transform_values(&:value)).to eq("target" => "_blank", "rel" => "noopener")
+      end
+    end
+
     it "shows no toast without a flash message" do
       expect(css_select(".focus-toast")).to be_empty
     end

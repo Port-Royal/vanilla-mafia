@@ -21,6 +21,30 @@ RSpec.describe "Live protocol focus mode" do
       expect(page).to have_no_css("#site-mobile-header", visible: :all)
     end
 
+    context "when copying the overlay link" do
+      before do
+        page.execute_script(<<~JS)
+          window.copiedText = null
+          Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: (text) => { window.copiedText = text; return Promise.resolve() } } })
+        JS
+        click_button I18n.t("live_protocols.overlay_link.copy")
+      end
+
+      it "confirms the copy on the button" do
+        expect(page).to have_button(I18n.t("live_protocols.overlay_link.copied"))
+      end
+
+      it "puts the overlay URL on the clipboard" do
+        expect(page).to have_button(I18n.t("live_protocols.overlay_link.copied"))
+        expect(page.evaluate_script("window.copiedText")).to end_with(overlay_game_path(game))
+      end
+
+      it "keeps the console keys working while the button has focus" do
+        page.driver.browser.action.send_keys("1", "2").perform
+        expect(page).to have_css(".lp-picks", text: "1, 2")
+      end
+    end
+
     it "keeps a way back to the protocol form and the protocols list" do
       within("#live-protocol-bar") do
         expect(page).to have_link(I18n.t("live_protocols.edit_link"), href: edit_judge_protocol_path(game))

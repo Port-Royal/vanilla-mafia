@@ -1,6 +1,17 @@
 <div id="live-protocol-bar" class="mb-2 flex flex-wrap items-baseline gap-4">
   <h1 class="text-xl font-bold text-maroon"><%= @game.full_name %></h1>
   <%= link_to t("live_protocols.edit_link"), edit_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
+  <span class="inline-flex items-baseline gap-2"
+        data-controller="clipboard"
+        data-clipboard-text-value="<%= overlay_game_url(@game) %>"
+        data-clipboard-copied-value="<%= t("live_protocols.overlay_link.copied") %>">
+    <button type="button"
+            data-action="click->clipboard#copy"
+            data-clipboard-target="button"
+            class="rounded bg-maroon px-2 py-0.5 text-sm text-white hover:bg-maroon/90"><%= t("live_protocols.overlay_link.copy") %></button>
+    <%= link_to t("live_protocols.overlay_link.open"), overlay_game_url(@game),
+                target: "_blank", rel: "noopener", class: "text-xs text-gray-500 hover:underline" %>
+  </span>
   <%= link_to t("live_protocols.list_link"), judge_protocols_path, class: "text-maroon hover:underline text-sm" %>
 </div>
 <div id="live-protocol"

@@ -106,6 +106,10 @@ en:
   live_protocols:
     edit_link: "Protocol form"
     list_link: "Back to protocols"
+    overlay_link:
+      copy: "Copy overlay link"
+      copied: "Copied"
+      open: "Open overlay"
     live_link: "Live protocol"
     screen:
       filter:
