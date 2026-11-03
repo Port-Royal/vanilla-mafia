@@ -88,7 +88,7 @@ describe("the checks", () => {
 
 describe("the rounds", () => {
   const voting = [...start(), ...nominate(5, 6), { type: "start_vote" }]
-const votingThree = [...start(), ...nominate(5, 6, 7), { type: "start_vote" }]
+  const votingThree = [...start(), ...nominate(5, 6, 7), { type: "start_vote" }]
 
   it("say who voted for whom", () => {
     expect(hidden([...voting, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }]).rounds).toEqual([{
