@@ -273,11 +273,6 @@
     color: #111;
   }
 
-  .overlay-role-badge[data-role="peace"] {
-    background: #dc2626;
-    color: #fff;
-  }
-
   .overlay-role-badge[data-role="don"] {
     border-color: #facc15;
     color: #facc15;

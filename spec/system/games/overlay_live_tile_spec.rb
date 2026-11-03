@@ -54,8 +54,8 @@ RSpec.describe "Game overlay live tiles" do
   context "when the role changes to peace" do
     let(:payloads) { [ { scope: "participation", seat: 1, field: "role_code", value: "peace" } ] }
 
-    it "shows the civilian badge in red" do
-      expect(seat_one.values_at("badge", "badgeRole", "badgeColour")).to eq([ "К", "peace", "rgb(220, 38, 38)" ])
+    it "clears the badge, as civilians get none" do
+      expect(seat_one.values_at("badge", "badgeRole")).to eq([ "", nil ])
     end
   end
 

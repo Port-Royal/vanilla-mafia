@@ -302,7 +302,7 @@ describe("GameOverlayController role badge colours", () => {
 
   beforeEach(async () => {
     document.body.innerHTML = `
-      <div id="game-overlay" data-controller="game-overlay" data-game-overlay-role-badges-value='{"don":"Д","peace":"К"}'>
+      <div id="game-overlay" data-controller="game-overlay" data-game-overlay-role-badges-value='{"sheriff":"Ш","don":"Д","mafia":"М"}'>
         <div data-game-overlay-target="roleBadge" data-seat="1"></div>
       </div>
     `
@@ -318,9 +318,16 @@ describe("GameOverlayController role badge colours", () => {
   })
 
   it("marks the badge with its role", () => {
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "mafia" })
+
+    expect([badge().textContent, badge().dataset.role]).toEqual(["М", "mafia"])
+  })
+
+  it("clears the badge when the role changes to civilian", () => {
+    controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "sheriff" })
     controller.handleUpdate({ scope: "participation", seat: 1, field: "role_code", value: "peace" })
 
-    expect([badge().textContent, badge().dataset.role]).toEqual(["К", "peace"])
+    expect([badge().textContent, badge().dataset.role]).toEqual(["", undefined])
   })
 
   it("drops the mark for a role with no badge", () => {
