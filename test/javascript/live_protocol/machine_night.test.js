@@ -175,7 +175,7 @@ describe("the checks", () => {
   })
 
   it.each([[3, "black"], [6, "red"]])("lets the sheriff check voted-out seat %i and shows %s", (seat, result) => {
-    const night = zeroVoteOut(seat, [5, 7, 8, 9, 10, 1], seat === 6 ? 7 : 6).do({ type: "vote_for", seats: [] })
+    const night = zeroVoteOut(seat, [5, 7, 8, 9, 10, 1], seat === 6 ? 7 : 6)
       .do({ type: "best_move" }).do({ type: "finish_leaving" }).shoot(8).do({ type: "don_check" })
 
     expect(night.try({ type: "sheriff_check", seats: [seat] }).events[0]).toMatchObject({ target_seats: [seat], metadata: { result } })
@@ -286,7 +286,8 @@ describe("a removal on a later day", () => {
   it("cancels tomorrow's vote when today's is decided", () => {
     const later = game().quietNight().night().shoot(5).checks().do({ type: "finish_leaving" })
     later.do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [6] })
-    later.do({ type: "set_speaker", seats: [10] }).do({ type: "nominate", seats: [7] }).do({ type: "start_vote" })
+    later.do({ type: "set_speaker", seats: [10] }).do({ type: "nominate", seats: [7] })
+    later.do({ type: "set_speaker", seats: [1] }).do({ type: "nominate", seats: [8] }).do({ type: "start_vote" })
     later.do({ type: "vote_for", seats: [1, 2, 3, 4, 8, 9] }).do({ type: "remove_player", seats: [10] })
 
     expect(later.state).toMatchObject({ stage: "vote", noVoteDay: 3 })
@@ -294,7 +295,7 @@ describe("a removal on a later day", () => {
 })
 
 describe("finish_leaving", () => {
-  const leaving = () => zeroVoteOut(5, [5, 7, 8, 9, 10, 1]).do({ type: "vote_for", seats: [] })
+  const leaving = () => zeroVoteOut(5, [5, 7, 8, 9, 10, 1])
 
   it("remembers that the speech came after a vote", () => {
     expect(leaving().state.leavingAfter).toBe("vote")
@@ -323,8 +324,8 @@ describe("finish_leaving", () => {
   it("takes the next player when several left", () => {
     const lifted = game().do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [5] })
     lifted.do({ type: "set_speaker", seats: [10] }).do({ type: "nominate", seats: [6] }).do({ type: "start_vote" })
-    lifted.do({ type: "vote_for", seats: [5, 7, 8, 9, 10] }).do({ type: "vote_for", seats: [] })
-    lifted.do({ type: "vote_for", seats: [5, 7, 8, 9, 10] }).do({ type: "vote_for", seats: [] })
+    lifted.do({ type: "vote_for", seats: [5, 7, 8, 9, 10] })
+    lifted.do({ type: "vote_for", seats: [5, 7, 8, 9, 10] })
     lifted.do({ type: "vote_for", seats: [1, 2, 3, 4, 7, 8] })
     const stageBefore = lifted.state.leaving
 
@@ -337,7 +338,7 @@ describe("finish_leaving", () => {
 })
 
 describe("will", () => {
-  const leaving = () => zeroVoteOut(5, [5, 7, 8, 9, 10, 1]).do({ type: "vote_for", seats: [] })
+  const leaving = () => zeroVoteOut(5, [5, 7, 8, 9, 10, 1])
 
   it("stores the raw text against the leaving player", () => {
     expect(leaving().try({ type: "will", text: "234к, план" }).events).toEqual([
@@ -457,27 +458,27 @@ describe("best move at night", () => {
 
 describe("best move by day", () => {
   it("is offered to the single player voted out in the zero circle", () => {
-    expect(zeroVoteOut(5, [1, 2, 3, 4, 7, 8]).do({ type: "vote_for", seats: [] }).state.stage).toBe("best_move")
+    expect(zeroVoteOut(5, [1, 2, 3, 4, 7, 8]).state.stage).toBe("best_move")
   })
 
   it("is not offered after a vote for himself", () => {
-    expect(zeroVoteOut(5, [5, 1, 2, 3, 4, 7]).do({ type: "vote_for", seats: [] }).state.stage).toBe("leaving")
+    expect(zeroVoteOut(5, [5, 1, 2, 3, 4, 7]).state.stage).toBe("leaving")
   })
 
   it("is not offered after an automatic vote for himself", () => {
     const round = game()
       .do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [6] })
       .do({ type: "set_speaker", seats: [10] }).do({ type: "nominate", seats: [5] })
-      .do({ type: "start_vote" }).do({ type: "vote_for", seats: [1, 2] }).do({ type: "vote_for", seats: [] })
+      .do({ type: "start_vote" }).do({ type: "vote_for", seats: [1, 2] })
 
     expect([round.state.leaving, round.state.stage]).toEqual([[5], "leaving"])
   })
 
   it("is not offered on later days", () => {
     const later = game().quietNight()
-    later.do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [5] }).do({ type: "start_vote" })
+    later.do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [5] })
 
-    expect(later.do({ type: "vote_for", seats: [1, 2, 3] }).state.stage).toBe("leaving")
+    expect(later.do({ type: "start_vote" }).state.stage).toBe("leaving")
   })
 
   it("is not offered on a later day even with no vote for himself", () => {
@@ -485,23 +486,23 @@ describe("best move by day", () => {
     later.do({ type: "set_speaker", seats: [9] }).do({ type: "nominate", seats: [5] })
     later.do({ type: "set_speaker", seats: [10] }).do({ type: "nominate", seats: [6] }).do({ type: "start_vote" })
 
-    expect(later.do({ type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }).do({ type: "vote_for", seats: [] }).state.stage).toBe("leaving")
+    expect(later.do({ type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }).state.stage).toBe("leaving")
   })
 
   it("can still be recorded with B", () => {
-    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7]).do({ type: "vote_for", seats: [] })
+    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7])
 
     expect(leaving.try({ type: "best_move", seats: [1, 3, 4] }).events[0]).toMatchObject({ kind: "best_move", actor_seat: 5 })
   })
 
   it("keeps the stage when recorded with B", () => {
-    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7]).do({ type: "vote_for", seats: [] })
+    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7])
 
     expect(leaving.do({ type: "best_move", seats: [1, 3, 4] }).state.stage).toBe("leaving")
   })
 
   it("refuses to decline with B", () => {
-    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7]).do({ type: "vote_for", seats: [] })
+    const leaving = zeroVoteOut(5, [5, 1, 2, 3, 4, 7])
 
     expect(leaving.try({ type: "best_move", seats: [] }).error).toBe("three_seats_required")
   })

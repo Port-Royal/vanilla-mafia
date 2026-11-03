@@ -211,6 +211,35 @@ describe("the vote", () => {
   it("does not close the vote on the last mark", () => {
     expect(press(emptyUi(), voting(), "Digit1").action).toBeUndefined()
   })
+
+  describe("after a player left the table", () => {
+    const decided = () => session([
+      { type: "assign_roles", seats: [1, 2, 3, 4] }, { type: "finish_deal" },
+      { type: "nominate", seats: [5] }, { type: "next_speaker" }, { type: "nominate", seats: [6] },
+      { type: "next_speaker" }, { type: "nominate", seats: [7] }, { type: "start_vote" },
+      { type: "vote_for", seats: [1, 2, 3, 4, 5, 6] }, { type: "remove_player", seats: [10] }
+    ])
+
+    it("does not mark a player who left", () => {
+      expect(press(emptyUi(), decided(), "Digit0").ui.marks).toEqual([])
+    })
+
+    it("says why a player who left cannot vote", () => {
+      expect(press(emptyUi(), decided(), "Digit0").hint).toBe("not_alive")
+    })
+
+    it("does not mark a player who already voted", () => {
+      expect(press(emptyUi(), decided(), "Digit1").ui.marks).toEqual([])
+    })
+
+    it("says why a player who voted cannot vote again", () => {
+      expect(press(emptyUi(), decided(), "Digit1").hint).toBe("already_voted")
+    })
+
+    it("still marks a player who has not voted", () => {
+      expect(press(emptyUi(), decided(), "Digit7").ui.marks).toEqual([7])
+    })
+  })
 })
 
 describe("the night", () => {

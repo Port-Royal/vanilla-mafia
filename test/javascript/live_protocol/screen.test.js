@@ -94,6 +94,37 @@ describe("renderScreen", () => {
   })
 })
 
+describe("the vote", () => {
+  const voteTexts = new Proxy({}, {
+    get: (_target, name) => (name === "vote" ? new Proxy({}, { get: (_t, inner) => (inner === "not_voted" ? "NV %{seats}" : `vote.${String(inner)}`) }) : texts[name])
+  })
+  const candidates = [{ type: "nominate", seats: [5] }, { type: "next_speaker" }, { type: "nominate", seats: [6] }, { type: "next_speaker" }, { type: "nominate", seats: [7] }]
+  const voting = (...actions) => stateAfter([...dayActions, ...candidates, { type: "start_vote" }, ...actions])
+  const notVoted = (html) => /<div class="lp-not-voted">([^<]*)<\/div>/.exec(html)?.[1]
+
+  it("lists everybody before the first vote", () => {
+    expect(notVoted(renderScreen(voting(), emptyUi(), voteTexts))).toBe("NV 1, 2, 3, 4, 5, 6, 7, 8, 9, 10")
+  })
+
+  it("leaves out the players who voted", () => {
+    expect(notVoted(renderScreen(voting({ type: "vote_for", seats: [1, 2, 3] }), emptyUi(), voteTexts))).toBe("NV 4, 5, 6, 7, 8, 9, 10")
+  })
+
+  it("leaves out the players marked now", () => {
+    expect(notVoted(renderScreen(voting(), { ...emptyUi(), marks: [2, 4] }, voteTexts))).toBe("NV 1, 3, 5, 6, 7, 8, 9, 10")
+  })
+
+  it("leaves out the players who left the table", () => {
+    const state = voting({ type: "vote_for", seats: [1, 2, 3, 4, 5, 6] }, { type: "remove_player", seats: [10] })
+
+    expect(notVoted(renderScreen(state, emptyUi(), voteTexts))).toBe("NV 7, 8, 9")
+  })
+
+  it("shows nothing once everybody is marked", () => {
+    expect(renderScreen(voting(), { ...emptyUi(), marks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }, voteTexts)).not.toContain("lp-not-voted")
+  })
+})
+
 describe("the connection status", () => {
   it.each(["saved", "saving", "offline", "rejected"])("shows %s", (status) => {
     expect(renderScreen(stateAfter(dayActions), emptyUi(), texts, "", status)).toContain(`connection.${status}`)

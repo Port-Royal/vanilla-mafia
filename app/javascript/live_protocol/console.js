@@ -77,8 +77,11 @@ const STAGES = {
     if (key.code === "KeyV") return fire(ui, { type: "start_vote" })
     return { ui }
   },
-  vote(ui, key, seat) {
-    if (seat !== null) return { ui: { ...ui, marks: toggle(ui.marks, seat) } }
+  vote(ui, key, seat, state) {
+    if (seat !== null) {
+      const refusal = voterRefusal(state, seat)
+      return refusal ? { ui, hint: refusal } : { ui: { ...ui, marks: toggle(ui.marks, seat) } }
+    }
     return key.code === "Enter" ? fire(ui, { type: "vote_for", seats: ui.marks }) : { ui }
   },
   night_shot(ui, key, seat) {
@@ -111,6 +114,14 @@ const STAGES = {
   }
 }
 
+// A player who left the table cannot vote, and a player who voted for an earlier candidate cannot
+// vote again, so neither number becomes a mark.
+function voterRefusal(state, seat) {
+  const player = state.players[seat]
+  if (!player || player.out) return "not_alive"
+  return Object.values(state.round.votes).flat().includes(seat) ? "already_voted" : null
+}
+
 function nightCheck(ui, key, seat, type) {
   if (seat !== null) return fire(ui, { type, seats: [seat] })
   return key.code === "Enter" ? fire(ui, { type, seats: [] }) : { ui }
@@ -136,7 +147,7 @@ export function handleKey(ui, state, key) {
   if (general) return general
 
   const stage = STAGES[state.stage]
-  return stage ? stage(ui, key, digitOf(key.code)) : { ui }
+  return stage ? stage(ui, key, digitOf(key.code), state) : { ui }
 }
 
 export function rolesShown(state, ui) {

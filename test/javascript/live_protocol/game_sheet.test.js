@@ -88,9 +88,10 @@ describe("the checks", () => {
 
 describe("the rounds", () => {
   const voting = [...start(), ...nominate(5, 6), { type: "start_vote" }]
+const votingThree = [...start(), ...nominate(5, 6, 7), { type: "start_vote" }]
 
   it("say who voted for whom", () => {
-    expect(hidden([...voting, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }, { type: "vote_for", seats: [] }]).rounds).toEqual([{
+    expect(hidden([...voting, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }]).rounds).toEqual([{
       day: 0,
       type: "main",
       votes: [{ candidates: [5], voters: [1, 2, 3, 4, 7, 8], auto: [] }, { candidates: [6], voters: [5, 6, 9, 10], auto: [5, 6, 9, 10] }],
@@ -101,14 +102,14 @@ describe("the rounds", () => {
   })
 
   it("list a repeat and a lift", () => {
-    const tie = [{ type: "vote_for", seats: [1, 2, 3, 4, 7] }, { type: "vote_for", seats: [] }]
+    const tie = [{ type: "vote_for", seats: [1, 2, 3, 4, 7] }]
     const sheet = hidden([...voting, ...tie, ...tie, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }])
 
     expect(sheet.rounds.map((round) => [round.type, round.outcome])).toEqual([["main", "repeat"], ["repeat", "lift"], ["lift", "leave"]])
   })
 
   it("give the voters of a lift against all the leaders", () => {
-    const tie = [{ type: "vote_for", seats: [1, 2, 3, 4, 7] }, { type: "vote_for", seats: [] }]
+    const tie = [{ type: "vote_for", seats: [1, 2, 3, 4, 7] }]
     const sheet = hidden([...voting, ...tie, ...tie, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }])
 
     expect(sheet.rounds[2].votes).toEqual([{ candidates: [5, 6], voters: [1, 2, 3, 4, 7, 8], auto: [] }])
@@ -116,27 +117,27 @@ describe("the rounds", () => {
 
   it("name why a lift was not held", () => {
     const shares = [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]].map((seats) => ({ type: "vote_for", seats }))
-    const sheet = hidden([...start(), ...nominate(1, 2, 3, 4, 5), { type: "start_vote" }, ...shares, ...shares])
+    const sheet = hidden([...start(), ...nominate(1, 2, 3, 4, 5), { type: "start_vote" }, ...shares.slice(0, -1), ...shares.slice(0, -1)])
 
     expect(sheet.rounds[1].reason).toBe("five_or_ten_zero")
   })
 
   it("show a round in progress", () => {
-    expect(hidden([...voting, { type: "vote_for", seats: [1] }]).rounds).toEqual([{
+    expect(hidden([...votingThree, { type: "vote_for", seats: [1] }]).rounds).toEqual([{
       day: 0, type: "main", votes: [{ candidates: [5], voters: [1], auto: [] }], outcome: null, leaders: [], reason: null
     }])
   })
 
   it("show a cancelled round", () => {
-    const sheet = hidden([...voting, { type: "vote_for", seats: [1] }, { type: "remove_player", seats: [9] }])
+    const sheet = hidden([...votingThree, { type: "vote_for", seats: [1] }, { type: "remove_player", seats: [9] }])
 
     expect(sheet.rounds[0].outcome).toBe("cancelled")
   })
 
   it("start over the next day as a main round", () => {
     const sheet = hidden([
-      ...voting, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }, { type: "vote_for", seats: [] }, { type: "best_move" }, { type: "finish_leaving" },
-      { type: "shoot", seats: [9] }, ...quietChecks, { type: "best_move" }, { type: "finish_leaving" }, ...nominate(7), { type: "start_vote" }, { type: "vote_for", seats: [1] }
+      ...voting, { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }, { type: "best_move" }, { type: "finish_leaving" },
+      { type: "shoot", seats: [9] }, ...quietChecks, { type: "best_move" }, { type: "finish_leaving" }, ...nominate(7), { type: "start_vote" }
     ])
 
     expect(sheet.rounds.map((round) => [round.day, round.type])).toEqual([[0, "main"], [1, "main"]])
@@ -144,8 +145,8 @@ describe("the rounds", () => {
 
   it("start as a main round after a cancelled one", () => {
     const sheet = hidden([
-      ...voting, { type: "vote_for", seats: [1] }, { type: "remove_player", seats: [9] },
-      { type: "shoot", seats: [8] }, ...quietChecks, { type: "best_move" }, { type: "finish_leaving" }, ...nominate(7), { type: "start_vote" }, { type: "vote_for", seats: [1] }
+      ...votingThree, { type: "vote_for", seats: [1] }, { type: "remove_player", seats: [9] },
+      { type: "shoot", seats: [8] }, ...quietChecks, { type: "best_move" }, { type: "finish_leaving" }, ...nominate(7), { type: "start_vote" }
     ])
 
     expect(sheet.rounds[1].type).toBe("main")

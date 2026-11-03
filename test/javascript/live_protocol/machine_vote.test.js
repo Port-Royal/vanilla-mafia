@@ -55,8 +55,11 @@ describe("entering the vote", () => {
     expect([skipped.state.stage, skipped.events.at(-1).metadata.reason]).toEqual(["night_shot", "single_candidate_zero"])
   })
 
-  it("votes on a single candidate on a later day", () => {
-    expect(dayOne().nominate(5).do({ type: "start_vote" }).state.stage).toBe("vote")
+  it("gives a single candidate on a later day every vote at once", () => {
+    const single = dayOne().nominate(5).do({ type: "start_vote" })
+
+    expect([single.kinds.slice(-4), single.events.at(-3).metadata.auto, single.state.leaving])
+      .toEqual([["speaker", "vote", "round_closed", "player_left"], seats, [5]])
   })
 
   it("writes only the move when the vote takes place", () => {
@@ -79,25 +82,25 @@ describe("entering the vote", () => {
 
 describe("vote_for", () => {
   it("records the candidate and the voters", () => {
-    expect(voting(5, 3).try({ type: "vote_for", seats: [1, 2] }).events).toEqual([{
+    expect(voting(5, 3, 4).try({ type: "vote_for", seats: [1, 2] }).events).toEqual([{
       kind: "vote", phase: "day", day_number: 0, actor_seat: null, target_seats: [5], text: null, metadata: { voters: [1, 2], auto: [] }
     }])
   })
 
   it("moves to the next candidate", () => {
-    expect(voting(5, 3).vote(1, 2).state.round).toMatchObject({ index: 1, votes: { 5: [1, 2] } })
+    expect(voting(5, 3, 4).vote(1, 2).state.round).toMatchObject({ index: 1, votes: { 5: [1, 2] } })
   })
 
   it("accepts no voters", () => {
-    expect(voting(5, 3).vote().state.round.votes[5]).toEqual([])
+    expect(voting(5, 3, 4).vote().state.round.votes[5]).toEqual([])
   })
 
   it("accepts a vote_for with no seats at all", () => {
-    expect(voting(5, 3).do({ type: "vote_for" }).state.round.votes[5]).toEqual([])
+    expect(voting(5, 3, 4).do({ type: "vote_for" }).state.round.votes[5]).toEqual([])
   })
 
   it("drops a voter marked twice", () => {
-    expect(voting(5, 3).vote(1, 1).state.round.votes[5]).toEqual([1])
+    expect(voting(5, 3, 4).vote(1, 1).state.round.votes[5]).toEqual([1])
   })
 
   it("refuses a player who already voted", () => {
@@ -112,23 +115,45 @@ describe("vote_for", () => {
     expect(game().try({ type: "vote_for", seats: [1] }).error).toBe("wrong_stage")
   })
 
-  it("gives the last candidate everybody who has not voted", () => {
-    const last = voting(5, 3).vote(1, 2, 3, 4, 5, 6).events.at(-1)
+  it("gives the last candidate everybody who has not voted without waiting for the judge", () => {
+    const produced = voting(5, 3).try({ type: "vote_for", seats: [1, 2, 3, 4, 5, 6] }).events
 
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).try({ type: "vote_for", seats: [] }).events[0].metadata)
-      .toEqual({ voters: [7, 8, 9, 10], auto: [7, 8, 9, 10] })
-    expect(last.kind).toBe("vote")
+    expect(produced.map((event) => event.kind)).toEqual(["vote", "vote", "round_closed", "player_left"])
+    expect(produced[1]).toMatchObject({ target_seats: [3], metadata: { voters: [7, 8, 9, 10], auto: [7, 8, 9, 10] } })
   })
 
-  it("separates marked voters from automatic ones", () => {
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).try({ type: "vote_for", seats: [7] }).events[0].metadata)
-      .toEqual({ voters: [7, 8, 9, 10], auto: [8, 9, 10] })
+  it("does not wait on a candidate before the last one", () => {
+    expect(voting(5, 3, 4).vote(1).state).toMatchObject({ stage: "vote", round: { index: 1 } })
+  })
+
+  it("counts only the players still at the table as automatic voters", () => {
+    const fewer = voting(1, 2, 3).vote(3, 4, 5, 6, 7, 8).remove(10).vote(1)
+
+    expect(fewer.events.filter((event) => event.kind === "vote").at(-1).metadata).toEqual({ voters: [2, 9], auto: [2, 9] })
+  })
+
+  it("closes on the earlier candidate when the later ones left the table", () => {
+    const decided = voting(1, 2, 3).vote(3, 4, 5, 6, 7, 8).remove(3)
+
+    expect(decided.events.filter((event) => event.kind === "vote").at(-1)).toMatchObject({ target_seats: [2], metadata: { auto: [1, 2, 9, 10] } })
+  })
+
+  it("refuses votes for a candidate who left the table", () => {
+    const decided = voting(1, 2, 3, 4).vote(3, 4, 5, 6, 7, 8).remove(2)
+
+    expect(decided.try({ type: "vote_for", seats: [9] }).error).toBe("not_alive")
+  })
+
+  it("records no votes for a candidate who left the table", () => {
+    const decided = voting(1, 2, 3, 4).vote(3, 4, 5, 6, 7, 8).remove(2).vote()
+
+    expect(decided.state.round.votes[2]).toEqual([])
   })
 })
 
 describe("the result", () => {
   it("removes a single leader", () => {
-    const done = voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote()
+    const done = voting(5, 3).vote(1, 2, 3, 4, 5, 6)
 
     expect(done.events.slice(-2)).toEqual([
       { kind: "round_closed", phase: "day", day_number: 0, actor_seat: null, target_seats: [5], text: null, metadata: { outcome: "leave", leaders: [5] } },
@@ -137,11 +162,11 @@ describe("the result", () => {
   })
 
   it("moves to the leaving speech", () => {
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote().state).toMatchObject({ stage: "leaving", leaving: [5], round: null })
+    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).state).toMatchObject({ stage: "leaving", leaving: [5], round: null })
   })
 
   it("marks the player as voted out", () => {
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote().state.players[5]).toMatchObject({ out: true, outReason: "voted" })
+    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).state.players[5]).toMatchObject({ out: true, outReason: "voted" })
   })
 
   it("closes at once when everybody alive has voted", () => {
@@ -170,21 +195,21 @@ describe("the result", () => {
     expect(tied.state).toMatchObject({ stage: "vote", round: { type: "repeat", candidates: [5, 3], index: 0, votes: {} } })
   })
 
-  const threeWayTie = () => game(ninePlayers).newDay().nominate(1, 2, 3).do({ type: "start_vote" }).vote(1, 2, 3).vote(4, 5, 6).vote(7, 8, 9)
+  const threeWayTie = () => game(ninePlayers).newDay().nominate(1, 2, 3).do({ type: "start_vote" }).vote(1, 2, 3).vote(4, 5, 6)
 
   it("repeats when every candidate ties", () => {
     expect(threeWayTie().state.round).toMatchObject({ type: "repeat", candidates: [1, 2, 3] })
   })
 
   it("repeats again when a repeat ties with fewer candidates", () => {
-    const tied = threeWayTie().vote(1, 2, 3, 4).vote(5, 6, 7, 8).vote()
+    const tied = threeWayTie().vote(1, 2, 3, 4).vote(5, 6, 7, 8)
 
     expect(tied.state.round).toMatchObject({ type: "repeat", candidates: [1, 2] })
   })
 
   it("removes the single leader of a repeat", () => {
-    const tied = voting(1, 2).vote(3, 4, 5, 6, 7).vote()
-    tied.vote(3, 4, 5, 6, 7, 8).vote()
+    const tied = voting(1, 2).vote(3, 4, 5, 6, 7)
+    tied.vote(3, 4, 5, 6, 7, 8)
 
     expect(tied.state.leaving).toEqual([1])
   })
@@ -194,10 +219,7 @@ const liftAt = (...candidates) => {
   const round = dayOne().nominate(...candidates).do({ type: "start_vote" })
   const tie = () => {
     const voters = seats.slice()
-    candidates.forEach((_candidate, index) => {
-      const share = voters.splice(0, index === candidates.length - 1 ? voters.length : Math.floor(10 / candidates.length))
-      round.vote(...share)
-    })
+    candidates.slice(0, -1).forEach(() => round.vote(...voters.splice(0, Math.floor(10 / candidates.length))))
   }
   tie()
   tie()
@@ -238,8 +260,8 @@ describe("the lift", () => {
 
 describe("when the lift is not called", () => {
   const tieTwice = (round, shares) => {
-    shares.forEach((share) => round.vote(...share))
-    shares.forEach((share) => round.vote(...share))
+    shares.slice(0, -1).forEach((share) => round.vote(...share))
+    shares.slice(0, -1).forEach((share) => round.vote(...share))
     return round
   }
 
@@ -477,7 +499,7 @@ describe("cancelling a sanction", () => {
   })
 
   it("does not bring back a player voted out", () => {
-    const done = voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote()
+    const done = voting(5, 3).vote(1, 2, 3, 4, 5, 6)
 
     expect(done.do({ type: "foul", seats: [1] }).do({ type: "cancel_foul", seats: [1] }).state.players[5].out).toBe(true)
   })
@@ -489,11 +511,11 @@ describe("removal and the vote", () => {
   })
 
   it("does not cancel anything when a player is voted out", () => {
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote().state.noVoteDay).toBeNull()
+    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).state.noVoteDay).toBeNull()
   })
 
   it("empties the leaving list on the new day", () => {
-    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).vote().newDay().state.leaving).toEqual([])
+    expect(voting(5, 3).vote(1, 2, 3, 4, 5, 6).newDay().state.leaving).toEqual([])
   })
 
   it("lets the speeches go on", () => {
@@ -513,7 +535,7 @@ describe("removal and the vote", () => {
   it("lets tomorrow vote after today's was cancelled", () => {
     const next = game().remove(5).newDay()
 
-    expect(next.nominate(1).do({ type: "start_vote" }).state.stage).toBe("vote")
+    expect(next.nominate(1).do({ type: "start_vote" }).kinds).not.toContain("vote_skipped")
   })
 
   it("drops a removed candidate", () => {
@@ -525,13 +547,13 @@ describe("removal and the vote", () => {
   })
 
   it("cancels tomorrow's vote during the leaving speech", () => {
-    const leaving = voting(5, 3).vote(1, 2, 3, 4, 6, 7).vote()
+    const leaving = voting(5, 3).vote(1, 2, 3, 4, 6, 7)
 
     expect(leaving.remove(9).state.noVoteDay).toBe(1)
   })
 
   it("keeps the same cancelled vote on a second removal in the leaving speech", () => {
-    const leaving = voting(5, 3).vote(1, 2, 3, 4, 6, 7).vote()
+    const leaving = voting(5, 3).vote(1, 2, 3, 4, 6, 7)
 
     expect(leaving.remove(9).remove(8).state.noVoteDay).toBe(1)
   })
@@ -573,13 +595,13 @@ describe("removal and the vote", () => {
   })
 
   it("does not call a removed leader to speak", () => {
-    const decided = voting(1, 2).vote(3, 4, 5, 6, 7, 8).remove(1).vote()
+    const decided = voting(1, 2, 3).vote(3, 4, 5, 6, 7, 8).remove(1).vote()
 
     expect([decided.state.stage, decided.state.leaving, decided.kinds]).toEqual(["night_shot", [], expect.not.arrayContaining(["nothing"])])
   })
 
   it("does not write a departure for a removed leader", () => {
-    const decided = voting(1, 2).vote(3, 4, 5, 6, 7, 8).remove(1).vote()
+    const decided = voting(1, 2, 3).vote(3, 4, 5, 6, 7, 8).remove(1).vote()
 
     expect(decided.kinds.at(-1)).toBe("round_closed")
   })
@@ -606,7 +628,7 @@ describe("the night stage", () => {
 
 describe("purity", () => {
   it("does not change the state while closing a round", () => {
-    const round = voting(5, 3).vote(1, 2, 3, 4, 5, 6)
+    const round = voting(5, 3, 4).vote(1, 2, 3, 4, 5, 6)
     const { state } = round
     const before = structuredClone(state)
 

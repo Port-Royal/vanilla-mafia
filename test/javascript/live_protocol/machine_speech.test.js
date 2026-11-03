@@ -463,7 +463,7 @@ describe("remove_player", () => {
   })
 
   it("does not move the speaker outside the speech", () => {
-    const voting = [...startGame, ...twoCandidates, { type: "start_vote" }, { type: "vote_for", seats: [2, 3, 4, 7, 8, 9] }, { type: "remove_player", seats: [1] }]
+    const voting = [...startGame, ...twoCandidates, { type: "set_speaker", seats: [3] }, { type: "nominate", seats: [7] }, { type: "start_vote" }, { type: "vote_for", seats: [2, 3, 4, 7, 8, 9] }, { type: "remove_player", seats: [1] }]
 
     expect(stateAfter(voting)).toMatchObject({ stage: "vote", speaker: null })
   })
