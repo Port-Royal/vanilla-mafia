@@ -47,6 +47,17 @@ class Judge::ProtocolsController < ApplicationController
     load_form_data
   end
 
+  # The new protocol form asks which number comes next at its competition, day and table.
+  def next_game_number
+    competition_id = params[:competition_id].presence
+    played_on = requested_played_on
+    return render(json: { last: nil, next: nil, hint: nil }) unless competition_id && played_on
+
+    last = Game.last_number_at(competition_id:, played_on:, table: requested_table)
+    hint = t("game_protocols.next_game_number.hint", number: last) if last
+    render json: { last:, next: last.to_i + 1, hint: }
+  end
+
   def autosave
     roles_were_public = @game.roles_public?
     result = AutosaveGameProtocolService.call(
@@ -123,6 +134,17 @@ class Judge::ProtocolsController < ApplicationController
   def unfinished_game_at_table
     table = game_params[:table_number].present? ? game_params[:table_number].to_i : Game::DEFAULT_TABLE
     Game.unfinished_from_past_day.at_table(table).order(:played_on, :id).first
+  end
+
+  def requested_played_on
+    Date.iso8601(params[:played_on])
+  rescue Date::Error
+    nil
+  end
+
+  # A blank table is table 1, as for games saved without one.
+  def requested_table
+    Integer(params[:table_number], exception: false) || Game::DEFAULT_TABLE
   end
 
   def after_create_path(game)

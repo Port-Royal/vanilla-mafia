@@ -43,6 +43,11 @@ class Game < ApplicationRecord
 
   scope :at_table, ->(number) { where(table_number: number == DEFAULT_TABLE ? [ number, nil ] : number) }
 
+  # The highest number a table has used on a day, nil when it has none yet: numbers restart every day at every table.
+  def self.last_number_at(competition_id:, played_on:, table:)
+    where(competition_id:, played_on:).at_table(table).maximum(:game_number)
+  end
+
   # The game an overlay of the table shows: the latest started game in progress today, otherwise
   # the last game of today, so the final reveal stays on screen until the next game starts.
   def self.current_at_table(number)
