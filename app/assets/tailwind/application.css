@@ -238,17 +238,21 @@
     overflow: hidden;
   }
 
-  .overlay-role-badge,
   .overlay-status-icon {
     position: absolute;
     top: 0.3em;
+    right: 0.3em;
     width: 1.6em;
     height: 1.6em;
   }
 
-  /* Read on stream at a glance: a solid colour per role and a large letter. */
+  /* Read on stream at a glance: a solid colour per role and a large letter. Anchored to the foot,
+     so it sits in the bottom-right corner of the photo right above the best move strip, or above
+     the name bar when there is no strip. */
   .overlay-role-badge {
-    left: 0.3em;
+    position: absolute;
+    right: 0.3em;
+    bottom: calc(100% + 0.3em);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -283,11 +287,7 @@
     display: none;
   }
 
-  .overlay-status-icon {
-    right: 0.3em;
-  }
-
-  /* Fouls as yellow pips, technical fouls as red diamonds, between the role badge and the status icon. */
+  /* Fouls as yellow pips, technical fouls as red diamonds, centred on the top edge; the status icon takes the top-right corner. */
   .overlay-fouls {
     position: absolute;
     top: 0.5em;
@@ -375,8 +375,8 @@
     filter: grayscale(1);
   }
 
-  .overlay-best-move,
-  .overlay-bottom {
+  /* Keeps the strip, the name bar and the badge above the sunk photo. */
+  .overlay-foot {
     position: relative;
     z-index: 1;
   }
