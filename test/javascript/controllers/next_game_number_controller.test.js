@@ -109,6 +109,33 @@ describe("NextGameNumberController", () => {
     })
   })
 
+  describe("when a prefilled choice stops having a suggestion", () => {
+    beforeEach(async () => {
+      await mount()
+      fetchMock.mockImplementation(() => reply({ last: null, next: null, hint: null }))
+      change("date", "")
+      await flush()
+    })
+
+    it("clears the prefilled number", () => {
+      expect(el("number").value).toBe("")
+    })
+  })
+
+  describe("when a typed choice stops having a suggestion", () => {
+    beforeEach(async () => {
+      await mount()
+      type("8")
+      fetchMock.mockImplementation(() => reply({ last: null, next: null, hint: null }))
+      change("date", "")
+      await flush()
+    })
+
+    it("keeps the typed number", () => {
+      expect(el("number").value).toBe("8")
+    })
+  })
+
   describe("when the form already holds a number", () => {
     beforeEach(() => mount({ number: "12" }))
 

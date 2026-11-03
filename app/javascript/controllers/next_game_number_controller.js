@@ -25,7 +25,7 @@ export default class extends Controller {
 
     this.hintTarget.textContent = suggestion.hint || ""
     this.hintTarget.hidden = !suggestion.hint
-    if (suggestion.next && !this.typed) this.numberTarget.value = suggestion.next
+    if (!this.typed) this.numberTarget.value = suggestion.next || ""
   }
 
   // The stage select falls back to its competition, so its value is where the game is saved.
