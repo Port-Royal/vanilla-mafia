@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   authenticate :user, ->(u) { u.can_manage_protocols? } do
     namespace :judge do
       resources :protocols, only: [ :index, :new, :create, :edit, :update ] do
+        get :next_game_number, on: :collection
         member do
           patch :autosave
           get :live, to: "live_protocols#show"

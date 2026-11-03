@@ -75,6 +75,132 @@ RSpec.describe "Judge::Protocols" do
     end
   end
 
+  describe "GET /judge/protocols/next_game_number" do
+    let_it_be(:day) { Date.new(2026, 11, 3) }
+    let_it_be(:last_game) { create(:game, competition:, played_on: day, table_number: 2, game_number: 4) }
+
+    let(:query) { { competition_id: competition.id, played_on: day.iso8601, table_number: "2" } }
+    let(:body) { response.parsed_body }
+
+    context "when user is a judge" do
+      before do
+        sign_in judge
+        get next_game_number_judge_protocols_path, params: query
+      end
+
+      context "when the table already has games that day" do
+        it "returns the last number, the next one and the hint" do
+          expect(body).to eq("last" => 4, "next" => 5, "hint" => I18n.t("game_protocols.next_game_number.hint", number: 4))
+        end
+      end
+
+      context "when the table has no games that day" do
+        let(:query) { super().merge(table_number: "3") }
+
+        it "starts from 1 without a hint" do
+          expect(body).to eq("last" => nil, "next" => 1, "hint" => nil)
+        end
+      end
+
+      context "when the table is blank" do
+        let(:query) { super().merge(table_number: "") }
+
+        it "looks at table 1, where blank-table games belong" do
+          expect(body).to eq("last" => nil, "next" => 1, "hint" => nil)
+        end
+      end
+
+      context "when the table is not a number" do
+        let(:query) { super().merge(table_number: "abc") }
+
+        it "falls back to table 1" do
+          expect(body["next"]).to eq(1)
+        end
+      end
+
+      context "when the date is blank" do
+        let(:query) { super().merge(played_on: "") }
+
+        it "suggests nothing" do
+          expect(body).to eq("last" => nil, "next" => nil, "hint" => nil)
+        end
+      end
+
+      context "when the date is not a date" do
+        let(:query) { super().merge(played_on: "soon") }
+
+        it "suggests nothing" do
+          expect(body).to eq("last" => nil, "next" => nil, "hint" => nil)
+        end
+      end
+
+      context "when the competition is blank" do
+        let(:query) { super().merge(competition_id: "") }
+
+        it "suggests nothing" do
+          expect(body).to eq("last" => nil, "next" => nil, "hint" => nil)
+        end
+      end
+    end
+
+    context "when table 1 holds games" do
+      let_it_be(:blank_table_game) { create(:game, competition:, played_on: day, table_number: nil, game_number: 6) }
+      let_it_be(:first_table_game) { create(:game, competition:, played_on: day, table_number: 1, game_number: 8) }
+
+      before do
+        sign_in judge
+        get next_game_number_judge_protocols_path, params: query
+      end
+
+      context "when the table is blank" do
+        let(:query) { super().merge(table_number: "") }
+
+        it "counts games with and without a table number" do
+          expect(body.values_at("last", "next")).to eq([ 8, 9 ])
+        end
+      end
+
+      context "when the table is not sent" do
+        let(:query) { super().except(:table_number) }
+
+        it "looks at table 1" do
+          expect(body.values_at("last", "next")).to eq([ 8, 9 ])
+        end
+      end
+    end
+
+    context "when a required value is not sent" do
+      before { sign_in judge }
+
+      %i[competition_id played_on].each do |key|
+        it "suggests nothing without #{key}" do
+          get next_game_number_judge_protocols_path, params: query.except(key)
+
+          expect(body).to eq("last" => nil, "next" => nil, "hint" => nil)
+        end
+      end
+    end
+
+    context "when user cannot manage protocols" do
+      before do
+        sign_in create(:user)
+        get next_game_number_judge_protocols_path, params: query
+      end
+
+      it "returns not found" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is not signed in" do
+      before { get next_game_number_judge_protocols_path, params: query }
+
+      it "redirects to sign in" do
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
   describe "GET /judge/protocols/new" do
     context "when user is admin" do
       before do
@@ -88,6 +214,15 @@ RSpec.describe "Judge::Protocols" do
 
       it "shows no overlay link for an unsaved game" do
         expect(response.parsed_body.css("[data-controller='clipboard']")).to be_empty
+      end
+
+      it "wires the next game number lookup" do
+        expect(response.parsed_body.at_css("[data-controller='next-game-number']")["data-next-game-number-url-value"])
+          .to eq(next_game_number_judge_protocols_path)
+      end
+
+      it "renders an empty hint next to the game number" do
+        expect(response.parsed_body.at_css("#game_number_hint[data-next-game-number-target='hint'][hidden]").text).to be_empty
       end
 
       it "renders the new protocol form" do
@@ -573,6 +708,19 @@ RSpec.describe "Judge::Protocols" do
         get edit_judge_protocol_path(live_game)
 
         assert_select "a[href=?]", live_judge_protocol_path(live_game), count: 0
+      end
+    end
+
+    context "with a saved game number" do
+      let(:saved_game) { create(:game) }
+
+      before do
+        sign_in admin
+        get edit_judge_protocol_path(saved_game)
+      end
+
+      it "does not look up the next game number" do
+        assert_select "[data-controller='next-game-number'], #game_number_hint", count: 0
       end
     end
 

@@ -2,7 +2,8 @@
   <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
     <%= t("game_protocols.form.game_panel") %>
   </div>
-  <div class="divide-y">
+  <% next_game_number_url = local_assigns[:next_game_number_url] %>
+  <div class="divide-y" <%= tag.attributes(data: { controller: "next-game-number", next_game_number_url_value: next_game_number_url }) if next_game_number_url %>>
     <% selected_competition = @game.competition %>
     <% selected_parent_id = selected_competition ? (selected_competition.parent_id || selected_competition.id) : nil %>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2"
@@ -11,14 +12,14 @@
       <label class="w-40 font-semibold text-sm text-right" for="game_competition_id"><%= t("game_protocols.form.competition") %></label>
       <div class="flex w-full gap-2">
         <select name="game[competition_id]" id="game_competition_id" class="w-1/3 border border-gray-300 rounded-md px-3 py-2 text-sm" required
-                data-cascade-select-target="parent" data-action="cascade-select#updateChild">
+                data-cascade-select-target="parent" data-next-game-number-target="competition" data-action="cascade-select#updateChild next-game-number#refresh">
           <option value=""></option>
           <% @competitions.each do |comp| %>
             <option value="<%= comp.id %>" <%= "selected" if comp.id == selected_parent_id %>><%= comp.name %></option>
           <% end %>
         </select>
         <select name="game[stage_id]" id="game_stage_id" class="w-1/3 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                data-cascade-select-target="child"
+                data-cascade-select-target="child" data-next-game-number-target="stage" data-action="next-game-number#refresh"
                 data-selected-value="<%= selected_competition && selected_competition.parent_id ? selected_competition.id : '' %>">
           <option value=""></option>
           <% (@stages_by_competition[selected_parent_id] || []).each do |stage| %>
@@ -33,18 +34,26 @@
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
       <div class="w-full flex flex-col sm:flex-row sm:items-center gap-2">
-        <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required />
+        <div class="w-full">
+          <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required
+                 data-next-game-number-target="number" data-action="input->next-game-number#numberTyped" />
+          <% if next_game_number_url %>
+            <p id="game_number_hint" class="mt-1 text-xs text-gray-500" data-next-game-number-target="hint" hidden></p>
+          <% end %>
+        </div>
         <label class="w-40 self-center sm:w-auto shrink-0 whitespace-nowrap font-semibold text-sm text-right sm:pl-2" for="game_games_total"><%= Game.human_attribute_name(:games_total) %></label>
         <input type="number" name="game[games_total]" id="game_games_total" value="<%= @game.games_total %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
       </div>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_table_number"><%= Game.human_attribute_name(:table_number) %></label>
-      <input type="number" name="game[table_number]" id="game_table_number" value="<%= @game.table_number %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      <input type="number" name="game[table_number]" id="game_table_number" value="<%= @game.table_number %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+             data-next-game-number-target="table" data-action="next-game-number#refresh" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_played_on"><%= Game.human_attribute_name(:played_on) %></label>
-      <input type="date" name="game[played_on]" id="game_played_on" value="<%= @game.played_on %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      <input type="date" name="game[played_on]" id="game_played_on" value="<%= @game.played_on %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+             data-next-game-number-target="date" data-action="next-game-number#refresh" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
       <label class="w-40 font-semibold text-sm text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>

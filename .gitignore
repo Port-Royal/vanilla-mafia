@@ -64,3 +64,4 @@ coverage/*
 /brakeman.sarif
 .claude/scheduled_tasks.lock
 .beads.gate.lock
+.vitest/json/output.json
