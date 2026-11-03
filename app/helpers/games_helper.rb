@@ -1,5 +1,6 @@
 module GamesHelper
-  OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia peace].freeze
+  # Civilians get no badge: only the roles the stream needs to spot carry one.
+  OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia].freeze
   OVERLAY_ELIMINATED_STATUSES = %i[killed_by_mafia voted_out banned].freeze
   OVERLAY_STATUS_ICONS_DIR = Rails.root.join("app/assets/images/overlay/status")
   # Best move cells: black when the named player is mafia (a hit), red when a civilian (a miss).

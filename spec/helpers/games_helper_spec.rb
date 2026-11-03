@@ -35,8 +35,7 @@ RSpec.describe GamesHelper do
     {
       "sheriff" => "Ш",
       "don" => "Д",
-      "mafia" => "М",
-      "peace" => "К"
+      "mafia" => "М"
     }.each do |role_code, letter|
       context "when the role is #{role_code}" do
         it "returns the #{letter} letter" do
@@ -45,7 +44,7 @@ RSpec.describe GamesHelper do
       end
     end
 
-    [ nil, "unknown" ].each do |role_code|
+    [ nil, "unknown", "peace" ].each do |role_code|
       context "when the role is #{role_code.inspect}" do
         it "returns nil" do
           expect(helper.overlay_role_badge(role_code)).to be_nil
@@ -55,13 +54,13 @@ RSpec.describe GamesHelper do
   end
 
   describe "#overlay_role_badge_role" do
-    %w[sheriff don mafia peace].each do |role_code|
+    %w[sheriff don mafia].each do |role_code|
       it "keeps #{role_code}" do
         expect(helper.overlay_role_badge_role(role_code)).to eq(role_code)
       end
     end
 
-    [ nil, "unknown" ].each do |role_code|
+    [ nil, "unknown", "peace" ].each do |role_code|
       it "gives nothing for #{role_code.inspect}" do
         expect(helper.overlay_role_badge_role(role_code)).to be_nil
       end
