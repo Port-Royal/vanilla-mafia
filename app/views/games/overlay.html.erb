@@ -62,19 +62,21 @@
           <% end %>
         </div>
 
-        <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>" <%= tag.attributes(data: { role: overlay_role_badge_role(seat_roles[seat]) }) %>><%= overlay_role_badge(seat_roles[seat]) %></div>
-
         <div class="overlay-fouls" data-game-overlay-target="fouls" data-seat="<%= seat %>"><% overlay_foul_pips(@fouls[seat]).each do |pip| %><span class="overlay-<%= pip %>"></span><% end %></div>
 
         <div class="overlay-status-icon" data-game-overlay-target="status" data-seat="<%= seat %>"><%= overlay_status_icon(status) %></div>
 
-        <div class="overlay-best-move" data-game-overlay-target="bestMove" data-seat="<%= seat %>"><% overlay_best_move_cells(participation, seat_roles).each do |named_seat, colour| %><span class="overlay-best-move-cell" data-named-seat="<%= named_seat %>" data-colour="<%= colour %>"><%= named_seat %></span><% end %></div>
+        <div class="overlay-foot">
+          <div class="overlay-role-badge" data-game-overlay-target="roleBadge" data-seat="<%= seat %>" <%= tag.attributes(data: { role: overlay_role_badge_role(seat_roles[seat]) }) %>><%= overlay_role_badge(seat_roles[seat]) %></div>
 
-        <div class="overlay-bottom flex items-stretch bg-black/70 font-semibold">
-          <div class="overlay-seat flex-none bg-white/15 px-[0.4em] text-center"><%= seat %></div>
-          <div class="overlay-name min-w-0 flex-1 truncate px-[0.4em]"
-               data-game-overlay-target="playerName"
-               data-seat="<%= seat %>"><%= player ? player.name : "" %></div>
+          <div class="overlay-best-move" data-game-overlay-target="bestMove" data-seat="<%= seat %>"><% overlay_best_move_cells(participation, seat_roles).each do |named_seat, colour| %><span class="overlay-best-move-cell" data-named-seat="<%= named_seat %>" data-colour="<%= colour %>"><%= named_seat %></span><% end %></div>
+
+          <div class="overlay-bottom flex items-stretch bg-black/70 font-semibold">
+            <div class="overlay-seat flex-none bg-white/15 px-[0.4em] text-center"><%= seat %></div>
+            <div class="overlay-name min-w-0 flex-1 truncate px-[0.4em]"
+                 data-game-overlay-target="playerName"
+                 data-seat="<%= seat %>"><%= player ? player.name : "" %></div>
+          </div>
         </div>
       </div>
     <% end %>
