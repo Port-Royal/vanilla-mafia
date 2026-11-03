@@ -23,6 +23,7 @@ export default class extends Controller {
     this.events = events
     this.ui = emptyUi()
     this.willBlurred = false
+    this.scroll = {}
     this.onKeydown = this.keydown.bind(this)
     this.onKeyup = this.keyup.bind(this)
     this.onBlur = this.hideRoles.bind(this)
@@ -221,12 +222,24 @@ export default class extends Controller {
 
   render(focus) {
     const { state } = this
+    this.saveScroll()
     this.element.innerHTML = renderScreen(state, this.ui, this.textsValue, this.hint, this.connection)
+    this.restoreScroll()
     const field = this.fieldToFocus(state, focus)
     if (field) {
       field.focus()
       field.setSelectionRange(field.value.length, field.value.length)
     }
+  }
+
+  // Every render replaces the panels, so their scroll offsets are kept by name: the seat list,
+  // and each tab of the side panel on its own.
+  saveScroll() {
+    this.element.querySelectorAll("[data-scroll]").forEach((panel) => { this.scroll[panel.dataset.scroll] = panel.scrollTop })
+  }
+
+  restoreScroll() {
+    this.element.querySelectorAll("[data-scroll]").forEach((panel) => { panel.scrollTop = this.scroll[panel.dataset.scroll] ?? 0 })
   }
 
   fieldToFocus(state, focus) {

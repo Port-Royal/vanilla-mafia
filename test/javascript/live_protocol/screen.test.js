@@ -115,6 +115,10 @@ describe("the tabs", () => {
     expect(renderScreen(stateAfter(dayActions), emptyUi(), texts).match(/data-tab="/g)).toHaveLength(2)
   })
 
+  it("names the scrolling panels after the seat list and the open tab", () => {
+    expect(renderScreen(stateAfter(dayActions), { ...emptyUi(), tab: "sheet" }, texts).match(/data-scroll="[a-z]+"/g)).toEqual(['data-scroll="seats"', 'data-scroll="sheet"'])
+  })
+
   it("shows the record by default", () => {
     expect(renderScreen(stateAfter(dayActions), emptyUi(), texts)).toContain('class="lp-log"')
   })
