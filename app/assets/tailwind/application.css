@@ -381,6 +381,18 @@
     z-index: 1;
   }
 
+  /* The nickname reads on stream: a size up from the canvas text, still in em off the tile width.
+     The seat cell stretches to the taller bar and centres its number; long names truncate on one line. */
+  .overlay-name {
+    font-size: 1.18em;
+  }
+
+  .overlay-seat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
 }
 
 @keyframes focus-toast-out {
