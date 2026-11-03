@@ -138,16 +138,24 @@ describe("vote_for", () => {
     expect(decided.events.filter((event) => event.kind === "vote").at(-1)).toMatchObject({ target_seats: [2], metadata: { auto: [1, 2, 9, 10] } })
   })
 
-  it("refuses votes for a candidate who left the table", () => {
+  it("skips a candidate who left the table without waiting for the judge", () => {
     const decided = voting(1, 2, 3, 4).vote(3, 4, 5, 6, 7, 8).remove(2)
 
-    expect(decided.try({ type: "vote_for", seats: [9] }).error).toBe("not_alive")
+    expect(decided.state.round).toMatchObject({ index: 2, votes: { 2: [] } })
   })
 
-  it("records no votes for a candidate who left the table", () => {
-    const decided = voting(1, 2, 3, 4).vote(3, 4, 5, 6, 7, 8).remove(2).vote()
+  it("skips a candidate who left the table once the vote reaches him", () => {
+    const decided = voting(1, 2, 3, 4, 5).vote(3, 4, 5, 6, 7, 8).remove(3).vote(9)
 
-    expect(decided.state.round.votes[2]).toEqual([])
+    expect(decided.state.round).toMatchObject({ index: 3, votes: { 2: [9], 3: [] } })
+  })
+
+  it("refuses votes for a candidate who left the table", () => {
+    const decided = voting(1, 2, 3, 4).vote(3, 4, 5, 6, 7, 8).remove(2)
+    const state = structuredClone(decided.state)
+    state.round.index = 1
+
+    expect(decide(state, { type: "vote_for", seats: [9] }).error).toBe("not_alive")
   })
 })
 
