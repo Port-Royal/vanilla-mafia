@@ -304,9 +304,9 @@ export function renderScreen(state, ui, texts, hint = "", connection = "saved") 
   return `<div class="lp-top"><span class="lp-status${problem ? " lp-status--bad" : ""}" role="status">${escapeHtml(texts.connection[connection])}</span><span class="lp-meta">${escapeHtml(status)}</span></div>
     <div class="lp-steps">${stripHtml(state, texts)}</div>
     <div class="lp-main">
-      <div class="lp-col">${SEATS.map((seat) => seatHtml(state, ui, texts, seat)).join("")}</div>
+      <div class="lp-col" data-scroll="seats">${SEATS.map((seat) => seatHtml(state, ui, texts, seat)).join("")}</div>
       <div class="lp-col lp-work" id="lp-work">${STAGE_VIEWS[state.stage](state, ui, texts)}</div>
-      <div class="lp-col">${tabsHtml(ui, texts)}${ui.tab === "sheet" ? renderSheet(state, ui, texts) : logPanel(state, ui, texts, log)}</div>
+      <div class="lp-col" data-scroll="${ui.tab}">${tabsHtml(ui, texts)}${ui.tab === "sheet" ? renderSheet(state, ui, texts) : logPanel(state, ui, texts, log)}</div>
     </div>
     ${hint ? `<div class="lp-flash" role="status">${escapeHtml(hint)}</div>` : ""}`
 }
