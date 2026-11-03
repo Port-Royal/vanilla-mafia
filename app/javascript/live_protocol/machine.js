@@ -472,11 +472,13 @@ function lastCandidate(state) {
   return round.candidates.slice(round.index + 1).every((seat) => !alive(state, seat))
 }
 
-// The non-voters can only vote for the last candidate (4.4.9), so the machine gives them to it
-// without waiting for the judge. Undo takes this back together with the action that led here.
+// Steps the judge has no say in: a candidate who left the table gets no votes, and the non-voters
+// can only vote for the last candidate (4.4.9). Undo takes these back with the action that led here.
 function autoVote(state) {
-  if (state.stage !== "vote" || state.round.type === "lift" || !lastCandidate(state)) return []
-  return voteFor(state, { seats: [] }).events
+  if (state.stage !== "vote" || state.round.type === "lift") return []
+  if (alive(state, state.round.candidates[state.round.index]) && !lastCandidate(state)) return []
+  const { events } = voteFor(state, { seats: [] })
+  return [...events, ...autoVote(simulate(state, events))]
 }
 
 function voteFor(state, action) {
