@@ -4,14 +4,15 @@ require "rails_helper"
 # when there is one and above the name bar otherwise, on alive and eliminated tiles alike.
 RSpec.describe "Game overlay role badge position" do
   let_it_be(:role_sheriff) { create(:role, code: "sheriff") }
-  let_it_be(:role_peace) { create(:role, code: "peace") }
+  let_it_be(:role_mafia) { create(:role, code: "mafia") }
+  let_it_be(:role_don) { create(:role, code: "don") }
   let_it_be(:game) { create(:game) }
   let_it_be(:alive_with_best_move) do
     create(:game_participation, game: game, player: create(:player), seat: 1, role_code: "sheriff", best_move_seats: [ 2, 3 ])
   end
-  let_it_be(:alive) { create(:game_participation, game: game, player: create(:player), seat: 2, role_code: "peace") }
+  let_it_be(:alive) { create(:game_participation, game: game, player: create(:player), seat: 2, role_code: "mafia") }
   let_it_be(:eliminated_with_best_move) do
-    create(:game_participation, game: game, player: create(:player), seat: 3, role_code: "peace", status: :killed_by_mafia, best_move_seats: [ 1, 2 ])
+    create(:game_participation, game: game, player: create(:player), seat: 3, role_code: "don", status: :killed_by_mafia, best_move_seats: [ 1, 2 ])
   end
   let_it_be(:eliminated) { create(:game_participation, game: game, player: create(:player), seat: 4, role_code: "sheriff", status: :voted_out) }
 
