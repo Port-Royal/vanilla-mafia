@@ -196,6 +196,7 @@ en:
         repeat: "Repeat vote"
         lift: "Lift everyone: %{seats}"
         marks: "Voting"
+        not_voted: "Not voted yet: %{seats}"
         hint: "Seats of the voters, press again to unmark. Enter moves on"
         go: "Next"
       night:

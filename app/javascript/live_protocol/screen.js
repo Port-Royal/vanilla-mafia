@@ -34,6 +34,13 @@ export function willPreview(raw, texts) {
   return parts.join("; ")
 }
 
+// Players at the table who have neither voted for an earlier candidate nor are marked now.
+function notVotedHtml(state, ui, texts) {
+  const voted = new Set([...Object.values(state.round.votes).flat(), ...ui.marks])
+  const seats = SEATS.filter((seat) => state.players[seat] && !state.players[seat].out && !voted.has(seat))
+  return seats.length ? `<div class="lp-not-voted">${fill(texts.vote.not_voted, { seats: seats.join(", ") })}</div>` : ""
+}
+
 // The deal sheriff stays in ui.deal so an undo back into the deal brings it back, but it is a
 // pick only while the deal is open.
 function seatMark(state, ui, seat) {
@@ -142,6 +149,7 @@ const STAGE_VIEWS = {
       ${pendingHtml(state, ui, texts)}
       <div class="lp-group">${rows}</div>
       ${prompt(texts.vote.marks, ui.marks, texts.vote.hint)}
+      ${notVotedHtml(state, ui, texts)}
       ${sanctionsHtml(texts)}
       <div class="lp-bar">${button("Enter", "Enter", texts.vote.go, { big: true })}${finishHtml(state, texts)}</div>`
   },

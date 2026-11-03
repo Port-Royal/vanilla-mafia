@@ -466,6 +466,19 @@ function closingEvents(state) {
   return events.concat(departing.flatMap((seat) => write(state, "player_left", { target_seats: [seat], metadata: { reason: "voted" } }).events))
 }
 
+// No candidate still at the table is left after the current one. A player who left can get no votes.
+function lastCandidate(state) {
+  const { round } = state
+  return round.candidates.slice(round.index + 1).every((seat) => !alive(state, seat))
+}
+
+// The non-voters can only vote for the last candidate (4.4.9), so the machine gives them to it
+// without waiting for the judge. Undo takes this back together with the action that led here.
+function autoVote(state) {
+  if (state.stage !== "vote" || state.round.type === "lift" || !lastCandidate(state)) return []
+  return voteFor(state, { seats: [] }).events
+}
+
 function voteFor(state, action) {
   if (state.stage !== "vote") return refuse("wrong_stage")
 
@@ -476,10 +489,13 @@ function voteFor(state, action) {
   if (marked.some((seat) => voted.has(seat))) return refuse("already_voted")
 
   const lift = round.type === "lift"
-  const last = round.index === round.candidates.length - 1
-  const auto = lift || !last ? [] : aliveSeats(state).filter((seat) => !voted.has(seat) && !marked.includes(seat))
+  const candidate = round.candidates[round.index]
+  if (!lift && !alive(state, candidate) && marked.length > 0) return refuse("not_alive")
+
+  const last = lastCandidate(state)
+  const auto = lift || !last || !alive(state, candidate) ? [] : aliveSeats(state).filter((seat) => !voted.has(seat) && !marked.includes(seat))
   const metadata = { voters: [...marked, ...auto], auto, ...(lift ? { lift } : {}) }
-  const target_seats = lift ? round.candidates : [round.candidates[round.index]]
+  const target_seats = lift ? round.candidates : [candidate]
   const { events } = write(state, "vote", { target_seats, metadata })
 
   const after = simulate(state, events)
@@ -575,13 +591,13 @@ function consequences(before, after, events) {
   if (after.stage === NIGHT_DONE) return write(after, "night_closed").events
   if (before.stage === "speech" && after.stage === "vote") {
     const reason = skipReason(after)
-    return reason ? write(after, "vote_skipped", { metadata: { reason } }).events : []
+    if (reason) return write(after, "vote_skipped", { metadata: { reason } }).events
   }
   const removed = events.some((event) => event.metadata.reason === "removed")
   if (removed && after.stage === "vote" && !voteDecided(after.round, aliveSeats(after))) {
     return write(after, "round_cancelled").events
   }
-  return []
+  return autoVote(after)
 }
 
 const SANCTION_ACTIONS = { remove_player: removePlayer, foul: sanction, tech: sanction, cancel_foul: cancelSanction, cancel_tech: cancelSanction }

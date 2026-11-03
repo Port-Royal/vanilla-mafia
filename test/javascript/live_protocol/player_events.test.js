@@ -61,7 +61,7 @@ describe("playerEvents", () => {
     })
 
     it("count an automatic vote", () => {
-      const done = stateAfter([...voting, { type: "vote_for", seats: [1] }, { type: "vote_for", seats: [] }])
+      const done = stateAfter([...voting, { type: "vote_for", seats: [1] }])
 
       expect(kinds(playerEvents(done, 9).actions)).toEqual(["vote"])
     })
@@ -70,7 +70,7 @@ describe("playerEvents", () => {
   it("leaves out every stage move of a whole game", () => {
     const game = stateAfter([
       ...start, { type: "nominate", seats: [5] }, { type: "next_speaker" }, { type: "nominate", seats: [6] }, { type: "start_vote" },
-      { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }, { type: "vote_for", seats: [] }, { type: "best_move" }, { type: "finish_leaving" },
+      { type: "vote_for", seats: [1, 2, 3, 4, 7, 8] }, { type: "best_move" }, { type: "finish_leaving" },
       { type: "miss_shot", miss: "no_shot" }, { type: "miss_shot", miss: "no_shot" }, { type: "miss_shot", miss: "no_shot" },
       { type: "don_check" }, { type: "sheriff_check" }, { type: "start_vote" }, { type: "finish_game", result: "draw" }
     ])

@@ -20,8 +20,9 @@ RSpec.describe "Live protocol console" do
     start_game.call
     press.call("n", "3", :space, "n", "4", "v")
     expect(page).to have_css(".lp-vote--now")
-    press.call("1", "2", "5", "6", "7", "8", :enter)
-    expect(page).to have_css(".lp-vote--now", text: "4")
+    expect(page).to have_css(".lp-not-voted", exact_text: I18n.t("live_protocols.screen.vote.not_voted", seats: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10"))
+    press.call("1", "2", "5", "6", "7", "8")
+    expect(page).to have_css(".lp-not-voted", exact_text: I18n.t("live_protocols.screen.vote.not_voted", seats: "3, 4, 9, 10"))
     press.call(:enter)
     expect(page).to have_text(I18n.t("live_protocols.screen.best.eyebrow"))
     press.call(:enter)
