@@ -410,6 +410,44 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe '.last_number_at' do
+    subject(:last_number) { described_class.last_number_at(competition_id: competition.id, played_on: day, table:) }
+
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:other_competition) { create(:competition, :series) }
+    let_it_be(:day) { Date.new(2026, 11, 3) }
+
+    before_all do
+      create(:game, competition:, played_on: day, table_number: 1, game_number: 3)
+      create(:game, competition:, played_on: day, table_number: nil, game_number: 4)
+      create(:game, competition:, played_on: day, table_number: 2, game_number: 7)
+      create(:game, competition:, played_on: day - 1, table_number: 1, game_number: 9)
+      create(:game, competition: other_competition, played_on: day, table_number: 1, game_number: 8)
+    end
+
+    context 'when the table is 1' do
+      let(:table) { 1 }
+
+      it 'takes the highest number of the day, counting games without a table' do
+        expect(last_number).to eq(4)
+      end
+    end
+
+    context 'when the table is 2' do
+      let(:table) { 2 }
+
+      it 'takes only that table' do
+        expect(last_number).to eq(7)
+      end
+    end
+
+    context 'when the table has no games that day' do
+      let(:table) { 3 }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
   describe '.current_at_table' do
     subject(:current) { described_class.current_at_table(1) }
 
