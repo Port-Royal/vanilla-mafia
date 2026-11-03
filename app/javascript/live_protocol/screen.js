@@ -34,8 +34,10 @@ export function willPreview(raw, texts) {
   return parts.join("; ")
 }
 
+// The deal sheriff stays in ui.deal so an undo back into the deal brings it back, but it is a
+// pick only while the deal is open.
 function seatMark(state, ui, seat) {
-  return ui.marks.includes(seat) || ui.pending?.seats.includes(seat) || ui.deal.sheriff === seat
+  return ui.marks.includes(seat) || ui.pending?.seats.includes(seat) || (state.stage === "deal" && ui.deal.sheriff === seat)
 }
 
 function seatHtml(state, ui, texts, seat) {

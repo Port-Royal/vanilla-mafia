@@ -169,3 +169,20 @@ describe("the player filter", () => {
     expect(renderScreen(stateAfter(over), emptyUi(), texts)).toContain("filter.hint")
   })
 })
+
+describe("the deal sheriff highlight", () => {
+  const dealUi = { ...emptyUi(), deal: { mode: "static", sheriff: 10, text: "" } }
+  const picked = (html) => (html.match(/lp-seat--picked" data-seat="\d+"/g) || []).map((match) => Number(match.match(/\d+/)[0]))
+
+  it("marks the chosen sheriff during the deal", () => {
+    expect(picked(renderScreen(stateAfter([dayActions[0]]), dealUi, texts))).toEqual([10])
+  })
+
+  it("marks no seat once the deal is finished", () => {
+    expect(picked(renderScreen(stateAfter(dayActions), dealUi, texts))).toEqual([])
+  })
+
+  it("still marks the seats picked in the current stage", () => {
+    expect(picked(renderScreen(stateAfter(dayActions), { ...dealUi, marks: [3] }, texts))).toEqual([3])
+  })
+})
