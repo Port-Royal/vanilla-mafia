@@ -515,7 +515,8 @@ function check(state, action, kind, step, role, resultOf) {
   if (state.stage !== step) return refuse("wrong_stage")
   const chosen = action.seats ?? []
   if (chosen.length > 1) return refuse("one_seat_required")
-  if (!chosen.every((seat) => alive(state, seat))) return refuse("not_alive")
+  // A player who left the table can still be checked; only an empty seat cannot.
+  if (!chosen.every((seat) => state.players[seat])) return refuse("seat_empty")
   const result = chosen.length ? resultOf(chosen[0]) : null
   return write(state, kind, { actor_seat: seatOfRole(state, role), target_seats: chosen, metadata: { result } })
 }

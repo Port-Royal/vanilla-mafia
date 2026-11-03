@@ -166,8 +166,29 @@ describe("the checks", () => {
     expect(killedNightOne().do({ type: "don_check" }).try({ type: "sheriff_check", seats: [] }).events[0].metadata.result).toBeNull()
   })
 
-  it("refuses a dead target", () => {
-    expect(killedNightOne().try({ type: "don_check", seats: [5] }).error).toBe("not_alive")
+  it("lets the don check the seat killed this night", () => {
+    expect(killedNightOne().try({ type: "don_check", seats: [5] }).events[0]).toMatchObject({ target_seats: [5], metadata: { result: "not_sheriff" } })
+  })
+
+  it("shows the don a killed sheriff", () => {
+    expect(nightOne().shoot(2).try({ type: "don_check", seats: [2] }).events[0].metadata.result).toBe("sheriff")
+  })
+
+  it.each([[3, "black"], [6, "red"]])("lets the sheriff check voted-out seat %i and shows %s", (seat, result) => {
+    const night = zeroVoteOut(seat, [5, 7, 8, 9, 10, 1], seat === 6 ? 7 : 6).do({ type: "vote_for", seats: [] })
+      .do({ type: "best_move" }).do({ type: "finish_leaving" }).shoot(8).do({ type: "don_check" })
+
+    expect(night.try({ type: "sheriff_check", seats: [seat] }).events[0]).toMatchObject({ target_seats: [seat], metadata: { result } })
+  })
+
+  it("lets the sheriff check a removed seat", () => {
+    const night = nightOne().do({ type: "remove_player", seats: [6] }).missAll().do({ type: "don_check" })
+
+    expect(night.try({ type: "sheriff_check", seats: [6] }).events[0].metadata.result).toBe("red")
+  })
+
+  it("refuses a seat with no player", () => {
+    expect(killedNightOne().try({ type: "don_check", seats: [11] }).error).toBe("seat_empty")
   })
 
   it("refuses several targets", () => {
