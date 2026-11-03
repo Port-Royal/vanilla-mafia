@@ -176,7 +176,11 @@ describe("the player filter", () => {
 
 describe("the deal sheriff highlight", () => {
   const dealUi = { ...emptyUi(), deal: { mode: "static", sheriff: 10, text: "" } }
-  const picked = (html) => (html.match(/lp-seat--picked" data-seat="\d+"/g) || []).map((match) => Number(match.match(/\d+/)[0]))
+  const picked = (html) => {
+    const root = document.createElement("div")
+    root.innerHTML = html
+    return [...root.querySelectorAll(".lp-seat--picked")].map((seat) => Number(seat.dataset.seat))
+  }
 
   it("marks the chosen sheriff during the deal", () => {
     expect(picked(renderScreen(stateAfter([dayActions[0]]), dealUi, texts))).toEqual([10])
