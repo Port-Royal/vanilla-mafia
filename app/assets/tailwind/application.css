@@ -68,6 +68,10 @@
   .lp-log { @apply flex flex-col gap-0.5 p-2 text-sm; }
   .lp-entry { @apply grid items-baseline gap-1.5; grid-template-columns: 24px minmax(0, 1fr) 18px; }
   .lp-a { @apply text-right font-mono font-semibold; }
+  .lp-sn { @apply inline-block min-w-5 rounded px-1 text-center font-mono font-semibold leading-5; }
+  .lp-sn--red { @apply bg-red-700 text-white; }
+  .lp-sn--black { @apply bg-gray-900 text-white; }
+  .lp-sn--yellow { @apply bg-yellow-300 text-gray-900; }
   .lp-x { @apply invisible text-gray-500; }
   .lp-entry:hover .lp-x { @apply visible; }
   .lp-flash { @apply fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-sm text-white; }

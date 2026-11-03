@@ -24,15 +24,31 @@ function heading(eyebrow, title) {
 
 const prompt = (title, seats, hint) => `<div class="lp-prompt"><b>${escapeHtml(title)}</b><div class="lp-picks">${seats.join(", ") || "…"}</div><small>${escapeHtml(hint)}</small></div>`
 
-export function willPreview(raw, texts) {
+const ROLE_COLORS = { peace: "red", don: "black", mafia: "black", sheriff: "yellow" }
+
+// A seat number for the side panel: on the colour of its role while the roles are shown, plain
+// text otherwise, so the markup carries nothing about the roles by day.
+function seatNumber(state, shown, seat) {
+  const color = shown && ROLE_COLORS[state.players[seat]?.role]
+  return color ? `<span class="lp-sn lp-sn--${color}">${seat}</span>` : String(seat)
+}
+
+const seatsOf = (seat) => (seats) => seats.map(seat).join(", ")
+
+function willParts(raw, texts, seat, text) {
   const { red, black, sheriff, plan } = parseWill(raw)
+  const list = seatsOf(seat)
   const parts = []
-  if (red.length) parts.push(`${texts.leaving.red}: ${red.join(", ")}`)
-  if (black.length) parts.push(`${texts.leaving.black}: ${black.join(", ")}`)
-  if (sheriff.length) parts.push(`${texts.leaving.sheriff}: ${sheriff.join(", ")}`)
-  if (plan) parts.push(`${texts.leaving.plan}: ${plan}`)
+  if (red.length) parts.push(`${text(texts.leaving.red)}: ${list(red)}`)
+  if (black.length) parts.push(`${text(texts.leaving.black)}: ${list(black)}`)
+  if (sheriff.length) parts.push(`${text(texts.leaving.sheriff)}: ${list(sheriff)}`)
+  if (plan) parts.push(`${text(texts.leaving.plan)}: ${text(plan)}`)
   return parts.join("; ")
 }
+
+// Plain text, for the preview under the field the judge is typing in.
+export const willPreview = (raw, texts) => willParts(raw, texts, String, String)
+const willHtml = (raw, texts, seat) => willParts(raw, texts, seat, escapeHtml)
 
 // Players at the table who have neither voted for an earlier candidate nor are marked now.
 function notVotedHtml(state, ui, texts) {
@@ -197,64 +213,70 @@ function checkView(state, ui, texts, role) {
 }
 
 function logEntry(state, ui, texts, event) {
-  const shown = rolesShown(state, ui) || !SECRET_KINDS.includes(event.kind)
+  const roles = rolesShown(state, ui)
+  const shown = roles || !SECRET_KINDS.includes(event.kind)
+  const seat = (number) => seatNumber(state, roles, number)
   const body = shown
-    ? [texts.log[`kind_${event.kind}`], event.target_seats.join(", "), event.kind === "will" ? willPreview(event.text, texts) : event.text].filter(Boolean).join(" ")
-    : texts.log.hidden
-  const actor = shown && event.actor_seat ? event.actor_seat : ""
-  return `<div class="lp-entry"><span class="lp-a">${actor}</span><span>${escapeHtml(body)}</span><button type="button" class="lp-x" data-delete="${escapeHtml(event.action_id)}" aria-label="${escapeHtml(texts.log.delete)}">×</button></div>`
+    ? [escapeHtml(texts.log[`kind_${event.kind}`]), seatsOf(seat)(event.target_seats), event.kind === "will" ? willHtml(event.text, texts, seat) : escapeHtml(event.text)].filter(Boolean).join(" ")
+    : escapeHtml(texts.log.hidden)
+  const actor = shown && event.actor_seat ? seat(event.actor_seat) : ""
+  return `<div class="lp-entry"><span class="lp-a">${actor}</span><span>${body}</span><button type="button" class="lp-x" data-delete="${escapeHtml(event.action_id)}" aria-label="${escapeHtml(texts.log.delete)}">×</button></div>`
 }
 
-const seatsList = (seats) => seats.join(", ")
-
+// Cells are markup: the callers escape the text and colour the seats.
 function table(rows) {
-  return `<table>${rows.map((cells) => `<tr>${cells.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</table>`
+  return `<table>${rows.map((cells) => `<tr>${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</table>`
 }
+
+const headerRow = (labels) => labels.map(escapeHtml)
 
 function section(title, body) {
   return `<div><h4>${escapeHtml(title)}</h4>${body}</div>`
 }
 
-function dealSection(deal, texts) {
+function dealSection(deal, texts, seat) {
   if (!deal) return section(texts.sheet.deal, escapeHtml(texts.log.hidden))
   const parts = [
-    deal.mode ? texts.deal[deal.mode] : "",
-    deal.sheriff ? fill(texts.sheet.claimed_sheriff, { seat: deal.sheriff }) : "",
-    deal.text
+    deal.mode ? escapeHtml(texts.deal[deal.mode]) : "",
+    deal.sheriff ? escapeHtml(texts.sheet.claimed_sheriff).replaceAll("%{seat}", seat(deal.sheriff)) : "",
+    escapeHtml(deal.text)
   ].filter(Boolean)
-  return section(texts.sheet.deal, escapeHtml(parts.join("; ") || texts.sheet.nothing))
+  return section(texts.sheet.deal, parts.join("; ") || escapeHtml(texts.sheet.nothing))
 }
 
-function missesHtml(misses, texts) {
+function missesHtml(misses, texts, seat) {
   if (!misses) return ""
-  return misses.map(({ night, shooter, target, miss }) => `<div>${escapeHtml(fill(texts.strip.night, { number: night }))}: ${shooter} → ${escapeHtml(miss ? texts.night[miss] : target)}</div>`).join("")
+  return misses.map(({ night, shooter, target, miss }) => `<div>${escapeHtml(fill(texts.strip.night, { number: night }))}: ${seat(shooter)} → ${miss ? escapeHtml(texts.night[miss]) : seat(target)}</div>`).join("")
 }
 
-function checksSection(checks, texts) {
+function checksSection(checks, texts, seat) {
   if (!checks) return section(texts.sheet.checks, escapeHtml(texts.log.hidden))
-  const cell = (check) => (check ? `${check.seat} ${texts.sheet[`check_${check.result}`]}` : "—")
+  const cell = (check) => (check ? `${seat(check.seat)} ${escapeHtml(texts.sheet[`check_${check.result}`])}` : "—")
   const rows = checks.map(({ night, don, sheriff }) => [night, cell(don), cell(sheriff)])
-  return section(texts.sheet.checks, rows.length ? table([[texts.sheet.night, texts.sheet.don, texts.sheet.sheriff], ...rows]) : escapeHtml(texts.sheet.nothing))
+  return section(texts.sheet.checks, rows.length ? table([headerRow([texts.sheet.night, texts.sheet.don, texts.sheet.sheriff]), ...rows]) : escapeHtml(texts.sheet.nothing))
 }
 
-function roundHtml(round, texts) {
-  const rows = round.votes.map(({ candidates, voters }) => [seatsList(candidates), voters.length, seatsList(voters)])
+function roundHtml(round, texts, seat) {
+  const list = seatsOf(seat)
+  const rows = round.votes.map(({ candidates, voters }) => [list(candidates), voters.length, list(voters)])
   const title = `${round.day === 0 ? texts.strip.zero : fill(texts.strip.day, { number: round.day })}, ${texts.sheet[`round_${round.type}`]}`
   const outcome = round.outcome ? `<div>${escapeHtml(texts.sheet[`outcome_${round.outcome}`])}${round.reason ? `: ${escapeHtml(texts.sheet[`reason_${round.reason}`])}` : ""}</div>` : ""
-  return section(title, table([[texts.sheet.candidate, texts.sheet.count, texts.sheet.voters], ...rows]) + outcome)
+  return section(title, table([headerRow([texts.sheet.candidate, texts.sheet.count, texts.sheet.voters]), ...rows]) + outcome)
 }
 
 function renderSheet(state, ui, texts) {
-  const sheet = buildSheet(state, { rolesShown: rolesShown(state, ui) })
-  const shots = sheet.shots.length ? table([sheet.shots.map(({ target }) => target)]) : escapeHtml(texts.sheet.nothing)
+  const roles = rolesShown(state, ui)
+  const sheet = buildSheet(state, { rolesShown: roles })
+  const seat = (number) => seatNumber(state, roles, number)
+  const shots = sheet.shots.length ? table([sheet.shots.map(({ target }) => seat(target))]) : escapeHtml(texts.sheet.nothing)
   const hint = sheet.sheriffBonusHint ? `<div class="lp-good">${escapeHtml(texts.sheet.sheriff_bonus)}</div>` : ""
-  const wills = sheet.wills.map(({ seat, text }) => `<div><b>${seat}</b> ${escapeHtml(willPreview(text, texts))}</div>`).join("")
-  const moves = sheet.bestMoves.map(({ seat, seats, noPoints }) => `<div><b>${seat}</b> ${seatsList(seats)}${noPoints ? ` (${escapeHtml(texts.sheet.no_points)})` : ""}</div>`).join("")
+  const wills = sheet.wills.map(({ seat: author, text }) => `<div><b>${seat(author)}</b> ${willHtml(text, texts, seat)}</div>`).join("")
+  const moves = sheet.bestMoves.map(({ seat: author, seats, noPoints }) => `<div><b>${seat(author)}</b> ${seatsOf(seat)(seats)}${noPoints ? ` (${escapeHtml(texts.sheet.no_points)})` : ""}</div>`).join("")
   return `<div class="lp-sheet">
-    ${dealSection(sheet.deal, texts)}${hint}
-    ${section(texts.sheet.shots, shots + missesHtml(sheet.misses, texts))}
-    ${checksSection(sheet.checks, texts)}
-    ${sheet.rounds.map((round) => roundHtml(round, texts)).join("")}
+    ${dealSection(sheet.deal, texts, seat)}${hint}
+    ${section(texts.sheet.shots, shots + missesHtml(sheet.misses, texts, seat))}
+    ${checksSection(sheet.checks, texts, seat)}
+    ${sheet.rounds.map((round) => roundHtml(round, texts, seat)).join("")}
     ${section(texts.sheet.wills, wills + moves || escapeHtml(texts.sheet.nothing))}
   </div>`
 }

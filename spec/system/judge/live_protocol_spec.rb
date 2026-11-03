@@ -148,6 +148,18 @@ RSpec.describe "Live protocol console" do
     expect(page).to have_text(I18n.t("live_protocols.screen.finish.done"))
   end
 
+  it "puts seat numbers in the log on their role colours only once the roles are open" do
+    start_game.call
+    press.call("n", "5")
+    expect(page).to have_css(".lp-entry", text: "5")
+    expect(page).to have_no_css(".lp-sn")
+    find("body").send_keys([ :shift, "d" ])
+    expect(page).to have_current_path(edit_judge_protocol_path(game))
+    visit live_judge_protocol_path(game)
+    expect(page).to have_css(".lp-a .lp-sn--black", exact_text: "1")
+    expect(page).to have_css(".lp-entry .lp-sn--red", exact_text: "5")
+  end
+
   it "focuses the will field in the leaving speech" do
     start_game.call
     press.call("v", "5", :enter, :enter)
