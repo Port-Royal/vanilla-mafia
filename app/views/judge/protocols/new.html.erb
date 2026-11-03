@@ -8,5 +8,5 @@
 <% end %>
 
 <%= form_with url: judge_protocols_path, method: :post, local: true do %>
-  <%= render "form", submit_label: t("game_protocols.form.submit_create") %>
+  <%= render "form", submit_label: t("game_protocols.form.submit_create"), next_game_number_url: next_game_number_judge_protocols_path %>
 <% end %>

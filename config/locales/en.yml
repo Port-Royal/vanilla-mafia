@@ -322,6 +322,8 @@ en:
         unknown_action: "Unknown action"
         cannot_delete: "This record can only be undone with Ctrl+Z, step by step"
   game_protocols:
+    next_game_number:
+      hint: "Last game at this table that day: #%{number}"
     unfinished_game:
       message: "Table %{table} has an unfinished game from %{date}: %{game}. Set its result before starting a new game at this table."
       link: "Open the protocol"
