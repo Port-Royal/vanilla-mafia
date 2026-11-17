@@ -685,7 +685,6 @@ DEPENDENCIES
   omniauth-google-oauth2
   omniauth-rails_csrf_protection
   pagy
-  prop_initializer (< 1.1)
   propshaft
   puma (>= 5.0)
   pundit
