@@ -7,6 +7,12 @@ RSpec.describe FeatureToggle, type: :model do
     it { is_expected.to validate_presence_of(:key) }
     it { is_expected.to validate_uniqueness_of(:key) }
     it { is_expected.to validate_inclusion_of(:key).in_array(described_class::KEYS) }
+
+    context "with the public redesign key" do
+      subject { build(:feature_toggle, key: "public_redesign") }
+
+      it { is_expected.to be_valid }
+    end
   end
 
   describe "KEYS" do
@@ -31,6 +37,10 @@ RSpec.describe FeatureToggle, type: :model do
         "telegram_force_import_enabled",
         "telegram_force_import_max_range"
       )
+    end
+
+    it "includes public redesign toggle key" do
+      expect(described_class::KEYS).to include("public_redesign")
     end
 
     it "includes live protocol toggle key" do
