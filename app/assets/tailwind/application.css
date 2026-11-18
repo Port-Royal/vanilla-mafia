@@ -1,13 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Roboto:wght@400;500;700&display=swap");
 @import "tailwindcss";
 
 @theme {
   --color-maroon: #75000A;
   --color-row-alt: #eeeeee;
   --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+
+  /* "Warm paper" redesign. Gold is for non-text marks only; text on ink uses gold-bright. */
+  --color-paper: #faf6ec;
+  --color-panel: #fffdf7;
+  --color-line: #e6dcc4;
+  --color-line-soft: #f0e8d6;
+  --color-ink: #2a2418;
+  --color-ink-muted: #736650;
+  --color-label: #86681f;
+  --color-gold: #d9a21b;
+  --color-gold-bright: #f3c94f;
+  --color-gold-soft: #f3e2b0;
+  --color-gold-wash: #fbf1d6;
+  --color-silver: #e3dccb;
+  --color-bronze: #e9cfae;
+  --color-alert-soft: #f5ddd5;
+  --color-alert-ink: #8a2a12;
+  --font-serif: "PT Serif", ui-serif, Georgia, serif;
 }
 
 @layer components {
+  /* Redesign shell components: opt-in only, nothing here styles bare elements outside a vm-* scope. */
+  .vm-container { @apply mx-auto w-full max-w-6xl px-4 lg:px-6; }
+  .vm-btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-transparent px-4 text-sm font-semibold no-underline lg:min-h-9; }
+  .vm-btn:focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
+  .vm-btn--primary { @apply bg-ink text-gold-bright; }
+  .vm-btn--ghost { @apply border-[#d8cba9] bg-transparent text-ink; }
+  .vm-panel { @apply rounded-lg border border-line bg-panel; }
+  .vm-panel--raised { box-shadow: 0 8px 24px rgb(42 36 24 / 0.12); }
+  /* Buttons keep their own colours inside the chrome, so the link rules skip them. */
+  .vm-chrome a:not(.vm-btn) { @apply text-ink no-underline; }
+  .vm-chrome a:not(.vm-btn):hover { @apply underline; }
+  .vm-chrome :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
+  .vm-logo { @apply h-8 w-auto; filter: invert(0.86) sepia(0.4); }
+
   .live-protocol { @apply flex min-h-0 flex-1 flex-col gap-2; }
   .lp-top { @apply flex justify-end gap-4 text-sm text-gray-500; }
   .lp-status { @apply text-green-800; }
