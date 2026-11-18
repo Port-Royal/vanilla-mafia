@@ -1,4 +1,4 @@
-<header id="site-top-bar" class="border-b border-line bg-paper">
+<header id="site-top-bar" class="relative border-b border-line bg-paper">
   <div class="vm-container flex min-h-14 items-center gap-6">
     <%= link_to root_path, class: "flex-shrink-0" do %>
       <img src="/img/chi_light.png" alt="Vanilla Mafia" class="vm-logo">
@@ -14,7 +14,7 @@
       </ul>
     </nav>
 
-    <div class="ml-auto flex flex-shrink-0 items-center gap-4">
+    <div class="ml-auto hidden flex-shrink-0 items-center gap-4 lg:flex">
       <%= render "layouts/redesign/locale_switcher" %>
 
       <div id="site-user-area" class="flex items-center">
@@ -25,5 +25,7 @@
         <% end %>
       </div>
     </div>
+
+    <%= render "layouts/redesign/phone_menu" %>
   </div>
 </header>
