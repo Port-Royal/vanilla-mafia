@@ -4,7 +4,7 @@
   </div>
 
   <main id="site-main" class="vm-container flex-1 py-6 lg:py-10">
-    <%= render "devise/shared/flash" %>
+    <%= render "layouts/redesign/flash" %>
     <%= content %>
   </main>
 
@@ -12,5 +12,5 @@
 </div>
 
 <% if @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
-  <%= render "layouts/announcement_toast", announcements: @announcements %>
+  <%= render "layouts/redesign/announcement_toast", announcements: @announcements %>
 <% end %>
