@@ -5,6 +5,10 @@
   </head>
 
   <body class="min-h-screen bg-white font-sans" data-controller="menu time-zone">
+    <% if design_preference.offer? %>
+      <%= render "layouts/design_offer" %>
+    <% end %>
+
     <%# Mobile top bar %>
     <header id="site-mobile-header" class="lg:hidden flex items-center justify-between bg-neutral-900 px-4 py-3">
       <%= link_to root_path do %>
@@ -91,6 +95,15 @@
           <li class="border-t border-neutral-700 pt-2">
             <%= link_to t("nav.sign_in"), new_user_session_path,
                   class: "block text-gray-300 hover:text-white transition-colors" %>
+          </li>
+        <% end %>
+        <% if design_preference.switch_to_new? %>
+          <li class="border-t border-neutral-700 pt-2">
+            <%= button_to t("design.switch_to_new"), design_preference_path,
+                  params: { design: "new" },
+                  method: :patch,
+                  class: "block text-gray-300 hover:text-white transition-colors",
+                  form: { class: "design-switch-to-new" } %>
           </li>
         <% end %>
         <li class="border-t border-neutral-700 pt-2">
@@ -180,6 +193,15 @@
                 <li class="border-t border-neutral-700 pt-3">
                   <%= link_to t("nav.sign_in"), new_user_session_path,
                         class: "block hover:text-white transition-colors" %>
+                </li>
+              <% end %>
+              <% if design_preference.switch_to_new? %>
+                <li class="border-t border-neutral-700 pt-3">
+                  <%= button_to t("design.switch_to_new"), design_preference_path,
+                        params: { design: "new" },
+                        method: :patch,
+                        class: "block hover:text-white transition-colors text-left",
+                        form: { class: "design-switch-to-new" } %>
                 </li>
               <% end %>
               <li class="border-t border-neutral-700 pt-3">

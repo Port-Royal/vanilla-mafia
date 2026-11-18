@@ -500,6 +500,13 @@ en:
     sign_out: "Sign out"
     help: "Help"
     admin: "Admin"
+  design:
+    offer:
+      text: "There's a new design — want to try it?"
+      try: "Try it"
+      decline: "No thanks"
+    switch_to_new: "New design"
+    switch_to_old: "Back to the old design"
   notification_settings:
     edit:
       title: "Notification settings"
