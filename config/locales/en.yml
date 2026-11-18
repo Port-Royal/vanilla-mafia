@@ -500,6 +500,7 @@ en:
     sign_out: "Sign out"
     help: "Help"
     admin: "Admin"
+    primary: "Main navigation"
   design:
     offer:
       text: "There's a new design — want to try it?"
