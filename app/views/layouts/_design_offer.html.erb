@@ -1,0 +1,15 @@
+<div id="design-offer" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 bg-gold-soft text-ink text-sm px-4 py-2">
+  <span><%= t("design.offer.text") %></span>
+  <span class="flex items-center gap-3">
+    <%= button_to t("design.offer.try"), design_preference_path,
+          params: { design: "new" },
+          method: :patch,
+          class: "font-semibold underline underline-offset-2 hover:no-underline",
+          form: { class: "inline" } %>
+    <%= button_to t("design.offer.decline"), design_preference_path,
+          params: { design: "old" },
+          method: :patch,
+          class: "underline underline-offset-2 hover:no-underline",
+          form: { class: "inline" } %>
+  </span>
+</div>
