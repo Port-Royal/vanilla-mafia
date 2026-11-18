@@ -18,7 +18,9 @@
       <%= render "layouts/redesign/locale_switcher" %>
 
       <div id="site-user-area" class="flex items-center">
-        <% unless user_signed_in? %>
+        <% if user_signed_in? %>
+          <%= render "layouts/redesign/user_menu" %>
+        <% else %>
           <%= link_to t("nav.sign_in"), new_user_session_path, class: "vm-btn vm-btn--ghost" %>
         <% end %>
       </div>

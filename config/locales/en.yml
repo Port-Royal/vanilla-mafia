@@ -501,6 +501,7 @@ en:
     help: "Help"
     admin: "Admin"
     primary: "Main navigation"
+    menu: "Menu"
   design:
     offer:
       text: "There's a new design — want to try it?"
