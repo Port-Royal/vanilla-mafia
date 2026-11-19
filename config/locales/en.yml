@@ -502,6 +502,7 @@ en:
     admin: "Admin"
     primary: "Main navigation"
     menu: "Menu"
+    account_menu: "Account"
   design:
     offer:
       text: "There's a new design — want to try it?"

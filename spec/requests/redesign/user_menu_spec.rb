@@ -75,14 +75,19 @@ RSpec.describe "Redesign user menu" do
       it { expect(user_area.at_css("#site-user-menu")).to be_present }
       it { expect(menu_wrapper["class"]).to include("hidden", "lg:block") }
 
-      it "closes the menu on an outside click and on Escape" do
-        expect(menu_wrapper["data-action"].split)
-          .to contain_exactly("click@window->menu#closeOnOutside", "keydown.esc@window->menu#close")
+      it "closes the menu on an outside press, on Escape, on focus leaving it and before Turbo caches the page" do
+        expect(menu_wrapper["data-action"].split).to contain_exactly(
+          "pointerdown@window->menu#closeOnOutside",
+          "keydown.esc@window->menu#close",
+          "focusout->menu#closeOnFocusOut",
+          "turbo:before-cache@document->menu#close"
+        )
       end
 
       it { expect(menu["class"]).to include("vm-panel", "vm-panel--raised", "hidden") }
       it { expect(menu["data-menu-target"]).to eq("nav") }
-      it { expect(menu_button.text.strip).to eq(I18n.t("nav.menu")) }
+      it { expect(menu["aria-label"]).to eq(I18n.t("nav.account_menu")) }
+      it { expect(menu_button.text.strip).to eq(I18n.t("nav.account_menu")) }
       it { expect(menu_button["type"]).to eq("button") }
       it { expect(menu_button["aria-controls"]).to eq("site-user-menu") }
       it { expect(menu_button["aria-expanded"]).to eq("false") }

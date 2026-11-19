@@ -96,6 +96,8 @@ RSpec.describe NavigationHelper, type: :helper do
       let_it_be(:user) { create(:user, :admin) }
 
       context "with the game_breakdown toggle on" do
+        let(:labels_and_paths) { helper.role_nav_items(user).map { |item| [ item.label, item.path ] } }
+
         before { create(:feature_toggle, key: "game_breakdown", enabled: true) }
 
         it do
@@ -103,7 +105,7 @@ RSpec.describe NavigationHelper, type: :helper do
         end
 
         it "labels and links each item" do
-          expect(helper.role_nav_items(user).map { |item| [ item.label, item.path ] }).to eq(
+          expect(labels_and_paths).to eq(
             [
               [ I18n.t("nav.podcast"), podcast_episodes_path ],
               [ I18n.t("nav.protocols"), judge_protocols_path ],
