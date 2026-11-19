@@ -1,4 +1,7 @@
-<div class="flex min-h-screen flex-col">
+<% show_toast = @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
+
+<%# Below lg the toast spans the screen bottom, so the page keeps room to scroll the footer clear of it. %>
+<div class="flex min-h-screen flex-col <%= "pb-40 lg:pb-0" if show_toast %>">
   <div class="vm-chrome">
     <%= render "layouts/redesign/top_bar" %>
   </div>
@@ -11,6 +14,6 @@
   <%= render "layouts/redesign/footer" %>
 </div>
 
-<% if @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
+<% if show_toast %>
   <%= render "layouts/redesign/announcement_toast", announcements: @announcements %>
 <% end %>
