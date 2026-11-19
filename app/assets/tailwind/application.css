@@ -28,16 +28,19 @@
 @layer components {
   /* Redesign shell components: opt-in only, nothing here styles bare elements outside a vm-* scope. */
   .vm-container { @apply mx-auto w-full max-w-6xl px-4 lg:px-6; }
-  .vm-btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-transparent px-4 text-sm font-semibold no-underline lg:min-h-9; }
+  .vm-btn { @apply inline-flex min-h-11 items-center justify-center gap-2 cursor-pointer rounded-md border border-transparent px-4 text-sm font-semibold no-underline lg:min-h-9; }
   .vm-btn:focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
   .vm-btn--primary { @apply bg-ink text-gold-bright; }
+  .vm-btn--primary:hover { @apply bg-ink/90; }
   .vm-btn--ghost { @apply border-[#d8cba9] bg-transparent text-ink; }
+  .vm-btn--ghost:hover { @apply bg-gold-wash; }
   .vm-panel { @apply rounded-lg border border-line bg-panel; }
   .vm-panel--raised { box-shadow: 0 8px 24px rgb(42 36 24 / 0.12); }
-  /* Buttons keep their own colours inside the chrome, so the link rules skip them. */
-  .vm-chrome a:not(.vm-btn) { @apply text-ink no-underline; }
-  .vm-chrome a:not(.vm-btn):hover { @apply underline; }
-  .vm-chrome :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
+  /* Buttons keep their own colours inside the chrome, so the link rules skip them.
+     :where() keeps these at the specificity of .vm-chrome alone, so later component classes and utilities win. */
+  .vm-chrome :where(a:not(.vm-btn)) { @apply text-ink no-underline; }
+  .vm-chrome :where(a:not(.vm-btn)):hover { @apply underline; }
+  .vm-chrome :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
   .vm-logo { @apply h-8 w-auto; filter: invert(0.86) sepia(0.4); }
 
   .live-protocol { @apply flex min-h-0 flex-1 flex-col gap-2; }
