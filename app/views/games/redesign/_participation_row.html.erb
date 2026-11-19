@@ -1,0 +1,39 @@
+<% details = [] %>
+<% details << t("games.overlay.status.#{participation.status}") unless participation.alive? %>
+<% if participation.best_move_seats.present? %>
+  <% details << t("games.redesign.best_move_seats", seats: participation.best_move_seats.join(", ")) %>
+<% end %>
+<% shown_on_desktop = participation.first_shoot || details.any? %>
+<% minus = participation.minus.to_d %>
+<% best_move = participation.best_move.to_d %>
+
+<tr data-seat="<%= participation.seat %>" class="<%= "vm-row--highlight" if participation.win %>">
+  <td data-column="seat" class="text-ink-muted tabular-nums"><%= participation.seat %></td>
+  <td data-column="player">
+    <% if game.roles_public? && participation.role_code.present? %>
+      <% role_label = (participation.role && participation.role.name.presence) || participation.role_code %>
+      <%= image_tag "roles/#{participation.role_code}.png", alt: role_label, title: role_label,
+            class: "mr-2 inline-block size-[22px] align-middle" %>
+    <% end %>
+    <%= link_to participation.player.name, player_path(participation.player),
+          class: "font-semibold text-ink hover:underline" %>
+    <% if shown_on_desktop || show_scores %>
+      <span data-part="details" class="vm-sub <%= "lg:hidden" unless shown_on_desktop %>">
+        <% if participation.first_shoot %>
+          <span data-part="first-shoot"
+                class="mr-1 inline-block rounded border border-bronze bg-paper px-1 text-[10.5px] font-bold text-ink"><%= t("games.redesign.first_shoot") %></span>
+        <% end %>
+        <%= safe_join(details, " · ") %>
+        <% if show_scores %>
+          <span data-part="score-parts" class="lg:hidden"><%= "· " if details.any? %><%= score_parts(participation) %></span>
+        <% end %>
+      </span>
+    <% end %>
+  </td>
+  <% if show_scores %>
+    <td data-column="plus" class="hidden text-right tabular-nums lg:table-cell"><%= format_score(participation.plus || 0) %></td>
+    <td data-column="minus" class="hidden text-right tabular-nums lg:table-cell <%= "text-alert-ink" if minus.nonzero? %>"><%= format_score(-minus) if minus.nonzero? %></td>
+    <td data-column="best_move" class="hidden text-right tabular-nums lg:table-cell"><%= format_score(best_move) if best_move.nonzero? %></td>
+    <td data-column="total" class="text-right font-bold tabular-nums"><%= format_score(participation.total) %></td>
+  <% end %>
+</tr>

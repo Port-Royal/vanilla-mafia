@@ -813,6 +813,14 @@ en:
         killed_by_mafia: "Killed"
         voted_out: "Voted out"
         banned: "Banned"
+    redesign:
+      first_shoot: "FK"
+      best_move_seats: "BM: %{seats}"
+      best_move_short: "BM"
+      legend: "FK — first killed · BM — best move · Total = Score − Minus + BM"
+      previous: "← Game %{number}"
+      next: "Game %{number} →"
+      competition_table: "table"
   series:
     show:
       player: "Player"

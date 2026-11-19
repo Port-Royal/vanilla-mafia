@@ -112,6 +112,26 @@ module GamesHelper
     t("games.overlay.judge", name: game.judge)
   end
 
+  MINUS_SIGN = "\u2212".freeze
+
+  # A score without trailing zeros and with a real minus sign: 1, 0.4, −0.25. The dot stays in every locale.
+  def format_score(value)
+    return "" if value.nil?
+
+    number = number_with_precision(value.abs, precision: 2, strip_insignificant_zeros: true, separator: ".")
+    value.negative? ? "#{MINUS_SIGN}#{number}" : number
+  end
+
+  # The score columns folded into one line for phones: "1 − 0.2 + ЛХ 0.4", the empty parts left out.
+  def score_parts(participation)
+    parts = [ format_score(participation.plus || 0) ]
+    parts << "#{MINUS_SIGN} #{format_score(participation.minus)}" if participation.minus.to_d.nonzero?
+    if participation.best_move.to_d.nonzero?
+      parts << "+ #{t("games.redesign.best_move_short")} #{format_score(participation.best_move)}"
+    end
+    parts.join(" ")
+  end
+
   private
 
   def overlay_night_row(entries, nights)

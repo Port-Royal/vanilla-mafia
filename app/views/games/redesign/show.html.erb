@@ -1,0 +1,72 @@
+<% game_label = "#{t("common.game")} #{@game.game_number}" %>
+<% show_scores = !@game.in_progress? %>
+<% crumb_link = "text-ink-muted underline decoration-[#e0cf9f] underline-offset-3 hover:text-ink" %>
+
+<header id="game-header" class="mb-5">
+  <nav aria-label="Breadcrumb" class="mb-1.5 text-xs text-ink-muted">
+    <% @game.competition.ancestors.each do |ancestor| %>
+      <%= link_to ancestor.name, competition_path(slug: ancestor.slug), class: crumb_link %> /
+    <% end %>
+    <%= link_to @game.competition.name, competition_path(slug: @game.competition.slug), class: crumb_link %> /
+    <span aria-current="page"><%= game_label %></span>
+  </nav>
+
+  <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <h1 class="font-serif text-[22px] font-bold text-ink lg:text-[28px]">
+      <%= game_label %>
+      <% if @game.name.present? %>
+        <span class="text-ink-muted"><%= @game.name %></span>
+      <% end %>
+    </h1>
+    <% if user_signed_in? && current_user.can_manage_protocols? %>
+      <%= link_to t("game_protocols.edit_link"), edit_judge_protocol_path(@game),
+            class: "ml-auto text-xs text-ink-muted underline hover:text-ink" %>
+    <% end %>
+  </div>
+
+  <div id="game-meta" class="mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-ink-muted">
+    <% if @game.in_progress? %>
+      <span class="vm-pill vm-pill--neutral">
+        <span class="mr-1 inline-block size-1.5 rounded-full bg-gold align-middle" aria-hidden="true"></span><%= t("games.show.result.in_progress") %>
+      </span>
+    <% else %>
+      <%= game_result_pill(@game) %>
+    <% end %>
+    <% if @game.played_on %>
+      <span><%= format_date(@game.played_on) %></span>
+    <% end %>
+    <% if @game.judge.present? %>
+      <span><%= t("games.show.judge", name: @game.judge) %></span>
+    <% end %>
+    <% if @game.table_number.present? %>
+      <span><%= t("games.show.table_number", number: @game.table_number) %></span>
+    <% end %>
+  </div>
+</header>
+
+<div class="vm-panel overflow-hidden">
+  <table id="game-table" class="vm-table">
+    <thead>
+      <tr>
+        <th scope="col" class="w-8"><%= t("games.show.seat") %></th>
+        <th scope="col"><%= t("games.show.player") %></th>
+        <% if show_scores %>
+          <th scope="col" class="hidden text-right lg:table-cell"><%= t("games.show.base_score") %></th>
+          <th scope="col" class="hidden text-right lg:table-cell"><%= t("activerecord.attributes.game_participation.minus") %></th>
+          <th scope="col" class="hidden text-right lg:table-cell"><%= t("games.redesign.best_move_short") %></th>
+          <th scope="col" class="text-right"><%= t("games.show.total") %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <%= render partial: "games/redesign/participation_row", collection: @participations, as: :participation,
+                 locals: { game: @game, show_scores: } %>
+    </tbody>
+  </table>
+</div>
+
+<% if show_scores %>
+  <p id="game-legend" class="mt-2 text-xs text-ink-muted"><%= t("games.redesign.legend") %></p>
+<% end %>
+
+<%= render "games/redesign/neighbours", game: @game %>

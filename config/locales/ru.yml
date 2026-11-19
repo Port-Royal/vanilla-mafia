@@ -383,6 +383,14 @@ ru:
         killed_by_mafia: "Убит"
         voted_out: "Повешен"
         banned: "ППК"
+    redesign:
+      first_shoot: "ПУ"
+      best_move_seats: "ЛХ: %{seats}"
+      best_move_short: "ЛХ"
+      legend: "ПУ — первый убитый · ЛХ — лучший ход · Итого = Балл − Минус + ЛХ"
+      previous: "← Игра %{number}"
+      next: "Игра %{number} →"
+      competition_table: "таблица"
   player_claims:
     create:
       pending: "Заявка отправлена и ожидает подтверждения."

@@ -393,4 +393,75 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_foul_pips(nil)).to eq([])
     end
   end
+
+  describe "#format_score" do
+    {
+      nil => "",
+      0 => "0",
+      BigDecimal("1.0") => "1",
+      BigDecimal("0.40") => "0.4",
+      BigDecimal("0.25") => "0.25",
+      BigDecimal("12.5") => "12.5",
+      BigDecimal("-0.2") => "\u22120.2",
+      -1 => "\u22121"
+    }.each do |value, text|
+      context "when the value gives #{text.inspect}" do
+        it { expect(helper.format_score(value)).to eq(text) }
+      end
+    end
+  end
+
+  describe "#score_parts" do
+    subject(:parts) { helper.score_parts(participation) }
+
+    let(:participation) { GameParticipation.new(plus:, minus:, best_move:) }
+    let(:plus) { 1 }
+    let(:minus) { 0 }
+    let(:best_move) { nil }
+
+    context "with the plus only" do
+      it { is_expected.to eq("1") }
+    end
+
+    context "with no plus" do
+      let(:plus) { nil }
+      let(:minus) { nil }
+
+      it { is_expected.to eq("0") }
+    end
+
+    context "with a minus" do
+      let(:plus) { 0 }
+      let(:minus) { BigDecimal("0.20") }
+
+      it { is_expected.to eq("0 \u2212 0.2") }
+    end
+
+    context "with a best move" do
+      let(:best_move) { BigDecimal("0.40") }
+
+      it { is_expected.to eq("1 + ЛХ 0.4") }
+    end
+
+    context "with a zero best move" do
+      let(:best_move) { 0 }
+
+      it { is_expected.to eq("1") }
+    end
+
+    context "with whole numbers stored as decimals" do
+      let(:plus) { BigDecimal("2.00") }
+      let(:minus) { BigDecimal("1.00") }
+      let(:best_move) { BigDecimal("1.00") }
+
+      it { is_expected.to eq("2 \u2212 1 + ЛХ 1") }
+    end
+
+    context "with all three" do
+      let(:minus) { BigDecimal("0.5") }
+      let(:best_move) { BigDecimal("0.25") }
+
+      it { is_expected.to eq("1 \u2212 0.5 + ЛХ 0.25") }
+    end
+  end
 end

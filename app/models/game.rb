@@ -126,7 +126,25 @@ class Game < ApplicationRecord
     "#{competition.name} #{I18n.t('common.game')} #{game_number}"
   end
 
+  def previous_in_competition
+    neighbour_in_competition(-1)
+  end
+
+  def next_in_competition
+    neighbour_in_competition(1)
+  end
+
   private
+
+  # Games of the competition in playing order, undated ones last. Tables share a date and number, so the table
+  # number breaks the tie, then the id.
+  def neighbour_in_competition(step)
+    ids = Game.for_competition(competition_id)
+              .order(Arel.sql("played_on IS NULL"), :played_on, :game_number, :table_number, :id)
+              .pluck(:id)
+    position = ids.index(id) + step
+    Game.find(ids[position]) if position.between?(0, ids.size - 1)
+  end
 
   def announce_table
     TableOverlayChannel.broadcast_current(table_key)
