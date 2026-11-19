@@ -500,6 +500,10 @@ en:
     sign_out: "Sign out"
     help: "Help"
     admin: "Admin"
+    primary: "Main navigation"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
       label: "New site design"

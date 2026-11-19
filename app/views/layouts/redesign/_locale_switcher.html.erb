@@ -1,0 +1,15 @@
+<div class="flex items-center gap-2 text-sm">
+  <% I18n.available_locales.each_with_index do |loc, i| %>
+    <% if i > 0 %><span class="text-ink-muted" aria-hidden="true">|</span><% end %>
+    <% if loc == I18n.locale %>
+      <span class="vm-locale-current font-bold text-ink" aria-current="true"><%= loc.to_s.upcase %></span>
+    <% else %>
+      <%= button_to loc.to_s.upcase, locale_path(locale: loc),
+            method: :patch,
+            lang: loc,
+            aria: { label: t("nav.language_names.#{loc}") },
+            class: "text-ink-muted hover:text-ink hover:underline",
+            form: { class: "inline" } %>
+    <% end %>
+  <% end %>
+</div>

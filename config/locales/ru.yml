@@ -589,6 +589,10 @@ ru:
     sign_out: "Выйти"
     help: "Справка"
     admin: "Админка"
+    primary: "Основная навигация"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
       label: "Новый дизайн сайта"

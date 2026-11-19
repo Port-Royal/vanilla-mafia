@@ -1,0 +1,12 @@
+<div class="vm-chrome">
+  <%= render "layouts/redesign/top_bar" %>
+</div>
+
+<main id="site-main" class="vm-container py-6 lg:py-10">
+  <%= render "devise/shared/flash" %>
+  <%= content %>
+</main>
+
+<% if @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
+  <%= render "layouts/announcement_toast", announcements: @announcements %>
+<% end %>

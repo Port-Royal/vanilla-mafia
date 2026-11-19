@@ -1,0 +1,5 @@
+<% if nav_active?(path) %>
+  <%= link_to label, path, class: "inline-block py-4 font-semibold text-ink shadow-[inset_0_-2px_0_var(--color-gold)]", aria: { current: "page" } %>
+<% else %>
+  <%= link_to label, path, class: "inline-block py-4 text-ink-muted" %>
+<% end %>

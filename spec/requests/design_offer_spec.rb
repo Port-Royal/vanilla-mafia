@@ -143,7 +143,9 @@ RSpec.describe "Design offer" do
     context "when the new design was chosen" do
       let(:design_cookie) { "new" }
 
-      it_behaves_like "neither offer nor link"
+      # The new shell renders here, so only the offer and the link are checked, not the old layout.
+      it { expect(offer).to be_nil }
+      it { expect(switch_links).to be_empty }
     end
   end
 
@@ -152,7 +154,9 @@ RSpec.describe "Design offer" do
 
     let(:design_cookie) { "old" }
 
-    it_behaves_like "neither offer nor link"
+    # The new shell renders here, so only the offer and the link are checked, not the old layout.
+    it { expect(offer).to be_nil }
+    it { expect(switch_links).to be_empty }
   end
 
   context "when the toggle is disabled" do
