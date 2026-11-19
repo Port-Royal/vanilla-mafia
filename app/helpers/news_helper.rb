@@ -3,7 +3,8 @@ module NewsHelper
     thumbnail: { resize_to_limit: [ 800, 600 ], saver: { quality: 85 } },
     full: { resize_to_limit: [ 1200, 900 ], saver: { quality: 90 } },
     zoom: { resize_to_limit: [ 2400, 1800 ], saver: { quality: 90 } },
-    admin_form: { resize_to_limit: [ 400, 400 ], saver: { quality: 80 } }
+    admin_form: { resize_to_limit: [ 400, 400 ], saver: { quality: 80 } },
+    card: { resize_to_fill: [ 160, 120 ], saver: { quality: 85 } }
   }.freeze
 
   def news_photo_variant(photo, variant)

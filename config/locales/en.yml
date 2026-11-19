@@ -572,6 +572,13 @@ en:
       player: "Player"
       rating: "Rating"
       view_all: "View all"
+    redesign:
+      running: "Running now"
+      table_link: "table"
+      table_link_label: "table: %{competition}"
+      recently_finished: "Recently finished"
+      winner: "winner"
+      news: "News"
   competitions:
     show:
       by_children: "Competitions"

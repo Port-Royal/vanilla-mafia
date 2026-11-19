@@ -22,6 +22,8 @@
   --color-bronze: #e9cfae;
   --color-alert-soft: #f5ddd5;
   --color-alert-ink: #8a2a12;
+  --color-gold-ink: #5c4000;
+  --color-gold-line: #e0cf9f;
   --font-serif: "PT Serif", ui-serif, Georgia, serif;
 }
 
@@ -42,6 +44,24 @@
   .vm-chrome :where(a:not(.vm-btn)):hover { @apply underline; }
   .vm-chrome :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
   .vm-logo { @apply h-8 w-auto; filter: invert(0.86) sepia(0.4); }
+
+  /* Page components. Numeric cells add `text-right tabular-nums` themselves. */
+  .vm-label { @apply text-xs font-semibold tracking-wider text-label uppercase; }
+  .vm-pill { @apply inline-block rounded-full border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap; }
+  .vm-pill--gold { @apply bg-gold-soft text-gold-ink; }
+  .vm-pill--alert { @apply bg-alert-soft text-alert-ink; }
+  .vm-pill--neutral { @apply border-line bg-panel text-ink; }
+  .vm-table { @apply w-full border-collapse text-sm; }
+  .vm-table th { @apply border-b border-line px-2.5 py-2 text-left text-[11px] font-medium tracking-wide text-ink-muted uppercase; }
+  .vm-table td { @apply border-t border-line-soft px-2.5 py-2; }
+  .vm-table tbody tr:first-child td { @apply border-t-0; }
+  .vm-row--highlight td { @apply bg-gold-wash; }
+  .vm-row--highlight td:first-child { box-shadow: inset 3px 0 0 var(--color-gold); }
+  .vm-sub { @apply mt-0.5 block text-[11px] text-ink-muted; }
+  .vm-medal { @apply inline-grid size-[18px] flex-none place-items-center rounded-full text-[10px] font-bold tabular-nums; }
+  .vm-medal--1 { @apply bg-gold text-ink; }
+  .vm-medal--2 { @apply bg-silver text-ink; }
+  .vm-medal--3 { @apply bg-bronze text-ink; }
 
   .live-protocol { @apply flex min-h-0 flex-1 flex-col gap-2; }
   .lp-top { @apply flex justify-end gap-4 text-sm text-gray-500; }

@@ -1,0 +1,20 @@
+<section id="home-recent-games" aria-labelledby="home-recent-games-label">
+  <h2 id="home-recent-games-label" class="vm-label mb-2"><%= t("home.recent_games.title") %></h2>
+  <ul class="vm-panel divide-y divide-line-soft">
+    <% games.each do |game| %>
+      <li class="flex items-center gap-3 px-3 py-2.5">
+        <div class="min-w-0">
+          <%= link_to "#{t("common.game")} #{game.game_number}", game_path(game),
+                class: "text-sm font-semibold text-ink hover:underline" %>
+          <span class="vm-sub">
+            <%= safe_join([ game.competition.name,
+                            format_date(game.played_on),
+                            (game.judge.present? ? "#{t("home.recent_games.judge")}: #{game.judge}" : nil) ].compact,
+                          " · ") %>
+          </span>
+        </div>
+        <span class="ml-auto"><%= game_result_pill(game) %></span>
+      </li>
+    <% end %>
+  </ul>
+</section>
