@@ -30,10 +30,18 @@ RSpec.describe "Redesign footer" do
 
     it { expect(footer.at_css("a[href='#{hall_path}']").text).to eq(I18n.t("nav.hall_of_fame")) }
     it { expect(footer.at_css("a[href='#{news_index_path}']").text).to eq(I18n.t("nav.news")) }
+    it { expect(footer.css("nav a").map { |link| link["class"].split }).to all(include("min-h-11")) }
     it { expect(switch_to_old).to be_nil }
 
     context "when the visitor chose the old design earlier" do
       let(:design_cookie) { "old" }
+
+      it { expect(footer).to be_present }
+      it { expect(switch_to_old).to be_nil }
+    end
+
+    context "when the visitor chose the new design earlier" do
+      let(:design_cookie) { "new" }
 
       it { expect(footer).to be_present }
       it { expect(switch_to_old).to be_nil }
@@ -51,6 +59,13 @@ RSpec.describe "Redesign footer" do
       it { expect(switch_form["action"]).to eq(design_preference_path) }
       it { expect(switch_form.at_css("input[name='_method']")["value"]).to eq("patch") }
       it { expect(switch_form.at_css("input[name='design']")["value"]).to eq("old") }
+      it { expect(switch_to_old["class"].split).to include("min-h-11") }
+    end
+
+    context "when the visitor chose the old design" do
+      let(:design_cookie) { "old" }
+
+      it { expect(footer).to be_nil }
     end
 
     context "when the visitor has not chosen" do

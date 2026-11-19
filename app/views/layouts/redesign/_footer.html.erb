@@ -2,16 +2,16 @@
   <div class="vm-container flex flex-wrap items-center gap-x-6 gap-y-2 py-6">
     <span><%= t("footer.copyright", year: Date.current.year) %></span>
     <nav class="flex flex-wrap items-center gap-x-4 gap-y-2" aria-label="<%= t("footer.links") %>">
-      <%= link_to t("nav.hall_of_fame"), hall_path, class: "text-ink-muted" %>
-      <%= link_to t("nav.news"), news_index_path, class: "text-ink-muted" %>
+      <%= link_to t("nav.hall_of_fame"), hall_path, class: "inline-flex min-h-11 items-center text-ink-muted lg:min-h-0" %>
+      <%= link_to t("nav.news"), news_index_path, class: "inline-flex min-h-11 items-center text-ink-muted lg:min-h-0" %>
     </nav>
     <% if design_preference.switch_to_old? %>
       <%= button_to t("design.switch_to_old"), design_preference_path,
             params: { design: "old" },
             method: :patch,
             id: "design-switch-to-old",
-            class: "text-ink-muted underline underline-offset-2 hover:no-underline cursor-pointer",
-            form: { class: "inline sm:ml-auto" } %>
+            class: "inline-flex min-h-11 items-center text-ink-muted underline underline-offset-2 hover:no-underline cursor-pointer lg:min-h-0",
+            form: { class: "inline" } %>
     <% end %>
   </div>
 </footer>
