@@ -603,6 +603,9 @@ ru:
       decline: "Нет, спасибо"
     switch_to_new: "Новый дизайн"
     switch_to_old: "Вернуться к старому дизайну"
+  footer:
+    copyright: "© %{year} Vanilla Mafia"
+    links: "Ссылки сайта"
   notification_settings:
     edit:
       title: "Настройки уведомлений"

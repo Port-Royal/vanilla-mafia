@@ -514,6 +514,9 @@ en:
       decline: "No thanks"
     switch_to_new: "New design"
     switch_to_old: "Back to the old design"
+  footer:
+    copyright: "© %{year} Vanilla Mafia"
+    links: "Site links"
   notification_settings:
     edit:
       title: "Notification settings"
