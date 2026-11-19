@@ -501,6 +501,8 @@ en:
     help: "Help"
     admin: "Admin"
     primary: "Main navigation"
+    menu: "Menu"
+    account_menu: "Account"
     language_names:
       ru: "Русский"
       en: "English"

@@ -1,0 +1,27 @@
+<div class="relative hidden lg:block"
+     data-controller="menu"
+     data-action="pointerdown@window->menu#closeOnOutside keydown.esc@window->menu#close
+                  focusout->menu#closeOnFocusOut turbo:before-cache@document->menu#close">
+  <button type="button" id="site-user-menu-button" class="vm-btn vm-btn--ghost"
+          data-menu-target="button" data-action="click->menu#toggle"
+          aria-expanded="false" aria-controls="site-user-menu">
+    <%= t("nav.account_menu") %>
+    <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6"/>
+    </svg>
+  </button>
+
+  <nav id="site-user-menu" aria-label="<%= t("nav.account_menu") %>" data-menu-target="nav"
+       class="vm-panel vm-panel--raised hidden absolute right-0 top-full z-20 mt-2 min-w-56 py-2">
+    <ul class="text-sm">
+      <% role_nav_items(current_user).each do |item| %>
+        <li><%= link_to item.label, item.path, class: "block px-4 py-2 text-ink hover:bg-gold-wash" %></li>
+      <% end %>
+      <li class="mt-2 border-t border-line pt-2">
+        <%= button_to t("nav.sign_out"), destroy_user_session_path,
+              method: :delete,
+              class: "block w-full cursor-pointer px-4 py-2 text-left text-ink hover:bg-gold-wash" %>
+      </li>
+    </ul>
+  </nav>
+</div>

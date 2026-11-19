@@ -590,6 +590,8 @@ ru:
     help: "Справка"
     admin: "Админка"
     primary: "Основная навигация"
+    menu: "Меню"
+    account_menu: "Аккаунт"
     language_names:
       ru: "Русский"
       en: "English"
