@@ -1,7 +1,7 @@
 <% details = [] %>
 <% details << t("games.overlay.status.#{participation.status}") unless participation.alive? %>
 <% if participation.best_move_seats.present? %>
-  <% details << t("games.redesign.best_move_seats", seats: participation.best_move_seats.join(", ")) %>
+  <% details << t("games.redesign.best_move_seats_html", label: best_move_abbr, seats: participation.best_move_seats.join(", ")) %>
 <% end %>
 <% shown_on_desktop = participation.first_shoot || details.any? %>
 <% minus = participation.minus.to_d %>
@@ -17,15 +17,18 @@
     <% end %>
     <%= link_to participation.player.name, player_path(participation.player),
           class: "font-semibold text-ink hover:underline" %>
+    <% if participation.win %>
+      <span data-part="winner" class="sr-only"><%= t("games.redesign.winner") %></span>
+    <% end %>
     <% if shown_on_desktop || show_scores %>
       <span data-part="details" class="vm-sub <%= "lg:hidden" unless shown_on_desktop %>">
         <% if participation.first_shoot %>
           <span data-part="first-shoot"
-                class="mr-1 inline-block rounded border border-bronze bg-paper px-1 text-[10.5px] font-bold text-ink"><%= t("games.redesign.first_shoot") %></span>
+                class="mr-1 inline-block rounded border border-bronze bg-paper px-1 text-[10.5px] font-bold text-ink"><%= first_shoot_abbr %></span>
         <% end %>
         <%= safe_join(details, " · ") %>
         <% if show_scores %>
-          <span data-part="score-parts" class="lg:hidden"><%= "· " if details.any? %><%= score_parts(participation) %></span>
+          <span data-part="score-parts" class="lg:hidden"><%= "· " if shown_on_desktop %><%= score_parts(participation) %></span>
         <% end %>
       </span>
     <% end %>

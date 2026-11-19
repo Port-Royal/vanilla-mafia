@@ -553,6 +553,26 @@ RSpec.describe Game, type: :model do
       it { expect(game.previous_in_competition).to be_nil }
       it { expect(game.next_in_competition).to be_nil }
     end
+
+    context 'when asked for both neighbours' do
+      subject(:game) { described_class.find(first_day_second.id) }
+
+      let(:game_queries) do
+        game
+        queries = []
+        subscription = ActiveSupport::Notifications.subscribe('sql.active_record') do |*, payload|
+          queries << payload[:sql] if payload[:sql].include?('"games"')
+        end
+        game.previous_in_competition
+        game.next_in_competition
+        ActiveSupport::Notifications.unsubscribe(subscription)
+        queries
+      end
+
+      it 'plucks the order once and loads both neighbours in one query' do
+        expect(game_queries.size).to eq(2)
+      end
+    end
   end
 
   describe 'table overlay broadcasts' do

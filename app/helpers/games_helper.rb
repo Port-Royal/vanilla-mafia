@@ -132,6 +132,25 @@ module GamesHelper
     parts.join(" ")
   end
 
+  # A neighbour game's link text: its number, plus the table and the date when they differ from the current game's.
+  def neighbour_game_label(neighbour, game)
+    parts = [ "#{t("common.game")} #{neighbour.game_number}" ]
+    if neighbour.table_number && neighbour.table_number != game.table_number
+      parts << t("games.redesign.neighbour_table", number: neighbour.table_number)
+    end
+    parts << format_date(neighbour.played_on) if neighbour.played_on && neighbour.played_on != game.played_on
+    parts.join(" · ")
+  end
+
+  # The ПУ and ЛХ abbreviations, spelled out on hover: the legend is hidden while a game is in progress.
+  def first_shoot_abbr
+    tag.abbr(t("games.redesign.first_shoot"), title: t("games.redesign.first_shoot_full"))
+  end
+
+  def best_move_abbr
+    tag.abbr(t("games.redesign.best_move_short"), title: t("games.redesign.best_move_full"))
+  end
+
   private
 
   def overlay_night_row(entries, nights)

@@ -13,7 +13,8 @@ RSpec.describe "Redesigned game page" do
   let(:details) { ->(seat) { row.(seat).at_css("[data-part='details']") } }
   let(:score_parts_line) { ->(seat) { row.(seat).at_css("[data-part='score-parts']") } }
   let(:legend) { document.at_css("#game-legend") }
-  let(:neighbours) { document.at_css("#game-neighbours") }
+  let(:neighbours) { document.at_css("nav#game-neighbours") }
+  let(:winner_mark) { ->(seat) { cell.(seat, "player").at_css("[data-part='winner']") } }
 
   let_it_be(:season) { create(:competition, :season, name: "Season 6") }
   let_it_be(:series) { create(:competition, :series, parent: season, name: "Series 3") }
@@ -133,20 +134,51 @@ RSpec.describe "Redesigned game page" do
       it { expect(row.(1)["class"]).to include("vm-row--highlight") }
       it { expect(row.(4)["class"]).to include("vm-row--highlight") }
       it { expect(row.(2)["class"].to_s).not_to include("vm-row--highlight") }
+      it { expect(winner_mark.(1).text).to eq(I18n.t("games.redesign.winner")) }
+      it { expect(winner_mark.(1)["class"]).to include("sr-only") }
+      it { expect(winner_mark.(4).text).to eq(I18n.t("games.redesign.winner")) }
+      it { expect(winner_mark.(2)).to be_nil }
       it { expect(legend.text.strip).to eq(I18n.t("games.redesign.legend")) }
+      it { expect(table.at_css("thead abbr[title='#{I18n.t('games.redesign.best_move_full')}']").text).to eq(I18n.t("games.redesign.best_move_short")) }
+    end
+
+    describe "a finished game in English" do
+      before do
+        cookies[:locale] = "en"
+        get game_path(game)
+      end
+
+      it { expect(column_headers).to eq(%w[Seat Player Score Minus BM Total]) }
+      it { expect(document.at_css(".translation_missing")).to be_nil }
+      it { expect(winner_mark.(1).text).to eq("winner") }
+      it { expect(details.(1).at_css("abbr[title='first killed']").text).to eq("FK") }
+      it { expect(details.(1).at_css("abbr[title='best move']").text).to eq("BM") }
+      it { expect(neighbours["aria-label"]).to eq("Game navigation") }
+    end
+
+    describe "a finished game with hidden roles" do
+      let_it_be(:hidden_series) { create(:competition, :series, parent: season, name: "Series 5") }
+      let_it_be(:hidden) { create(:game, competition: hidden_series, game_number: 1, hide_roles: true, result: "mafia_victory") }
+      let_it_be(:hidden_seat) { create(:game_participation, game: hidden, seat: 1, role: mafia) }
+
+      before { get game_path(hidden) }
+
+      it { expect(table.at_css("img[src*='roles/mafia']")).to be_present }
     end
 
     describe "the secondary line" do
       before { get game_path(game) }
 
       it { expect(details.(1).at_css("[data-part='first-shoot']").text).to eq(I18n.t("games.redesign.first_shoot")) }
+      it { expect(details.(1).at_css("[data-part='first-shoot'] abbr")["title"]).to eq(I18n.t("games.redesign.first_shoot_full")) }
+      it { expect(details.(1).at_css("abbr[title='#{I18n.t('games.redesign.best_move_full')}']").text).to eq(I18n.t("games.redesign.best_move_short")) }
       it { expect(details.(2).at_css("[data-part='first-shoot']")).to be_nil }
       it { expect(details.(1).text).to include(I18n.t("games.overlay.status.killed_by_mafia")) }
       it { expect(details.(2).text).to include(I18n.t("games.overlay.status.voted_out")) }
       it { expect(details.(3).text).to include(I18n.t("games.overlay.status.banned")) }
       it { expect(details.(4).text).not_to include(I18n.t("games.overlay.status.alive")) }
-      it { expect(details.(1).text).to include(I18n.t("games.redesign.best_move_seats", seats: "2, 5, 7")) }
-      it { expect(details.(4).text).to include(I18n.t("games.redesign.best_move_seats", seats: "3")) }
+      it { expect(details.(1).text).to include("#{I18n.t('games.redesign.best_move_short')}: 2, 5, 7") }
+      it { expect(details.(4).text).to include("#{I18n.t('games.redesign.best_move_short')}: 3") }
       it { expect(details.(2).text).not_to include(I18n.t("games.redesign.best_move_short")) }
       it { expect(score_parts_line.(1).text.strip).to eq("· 1 + #{I18n.t('games.redesign.best_move_short')} 0.4") }
       it { expect(score_parts_line.(1)["class"]).to include("lg:hidden") }
@@ -163,6 +195,16 @@ RSpec.describe "Redesigned game page" do
       it { expect(score_parts_line.(5).text.strip).to eq("0.5") }
       it { expect(meta.at_css(".vm-pill.vm-pill--neutral")).to be_present }
       it { expect(row.(5)["class"].to_s).not_to include("vm-row--highlight") }
+    end
+
+    describe "a first-killed player still alive with no best move seats" do
+      let_it_be(:odd_game) { create(:game, competition: series, game_number: 45, result: "draw") }
+      let_it_be(:odd) { create(:game_participation, game: odd_game, seat: 6, role: nil, plus: 1, best_move: 0.4, first_shoot: true) }
+
+      before { get game_path(odd_game) }
+
+      it { expect(details.(6).text.squish).to eq("#{I18n.t('games.redesign.first_shoot')} · 1 + #{I18n.t('games.redesign.best_move_short')} 0.4") }
+      it { expect(score_parts_line.(6).text.strip).to eq("· 1 + #{I18n.t('games.redesign.best_move_short')} 0.4") }
     end
 
     describe "row order" do
@@ -198,8 +240,10 @@ RSpec.describe "Redesigned game page" do
       it { expect(score_parts_line.(1)).to be_nil }
       it { expect(legend).to be_nil }
       it { expect(details.(1).text).to include(I18n.t("games.overlay.status.killed_by_mafia")) }
-      it { expect(details.(1).text).to include(I18n.t("games.redesign.best_move_seats", seats: "4")) }
+      it { expect(details.(1).text).to include("#{I18n.t('games.redesign.best_move_short')}: 4") }
       it { expect(details.(1).at_css("[data-part='first-shoot']")).to be_present }
+      it { expect(details.(1).at_css("abbr[title='#{I18n.t('games.redesign.first_shoot_full')}']")).to be_present }
+      it { expect(details.(1).at_css("abbr[title='#{I18n.t('games.redesign.best_move_full')}']")).to be_present }
       it { expect(details.(1)["class"]).not_to include("lg:hidden") }
       it { expect(table.css("img[src*='roles/']")).to be_empty }
       it { expect(neighbours.css("a[href*='/games/']")).to be_empty }
@@ -219,19 +263,57 @@ RSpec.describe "Redesigned game page" do
       let_it_be(:previous_game) { create(:game, competition: series, game_number: 13, played_on: game.played_on, table_number: 2) }
       let_it_be(:next_game) { create(:game, competition: series, game_number: 15, played_on: game.played_on, table_number: 2) }
       let(:links) { neighbours.css("a") }
+      let(:sides) { neighbours.element_children }
 
-      before { get game_path(game) }
+      context "with a game in the middle" do
+        before { get game_path(game) }
 
-      it { expect(links.first["href"]).to eq(game_path(previous_game)) }
-      it { expect(links.first.text.strip).to eq(I18n.t("games.redesign.previous", number: 13)) }
-      it { expect(links.last["href"]).to eq(game_path(next_game)) }
-      it { expect(links.last.text.strip).to eq(I18n.t("games.redesign.next", number: 15)) }
+        it { expect(neighbours["aria-label"]).to eq(I18n.t("games.redesign.neighbours")) }
+        it { expect(links.first["href"]).to eq(game_path(previous_game)) }
+        it { expect(links.first.text.squish).to eq("← #{I18n.t('common.game')} 13") }
+        it { expect(links.first.at_css("span[aria-hidden='true']").text).to eq("←") }
+        it { expect(links.last["href"]).to eq(game_path(next_game)) }
+        it { expect(links.last.text.squish).to eq("#{I18n.t('common.game')} 15 →") }
+        it { expect(links.last.at_css("span[aria-hidden='true']").text).to eq("→") }
 
-      it "links to the competition table in the middle" do
-        expect(links[1]["href"]).to eq(competition_path(slug: series.slug))
+        it "links to the competition table in the middle" do
+          expect(links[1]["href"]).to eq(competition_path(slug: series.slug))
+        end
+
+        it { expect(links[1].text.strip).to eq("Series 3: #{I18n.t('games.redesign.competition_table')}") }
       end
 
-      it { expect(links[1].text.strip).to eq("Series 3: #{I18n.t('games.redesign.competition_table')}") }
+      context "with the first game" do
+        before { get game_path(previous_game) }
+
+        it { expect(sides.first.element_children).to be_empty }
+        it { expect(links.size).to eq(2) }
+        it { expect(links.last["href"]).to eq(game_path(game)) }
+      end
+
+      context "with the last game" do
+        before { get game_path(next_game) }
+
+        it { expect(sides.last.element_children).to be_empty }
+        it { expect(links.size).to eq(2) }
+        it { expect(links.first["href"]).to eq(game_path(game)) }
+      end
+    end
+
+    describe "neighbours on other tables and days" do
+      let_it_be(:tables_series) { create(:competition, :series, parent: season, name: "Series 7") }
+      let_it_be(:first_table) { create(:game, competition: tables_series, game_number: 1, played_on: Date.new(2026, 3, 20), table_number: 1) }
+      let_it_be(:second_table) { create(:game, competition: tables_series, game_number: 1, played_on: Date.new(2026, 3, 20), table_number: 2) }
+      let_it_be(:next_day) { create(:game, competition: tables_series, game_number: 1, played_on: Date.new(2026, 3, 21), table_number: 1) }
+      let(:links) { neighbours.css("a") }
+
+      before { get game_path(second_table) }
+
+      it { expect(links.first.text.squish).to eq("← #{I18n.t('common.game')} 1 · #{I18n.t('games.redesign.neighbour_table', number: 1)}") }
+
+      it "names the table and the date of the next day's game" do
+        expect(links.last.text.squish).to eq("#{I18n.t('common.game')} 1 · #{I18n.t('games.redesign.neighbour_table', number: 1)} · 21.03.2026 →")
+      end
     end
   end
 end

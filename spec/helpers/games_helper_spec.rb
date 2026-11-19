@@ -464,4 +464,66 @@ RSpec.describe GamesHelper do
       it { is_expected.to eq("1 \u2212 0.5 + ЛХ 0.25") }
     end
   end
+
+  describe "#neighbour_game_label" do
+    subject(:label) { helper.neighbour_game_label(neighbour, game) }
+
+    let(:game) { Game.new(game_number: 1, played_on: Date.new(2026, 3, 20), table_number: 1) }
+    let(:neighbour) { Game.new(game_number: 2, played_on: neighbour_date, table_number: neighbour_table) }
+    # Fresh objects equal to the game's, so the comparison is by value.
+    let(:neighbour_date) { Date.new(2026, 3, 20) }
+    let(:neighbour_table) { 1 }
+
+    context "with the same table and date" do
+      it { is_expected.to eq("Игра 2") }
+    end
+
+    context "with another table" do
+      let(:neighbour_table) { 2 }
+
+      it { is_expected.to eq("Игра 2 · стол 2") }
+    end
+
+    context "with another date" do
+      let(:neighbour_date) { Date.new(2026, 3, 21) }
+
+      it { is_expected.to eq("Игра 2 · 21.03.2026") }
+    end
+
+    context "with another table and date" do
+      let(:neighbour_table) { 3 }
+      let(:neighbour_date) { Date.new(2026, 3, 19) }
+
+      it { is_expected.to eq("Игра 2 · стол 3 · 19.03.2026") }
+    end
+
+    context "with a neighbour without a table or date" do
+      let(:neighbour_table) { nil }
+      let(:neighbour_date) { nil }
+
+      it { is_expected.to eq("Игра 2") }
+    end
+
+    context "when only the current game has no table or date" do
+      let(:game) { Game.new(game_number: 1) }
+      let(:neighbour_table) { 2 }
+      let(:neighbour_date) { Date.new(2026, 3, 21) }
+
+      it { is_expected.to eq("Игра 2 · стол 2 · 21.03.2026") }
+    end
+  end
+
+  describe "#first_shoot_abbr" do
+    subject(:abbr) { Nokogiri::HTML.fragment(helper.first_shoot_abbr).at_css("abbr") }
+
+    it { expect(abbr.text).to eq("ПУ") }
+    it { expect(abbr["title"]).to eq("первый убитый") }
+  end
+
+  describe "#best_move_abbr" do
+    subject(:abbr) { Nokogiri::HTML.fragment(helper.best_move_abbr).at_css("abbr") }
+
+    it { expect(abbr.text).to eq("ЛХ") }
+    it { expect(abbr["title"]).to eq("лучший ход") }
+  end
 end

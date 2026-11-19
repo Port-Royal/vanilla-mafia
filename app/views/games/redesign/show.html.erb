@@ -53,7 +53,7 @@
         <% if show_scores %>
           <th scope="col" class="hidden text-right lg:table-cell"><%= t("games.show.base_score") %></th>
           <th scope="col" class="hidden text-right lg:table-cell"><%= t("activerecord.attributes.game_participation.minus") %></th>
-          <th scope="col" class="hidden text-right lg:table-cell"><%= t("games.redesign.best_move_short") %></th>
+          <th scope="col" class="hidden text-right lg:table-cell"><%= best_move_abbr %></th>
           <th scope="col" class="text-right"><%= t("games.show.total") %></th>
         <% end %>
       </tr>
