@@ -1,11 +1,11 @@
-<header id="site-top-bar" class="relative border-b border-line bg-paper">
+<header id="site-top-bar" class="relative border-b border-line bg-paper text-ink">
   <div class="vm-container flex min-h-14 items-center gap-6">
     <%= link_to root_path, class: "flex-shrink-0" do %>
       <img src="/img/chi_light.png" alt="Vanilla Mafia" class="vm-logo">
     <% end %>
 
     <nav aria-label="<%= t("nav.primary") %>" class="hidden min-w-0 lg:block">
-      <ul class="flex items-center gap-5 overflow-x-auto whitespace-nowrap text-sm">
+      <ul class="-my-1 flex items-center gap-5 overflow-x-auto whitespace-nowrap py-1 text-sm">
         <% featured_competitions.each do |competition| %>
           <li><%= render "layouts/redesign/nav_link", label: competition.name, path: competition_path(slug: competition.slug) %></li>
         <% end %>

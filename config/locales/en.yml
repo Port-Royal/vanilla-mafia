@@ -502,8 +502,13 @@ en:
     admin: "Admin"
     primary: "Main navigation"
     menu: "Menu"
+    account_menu: "Account"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
+      label: "New site design"
       text: "There's a new design — want to try it?"
       try: "Try it"
       decline: "No thanks"

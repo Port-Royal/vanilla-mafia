@@ -591,8 +591,13 @@ ru:
     admin: "Админка"
     primary: "Основная навигация"
     menu: "Меню"
+    account_menu: "Аккаунт"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
+      label: "Новый дизайн сайта"
       text: "У сайта новый дизайн — хотите попробовать?"
       try: "Попробовать"
       decline: "Нет, спасибо"

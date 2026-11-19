@@ -39,7 +39,9 @@ RSpec.describe "Redesign layout shell" do
     it_behaves_like "the new shell"
 
     it { expect(top_bar.name).to eq("header") }
-    it { expect(body["class"]).to eq("min-h-screen bg-paper text-ink font-sans") }
+    it { expect(top_bar["class"]).to include("text-ink") }
+    it { expect(nav.at_css("ul")["class"]).to include("py-1", "-my-1") }
+    it { expect(body["class"]).to eq("min-h-screen bg-paper font-sans") }
     it { expect(body["data-controller"]).to eq("time-zone") }
 
     it "links the logo to the home page" do
@@ -100,6 +102,18 @@ RSpec.describe "Redesign layout shell" do
       it "shows the current locale as plain text" do
         expect(top_bar.at_css(".vm-locale-current").text).to eq("RU")
       end
+
+      it "marks the current locale" do
+        expect(top_bar.at_css(".vm-locale-current")["aria-current"]).to eq("true")
+      end
+
+      it "tags the other locale button with its language" do
+        expect(locale_forms.first.at_css("button")["lang"]).to eq("en")
+      end
+
+      it "names the other locale button in its own language" do
+        expect(locale_forms.first.at_css("button")["aria-label"]).to eq("English")
+      end
     end
 
     describe "active item" do
@@ -148,10 +162,22 @@ RSpec.describe "Redesign layout shell" do
     it { expect(top_bar).to be_nil }
   end
 
+  context "when rendering a judge page" do
+    include_context "with the new design"
+
+    let_it_be(:judge) { create(:user, :judge) }
+    let(:signed_in_user) { judge }
+    let(:path) { judge_protocols_path }
+
+    it_behaves_like "the new shell"
+
+    it { expect(response).to have_http_status(:ok) }
+  end
+
   context "when rendering an error page" do
     include_context "with the new design"
 
-    let(:path) { "/404" }
+    let(:path) { competition_path(slug: "missing") }
 
     around do |example|
       env = Rails.application.env_config
@@ -168,5 +194,6 @@ RSpec.describe "Redesign layout shell" do
     it_behaves_like "the new shell"
 
     it { expect(response).to have_http_status(:not_found) }
+    it { expect(document.at_css("main#site-main").text).to include(I18n.t("errors.404.title")) }
   end
 end
