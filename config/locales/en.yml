@@ -501,6 +501,9 @@ en:
     help: "Help"
     admin: "Admin"
     primary: "Main navigation"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
       text: "There's a new design — want to try it?"

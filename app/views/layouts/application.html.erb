@@ -5,7 +5,7 @@
   </head>
 
   <% if new_design? %>
-    <body class="min-h-screen bg-paper text-ink font-sans" data-controller="time-zone">
+    <body class="min-h-screen bg-paper font-sans" data-controller="time-zone">
       <%= render "layouts/redesign/shell", content: yield %>
     </body>
   <% else %>

@@ -590,6 +590,9 @@ ru:
     help: "Справка"
     admin: "Админка"
     primary: "Основная навигация"
+    language_names:
+      ru: "Русский"
+      en: "English"
   design:
     offer:
       text: "У сайта новый дизайн — хотите попробовать?"
