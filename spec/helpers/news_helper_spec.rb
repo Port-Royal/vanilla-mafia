@@ -1,6 +1,14 @@
 require "rails_helper"
 
 RSpec.describe NewsHelper, type: :helper do
+  describe "NEWS_PHOTO_VARIANTS" do
+    it "crops the card variant to 160x120 at quality 85" do
+      expect(NewsHelper::NEWS_PHOTO_VARIANTS[:card]).to eq(resize_to_fill: [ 160, 120 ], saver: { quality: 85 })
+    end
+
+    it { expect(NewsHelper::NEWS_PHOTO_VARIANTS).to be_frozen }
+  end
+
   describe "#news_photo_variant" do
     let_it_be(:author) { create(:user) }
     let_it_be(:news) { create(:news, :with_photo, author: author) }
@@ -28,6 +36,12 @@ RSpec.describe NewsHelper, type: :helper do
       variant = helper.news_photo_variant(photo, :admin_form)
       expect(variant.variation.transformations[:resize_to_limit]).to eq([ 400, 400 ])
       expect(variant.variation.transformations[:saver]).to eq(quality: 80)
+    end
+
+    it "returns a card variant cropped to 160x120 with quality 85" do
+      variant = helper.news_photo_variant(photo, :card)
+      expect(variant.variation.transformations[:resize_to_fill]).to eq([ 160, 120 ])
+      expect(variant.variation.transformations[:saver]).to eq(quality: 85)
     end
 
     it "raises KeyError for an unknown variant name" do

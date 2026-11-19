@@ -20,9 +20,11 @@ class HomeController < ApplicationController
 
     @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT) if @block_visible[:recent_games]
     @latest_news = News.visible.recent.limit(LATEST_NEWS_LIMIT) if @block_visible[:latest_news]
+    @announcements = load_announcements
+    return render "home/redesign/index" if helpers.new_design?
+
     @hall_of_fame_players = load_hall_of_fame_players if @block_visible[:hall_of_fame]
     @stats = load_stats if @block_visible[:stats]
-    @announcements = load_announcements
   end
 
   private

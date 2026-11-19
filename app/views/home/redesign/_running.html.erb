@@ -1,0 +1,36 @@
+<section id="home-running" aria-labelledby="home-running-label">
+  <h2 id="home-running-label" class="vm-label mb-2"><%= t("home.redesign.running") %></h2>
+  <div class="space-y-4">
+    <% competitions.each do |competition| %>
+      <div class="vm-panel overflow-hidden">
+        <div class="flex items-baseline justify-between gap-3 px-3 pt-3 pb-1">
+          <%= link_to competition.name, competition_path(slug: competition.slug),
+                class: "text-sm font-bold text-ink hover:underline" %>
+          <%= link_to "#{t("home.redesign.table_link")} →", competition_path(slug: competition.slug),
+                class: "text-xs whitespace-nowrap text-ink-muted hover:underline" %>
+        </div>
+        <table class="vm-table">
+          <thead class="sr-only">
+            <tr>
+              <th scope="col"><%= t("home.running_tournaments.rank") %></th>
+              <th scope="col"><%= t("home.running_tournaments.player") %></th>
+              <th scope="col"><%= t("home.running_tournaments.rating") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% standings[competition].each_with_index do |player, index| %>
+              <% rank = index + 1 %>
+              <tr>
+                <td class="w-8">
+                  <span class="vm-medal <%= rank <= 3 ? "vm-medal--#{rank}" : "text-ink-muted" %>"><%= rank %></span>
+                </td>
+                <td><%= link_to player.name, player_path(player), class: "font-semibold text-ink hover:underline" %></td>
+                <td class="text-right tabular-nums font-bold"><%= player.total_rating %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</section>

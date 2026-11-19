@@ -142,6 +142,14 @@ ru:
       player: "Игрок"
       rating: "Рейтинг"
       view_all: "Подробнее"
+    redesign:
+      running: "Идёт сейчас"
+      table_link: "таблица"
+      recently_finished: "Недавно завершились"
+      winner: "победитель"
+      recent_games: "Последние игры"
+      news: "Новости"
+      all_news: "все новости"
   competitions:
     show:
       by_children: "Соревнования"
