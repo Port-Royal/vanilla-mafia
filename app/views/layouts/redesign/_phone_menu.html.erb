@@ -1,6 +1,7 @@
 <div class="ml-auto lg:hidden"
      data-controller="menu"
-     data-action="click@window->menu#closeOnOutside keydown.esc@window->menu#close">
+     data-action="pointerdown@window->menu#closeOnOutside keydown.esc@window->menu#close
+                  focusout->menu#closeOnFocusOut turbo:before-cache@document->menu#close">
   <button type="button" id="site-phone-menu-button"
           class="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-ink"
           data-menu-target="button" data-action="click->menu#toggle"
@@ -11,7 +12,7 @@
   </button>
 
   <nav id="site-phone-menu" aria-label="<%= t("nav.menu") %>" data-menu-target="nav"
-       class="vm-panel--raised hidden absolute inset-x-0 top-full z-20 border-b border-line bg-paper lg:hidden">
+       class="vm-panel--raised hidden absolute inset-x-0 top-full z-[60] max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-b border-line bg-paper lg:hidden">
     <ul class="vm-container py-2 text-sm">
       <% featured_competitions.each do |competition| %>
         <li><%= render "layouts/redesign/phone_nav_link", label: competition.name, path: competition_path(slug: competition.slug) %></li>
@@ -28,16 +29,17 @@
         <li class="mt-2 border-t border-line pt-2">
           <%= button_to t("nav.sign_out"), destroy_user_session_path,
                 method: :delete,
-                class: "flex min-h-11 w-full cursor-pointer items-center text-left text-ink" %>
+                class: "flex min-h-11 w-full cursor-pointer items-center pl-3 text-left text-ink" %>
         </li>
       <% else %>
         <li class="mt-2 border-t border-line pt-2">
-          <%= link_to t("nav.sign_in"), new_user_session_path, class: "flex min-h-11 items-center text-ink" %>
+          <%= link_to t("nav.sign_in"), new_user_session_path, class: "flex min-h-11 items-center pl-3 text-ink" %>
         </li>
       <% end %>
 
-      <li class="mt-2 flex min-h-11 items-center border-t border-line pt-2">
-        <%= render "layouts/redesign/locale_switcher" %>
+      <li class="mt-2 flex min-h-11 items-center border-t border-line pl-3 pt-2">
+        <%= render "layouts/redesign/locale_switcher",
+              button_class: "inline-flex min-h-11 min-w-11 items-center justify-center text-ink-muted hover:text-ink hover:underline" %>
       </li>
     </ul>
   </nav>

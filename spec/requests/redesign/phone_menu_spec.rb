@@ -31,6 +31,12 @@ RSpec.describe "Redesign phone menu" do
   let(:menu_targets) do
     menu.css("a, form").map { |node| node.name == "a" ? node["href"] : node["action"] }
   end
+  let(:section_targets) do
+    menu.css("ul > li.border-t.border-line").map do |item|
+      link = item.at_css("a")
+      link ? link["href"] : item.at_css("form")["action"]
+    end
+  end
   let(:path) { news_index_path }
   let(:signed_in_user) { nil }
 
@@ -77,9 +83,14 @@ RSpec.describe "Redesign phone menu" do
       it { expect(menu_wrapper.at_css("#site-phone-menu")).to be_present }
       it { expect(menu_wrapper.at_css("#site-user-menu")).to be_nil }
 
-      it "closes the menu on an outside click and on Escape" do
+      it "closes the menu on an outside pointer, Escape, focus leaving it and before Turbo caches the page" do
         expect(menu_wrapper["data-action"].split)
-          .to contain_exactly("click@window->menu#closeOnOutside", "keydown.esc@window->menu#close")
+          .to contain_exactly(
+            "pointerdown@window->menu#closeOnOutside",
+            "keydown.esc@window->menu#close",
+            "focusout->menu#closeOnFocusOut",
+            "turbo:before-cache@document->menu#close"
+          )
       end
     end
 
@@ -90,9 +101,21 @@ RSpec.describe "Redesign phone menu" do
       it { expect(menu["class"]).to include("hidden", "lg:hidden", "absolute", "inset-x-0", "top-full") }
       it { expect(top_bar["class"]).to include("relative") }
 
-      it "gives every link a 44 px tap target" do
-        expect(menu.css("a").map { |link| link["class"] }).to all(include("min-h-11"))
+      it { expect(menu["class"]).to include("z-[60]") }
+      it { expect(menu["class"]).to include("max-h-[calc(100dvh-3.5rem)]", "overflow-y-auto") }
+
+      it "gives every link and button a 44 px tap target" do
+        expect(menu.css("a, button").map { |target| target["class"] }).to all(include("min-h-11"))
       end
+    end
+
+    describe "the locale row" do
+      let(:locale_row) { menu.css("ul > li").last }
+      let(:locale_button) { locale_row.at_css("form[action='#{locale_target}'] button") }
+
+      it { expect(locale_row["class"]).to include("pl-3") }
+      it { expect(locale_button["class"]).to include("inline-flex", "min-h-11", "min-w-11", "items-center", "justify-center") }
+      it { expect(locale_button["lang"]).to eq("en") }
     end
 
     describe "the desktop controls" do
@@ -108,6 +131,7 @@ RSpec.describe "Redesign phone menu" do
       end
 
       it { expect(menu.at_css("a[href='#{new_user_session_path}']").text.strip).to eq(I18n.t("nav.sign_in")) }
+      it { expect(menu.at_css("a[href='#{new_user_session_path}']")["class"]).to include("pl-3") }
       it { expect(menu.at_css(".vm-locale-current").text).to eq("RU") }
       it { expect(menu.css("ul > li.border-t.border-line").size).to eq(2) }
     end
@@ -119,6 +143,7 @@ RSpec.describe "Redesign phone menu" do
       it_behaves_like "the phone menu links"
 
       it { expect(menu.at_css("form[action='#{destroy_user_session_path}'] button").text.strip).to eq(I18n.t("nav.sign_out")) }
+      it { expect(menu.at_css("form[action='#{destroy_user_session_path}'] button")["class"]).to include("pl-3") }
       it { expect(menu.css("ul > li.border-t.border-line").size).to eq(2) }
     end
 
@@ -129,8 +154,7 @@ RSpec.describe "Redesign phone menu" do
       it_behaves_like "the phone menu links"
 
       it "separates public, role, account and locale sections with a line" do
-        expect(menu.css("ul > li.border-t.border-line").map { |item| item.at_css("a, form")[item.at_css("a") ? "href" : "action"] })
-          .to eq([ podcast_episodes_path, destroy_user_session_path, locale_target ])
+        expect(section_targets).to eq([ podcast_episodes_path, destroy_user_session_path, locale_target ])
       end
     end
 

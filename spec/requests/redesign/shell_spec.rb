@@ -111,6 +111,10 @@ RSpec.describe "Redesign layout shell" do
         expect(locale_forms.first.at_css("button")["lang"]).to eq("en")
       end
 
+      it "keeps the compact desktop button" do
+        expect(locale_forms.first.at_css("button")["class"]).to eq("text-ink-muted hover:text-ink hover:underline")
+      end
+
       it "names the other locale button in its own language" do
         expect(locale_forms.first.at_css("button")["aria-label"]).to eq("English")
       end

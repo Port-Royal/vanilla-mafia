@@ -1,3 +1,4 @@
+<% button_class = local_assigns.fetch(:button_class, "text-ink-muted hover:text-ink hover:underline") %>
 <div class="flex items-center gap-2 text-sm">
   <% I18n.available_locales.each_with_index do |loc, i| %>
     <% if i > 0 %><span class="text-ink-muted" aria-hidden="true">|</span><% end %>
@@ -8,7 +9,7 @@
             method: :patch,
             lang: loc,
             aria: { label: t("nav.language_names.#{loc}") },
-            class: "text-ink-muted hover:text-ink hover:underline",
+            class: button_class,
             form: { class: "inline" } %>
     <% end %>
   <% end %>
