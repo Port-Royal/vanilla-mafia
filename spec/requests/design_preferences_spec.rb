@@ -24,6 +24,17 @@ RSpec.describe DesignPreferencesController, type: :request do
         it { expect(cookies[:design]).to be_nil }
       end
 
+      context "with an unknown design after choosing the old design" do
+        before do
+          cookies[:design] = "old"
+          patch design_preference_path, params: { design: "beta" }
+        end
+
+        it { expect(response).to redirect_to(root_path) }
+        it { expect(cookies[:design]).to eq("old") }
+        it { expect(response.headers["Set-Cookie"].to_s).not_to include("design=") }
+      end
+
       context "without a design param" do
         before { patch design_preference_path }
 
@@ -58,8 +69,6 @@ RSpec.describe DesignPreferencesController, type: :request do
         freeze_time
         patch design_preference_path, params: { design: "new" }
       end
-
-      after { unfreeze_time }
 
       it "expires in one year" do
         expect(set_cookie).to include("expires=#{1.year.from_now.httpdate}")
