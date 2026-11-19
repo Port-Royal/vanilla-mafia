@@ -80,14 +80,15 @@ RSpec.describe "Redesign layout shell" do
     end
 
     describe "locale switcher" do
-      let(:locale_forms) { document.css("form[action^='#{locale_path}']") }
+      let(:locale_selector) { "form[action^='#{locale_path}']" }
+      let(:locale_forms) { top_bar.at_css("#site-user-area").parent.css(locale_selector) }
 
-      it "renders exactly one locale form on the page" do
+      it "renders exactly one locale form in the desktop controls" do
         expect(locale_forms.size).to eq(1)
       end
 
-      it "places the locale form in the top bar" do
-        expect(top_bar.css("form[action^='#{locale_path}']").size).to eq(1)
+      it "renders the locale forms only in the top bar: desktop controls and phone menu" do
+        expect(document.css(locale_selector).size).to eq(top_bar.css(locale_selector).size).and eq(2)
       end
 
       it "posts the other locale" do
@@ -108,6 +109,10 @@ RSpec.describe "Redesign layout shell" do
 
       it "tags the other locale button with its language" do
         expect(locale_forms.first.at_css("button")["lang"]).to eq("en")
+      end
+
+      it "keeps the compact desktop button" do
+        expect(locale_forms.first.at_css("button")["class"]).to eq("text-ink-muted hover:text-ink hover:underline")
       end
 
       it "names the other locale button in its own language" do

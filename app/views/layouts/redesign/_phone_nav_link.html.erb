@@ -1,0 +1,5 @@
+<% if nav_active?(path) %>
+  <%= link_to label, path, class: "flex min-h-11 items-center font-semibold text-ink shadow-[inset_2px_0_0_var(--color-gold)] pl-3", aria: { current: "page" } %>
+<% else %>
+  <%= link_to label, path, class: "flex min-h-11 items-center text-ink-muted pl-3" %>
+<% end %>
