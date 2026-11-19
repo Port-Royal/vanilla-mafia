@@ -87,10 +87,11 @@ the markup 3 edits).
   `gold-soft #f3e2b0`, `gold-wash #fbf1d6`, `silver #e3dccb`, `bronze #e9cfae`, `alert-soft #f5ddd5`,
   `alert-ink #8a2a12` (as `--color-<name>`), and `--font-serif: "PT Serif", ui-serif, Georgia, serif`.
 - Produces classes: `vm-container` (centred, `max-w-6xl`, `px-4 lg:px-6`), `vm-btn` + `vm-btn--primary` (bg ink,
-  text gold-bright, semibold, `rounded-md`, `min-h-9`, `min-h-11` below `lg`) + `vm-btn--ghost` (transparent,
-  1 px `#d8cba9` border, ink text), `vm-panel` (bg panel, 1 px line border, `rounded-lg`), `vm-panel--raised`
-  (adds one soft shadow), `vm-chrome` (scope class for header/footer/menus: links ink, underline on hover,
-  `:focus-visible` 2 px ink outline offset 2 px), `vm-logo` (`filter: invert(.86) sepia(.4)`, `h-8`).
+  text gold-bright, semibold, `rounded-md`, `min-h-9`, `min-h-11` below `lg`, pointer cursor, `bg-ink/90` on hover) +
+  `vm-btn--ghost` (transparent, 1 px `#d8cba9` border, ink text, `bg-gold-wash` on hover), `vm-panel` (bg panel, 1 px line border, `rounded-lg`), `vm-panel--raised`
+  (adds one soft shadow), `vm-chrome` (scope class for header/footer/menus: links ink, underline on hover, wrapped in `:where()` so
+  later component classes and utilities override them; `:focus-visible` 2 px ink outline offset 2 px, skipping
+  `tabindex="-1"`), `vm-logo` (`filter: invert(.86) sepia(.4)`, `h-8`).
 
 - [ ] **Step 1: Add the font**
 
@@ -101,11 +102,15 @@ Change the Google Fonts import to load Roboto 400/500/700 and PT Serif 700 in on
 
 - [ ] **Step 3: Verify the build**
 
-Run: `bin/rails tailwindcss:build && grep -o -- "--color-ink-muted\|\.vm-btn--primary\|PT Serif" app/assets/builds/tailwind.css | sort -u`
+Run: `bin/rails tailwindcss:build && grep -o -- "--color-gold-bright\|\.vm-btn--primary\|PT Serif" app/assets/builds/tailwind.css | sort -u`
 Expected: build succeeds; all three strings listed (the build is minified onto one line, so count matches, not lines).
+`--color-gold-bright` is in the build because `vm-btn--primary` uses it; confirm the full token list against the
+source `@theme` block in `app/assets/tailwind/application.css`, not the build.
 
-Note: Tailwind v4 drops classes no template uses. `vm-*` component classes declared in `@layer components` are kept;
-token utilities (e.g. `bg-paper`) appear in the build only once a template uses them — that is expected here.
+Note: Tailwind v4 drops what nothing uses. `vm-*` component classes declared in `@layer components` are kept;
+token utilities (e.g. `bg-paper`) appear in the build only once a template uses them, and a `--color-*` variable
+appears only once a used class or utility references it (`--color-silver`, `--color-bronze` and the like are absent
+for now) — that is expected here.
 
 - [ ] **Step 4: Verify nothing visible changed**
 
@@ -315,8 +320,8 @@ DesignPreference::CHOICES.include?(params[:design])`; set `cookies[:design] = { 
   - `include_context "with the new design"`: `#site-top-bar` present, `#site-sidebar` and `#site-mobile-header`
     absent; logo `img.vm-logo` links to `root_path`; links to each featured competition, `hall_path`,
     `news_index_path` inside `#site-top-bar nav`; on `get hall_path` the Hall of Fame link has
-    `aria-current="page"`; signed out → a `vm-btn--ghost` link to `new_user_session_path`; RU/EN forms posting to
-    `locale_path`
+    `aria-current="page"`; signed out → a `vm-btn--ghost` link to `new_user_session_path`; the locale switcher shows the
+    current locale as text and one form for the other locale posting to `locale_path`
   - opted in (`with the redesign offered` + `cookies[:design] = "new"`): new shell renders
   - errors page (`get "/404"`, as `spec/requests/errors_spec.rb` does) renders inside the new shell
 
@@ -418,7 +423,7 @@ DesignPreference::CHOICES.include?(params[:design])`; set `cookies[:design] = { 
 
 - [ ] **Step 1: Write the failing request spec** with `include_context "with the new design"`: for each user kind,
   `#site-phone-menu` lists, in order, the featured competitions, `hall_path`, `news_index_path`, then the
-  `role_nav_items` hrefs, then sign out (signed in) or `new_user_session_path` (signed out), then the RU/EN forms;
+  `role_nav_items` hrefs, then sign out (signed in) or `new_user_session_path` (signed out), then the locale switcher (current locale as text, one form for the other locale);
   the button has `aria-expanded="false"`.
 
 - [ ] **Step 2: Run, verify it fails.**
@@ -456,7 +461,7 @@ DesignPreference::CHOICES.include?(params[:design])`; set `cookies[:design] = { 
 
 - [ ] **Step 2: Run, verify it fails.**
 
-- [ ] **Step 3: Implement** — `border-t border-line`, `text-ink-muted text-xs` (13 px), inside `vm-container`,
+- [ ] **Step 3: Implement** — `border-t border-line`, `text-ink-muted text-xs` (12 px), inside `vm-container`,
   `vm-chrome`; render it after `main` in the new shell.
 
 - [ ] **Step 4: Run** → PASS.
