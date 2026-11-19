@@ -1,0 +1,8 @@
+<% flash.each do |type, message| %>
+  <% next if message.blank? %>
+  <% error = %w[alert error].include?(type.to_s) %>
+  <div role="<%= error ? "alert" : "status" %>"
+       class="vm-panel mb-4 px-4 py-3 text-sm <%= error ? "bg-alert-soft text-alert-ink border-alert-ink/20" : "text-ink" %>">
+    <%= message %>
+  </div>
+<% end %>

@@ -1,16 +1,19 @@
-<div class="flex min-h-screen flex-col">
+<% show_toast = @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
+
+<%# Below lg the toast spans the screen bottom, so the page keeps room to scroll the footer clear of it. %>
+<div class="flex min-h-screen flex-col <%= "pb-40 lg:pb-0" if show_toast %>">
   <div class="vm-chrome">
     <%= render "layouts/redesign/top_bar" %>
   </div>
 
   <main id="site-main" class="vm-container flex-1 py-6 lg:py-10">
-    <%= render "devise/shared/flash" %>
+    <%= render "layouts/redesign/flash" %>
     <%= content %>
   </main>
 
   <%= render "layouts/redesign/footer" %>
 </div>
 
-<% if @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
-  <%= render "layouts/announcement_toast", announcements: @announcements %>
+<% if show_toast %>
+  <%= render "layouts/redesign/announcement_toast", announcements: @announcements %>
 <% end %>
