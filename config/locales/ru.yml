@@ -145,11 +145,10 @@ ru:
     redesign:
       running: "Идёт сейчас"
       table_link: "таблица"
+      table_link_label: "таблица: %{competition}"
       recently_finished: "Недавно завершились"
       winner: "победитель"
-      recent_games: "Последние игры"
       news: "Новости"
-      all_news: "все новости"
   competitions:
     show:
       by_children: "Соревнования"

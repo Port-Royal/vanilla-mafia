@@ -53,7 +53,9 @@ RSpec.describe "Redesigned home page" do
     describe "removed blocks" do
       before { get root_path }
 
-      it { expect(main.text).not_to include(I18n.t("home.hero.title")) }
+      it { expect(main.css("h1").size).to eq(1) }
+      it { expect(main.at_css("h1")["class"].split).to eq(%w[sr-only]) }
+      it { expect(main.at_css("h1").text).to eq(I18n.t("home.hero.title")) }
       it { expect(main.text).not_to include(I18n.t("home.hero.tagline")) }
       it { expect(main.text).not_to include(I18n.t("home.whats_new.title")) }
       it { expect(main.text).not_to include(I18n.t("home.hall_of_fame.title")) }
@@ -73,12 +75,17 @@ RSpec.describe "Redesigned home page" do
     describe "running now" do
       let(:panel) { running.at_css(".vm-panel") }
       let(:rows) { panel.css("tbody tr") }
+      let(:competition_links) { panel.css("a[href='#{competition_path(slug: season.slug)}']") }
+      let(:table_link) { competition_links.last }
 
       before { get root_path }
 
       it { expect(running.at_css(".vm-label").text).to eq(I18n.t("home.redesign.running")) }
       it { expect(panel.at_css("a[href='#{competition_path(slug: season.slug)}']").text.strip).to eq("Season 6") }
-      it { expect(panel.css("a[href='#{competition_path(slug: season.slug)}']").map(&:text).join).to include(I18n.t("home.redesign.table_link")) }
+      it { expect(competition_links.size).to eq(2) }
+      it { expect(table_link.text.strip).to start_with(I18n.t("home.redesign.table_link")) }
+      it { expect(table_link.at_css("span[aria-hidden='true']").text).to eq("→") }
+      it { expect(table_link["aria-label"]).to eq(I18n.t("home.redesign.table_link_label", competition: "Season 6")) }
       it { expect(panel.at_css("table")["class"]).to include("vm-table") }
       it { expect(rows.map { |row| row.at_css("a").text }).to eq([ "Player 6", "Player 5", "Player 4", "Player 3", "Player 2" ]) }
       it { expect(rows.first.at_css("a")["href"]).to eq(player_path(players.last)) }
@@ -111,6 +118,7 @@ RSpec.describe "Redesigned home page" do
       it { expect(rows.first.text).to include(DatetimeFormatter.call(finished_season.ended_on, type: :date)) }
       it { expect(rows.first.text).to include(I18n.t("home.redesign.winner")) }
       it { expect(rows.first.at_css("a[href='#{player_path(champion)}']").text).to eq("Champion Alice") }
+      it { expect(rows.first.at_css("a[href='#{player_path(champion)}']")["class"].split).to include("decoration-gold-line") }
 
       context "when a finished competition has no games" do
         let_it_be(:empty_finished) { create(:competition, :season, name: "Empty Finished", ended_on: Date.new(2026, 4, 1)) }
@@ -142,7 +150,7 @@ RSpec.describe "Redesigned home page" do
 
       before { get root_path }
 
-      it { expect(recent_games.at_css(".vm-label").text).to eq(I18n.t("home.redesign.recent_games")) }
+      it { expect(recent_games.at_css(".vm-label").text).to eq(I18n.t("home.recent_games.title")) }
       it { expect(rows.size).to eq(2) }
       it { expect(game_row.at_css("a").text).to eq("#{I18n.t('common.game')} 14") }
       it { expect(game_row.text).to include("Series 3") }
@@ -155,12 +163,14 @@ RSpec.describe "Redesigned home page" do
     describe "news" do
       let(:items) { news_column.css("article") }
       let(:item) { items.first }
+      let(:all_news_link) { news_column.at_css("a[href='#{news_index_path}']") }
 
       before { get root_path }
 
       it { expect(news_column.at_css(".vm-label").text).to eq(I18n.t("home.redesign.news")) }
-      it { expect(news_column.at_css("a[href='#{news_index_path}']").text).to include(I18n.t("home.redesign.all_news")) }
-      it { expect(item.at_css("a[href='#{news_path(article)}']").text).to eq("Big Recap") }
+      it { expect(all_news_link.text.strip).to eq(I18n.t("home.latest_news.all_news")) }
+      it { expect(all_news_link["class"].split).to include("decoration-gold-line") }
+      it { expect(item.at_css("h3 > a[href='#{news_path(article)}']").text).to eq("Big Recap") }
       it { expect(item.text).to include(DatetimeFormatter.call(article.published_at, type: :date)) }
       it { expect(item.at_css("p").text.strip).to eq("Twelve players and eight games") }
       it { expect(item.at_css("p strong")).to be_nil }
@@ -182,6 +192,12 @@ RSpec.describe "Redesigned home page" do
         end
 
         it { expect(items.map { |entry| entry.at_css("a").text }).to eq([ "Later 3", "Later 2", "Later 1" ]) }
+      end
+
+      context "when a newer article is a draft" do
+        let_it_be(:draft) { create(:news, title: "Draft Recap", published_at: Time.zone.local(2026, 4, 1)) }
+
+        it { expect(news_column.text).not_to include("Draft Recap") }
       end
 
       context "when the author is a claimed player" do
@@ -218,6 +234,60 @@ RSpec.describe "Redesigned home page" do
         it { expect(response).to have_http_status(:ok) }
         it { expect(item.at_css("a").text).to eq("With a PDF") }
         it { expect(item.at_css("img")).to be_nil }
+      end
+    end
+
+    describe "database queries" do
+      let(:sql) { [] }
+      let(:queries_from) { ->(table) { sql.count { |query| query.include?(%(FROM "#{table}")) } } }
+
+      let_it_be(:photo_articles) do
+        (1..3).map do |i|
+          author = create(:user, player: create(:player, name: "Writer #{i}"))
+          create(:news, :published, :with_photo, title: "Photo #{i}", author: author,
+                                                 published_at: Time.zone.local(2026, 5, i))
+        end
+      end
+
+      before do
+        ActiveSupport::Notifications.subscribed(->(*, payload) { sql << payload[:sql] }, "sql.active_record") do
+          get root_path
+        end
+      end
+
+      it { expect(news_column.css("article img").size).to eq(3) }
+      it { expect(queries_from.call("action_text_rich_texts")).to eq(1) }
+      # One for the photos, one for the blobs' preview images: three articles, so a query per article would show.
+      it { expect(queries_from.call("active_storage_attachments")).to eq(2) }
+      it { expect(queries_from.call("active_storage_blobs")).to eq(1) }
+      it { expect(queries_from.call("users")).to eq(1) }
+      it { expect(sql.grep(/FROM "players" WHERE "players"."id" = /)).to be_empty }
+      it { expect(sql.grep(/FROM "competitions" WHERE "competitions"."id" = /)).to be_empty }
+      it { expect(sql.grep(/SELECT 1 AS one/)).to be_empty }
+    end
+
+    describe "release notes" do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:announcement) { create(:announcement, message_ru: "Заметка о выпуске", message_en: "Release note") }
+
+      before do
+        toggles.each { |key| create(:feature_toggle, key: key, enabled: true) }
+        sign_in user
+        get root_path
+      end
+
+      context "when only home_whats_new is enabled" do
+        let(:toggles) { %w[home_whats_new] }
+
+        it { expect(controller.instance_variable_get(:@announcements)).to be_nil }
+        it { expect(response.body).not_to include("Заметка о выпуске") }
+      end
+
+      context "when toast_whats_new is enabled" do
+        let(:toggles) { %w[toast_whats_new] }
+
+        it { expect(controller.instance_variable_get(:@announcements)).to include(announcement) }
+        it { expect(response.body).to include("Заметка о выпуске") }
       end
     end
 
@@ -289,6 +359,7 @@ RSpec.describe "Redesigned home page" do
 
     it { expect(response).to have_http_status(:ok) }
     it { expect(columns).to be_nil }
+    it { expect(main.at_css("h1.sr-only").text).to eq(I18n.t("home.hero.title")) }
   end
 
   context "with the new design and only news" do

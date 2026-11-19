@@ -4,6 +4,8 @@
 <% show_results = show_running || show_finished || show_games %>
 <% show_news = @block_visible[:latest_news] && @latest_news.any? %>
 
+<h1 class="sr-only"><%= t("home.hero.title") %></h1>
+
 <%= render "home/redesign/event_slot" %>
 
 <% if show_results || show_news %>

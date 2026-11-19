@@ -6,8 +6,11 @@
         <div class="flex items-baseline justify-between gap-3 px-3 pt-3 pb-1">
           <%= link_to competition.name, competition_path(slug: competition.slug),
                 class: "text-sm font-bold text-ink hover:underline" %>
-          <%= link_to "#{t("home.redesign.table_link")} →", competition_path(slug: competition.slug),
-                class: "text-xs whitespace-nowrap text-ink-muted hover:underline" %>
+          <%= link_to competition_path(slug: competition.slug),
+                aria: { label: t("home.redesign.table_link_label", competition: competition.name) },
+                class: "text-xs whitespace-nowrap text-ink-muted hover:underline" do %>
+            <%= t("home.redesign.table_link") %> <span aria-hidden="true">→</span>
+          <% end %>
         </div>
         <table class="vm-table">
           <thead class="sr-only">

@@ -18,11 +18,11 @@ class HomeController < ApplicationController
       @winners = load_winners(@recently_finished)
     end
 
-    @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT) if @block_visible[:recent_games]
+    @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT).load if @block_visible[:recent_games]
+    return render_new_design if helpers.new_design?
+
     @latest_news = News.visible.recent.limit(LATEST_NEWS_LIMIT) if @block_visible[:latest_news]
     @announcements = load_announcements
-    return render "home/redesign/index" if helpers.new_design?
-
     @hall_of_fame_players = load_hall_of_fame_players if @block_visible[:hall_of_fame]
     @stats = load_stats if @block_visible[:stats]
   end
@@ -30,6 +30,18 @@ class HomeController < ApplicationController
   private
 
   BLOCK_KEYS = %i[hero whats_new running_tournaments recently_finished recent_games latest_news hall_of_fame stats documents].freeze
+
+  # News cards show each article's photo, author and excerpt, so those are preloaded; release notes reach this page
+  # only through the toast.
+  def render_new_design
+    @latest_news = load_news_cards if @block_visible[:latest_news]
+    @announcements = load_announcements if FeatureToggle.enabled?("toast_whats_new")
+    render "home/redesign/index"
+  end
+
+  def load_news_cards
+    News.visible.recent.with_attached_photos.includes(:rich_text_content, author: :player).limit(LATEST_NEWS_LIMIT).load
+  end
 
   def load_block_visibility
     BLOCK_KEYS.index_with { |key| !FeatureToggle.disabled?("home_#{key}") }

@@ -1,8 +1,8 @@
 <section id="home-news" aria-labelledby="home-news-label">
   <div class="mb-2 flex items-baseline justify-between gap-3">
     <h2 id="home-news-label" class="vm-label"><%= t("home.redesign.news") %></h2>
-    <%= link_to t("home.redesign.all_news"), news_index_path,
-          class: "text-xs text-ink-muted underline decoration-[#e0cf9f] underline-offset-2 hover:decoration-ink" %>
+    <%= link_to t("home.latest_news.all_news"), news_index_path,
+          class: "text-xs text-ink-muted underline decoration-gold-line underline-offset-2 hover:decoration-ink" %>
   </div>
   <div class="vm-panel divide-y divide-line-soft">
     <% articles.each do |article| %>
@@ -14,8 +14,9 @@
                 class: "h-15 w-20 flex-none rounded-md object-cover" %>
         <% end %>
         <div class="min-w-0">
-          <%= link_to article.title, news_path(article),
-                class: "block text-sm font-semibold text-ink hover:underline" %>
+          <h3 class="text-sm font-semibold">
+            <%= link_to article.title, news_path(article), class: "text-ink hover:underline" %>
+          </h3>
           <span class="vm-sub">
             <%= safe_join([ (format_date(article.published_at) if article.published_at),
                             (article.author.player.name if article.author.claimed_player?) ].compact,
