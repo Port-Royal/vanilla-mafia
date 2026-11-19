@@ -5,7 +5,10 @@
   </head>
 
   <body class="min-h-screen bg-white font-sans" data-controller="menu time-zone">
-    <% if design_preference.offer? %>
+    <% show_offer = design_preference.offer? %>
+    <%# The offer strip sits above the page, so the page fills the rest of the screen instead of a full screen %>
+    <% if show_offer %>
+      <div id="design-offer-shell" class="flex min-h-screen flex-col">
       <%= render "layouts/design_offer" %>
     <% end %>
 
@@ -112,11 +115,11 @@
       </ul>
     </nav>
 
-    <div class="lg:flex lg:min-h-screen">
+    <div class="<%= show_offer ? "lg:flex lg:flex-1" : "lg:flex lg:min-h-screen" %>">
       <%# Desktop sidebar %>
       <aside id="site-sidebar" class="hidden lg:flex lg:flex-col lg:w-56 lg:flex-shrink-0 bg-neutral-900 bg-repeat bg-top text-gray-300"
              style="background-image: url('/img/back.jpg')">
-        <div class="flex flex-col items-center px-4 py-8 bg-neutral-900/80 min-h-screen">
+        <div class="flex flex-col items-center px-4 py-8 bg-neutral-900/80 <%= show_offer ? "flex-1" : "min-h-screen" %>">
           <%= link_to root_path, class: "mb-8" do %>
             <img src="/img/chi_light.png" alt="Vanilla Mafia" class="w-40">
           <% end %>
@@ -218,6 +221,9 @@
         <%= yield %>
       </main>
     </div>
+    <% if show_offer %>
+      </div>
+    <% end %>
 
     <% if @announcements&.any? && FeatureToggle.enabled?("toast_whats_new") %>
       <%= render "layouts/announcement_toast", announcements: @announcements %>
