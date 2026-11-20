@@ -36,6 +36,7 @@ en:
       game_breakdown: "Game breakdown"
     attributes:
       game_participation:
+        minus: "Minus"
         best_move_seats: "Best move seats"
       game_breakdown:
         title: "Title"
@@ -813,6 +814,17 @@ en:
         killed_by_mafia: "Killed"
         voted_out: "Voted out"
         banned: "Banned"
+    redesign:
+      first_shoot: "FK"
+      first_shoot_full: "first killed"
+      best_move_seats_html: "%{label}: %{seats}"
+      best_move_short: "BM"
+      best_move_full: "best move"
+      legend: "FK — first killed · BM — best move · Total = Score − Minus + BM"
+      winner: "winner"
+      neighbours: "Game navigation"
+      neighbour_table: "table %{number}"
+      competition_table: "table"
   series:
     show:
       player: "Player"

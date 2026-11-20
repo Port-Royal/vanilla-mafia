@@ -508,6 +508,73 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe 'neighbours in the competition' do
+    let_it_be(:competition) { create(:competition, :series) }
+    let_it_be(:other_competition) { create(:competition, :series) }
+    # Created out of playing order, so the id alone never gives the expected order.
+    let_it_be(:undated) { create(:game, competition:, played_on: nil, game_number: 1) }
+    let_it_be(:second_day_table_two) { create(:game, competition:, played_on: Date.new(2026, 1, 2), game_number: 1, table_number: 2) }
+    let_it_be(:first_day_second) { create(:game, competition:, played_on: Date.new(2026, 1, 1), game_number: 2, table_number: 1) }
+    let_it_be(:second_day_table_one) { create(:game, competition:, played_on: Date.new(2026, 1, 2), game_number: 1, table_number: 1) }
+    let_it_be(:first_day_first) { create(:game, competition:, played_on: Date.new(2026, 1, 1), game_number: 1, table_number: 2) }
+    let_it_be(:elsewhere) { create(:game, competition: other_competition, played_on: Date.new(2026, 1, 1), game_number: 3) }
+
+    context 'with the first game' do
+      subject(:game) { first_day_first }
+
+      it { expect(game.previous_in_competition).to be_nil }
+      it { expect(game.next_in_competition).to eq(first_day_second) }
+    end
+
+    context 'with a game followed by a later day' do
+      subject(:game) { first_day_second }
+
+      it { expect(game.previous_in_competition).to eq(first_day_first) }
+      it { expect(game.next_in_competition).to eq(second_day_table_one) }
+    end
+
+    context 'with two games of one date and number on different tables' do
+      it { expect(second_day_table_one.previous_in_competition).to eq(first_day_second) }
+      it { expect(second_day_table_one.next_in_competition).to eq(second_day_table_two) }
+      it { expect(second_day_table_two.previous_in_competition).to eq(second_day_table_one) }
+      it { expect(second_day_table_two.next_in_competition).to eq(undated) }
+    end
+
+    context 'with an undated game' do
+      subject(:game) { undated }
+
+      it { expect(game.previous_in_competition).to eq(second_day_table_two) }
+      it { expect(game.next_in_competition).to be_nil }
+    end
+
+    context 'with the only game of a competition' do
+      subject(:game) { elsewhere }
+
+      it { expect(game.previous_in_competition).to be_nil }
+      it { expect(game.next_in_competition).to be_nil }
+    end
+
+    context 'when asked for both neighbours' do
+      subject(:game) { described_class.find(first_day_second.id) }
+
+      let(:game_queries) do
+        game
+        queries = []
+        subscription = ActiveSupport::Notifications.subscribe('sql.active_record') do |*, payload|
+          queries << payload[:sql] if payload[:sql].include?('"games"')
+        end
+        game.previous_in_competition
+        game.next_in_competition
+        ActiveSupport::Notifications.unsubscribe(subscription)
+        queries
+      end
+
+      it 'plucks the order once and loads both neighbours in one query' do
+        expect(game_queries.size).to eq(2)
+      end
+    end
+  end
+
   describe 'table overlay broadcasts' do
     let(:stream) { ->(table) { TableOverlayChannel.stream_name(table) } }
 

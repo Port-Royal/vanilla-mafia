@@ -1,0 +1,23 @@
+<% previous_game = game.previous_in_competition %>
+<% next_game = game.next_in_competition %>
+<% link_class = "vm-btn vm-btn--ghost bg-panel" %>
+
+<nav id="game-neighbours" aria-label="<%= t("games.redesign.neighbours") %>"
+     class="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-sm">
+  <div>
+    <% if previous_game %>
+      <%= link_to game_path(previous_game), class: link_class do %>
+        <span aria-hidden="true">←</span> <%= neighbour_game_label(previous_game, game) %>
+      <% end %>
+    <% end %>
+  </div>
+  <%= link_to "#{game.competition.name}: #{t("games.redesign.competition_table")}",
+        competition_path(slug: game.competition.slug), class: link_class %>
+  <div class="text-right">
+    <% if next_game %>
+      <%= link_to game_path(next_game), class: link_class do %>
+        <%= neighbour_game_label(next_game, game) %> <span aria-hidden="true">→</span>
+      <% end %>
+    <% end %>
+  </div>
+</nav>

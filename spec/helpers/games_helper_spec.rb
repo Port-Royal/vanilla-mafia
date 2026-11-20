@@ -393,4 +393,137 @@ RSpec.describe GamesHelper do
       expect(helper.overlay_foul_pips(nil)).to eq([])
     end
   end
+
+  describe "#format_score" do
+    {
+      nil => "",
+      0 => "0",
+      BigDecimal("1.0") => "1",
+      BigDecimal("0.40") => "0.4",
+      BigDecimal("0.25") => "0.25",
+      BigDecimal("12.5") => "12.5",
+      BigDecimal("-0.2") => "\u22120.2",
+      -1 => "\u22121"
+    }.each do |value, text|
+      context "when the value gives #{text.inspect}" do
+        it { expect(helper.format_score(value)).to eq(text) }
+      end
+    end
+  end
+
+  describe "#score_parts" do
+    subject(:parts) { helper.score_parts(participation) }
+
+    let(:participation) { GameParticipation.new(plus:, minus:, best_move:) }
+    let(:plus) { 1 }
+    let(:minus) { 0 }
+    let(:best_move) { nil }
+
+    context "with the plus only" do
+      it { is_expected.to eq("1") }
+    end
+
+    context "with no plus" do
+      let(:plus) { nil }
+      let(:minus) { nil }
+
+      it { is_expected.to eq("0") }
+    end
+
+    context "with a minus" do
+      let(:plus) { 0 }
+      let(:minus) { BigDecimal("0.20") }
+
+      it { is_expected.to eq("0 \u2212 0.2") }
+    end
+
+    context "with a best move" do
+      let(:best_move) { BigDecimal("0.40") }
+
+      it { is_expected.to eq("1 + ЛХ 0.4") }
+    end
+
+    context "with a zero best move" do
+      let(:best_move) { 0 }
+
+      it { is_expected.to eq("1") }
+    end
+
+    context "with whole numbers stored as decimals" do
+      let(:plus) { BigDecimal("2.00") }
+      let(:minus) { BigDecimal("1.00") }
+      let(:best_move) { BigDecimal("1.00") }
+
+      it { is_expected.to eq("2 \u2212 1 + ЛХ 1") }
+    end
+
+    context "with all three" do
+      let(:minus) { BigDecimal("0.5") }
+      let(:best_move) { BigDecimal("0.25") }
+
+      it { is_expected.to eq("1 \u2212 0.5 + ЛХ 0.25") }
+    end
+  end
+
+  describe "#neighbour_game_label" do
+    subject(:label) { helper.neighbour_game_label(neighbour, game) }
+
+    let(:game) { Game.new(game_number: 1, played_on: Date.new(2026, 3, 20), table_number: 1) }
+    let(:neighbour) { Game.new(game_number: 2, played_on: neighbour_date, table_number: neighbour_table) }
+    # Fresh objects equal to the game's, so the comparison is by value.
+    let(:neighbour_date) { Date.new(2026, 3, 20) }
+    let(:neighbour_table) { 1 }
+
+    context "with the same table and date" do
+      it { is_expected.to eq("Игра 2") }
+    end
+
+    context "with another table" do
+      let(:neighbour_table) { 2 }
+
+      it { is_expected.to eq("Игра 2 · стол 2") }
+    end
+
+    context "with another date" do
+      let(:neighbour_date) { Date.new(2026, 3, 21) }
+
+      it { is_expected.to eq("Игра 2 · 21.03.2026") }
+    end
+
+    context "with another table and date" do
+      let(:neighbour_table) { 3 }
+      let(:neighbour_date) { Date.new(2026, 3, 19) }
+
+      it { is_expected.to eq("Игра 2 · стол 3 · 19.03.2026") }
+    end
+
+    context "with a neighbour without a table or date" do
+      let(:neighbour_table) { nil }
+      let(:neighbour_date) { nil }
+
+      it { is_expected.to eq("Игра 2") }
+    end
+
+    context "when only the current game has no table or date" do
+      let(:game) { Game.new(game_number: 1) }
+      let(:neighbour_table) { 2 }
+      let(:neighbour_date) { Date.new(2026, 3, 21) }
+
+      it { is_expected.to eq("Игра 2 · стол 2 · 21.03.2026") }
+    end
+  end
+
+  describe "#first_shoot_abbr" do
+    subject(:abbr) { Nokogiri::HTML.fragment(helper.first_shoot_abbr).at_css("abbr") }
+
+    it { expect(abbr.text).to eq("ПУ") }
+    it { expect(abbr["title"]).to eq("первый убитый") }
+  end
+
+  describe "#best_move_abbr" do
+    subject(:abbr) { Nokogiri::HTML.fragment(helper.best_move_abbr).at_css("abbr") }
+
+    it { expect(abbr.text).to eq("ЛХ") }
+    it { expect(abbr["title"]).to eq("лучший ход") }
+  end
 end

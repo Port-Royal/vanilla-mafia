@@ -112,6 +112,45 @@ module GamesHelper
     t("games.overlay.judge", name: game.judge)
   end
 
+  MINUS_SIGN = "\u2212".freeze
+
+  # A score without trailing zeros and with a real minus sign: 1, 0.4, −0.25. The dot stays in every locale.
+  def format_score(value)
+    return "" if value.nil?
+
+    number = number_with_precision(value.abs, precision: 2, strip_insignificant_zeros: true, separator: ".")
+    value.negative? ? "#{MINUS_SIGN}#{number}" : number
+  end
+
+  # The score columns folded into one line for phones: "1 − 0.2 + ЛХ 0.4", the empty parts left out.
+  def score_parts(participation)
+    parts = [ format_score(participation.plus || 0) ]
+    parts << "#{MINUS_SIGN} #{format_score(participation.minus)}" if participation.minus.to_d.nonzero?
+    if participation.best_move.to_d.nonzero?
+      parts << "+ #{t("games.redesign.best_move_short")} #{format_score(participation.best_move)}"
+    end
+    parts.join(" ")
+  end
+
+  # A neighbour game's link text: its number, plus the table and the date when they differ from the current game's.
+  def neighbour_game_label(neighbour, game)
+    parts = [ "#{t("common.game")} #{neighbour.game_number}" ]
+    if neighbour.table_number && neighbour.table_number != game.table_number
+      parts << t("games.redesign.neighbour_table", number: neighbour.table_number)
+    end
+    parts << format_date(neighbour.played_on) if neighbour.played_on && neighbour.played_on != game.played_on
+    parts.join(" · ")
+  end
+
+  # The ПУ and ЛХ abbreviations, spelled out on hover: the legend is hidden while a game is in progress.
+  def first_shoot_abbr
+    tag.abbr(t("games.redesign.first_shoot"), title: t("games.redesign.first_shoot_full"))
+  end
+
+  def best_move_abbr
+    tag.abbr(t("games.redesign.best_move_short"), title: t("games.redesign.best_move_full"))
+  end
+
   private
 
   def overlay_night_row(entries, nights)

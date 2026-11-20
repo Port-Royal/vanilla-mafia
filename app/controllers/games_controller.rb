@@ -4,6 +4,7 @@ class GamesController < ApplicationController
   def show
     @game = Game.includes(competition: :parent).find_by!(slug: params[:slug])
     @participations = @game.game_participations.includes(:player, :role).order(Arel.sql("seat IS NULL"), seat: :asc, id: :asc)
+    render "games/redesign/show" if helpers.new_design?
   end
 
   def overlay

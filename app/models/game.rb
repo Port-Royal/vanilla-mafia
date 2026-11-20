@@ -126,7 +126,32 @@ class Game < ApplicationRecord
     "#{competition.name} #{I18n.t('common.game')} #{game_number}"
   end
 
+  def previous_in_competition
+    neighbours_in_competition[:previous]
+  end
+
+  def next_in_competition
+    neighbours_in_competition[:next]
+  end
+
   private
+
+  def neighbours_in_competition
+    @neighbours_in_competition ||= load_neighbours_in_competition
+  end
+
+  # Games of the competition in playing order, undated ones last. Tables share a date and number, so the table
+  # number breaks the tie, then the id. One query for the order, one for both neighbours.
+  def load_neighbours_in_competition
+    ids = Game.for_competition(competition_id)
+              .order(Arel.sql("played_on IS NULL"), :played_on, :game_number, :table_number, :id)
+              .pluck(:id)
+    position = ids.index(id)
+    previous_id = ids[position - 1] if position.positive?
+    next_id = ids[position + 1]
+    games = Game.where(id: [ previous_id, next_id ].compact).index_by(&:id)
+    { previous: games[previous_id], next: games[next_id] }
+  end
 
   def announce_table
     TableOverlayChannel.broadcast_current(table_key)
