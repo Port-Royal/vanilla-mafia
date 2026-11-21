@@ -136,6 +136,52 @@ RSpec.describe CompetitionOverviewService do
       end
     end
 
+    describe "child winners" do
+      let_it_be(:season) { create(:competition, :season) }
+      let_it_be(:finished_child) do
+        create(:competition, :series, parent: season, position: 1, started_on: Date.new(2026, 9, 1), ended_on: Date.new(2026, 9, 30))
+      end
+      let_it_be(:running_child) { create(:competition, :series, parent: season, position: 2, started_on: Date.new(2026, 10, 1)) }
+      let_it_be(:empty_finished_child) do
+        create(:competition, :series, parent: season, position: 3, ended_on: Date.new(2026, 10, 15))
+      end
+      let_it_be(:finished_game) { create(:game, competition: finished_child, game_number: 1) }
+      let_it_be(:running_game) { create(:game, competition: running_child, game_number: 2) }
+      # The runner-up is created first, so an unranked query would return it ahead of the winner.
+      let_it_be(:runner_up) { create(:player, name: "Runner-up") }
+      let_it_be(:winner) { create(:player, name: "Winner") }
+
+      before_all do
+        create(:game_participation, game: finished_game, player: runner_up, plus: 1.0)
+        create(:game_participation, game: finished_game, player: winner, plus: 3.0)
+        create(:game_participation, game: running_game, player: runner_up, plus: 5.0)
+      end
+
+      let(:child_winners) { described_class.call(competition: season).child_winners }
+
+      it "maps every child in order" do
+        expect(child_winners.keys).to eq([ finished_child, running_child, empty_finished_child ])
+      end
+
+      it "maps a finished child to the top of its standings" do
+        expect(child_winners[finished_child]).to eq(winner)
+      end
+
+      it "maps a running child to nil" do
+        expect(child_winners[running_child]).to be_nil
+      end
+
+      it "maps a finished child without participations to nil" do
+        expect(child_winners[empty_finished_child]).to be_nil
+      end
+
+      context "when the competition is a leaf" do
+        let(:child_winners) { described_class.call(competition: finished_child).child_winners }
+
+        it { expect(child_winners).to eq({}) }
+      end
+    end
+
     context "when competition has no games" do
       let_it_be(:empty_parent) { create(:competition, :season) }
       let_it_be(:empty_child) { create(:competition, :series, parent: empty_parent) }

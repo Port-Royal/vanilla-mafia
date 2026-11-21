@@ -1,5 +1,6 @@
 class CompetitionOverviewService
-  Result = Data.define(:parent_view, :games_by_child, :players, :games, :participations_by_player, :players_sorted, :news)
+  Result = Data.define(:parent_view, :games_by_child, :child_winners, :players, :games, :participations_by_player,
+                       :players_sorted, :news)
 
   def self.call(competition:)
     new(competition).call
@@ -28,6 +29,7 @@ class CompetitionOverviewService
     Result.new(
       parent_view: true,
       games_by_child: games_by_child,
+      child_winners: children.index_with { |child| winner_of(child) },
       players: Player.with_aggregated_stats.where(games: { competition_id: subtree_ids }).ranked,
       games: Game.none,
       participations_by_player: {},
@@ -44,12 +46,20 @@ class CompetitionOverviewService
     Result.new(
       parent_view: false,
       games_by_child: {},
+      child_winners: {},
       players: [],
       games: games,
       participations_by_player: participations_by_player,
       players_sorted: players_sorted,
       news: news_for_competition
     )
+  end
+
+  # The top of a finished child's standings, as on the home page; a running child has no winner yet.
+  def winner_of(child)
+    return if child.ended_on.nil?
+
+    Player.with_stats_for_competition(child).ranked.first
   end
 
   def news_for_competition
