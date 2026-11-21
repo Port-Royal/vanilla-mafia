@@ -1,0 +1,52 @@
+<% if games.empty? %>
+  <p class="text-sm text-ink-muted"><%= t("competitions.redesign.no_games") %></p>
+<% else %>
+  <% total_label = t("competitions.show.total") %>
+  <% win_label = t("competitions.redesign.win") %>
+  <section id="competition-matrix" aria-label="<%= t("competitions.redesign.rating") %>">
+    <div class="vm-panel overflow-x-auto">
+      <table class="vm-table">
+        <thead>
+          <tr>
+            <th scope="col" class="sticky left-0 bg-panel"><%= t("competitions.show.player") %></th>
+            <th scope="col" class="text-right lg:hidden"><%= total_label %></th>
+            <% games.each do |game| %>
+              <th scope="col" class="text-right">
+                <%= link_to t("competitions.redesign.game_short", number: game.game_number), game_path(game),
+                      "aria-label": "#{t("common.game")} #{game.game_number}",
+                      class: "underline decoration-gold-line underline-offset-3 hover:decoration-ink" %>
+              </th>
+            <% end %>
+            <th scope="col" class="hidden text-right lg:table-cell"><%= total_label %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% players_sorted.each_with_index do |player, index| %>
+            <% rank = index + 1 %>
+            <% participations = participations_by_player[player] %>
+            <% participations_by_game = participations.index_by(&:game_id) %>
+            <% total = format_score(participations.sum(&:total)) %>
+            <tr data-player="<%= player.id %>">
+              <th scope="row" class="sticky left-0 bg-panel whitespace-nowrap">
+                <span class="vm-medal mr-1.5 <%= rank <= 3 ? "vm-medal--#{rank}" : "text-ink-muted" %>"><%= rank %></span>
+                <%= link_to player.name, player_path(player), class: "font-semibold text-ink hover:underline" %>
+              </th>
+              <td data-column="total" class="text-right font-bold tabular-nums lg:hidden"><%= total %></td>
+              <% games.each do |game| %>
+                <% participation = participations_by_game[game.id] %>
+                <% cell_class = [] %>
+                <% if participation %>
+                  <% cell_class << "bg-gold-wash" if participation.win %>
+                  <% cell_class << "text-alert-ink" if participation.total.negative? %>
+                <% end %>
+                <td data-game="<%= game.id %>" class="text-right tabular-nums <%= cell_class.join(" ") %>"><%= format_score(participation.total) if participation %><% if participation && participation.win %> <span class="sr-only"><%= win_label %></span><% end %></td>
+              <% end %>
+              <td data-column="total" class="hidden text-right font-bold tabular-nums lg:table-cell"><%= total %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <p id="competition-legend" class="mt-2 text-xs text-ink-muted"><%= t("competitions.redesign.legend") %></p>
+  </section>
+<% end %>

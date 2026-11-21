@@ -162,6 +162,42 @@ ru:
       view: "Итог"
       total: "Итого"
       news: "Новости"
+    redesign:
+      running: "Идёт"
+      running_short: "идёт"
+      since: "с %{date}"
+      rating: "Рейтинг"
+      winner: "победитель"
+      news: "Новости"
+      no_games: "Игр пока нет"
+      legend: "Золотистая ячейка — победа в этой игре. Пустая — не играл."
+      game_short: "И%{number}"
+      win: "победа"
+      children:
+        series:
+          label: "Серии"
+          count:
+            one: "%{count} серия"
+            few: "%{count} серии"
+            many: "%{count} серий"
+            other: "%{count} серии"
+        stages:
+          label: "Этапы"
+          count:
+            one: "%{count} этап"
+            few: "%{count} этапа"
+            many: "%{count} этапов"
+            other: "%{count} этапа"
+      games_count:
+        one: "%{count} игра"
+        few: "%{count} игры"
+        many: "%{count} игр"
+        other: "%{count} игры"
+      players_count:
+        one: "%{count} игрок"
+        few: "%{count} игрока"
+        many: "%{count} игроков"
+        other: "%{count} игрока"
   seasons:
     show:
       date: "Дата"

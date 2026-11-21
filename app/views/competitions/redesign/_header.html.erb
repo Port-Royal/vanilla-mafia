@@ -1,0 +1,32 @@
+<% crumb_link = "text-ink-muted underline decoration-gold-line underline-offset-3 hover:text-ink" %>
+<% ancestors = competition.ancestors %>
+<% dates = competition_dates(competition) %>
+<% counts = [] %>
+<% counts << children_label(competition, count: @games_by_child.size) if @parent_view %>
+<% counts << t("competitions.redesign.games_count", count: @games_count) %>
+<% counts << t("competitions.redesign.players_count", count: (@parent_view ? @players : @players_sorted).length) %>
+
+<header id="competition-header" class="mb-6">
+  <% if ancestors.any? %>
+    <nav aria-label="Breadcrumb" class="mb-1.5 text-xs text-ink-muted">
+      <% ancestors.each do |ancestor| %>
+        <%= link_to ancestor.name, competition_path(slug: ancestor.slug), class: crumb_link %> /
+      <% end %>
+      <span aria-current="page"><%= competition.name %></span>
+    </nav>
+  <% end %>
+
+  <h1 class="font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= competition.name %></h1>
+
+  <div id="competition-meta" class="mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-ink-muted">
+    <% if competition.ended_on.nil? %>
+      <span class="vm-pill vm-pill--neutral">
+        <span class="mr-1 inline-block size-1.5 rounded-full bg-gold align-middle" aria-hidden="true"></span><%= t("competitions.redesign.running") %>
+      </span>
+    <% end %>
+    <% if dates.present? %>
+      <span><%= dates %></span>
+    <% end %>
+    <span><%= counts.join(" · ") %></span>
+  </div>
+</header>

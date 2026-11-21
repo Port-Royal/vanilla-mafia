@@ -593,6 +593,34 @@ en:
       view: "Result"
       total: "Total"
       news: "News"
+    redesign:
+      running: "Running"
+      running_short: "running"
+      since: "since %{date}"
+      rating: "Rating"
+      winner: "winner"
+      news: "News"
+      no_games: "No games yet"
+      legend: "Gold cell — won that game. Empty — did not play."
+      game_short: "G%{number}"
+      win: "win"
+      children:
+        series:
+          label: "Series"
+          count:
+            one: "%{count} series"
+            other: "%{count} series"
+        stages:
+          label: "Stages"
+          count:
+            one: "%{count} stage"
+            other: "%{count} stages"
+      games_count:
+        one: "%{count} game"
+        other: "%{count} games"
+      players_count:
+        one: "%{count} player"
+        other: "%{count} players"
   seasons:
     show:
       date: "Date"
