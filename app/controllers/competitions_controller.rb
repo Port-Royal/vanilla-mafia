@@ -1,7 +1,8 @@
 class CompetitionsController < ApplicationController
   def show
     @competition = Competition.find_by!(slug: params[:slug])
-    result = CompetitionOverviewService.call(competition: @competition)
+    overview = CompetitionOverviewService.new(@competition)
+    result = overview.call
     @parent_view = result.parent_view
     @news = result.news
 
@@ -14,14 +15,14 @@ class CompetitionsController < ApplicationController
       @players_sorted = result.players_sorted
     end
 
-    render_new_design(result) if helpers.new_design?
+    render_new_design(overview) if helpers.new_design?
   end
 
   private
 
   # The header counts every game in the subtree, as the standings do; a child's row lists only its direct games.
-  def render_new_design(result)
-    @child_winners = result.child_winners
+  def render_new_design(overview)
+    @child_winners = overview.child_winners
     @games_count = Game.where(competition_id: @competition.subtree_ids).count
     render "competitions/redesign/show"
   end

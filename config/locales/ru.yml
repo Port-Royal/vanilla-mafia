@@ -172,6 +172,7 @@ ru:
       no_games: "Игр пока нет"
       legend: "Золотистая ячейка — победа в этой игре. Пустая — не играл."
       game_short: "И%{number}"
+      win: "победа"
       children:
         series:
           label: "Серии"

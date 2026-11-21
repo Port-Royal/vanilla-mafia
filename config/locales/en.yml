@@ -603,6 +603,7 @@ en:
       no_games: "No games yet"
       legend: "Gold cell — won that game. Empty — did not play."
       game_short: "G%{number}"
+      win: "win"
       children:
         series:
           label: "Series"

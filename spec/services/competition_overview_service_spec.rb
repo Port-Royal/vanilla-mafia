@@ -142,8 +142,9 @@ RSpec.describe CompetitionOverviewService do
         create(:competition, :series, parent: season, position: 1, started_on: Date.new(2026, 9, 1), ended_on: Date.new(2026, 9, 30))
       end
       let_it_be(:running_child) { create(:competition, :series, parent: season, position: 2, started_on: Date.new(2026, 10, 1)) }
+      # Created last but placed first, so an unordered query would list it last.
       let_it_be(:empty_finished_child) do
-        create(:competition, :series, parent: season, position: 3, ended_on: Date.new(2026, 10, 15))
+        create(:competition, :series, parent: season, position: 0, ended_on: Date.new(2026, 10, 15))
       end
       let_it_be(:finished_game) { create(:game, competition: finished_child, game_number: 1) }
       let_it_be(:running_game) { create(:game, competition: running_child, game_number: 2) }
@@ -157,10 +158,14 @@ RSpec.describe CompetitionOverviewService do
         create(:game_participation, game: running_game, player: runner_up, plus: 5.0)
       end
 
-      let(:child_winners) { described_class.call(competition: season).child_winners }
+      let(:service) { described_class.new(season) }
+      let(:child_winners) { service.child_winners }
+      let(:sql) { [] }
+      let(:record_sql) { ->(*, payload) { sql << payload[:sql] } }
+      let(:standings_queries) { sql.count { |query| query.include?("wins_count") } }
 
       it "maps every child in order" do
-        expect(child_winners.keys).to eq([ finished_child, running_child, empty_finished_child ])
+        expect(child_winners.keys).to eq([ empty_finished_child, finished_child, running_child ])
       end
 
       it "maps a finished child to the top of its standings" do
@@ -175,8 +180,64 @@ RSpec.describe CompetitionOverviewService do
         expect(child_winners[empty_finished_child]).to be_nil
       end
 
+      context "when the service is only called" do
+        before { ActiveSupport::Notifications.subscribed(record_sql, "sql.active_record") { service.call } }
+
+        # The parent's standings stay a relation for the view to load, so no standings query runs here at all.
+        it "runs no winner query" do
+          expect(standings_queries).to eq(0)
+        end
+
+        # The children, the subtree ids and the games.
+        it { expect(sql.size).to eq(3) }
+      end
+
+      context "when the winners are asked for" do
+        before do
+          service.call
+          ActiveSupport::Notifications.subscribed(record_sql, "sql.active_record") { service.child_winners }
+        end
+
+        it "runs one standings query per finished child" do
+          expect(standings_queries).to eq(2)
+        end
+
+        it "does not reload the subtree" do
+          expect(sql.grep(/WITH RECURSIVE/)).to be_empty
+        end
+
+        # The subtree's links and the two finished children's standings; the children are not reloaded.
+        it { expect(sql.size).to eq(3) }
+      end
+
+      context "when a finished child's games are in its own children" do
+        let_it_be(:nested_season) { create(:competition, :season) }
+        let_it_be(:stage) { create(:competition, :round, parent: nested_season, ended_on: Date.new(2026, 9, 30)) }
+        let_it_be(:group) { create(:competition, :group, parent: stage) }
+        let_it_be(:subgroup) { create(:competition, :group, parent: group) }
+        let_it_be(:group_game) { create(:game, competition: subgroup, game_number: 1) }
+        let_it_be(:sibling_stage) { create(:competition, :round, parent: nested_season, ended_on: Date.new(2026, 10, 30)) }
+        let_it_be(:sibling_game) { create(:game, competition: sibling_stage, game_number: 2) }
+
+        let(:service) { described_class.new(nested_season) }
+
+        before_all do
+          create(:game_participation, game: group_game, player: winner, plus: 2.0)
+          create(:game_participation, game: sibling_game, player: runner_up, plus: 9.0)
+        end
+
+        let(:links_queries) { sql.grep(/SELECT "competitions"."parent_id", "competitions"."id"/) }
+
+        before { ActiveSupport::Notifications.subscribed(record_sql, "sql.active_record") { child_winners } }
+
+        it { expect(child_winners[stage]).to eq(winner) }
+        it { expect(child_winners[sibling_stage]).to eq(runner_up) }
+        it { expect(links_queries.size).to eq(1) }
+        it { expect(links_queries.first).to include(%("competitions"."id" IN)) }
+      end
+
       context "when the competition is a leaf" do
-        let(:child_winners) { described_class.call(competition: finished_child).child_winners }
+        let(:service) { described_class.new(finished_child) }
 
         it { expect(child_winners).to eq({}) }
       end

@@ -10,11 +10,15 @@ RSpec.describe "Redesigned competition page" do
   let(:rating) { document.at_css("#competition-rating") }
   let(:rating_row) { ->(name) { rating.css("tbody tr").find { |tr| tr.at_css("a").text == name } } }
   let(:children) { document.at_css("#competition-children") }
-  let(:child_row) { ->(child) { children.at_css("tr[data-competition='#{child.slug}']") } }
+  let(:child_row) { ->(child) { children.at_css("li[data-competition='#{child.slug}']") } }
   let(:chip) { ->(child, game) { child_row.(child).at_css("a[href='#{game_path(game)}']") } }
   let(:matrix) { document.at_css("#competition-matrix") }
   let(:matrix_row) { ->(player) { matrix.at_css("tbody tr[data-player='#{player.id}']") } }
   let(:matrix_cell) { ->(player, game) { matrix_row.(player).at_css("td[data-game='#{game.id}']") } }
+  let(:player_cell) { ->(player) { matrix_row.(player).at_css("th[scope='row'].sticky") } }
+  let(:sql) { [] }
+  let(:record_sql) { ->(*, payload) { sql << payload[:sql] } }
+  let(:standings_queries) { sql.count { |query| query.include?("wins_count") } }
   let(:news) { document.at_css("#competition-news") }
 
   let_it_be(:role) { create(:role) }
@@ -47,17 +51,26 @@ RSpec.describe "Redesigned competition page" do
   end
 
   context "with the default design" do
-    before { get competition_path(slug: season.slug) }
+    before do
+      ActiveSupport::Notifications.subscribed(record_sql, "sql.active_record") { get competition_path(slug: season.slug) }
+    end
 
     it { expect(document.at_css("table.data-table")).to be_present }
     it { expect(header).to be_nil }
+    # The season's standings only: the children's winners belong to the new design.
+    it { expect(standings_queries).to eq(1) }
   end
 
   context "with the new design" do
     include_context "with the new design"
 
     describe "a parent competition (season)" do
-      before { get competition_path(slug: season.slug) }
+      before do
+        ActiveSupport::Notifications.subscribed(record_sql, "sql.active_record") { get competition_path(slug: season.slug) }
+      end
+
+      # The season's standings, then one per finished child for its winner.
+      it { expect(standings_queries).to eq(2) }
 
       describe "header" do
         it { expect(crumbs).to be_nil }
@@ -94,7 +107,7 @@ RSpec.describe "Redesigned competition page" do
         it { expect(children.at_css(".vm-label").text).to eq("Серии") }
 
         it "lists children in order" do
-          expect(children.css("tbody tr").map { |tr| tr["data-competition"] })
+          expect(children.css("ul > li").map { |li| li["data-competition"] })
             .to eq([ finished_series.slug, running_series.slug, empty_series.slug ])
         end
 
@@ -103,9 +116,15 @@ RSpec.describe "Redesigned competition page" do
         it { expect(child_row.(finished_series).at_css(".vm-sub a")["href"]).to eq(player_path(baron)) }
         it { expect(child_row.(running_series).at_css(".vm-sub").text.squish).to eq("идёт") }
         it { expect(chip.(finished_series, first_game).text).to eq("1") }
+        it { expect(chip.(running_series, live_game).text).to eq("3") }
         it { expect(chip.(finished_series, second_game).text).to eq("2") }
         it { expect(chip.(finished_series, first_game)["class"].split).not_to include("border-gold") }
         it { expect(chip.(running_series, live_game)["class"].split).to include("border-gold") }
+        it { expect(children.at_css("table")).to be_nil }
+        it { expect(chip.(finished_series, first_game)["aria-label"]).to eq("Игра 1") }
+        it { expect(chip.(running_series, live_game)["aria-label"]).to eq("Игра 3") }
+        it { expect(chip.(finished_series, first_game)["title"]).to be_nil }
+        it { expect(chip.(running_series, live_game)["title"]).to eq(I18n.t("games.show.result.in_progress")) }
 
         context "with a running child that has no games and no players" do
           it { expect(child_row.(empty_series).at_css(".vm-sub").text.squish).to eq("идёт") }
@@ -175,13 +194,20 @@ RSpec.describe "Redesigned competition page" do
 
         it { expect(sections).to eq(%w[competition-matrix]) }
         it { expect(matrix.css("tbody tr").map { |tr| tr["data-player"] }).to eq([ baron, laska, graf, kira ].map { |p| p.id.to_s }) }
-        it { expect(matrix_row.(baron).at_css("td.sticky .vm-medal--1").text).to eq("1") }
-        it { expect(matrix_row.(kira).at_css("td.sticky .vm-medal").text).to eq("4") }
-        it { expect(matrix_row.(kira).at_css("td.sticky a")["href"]).to eq(player_path(kira)) }
+        it { expect(player_cell.(baron).at_css(".vm-medal--1").text).to eq("1") }
+        it { expect(player_cell.(kira).at_css(".vm-medal").text).to eq("4") }
+        it { expect(player_cell.(kira).at_css("a")["href"]).to eq(player_path(kira)) }
+        it { expect(player_cell.(kira)["class"].split).to include("sticky", "left-0", "bg-panel", "whitespace-nowrap") }
+        it { expect(matrix_row.(kira).at_css("td.sticky")).to be_nil }
         it { expect(matrix.at_css("thead a[href='#{game_path(first_game)}']").text).to eq("И1") }
         it { expect(matrix.at_css("thead a[href='#{game_path(second_game)}']").text).to eq("И2") }
-        it { expect(matrix_cell.(baron, first_game).text.strip).to eq("3") }
-        it { expect(matrix_cell.(graf, first_game).text.strip).to eq("0.5") }
+        it { expect(matrix.at_css("thead a[href='#{game_path(first_game)}']")["aria-label"]).to eq("Игра 1") }
+        it { expect(matrix.at_css("thead a[href='#{game_path(second_game)}']")["aria-label"]).to eq("Игра 2") }
+        it { expect(matrix_cell.(baron, first_game).text.squish).to eq("3 победа") }
+        it { expect(matrix_cell.(graf, first_game).text.squish).to eq("0.5 победа") }
+        it { expect(matrix_cell.(laska, first_game).text.strip).to eq("1") }
+        it { expect(matrix_cell.(baron, first_game).at_css(".sr-only").text).to eq(I18n.t("competitions.redesign.win")) }
+        it { expect(matrix_cell.(laska, first_game).at_css(".sr-only")).to be_nil }
         it { expect(matrix_cell.(baron, first_game)["class"].split).to include("bg-gold-wash") }
         it { expect(matrix_cell.(laska, first_game)["class"].split).not_to include("bg-gold-wash") }
         it { expect(matrix_cell.(kira, first_game).text.strip).to eq("−1.25") }
@@ -191,7 +217,7 @@ RSpec.describe "Redesigned competition page" do
         it { expect(total_cells.first["class"].split).to include("lg:hidden") }
         it { expect(total_cells.last["class"].split).to include("hidden", "lg:table-cell") }
         it { expect(matrix_row.(baron).css("td").last).to eq(total_cells.last) }
-        it { expect(matrix_row.(baron).css("td")[1]).to eq(total_cells.first) }
+        it { expect(matrix_row.(baron).css("td").first).to eq(total_cells.first) }
         it { expect(column_headers.map { |th| th.text.strip }.count(I18n.t("competitions.show.total"))).to eq(2) }
         it { expect(document.at_css("#competition-legend").text).to eq(I18n.t("competitions.redesign.legend")) }
 
