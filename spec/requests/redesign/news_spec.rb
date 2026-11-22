@@ -131,8 +131,6 @@ RSpec.describe "Redesigned news pages" do
         get news_index_path
       end
 
-      after { older.tags.delete(tag) }
-
       it "shows them as pills" do
         expect(card.(older).css(".vm-pill").map { |pill| pill.text.strip }).to eq([ "Гайды" ])
       end
@@ -296,6 +294,10 @@ RSpec.describe "Redesigned news pages" do
         expect(page_part.("body")["class"].split).to include("news-prose")
       end
 
+      it "names the related list for screen readers, as it has no heading" do
+        expect(related["aria-label"]).to eq(I18n.t("news.redesign.related.label"))
+      end
+
       it "lists the related links without a heading" do
         expect(related.css("li").map { |item| item["data-kind"] }).to eq(%w[competition game player])
       end
@@ -351,6 +353,10 @@ RSpec.describe "Redesigned news pages" do
 
       it "shows the other photos as zoomable thumbnails" do
         expect(article.css("[data-part='thumbnail'][data-controller='lightbox']").size).to eq(1)
+      end
+
+      it "numbers each thumbnail link, so they are told apart" do
+        expect(article.at_css("[data-part='thumbnail']")["aria-label"]).to eq("С фото — 2")
       end
 
       it "describes a thumbnail with the title, so its zoomed view is named" do

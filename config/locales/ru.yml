@@ -569,6 +569,7 @@ ru:
     redesign:
       game: "%{competition} · Игра %{number}"
       related:
+        label: "Связано"
         competition: "Турнир"
         game: "Игра"
         player: "Игрок"

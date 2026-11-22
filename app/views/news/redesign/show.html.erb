@@ -34,9 +34,9 @@
       <% end %>
       <% if photos.size > 1 %>
         <div class="mt-2 flex flex-wrap gap-2">
-          <% photos.drop(1).each do |photo| %>
+          <% photos.drop(1).each.with_index(2) do |photo, number| %>
             <%= link_to rails_representation_path(news_photo_variant(photo, :zoom)),
-                  aria: { label: @news.title }, class: "block cursor-zoom-in",
+                  aria: { label: "#{@news.title} — #{number}" }, class: "block cursor-zoom-in",
                   data: { part: "thumbnail", controller: "lightbox", action: "click->lightbox#open" } do %>
               <%= image_tag news_photo_variant(photo, :card), alt: @news.title, width: 96, height: 72,
                     class: "h-18 w-24 rounded-md object-cover" %>
@@ -52,7 +52,7 @@
   </div>
 
   <% if related_links.any? %>
-    <ul data-part="related" class="mt-6 flex flex-wrap gap-2 border-t border-line pt-4">
+    <ul data-part="related" aria-label="<%= t("news.redesign.related.label") %>" class="mt-6 flex flex-wrap gap-2 border-t border-line pt-4">
       <% related_links.each do |related| %>
         <li data-kind="<%= related.kind %>">
           <%= link_to related.path, class: "block rounded-md border border-line bg-panel px-2.5 py-1 text-[12.5px] text-ink hover:bg-gold-wash" do %>

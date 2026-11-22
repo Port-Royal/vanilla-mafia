@@ -391,6 +391,7 @@ en:
     redesign:
       game: "%{competition} · Game %{number}"
       related:
+        label: "Related"
         competition: "Competition"
         game: "Game"
         player: "Player"
