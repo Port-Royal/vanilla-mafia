@@ -1,0 +1,22 @@
+<ul class="flex flex-wrap gap-2">
+  <% badges.each do |badge| %>
+    <% award = badge.award %>
+    <li data-award="<%= award.staff? ? "staff" : "player" %>"
+        class="flex items-center gap-2 rounded-md border border-line bg-panel py-1.5 pr-3 pl-1.5">
+      <span class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full text-sm font-bold <%= award.staff? ? "bg-ink text-gold-bright" : "bg-gold-soft text-gold-ink" %>"
+            aria-hidden="true">
+        <% if award.icon.attached? %>
+          <%= image_tag award.icon.variable? ? award.icon.variant(resize_to_limit: [ 64, 64 ]) : award.icon, alt: "", size: "24x24", loading: "lazy" %>
+        <% else %>
+          <%= player_initial(award.title) %>
+        <% end %>
+      </span>
+      <span>
+        <span data-part="title" class="block text-xs font-semibold text-ink"><%= award.title %></span>
+        <% if badge.competitions.any? %>
+          <span class="vm-sub"><%= badge.competitions.map(&:name).join(", ") %></span>
+        <% end %>
+      </span>
+    </li>
+  <% end %>
+</ul>

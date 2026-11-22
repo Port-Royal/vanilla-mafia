@@ -1,0 +1,11 @@
+<ul class="grid grid-cols-2 gap-2 lg:grid-cols-4">
+  <% role_stats.each do |role_stat| %>
+    <li data-role="<%= role_stat.role_code %>" class="vm-panel flex items-center gap-2.5 px-3 py-2">
+      <%= image_tag "roles/#{role_stat.role_code}.png", alt: "", class: "size-7 shrink-0" %>
+      <span>
+        <span class="block text-xs font-semibold text-ink"><%= role_stat.role_name %></span>
+        <span class="block text-xs tabular-nums text-ink-muted"><%= role_stat.games %> <%= profile_number_label(:games, role_stat.games) %> · <%= role_stat.win_rate %>%</span>
+      </span>
+    </li>
+  <% end %>
+</ul>
