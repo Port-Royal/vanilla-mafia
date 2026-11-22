@@ -869,6 +869,10 @@ en:
     organizers: "Organizers"
     all_awards: "All awards"
     award: {}
+    redesign:
+      awards_count:
+        one: "%{count} award"
+        other: "%{count} awards"
   player_disputes:
     new:
       title: "Player %{player_name} is actually me"

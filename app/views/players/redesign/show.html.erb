@@ -4,7 +4,7 @@
 <% if @award_badges.any? %>
   <section id="player-awards" aria-labelledby="player-awards-label" class="mt-8">
     <h2 id="player-awards-label" class="vm-label mb-2"><%= t("players.show.awards") %></h2>
-    <%= render "players/redesign/awards", badges: @award_badges %>
+    <%= render "shared/redesign/award_badges", badges: @award_badges %>
   </section>
 <% end %>
 

@@ -102,4 +102,85 @@ RSpec.describe HallOfFameService do
       end
     end
   end
+  describe "entries for the redesigned page" do
+    let_it_be(:old_season) { create(:competition, :season, name: "Сезон 1", started_on: Date.new(2021, 1, 1)) }
+    let_it_be(:new_season) { create(:competition, :season, name: "Сезон 2", started_on: Date.new(2022, 1, 1)) }
+    # Created before first_award, so id order and position order disagree; 10 sorts before 2 as text.
+    let_it_be(:second_award) { create(:award, title: "Глаз-алмаз", position: 10) }
+    let_it_be(:first_award) do
+      create(:award, title: "Победитель", position: 2).tap do |award|
+        award.icon.attach(io: StringIO.new("icon"), filename: "icon.png", content_type: "image/png")
+      end
+    end
+    let_it_be(:unplaced_award) { create(:award, title: "Без места") }
+    let_it_be(:later_unplaced_award) { create(:award, title: "Тоже без места") }
+    let_it_be(:staff_award) { create(:award, title: "Организатор", staff: true) }
+    let_it_be(:champion) do
+      create(:player, name: "Чемпион").tap do |player|
+        player.photo.attach(io: Rails.root.join("spec/fixtures/files/selfie.jpg").open, filename: "selfie.jpg",
+                            content_type: "image/jpeg")
+      end
+    end
+    let_it_be(:recent) { create(:player, name: "Свежий") }
+    let_it_be(:earlier) { create(:player, name: "Давний") }
+    let_it_be(:same_season) { create(:player, name: "Ровесник") }
+    let_it_be(:organizer) { create(:player, name: "Ведущий") }
+
+    before_all do
+      create(:player_award, player: earlier, award: first_award, competition: old_season)
+      create(:player_award, player: earlier, award: second_award, competition: old_season)
+      create(:player_award, player: champion, award: later_unplaced_award, competition: new_season)
+      create(:player_award, player: champion, award: second_award, competition: new_season)
+      create(:player_award, player: champion, award: unplaced_award, competition: old_season)
+      create(:player_award, player: champion, award: second_award, competition: old_season)
+      create(:player_award, player: champion, award: first_award)
+      create(:player_award, player: same_season, award: second_award, competition: new_season)
+      create(:player_award, player: recent, award: first_award, competition: new_season)
+      create(:player_award, player: organizer, award: staff_award)
+    end
+
+    let(:result) { described_class.call }
+    let(:entries) { result.player_entries }
+    let(:champion_entry) { entries.first }
+
+    it "puts players with the most award records first, ties by their latest award, then by entry order" do
+      expect(entries.map(&:player)).to eq([ champion, earlier, same_season, recent ])
+    end
+
+    it "counts every award record of a player" do
+      expect(champion_entry.awards_count).to eq(5)
+    end
+
+    it "merges repeat wins into one badge per award, by award position, unplaced awards last by id" do
+      expect(champion_entry.badges.map(&:award)).to eq([ first_award, second_award, unplaced_award, later_unplaced_award ])
+    end
+
+    it "lists the competitions of a badge newest first" do
+      expect(champion_entry.badges.second.competitions).to eq([ new_season, old_season ])
+    end
+
+    it "lists no competitions for an award won without one" do
+      expect(champion_entry.badges.first.competitions).to eq([])
+    end
+
+    it "builds badges for the other players too" do
+      expect(entries.second.badges.map(&:award)).to eq([ first_award, second_award ])
+    end
+
+    it "eager loads player photo blobs" do
+      expect(champion_entry.player.photo_attachment.association(:blob)).to be_loaded
+    end
+
+    it "eager loads award icon blobs" do
+      expect(champion_entry.badges.first.award.icon_attachment.association(:blob)).to be_loaded
+    end
+
+    it "returns staff entries separately" do
+      expect(result.staff_entries.map(&:player)).to eq([ organizer ])
+    end
+
+    it "builds staff badges" do
+      expect(result.staff_entries.first.badges.map(&:award)).to eq([ staff_award ])
+    end
+  end
 end
