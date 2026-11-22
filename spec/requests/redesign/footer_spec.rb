@@ -30,6 +30,7 @@ RSpec.describe "Redesign footer" do
 
     it { expect(footer.at_css("a[href='#{hall_path}']").text).to eq(I18n.t("nav.hall_of_fame")) }
     it { expect(footer.at_css("a[href='#{news_index_path}']").text).to eq(I18n.t("nav.news")) }
+    it { expect(footer.at_css("a[href='#{stats_path}']").text).to eq(I18n.t("nav.stats")) }
     it { expect(footer.css("nav a").map { |link| link["class"].split }).to all(include("min-h-11")) }
     it { expect(switch_to_old).to be_nil }
 

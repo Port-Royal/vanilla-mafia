@@ -1,0 +1,87 @@
+<% totals = @stats.totals %>
+<% results = @stats.results.reject { |result, count| result == :draw && count.zero? } %>
+<% results_total = results.values.sum %>
+
+<header class="mb-6">
+  <h1 class="font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= t("home.stats.title") %></h1>
+  <% if @stats.first_game_on %>
+    <p id="stats-since" class="mt-1 text-xs text-ink-muted"><%= t("stats.show.since", date: format_date(@stats.first_game_on)) %></p>
+  <% end %>
+</header>
+
+<div id="stats-numbers" class="vm-panel grid grid-cols-3 divide-x divide-line-soft">
+  <% %i[players games competitions].each do |key| %>
+    <p data-number="<%= key %>" class="px-2 py-4 text-center lg:py-6">
+      <span data-part="value" class="block text-2xl font-bold tabular-nums text-ink lg:text-4xl"><%= totals[key] %></span>
+      <span data-part="label" class="mt-1 block text-xs text-ink-muted lg:text-sm"><%= t("home.stats.#{key}") %></span>
+    </p>
+  <% end %>
+</div>
+
+<% if results_total.positive? %>
+  <section id="stats-results" aria-labelledby="stats-results-label" class="mt-8">
+    <h2 id="stats-results-label" class="vm-label mb-2"><%= t("stats.show.results") %></h2>
+    <div class="vm-panel px-4 py-4">
+      <div class="flex h-2.5 overflow-hidden rounded-full" aria-hidden="true">
+        <% results.each do |result, count| %>
+          <% next if count.zero? %>
+          <span data-bar="<%= result %>" class="<%= stats_result_bar_class(result) %>" style="flex-grow:<%= count %>"></span>
+        <% end %>
+      </div>
+      <dl class="mt-3 flex flex-wrap gap-x-8 gap-y-3">
+        <% results.each do |result, count| %>
+          <div data-result="<%= result %>">
+            <dt data-part="label" class="text-xs text-ink-muted"><%= t("stats.show.#{result}") %></dt>
+            <dd class="mt-0.5 flex items-baseline gap-2">
+              <span data-part="count" class="text-xl font-bold tabular-nums text-ink"><%= count %></span>
+              <span data-part="share" class="text-sm tabular-nums text-ink-muted"><%= stats_share(count, results_total) %>%</span>
+            </dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+  </section>
+<% end %>
+
+<section id="stats-competitions" aria-labelledby="stats-competitions-label" class="mt-8">
+  <h2 id="stats-competitions-label" class="vm-label mb-2"><%= t("stats.show.competitions") %></h2>
+  <% if @stats.competitions.any? %>
+    <div class="vm-panel overflow-hidden">
+      <table class="vm-table">
+        <thead>
+          <tr>
+            <th scope="col"><%= t("stats.show.competition") %></th>
+            <th scope="col" class="text-right"><%= t("stats.show.games") %></th>
+            <th scope="col" class="text-right"><%= t("stats.show.players") %></th>
+            <th scope="col" class="hidden text-right lg:table-cell"><%= t("stats.show.peace_wins") %></th>
+            <th scope="col" class="hidden text-right lg:table-cell"><%= t("stats.show.mafia_wins") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @stats.competitions.each do |row| %>
+            <% competition = row.competition %>
+            <tr data-competition-id="<%= competition.id %>">
+              <td class="min-w-0 break-words">
+                <%= link_to competition.name, competition_path(slug: competition.slug), class: "font-semibold text-ink hover:underline" %>
+                <% if competition.ended_on.nil? %>
+                  <span class="vm-pill vm-pill--neutral ml-1">
+                    <span class="mr-1 inline-block size-1.5 rounded-full bg-gold align-middle" aria-hidden="true"></span><%= t("stats.show.running") %>
+                  </span>
+                <% end %>
+                <span class="vm-sub lg:hidden">
+                  <%= t("stats.show.peace_wins") %> <%= row.peace_wins %> · <%= t("stats.show.mafia_wins") %> <%= row.mafia_wins %>
+                </span>
+              </td>
+              <td data-column="games" class="text-right tabular-nums"><%= row.games_count %></td>
+              <td data-column="players" class="text-right tabular-nums"><%= row.players_count %></td>
+              <td data-column="peace_wins" class="hidden text-right tabular-nums lg:table-cell"><%= row.peace_wins %></td>
+              <td data-column="mafia_wins" class="hidden text-right tabular-nums lg:table-cell"><%= row.mafia_wins %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p id="stats-empty" class="text-sm text-ink-muted"><%= t("stats.show.empty") %></p>
+  <% end %>
+</section>

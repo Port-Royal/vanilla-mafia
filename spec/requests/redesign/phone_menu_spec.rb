@@ -25,7 +25,7 @@ RSpec.describe "Redesign phone menu" do
       notification_settings: edit_notification_settings_path
     }
   end
-  let(:public_hrefs) { [ competition_path(slug: competition.slug), hall_path, news_index_path ] }
+  let(:public_hrefs) { [ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path ] }
   let(:role_hrefs) { role_paths.values_at(*expected_keys) }
   let(:locale_target) { locale_path(locale: :en) }
   let(:menu_targets) do
@@ -224,6 +224,15 @@ RSpec.describe "Redesign phone menu" do
 
         it { expect(news_link["aria-current"]).to eq("page") }
         it { expect(hall_link["aria-current"]).to be_nil }
+      end
+
+      context "when on the stats page" do
+        let(:path) { stats_path }
+        let(:stats_link) { menu.at_css("a[href='#{stats_path}']") }
+
+        it { expect(stats_link.text).to eq(I18n.t("nav.stats")) }
+        it { expect(stats_link["aria-current"]).to eq("page") }
+        it { expect(news_link["aria-current"]).to be_nil }
       end
     end
   end
