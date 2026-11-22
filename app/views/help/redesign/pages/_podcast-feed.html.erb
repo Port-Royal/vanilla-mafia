@@ -1,0 +1,39 @@
+<% scope = "help.pages.podcast-feed" %>
+
+<p data-part="intro" class="help-intro"><%= t("intro", scope:) %></p>
+
+<%= help_heading "apple", t("apple_title", scope:) %>
+
+<ol>
+  <% %w[library search paste subscribe].each do |step| %>
+    <li><%= t("apple_step_#{step}", scope:) %></li>
+  <% end %>
+</ol>
+
+<%= help_heading "pocket-casts", t("pocket_casts_title", scope:) %>
+
+<ol>
+  <% %w[search rss paste subscribe].each do |step| %>
+    <li><%= t("pocket_casts_step_#{step}", scope:) %></li>
+  <% end %>
+</ol>
+
+<%= help_heading "castbox", t("castbox_title", scope:) %>
+
+<ol>
+  <% %w[search rss paste subscribe].each do |step| %>
+    <li><%= t("castbox_step_#{step}", scope:) %></li>
+  <% end %>
+</ol>
+
+<%= help_heading "generic", t("generic_title", scope:) %>
+
+<ol>
+  <% %w[find paste subscribe].each do |step| %>
+    <li><%= t("generic_step_#{step}", scope:) %></li>
+  <% end %>
+</ol>
+
+<%= help_heading "privacy", t("privacy_title", scope:) %>
+
+<p><%= t("privacy_description", scope:) %></p>

@@ -642,6 +642,8 @@ en:
       view: "Result"
       all_news: "View all news"
   help:
+    redesign:
+      contents: "Contents"
     index:
       title: "Help"
     pages:
