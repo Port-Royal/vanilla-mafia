@@ -53,7 +53,9 @@ class CompetitionOverviewService
   def leaf_result
     games = Game.where(competition: @competition).ordered
     participations_by_player = GameParticipation.where(game: games).includes(:player).group_by(&:player)
-    players_sorted = participations_by_player.keys.sort_by { |p| [ -participations_by_player[p].sum(&:total), p.id ] }
+    players_sorted = participations_by_player.keys.sort_by do |p|
+      CompetitionRanking.leaf_sort_key(p.id, participations_by_player[p].sum(&:total))
+    end
 
     Result.new(
       parent_view: false,
