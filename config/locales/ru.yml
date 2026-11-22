@@ -212,6 +212,8 @@ ru:
       view: "Итог"
       all_news: "Все новости"
   help:
+    redesign:
+      contents: "Содержание"
     index:
       title: "Справка"
     pages:

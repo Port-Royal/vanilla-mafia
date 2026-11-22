@@ -63,6 +63,22 @@
   .vm-medal--2 { @apply bg-silver text-ink; }
   .vm-medal--3 { @apply bg-bronze text-ink; }
 
+  /* Help page body: section headings come from HelpHelper#help_heading, the rest is plain markup scoped here. */
+  .help-prose { @apply leading-[1.65]; }
+  .help-prose h2 { @apply mt-9 mb-3 scroll-mt-6 text-xl leading-snug font-semibold text-ink; }
+  .help-prose h2:first-child { @apply mt-0; }
+  .help-prose h3 { @apply mt-6 mb-2 text-[15px] font-semibold text-ink; }
+  .help-prose p { @apply mb-4; }
+  .help-prose .help-intro { @apply mb-6 text-[17px]; }
+  .help-prose .help-note { @apply mt-1.5 mb-0 text-sm text-ink-muted; }
+  .help-prose ol { @apply mb-6 list-decimal space-y-2 pl-6; }
+  .help-prose ul { @apply mb-6 list-disc space-y-2 pl-6; }
+  .help-prose li::marker { @apply text-ink-muted; }
+  .help-prose pre { @apply my-2 overflow-x-auto rounded-md border border-line bg-panel px-3 py-2 font-mono text-[13px] leading-normal; }
+  .help-prose code { @apply font-mono text-[13px]; }
+  .help-prose kbd { @apply inline-block rounded border border-line bg-panel px-1.5 font-mono text-[12.5px] font-medium; box-shadow: inset 0 -1px 0 var(--color-line); }
+  .help-prose .help-table { @apply mb-6 overflow-x-auto leading-normal; }
+
   .live-protocol { @apply flex min-h-0 flex-1 flex-col gap-2; }
   .lp-top { @apply flex justify-end gap-4 text-sm text-gray-500; }
   .lp-status { @apply text-green-800; }
