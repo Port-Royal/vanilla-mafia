@@ -1,0 +1,43 @@
+<%# Rows are <details>, which a <table> cannot hold, so the columns are a grid and the header row is decorative. %>
+<% columns = "grid grid-cols-[1fr_5.5rem_4rem_1rem] items-center gap-x-3 px-3 lg:grid-cols-[1fr_7rem_4rem_4rem_5rem_1rem]" %>
+<div class="vm-panel overflow-hidden">
+  <div class="<%= columns %> border-b border-line py-2 text-[10.5px] font-semibold tracking-wide text-ink-muted uppercase" aria-hidden="true">
+    <span><%= t("players.redesign.competition") %></span>
+    <span><%= t("players.redesign.place") %></span>
+    <span class="hidden text-right lg:block"><%= t("players.redesign.games") %></span>
+    <span class="hidden text-right lg:block"><%= t("players.redesign.wins") %></span>
+    <span class="text-right"><%= t("players.redesign.rating") %></span>
+    <span></span>
+  </div>
+
+  <% summaries.each_with_index do |summary, index| %>
+    <% competition = summary.competition %>
+    <details class="group border-t border-line-soft first-of-type:border-t-0" <%= "open" if index.zero? %>>
+      <summary class="<%= columns %> cursor-pointer list-none py-2.5 hover:bg-gold-wash [&::-webkit-details-marker]:hidden">
+        <span data-part="name" class="min-w-0">
+          <%= link_to competition.name, competition_path(slug: competition.slug),
+                class: "font-semibold text-ink underline decoration-gold-line underline-offset-3" %>
+          <% if summary.running %>
+            <span class="vm-pill vm-pill--neutral ml-1 hidden lg:inline-block">
+              <span class="mr-1 inline-block size-1.5 rounded-full bg-gold align-middle" aria-hidden="true"></span><%= t("players.redesign.running") %>
+            </span>
+          <% end %>
+          <span class="vm-sub lg:hidden">
+            <%= safe_join([ (t("players.redesign.running") if summary.running),
+                            t("players.redesign.summary_sub.games", count: summary.games_count),
+                            t("players.redesign.summary_sub.wins", count: summary.wins_count) ].compact, " · ") %>
+          </span>
+        </span>
+        <span data-column="place" class="whitespace-nowrap">
+          <span class="vm-medal <%= summary.place <= 3 ? "vm-medal--#{summary.place}" : "text-ink-muted" %>"><%= summary.place %></span>
+          <span class="text-xs text-ink-muted"><%= t("players.redesign.place_of", count: summary.ranked_count) %></span>
+        </span>
+        <span data-column="games" class="hidden text-right tabular-nums lg:block"><%= summary.games_count %></span>
+        <span data-column="wins" class="hidden text-right tabular-nums lg:block"><%= summary.wins_count %></span>
+        <span data-column="rating" class="text-right font-bold tabular-nums"><%= format_score(summary.rating) %></span>
+        <span class="text-ink-muted transition-transform group-open:rotate-90" aria-hidden="true">›</span>
+      </summary>
+      <%= render "players/redesign/competition_games", summary: %>
+    </details>
+  <% end %>
+</div>

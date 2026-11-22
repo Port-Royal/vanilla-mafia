@@ -1,0 +1,40 @@
+<div class="border-t border-line-soft bg-paper p-2 lg:py-2 lg:pr-3 lg:pl-6">
+  <table class="vm-table vm-panel">
+    <thead class="hidden lg:table-header-group">
+      <tr>
+        <th scope="col"><%= t("players.redesign.date") %></th>
+        <th scope="col"><%= t("players.redesign.game_column") %></th>
+        <th scope="col"><%= t("players.redesign.role") %></th>
+        <th scope="col"><%= t("players.redesign.result_column") %></th>
+        <th scope="col" class="text-right"><%= t("players.redesign.score") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% summary.participations.each do |participation| %>
+        <% game = participation.game %>
+        <% show_role = game.roles_public? && participation.role_code.present? %>
+        <% role_label = show_role ? ((participation.role && participation.role.name.presence) || participation.role_code) : nil %>
+        <% result_word = profile_result_word(participation) %>
+        <tr class="<%= "vm-row--highlight" if profile_won?(participation) %>">
+          <td data-column="date" class="hidden whitespace-nowrap text-ink-muted lg:table-cell"><%= format_date(game.played_on) if game.played_on %></td>
+          <td data-column="game">
+            <% if show_role %>
+              <%= image_tag "roles/#{participation.role_code}.png", alt: role_label, title: role_label,
+                    class: "mr-1.5 inline-block size-5 align-middle lg:hidden" %>
+            <% end %>
+            <%= link_to profile_game_label(game, summary.competition), game_path(game),
+                  class: "text-ink underline decoration-gold-line underline-offset-3" %>
+            <span class="vm-sub lg:hidden"><%= safe_join([ (format_date(game.played_on) if game.played_on), (result_word.downcase if result_word) ].compact, " · ") %></span>
+          </td>
+          <td data-column="role" class="hidden whitespace-nowrap lg:table-cell">
+            <% if show_role %>
+              <%= image_tag "roles/#{participation.role_code}.png", alt: "", class: "mr-1.5 inline-block size-5 align-middle" %><%= role_label %>
+            <% end %>
+          </td>
+          <td data-column="result" class="hidden lg:table-cell"><%= profile_result_pill(participation) %></td>
+          <td data-column="score" class="text-right font-bold tabular-nums"><%= format_score(participation.total) unless game.in_progress? %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

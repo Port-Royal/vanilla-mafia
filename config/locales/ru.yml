@@ -481,6 +481,56 @@ ru:
       role_stats: "По ролям"
       playing_since: "Играет с"
       news: "Новости"
+    redesign:
+      news: "Новости"
+      competitions: "По турнирам"
+      competition: "Турнир"
+      place: "Место"
+      games: "Игры"
+      wins: "Победы"
+      rating: "Рейтинг"
+      date: "Дата"
+      game_column: "Игра"
+      role: "Роль"
+      result_column: "Итог"
+      score: "Балл"
+      place_of: "из %{count}"
+      running: "идёт"
+      no_games: "Игр пока нет"
+      game: "Игра %{number}"
+      game_in: "%{competition} · Игра %{number}"
+      result:
+        win: "Победа"
+        lose: "Поражение"
+        draw: "Ничья"
+      summary_sub:
+        games:
+          one: "%{count} игра"
+          few: "%{count} игры"
+          many: "%{count} игр"
+          other: "%{count} игры"
+        wins:
+          one: "%{count} победа"
+          few: "%{count} победы"
+          many: "%{count} побед"
+          other: "%{count} победы"
+      numbers:
+        games:
+          one: "игра"
+          few: "игры"
+          many: "игр"
+          other: "игры"
+        wins_pct: "побед"
+        competitions:
+          one: "турнир"
+          few: "турнира"
+          many: "турниров"
+          other: "турнира"
+        awards:
+          one: "награда"
+          few: "награды"
+          many: "наград"
+          other: "награды"
   profiles:
     edit:
       title: "Редактирование профиля"

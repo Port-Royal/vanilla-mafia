@@ -1,0 +1,38 @@
+<%= render "players/redesign/header", player: @player, stats: @stats, competitions_count: @competition_summaries.size,
+           awards_count: @player_awards.size %>
+
+<% if @award_badges.any? %>
+  <section id="player-awards" aria-labelledby="player-awards-label" class="mt-8">
+    <h2 id="player-awards-label" class="vm-label mb-2"><%= t("players.show.awards") %></h2>
+    <%= render "players/redesign/awards", badges: @award_badges %>
+  </section>
+<% end %>
+
+<% if @stats.role_stats.any? %>
+  <section id="player-roles" aria-labelledby="player-roles-label" class="mt-8">
+    <h2 id="player-roles-label" class="vm-label mb-2"><%= t("players.show.role_stats") %></h2>
+    <%= render "players/redesign/roles", role_stats: @stats.role_stats %>
+  </section>
+<% end %>
+
+<% if @player.bio.present? %>
+  <section id="player-bio" aria-labelledby="player-bio-label" class="mt-8">
+    <h2 id="player-bio-label" class="vm-label mb-2"><%= t("players.show.bio") %></h2>
+    <p class="vm-panel whitespace-pre-line px-4 py-3 text-base leading-relaxed text-ink"><%= @player.bio %></p>
+  </section>
+<% end %>
+
+<% if @competition_summaries.any? %>
+  <section id="player-competitions" aria-labelledby="player-competitions-label" class="mt-8">
+    <h2 id="player-competitions-label" class="vm-label mb-2"><%= t("players.redesign.competitions") %></h2>
+    <%= render "players/redesign/competitions", summaries: @competition_summaries %>
+  </section>
+<% else %>
+  <p id="player-no-games" class="mt-8 text-sm text-ink-muted"><%= t("players.redesign.no_games") %></p>
+<% end %>
+
+<% if @news_articles.any? %>
+  <section id="player-news" aria-labelledby="news-cards-label" class="mt-8">
+    <%= render "shared/redesign/news_cards", articles: @news_articles, heading: t("players.redesign.news"), all_link: nil %>
+  </section>
+<% end %>

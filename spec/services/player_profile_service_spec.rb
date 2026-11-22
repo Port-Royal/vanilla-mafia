@@ -235,4 +235,129 @@ RSpec.describe PlayerProfileService do
       end
     end
   end
+
+  describe "#competition_summaries" do
+    let_it_be(:summary_player) { create(:player, name: "Яков") }
+    let_it_be(:rival) { create(:player, name: "Аарон") }
+    let_it_be(:old_season) { create(:competition, :season, started_on: Date.new(2024, 1, 1), ended_on: Date.new(2024, 2, 1)) }
+    let_it_be(:new_season) { create(:competition, :season, started_on: Date.new(2025, 1, 1), ended_on: Date.new(2025, 2, 1)) }
+    let_it_be(:running_season) { create(:competition, :season, started_on: Date.new(2025, 6, 1)) }
+    let_it_be(:undated_root) { create(:competition, :series) }
+    let_it_be(:old_series) { create(:competition, :series, parent: old_season) }
+    let_it_be(:new_series) { create(:competition, :series, parent: new_season) }
+    let_it_be(:running_series) { create(:competition, :series, parent: running_season) }
+    let_it_be(:old_game) { create(:game, competition: old_series, played_on: Date.new(2024, 1, 10)) }
+    let_it_be(:early_game) { create(:game, competition: new_series, played_on: Date.new(2025, 1, 5), game_number: 3) }
+    # Created before game 1, so only the game number puts it first.
+    let_it_be(:second_game) { create(:game, competition: new_series, played_on: Date.new(2025, 1, 10), game_number: 2) }
+    let_it_be(:first_game) { create(:game, competition: new_series, played_on: Date.new(2025, 1, 10), game_number: 1) }
+    let_it_be(:running_game) { create(:game, competition: running_series, played_on: Date.new(2025, 6, 2)) }
+    let_it_be(:undated_game) { create(:game, competition: undated_root) }
+
+    before_all do
+      create(:game_participation, game: old_game, player: summary_player, plus: 1)
+      create(:game_participation, game: early_game, player: summary_player, plus: 1)
+      create(:game_participation, game: first_game, player: summary_player, plus: 1, win: true)
+      create(:game_participation, game: second_game, player: summary_player, plus: 1)
+      create(:game_participation, game: first_game, player: rival, plus: 5, win: true)
+      create(:game_participation, game: running_game, player: summary_player, plus: 1)
+      create(:game_participation, game: undated_game, player: summary_player, plus: 1)
+      create(:game_participation, game: undated_game, player: rival, plus: 1, win: true)
+    end
+
+    let(:summaries) { described_class.call(player_slug: summary_player.slug).competition_summaries }
+    let(:new_summary) { summaries.find { |summary| summary.competition == new_season } }
+    let(:undated_summary) { summaries.find { |summary| summary.competition == undated_root } }
+
+    it "puts running and undated roots first, then the newest finished" do
+      expect(summaries.map(&:competition)).to eq([ undated_root, running_season, new_season, old_season ])
+    end
+
+    it "marks running roots" do
+      expect(summaries.map(&:running)).to eq([ true, true, false, false ])
+    end
+
+    it "takes the place and counts from the competition's ranking" do
+      expect(new_summary).to have_attributes(place: 2, ranked_count: 2, games_count: 3, wins_count: 1, rating: 3)
+    end
+
+    it "ranks a root without children like its page does (tie broken by player id, not name)" do
+      expect(undated_summary).to have_attributes(place: 1, ranked_count: 2)
+    end
+
+    it "lists the root's games newest first" do
+      expect(new_summary.participations.map(&:game)).to eq([ second_game, first_game, early_game ])
+    end
+
+    context "when a running root started before the finished ones" do
+      let_it_be(:long_running) { create(:competition, :season, started_on: Date.new(2023, 1, 1)) }
+      let_it_be(:long_game) { create(:game, competition: long_running) }
+
+      before_all { create(:game_participation, game: long_game, player: summary_player) }
+
+      it "still puts it among the running ones" do
+        expect(summaries.map(&:competition)).to eq([ undated_root, running_season, long_running, new_season, old_season ])
+      end
+    end
+
+    context "when a finished root has no start date" do
+      let_it_be(:startless) { create(:competition, :season, ended_on: Date.new(2023, 5, 1)) }
+      let_it_be(:startless_game) { create(:game, competition: startless) }
+
+      before_all { create(:game_participation, game: startless_game, player: summary_player) }
+
+      it "treats it as the newest" do
+        expect(summaries.map(&:competition).first(2)).to contain_exactly(undated_root, startless)
+      end
+
+      it "still reports it as finished" do
+        expect(summaries.find { |summary| summary.competition == startless }.running).to be(false)
+      end
+    end
+
+    context "when roots have the same start date" do
+      let_it_be(:twin_season) { create(:competition, :season, started_on: Date.new(2025, 1, 1), ended_on: Date.new(2025, 1, 20)) }
+      let_it_be(:twin_game) { create(:game, competition: twin_season) }
+
+      before_all { create(:game_participation, game: twin_game, player: summary_player) }
+
+      it "puts the later created one first" do
+        expect(summaries.map(&:competition)).to eq([ undated_root, running_season, twin_season, new_season, old_season ])
+      end
+    end
+  end
+
+  describe "#award_badges" do
+    let_it_be(:badge_player) { create(:player) }
+    let_it_be(:first_season) { create(:competition, :season) }
+    let_it_be(:second_season) { create(:competition, :season) }
+    let_it_be(:repeated_award) { create(:award, title: "Почётный трупак") }
+    let_it_be(:plain_award) { create(:award, title: "Глаз-алмаз") }
+    let_it_be(:staff_award) { create(:award, title: "Организатор", staff: true) }
+
+    before_all do
+      create(:player_award, player: badge_player, award: repeated_award, competition: first_season, position: 3)
+      create(:player_award, player: badge_player, award: repeated_award, competition: second_season, position: 1)
+      create(:player_award, player: badge_player, award: plain_award, position: 2)
+      create(:player_award, player: badge_player, award: staff_award, position: 5)
+    end
+
+    let(:badges) { described_class.call(player_slug: badge_player.slug).award_badges }
+
+    it "shows staff awards first, then by the position of each award's first win" do
+      expect(badges.map(&:award)).to eq([ staff_award, repeated_award, plain_award ])
+    end
+
+    it "merges repeat wins into one badge listing competitions in position order" do
+      expect(badges.second.competitions).to eq([ second_season, first_season ])
+    end
+
+    it "lists no competitions for an award won without one" do
+      expect(badges.third.competitions).to eq([])
+    end
+
+    it "lists no competitions for a staff award" do
+      expect(badges.first.competitions).to eq([])
+    end
+  end
 end

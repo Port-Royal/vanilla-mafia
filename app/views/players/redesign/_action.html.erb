@@ -1,0 +1,30 @@
+<%# The same choices and conditions as the old profile page, in the same order. %>
+<% if user_signed_in? %>
+  <% existing_claim = current_user.player_claims.find_by(player:) %>
+  <% wide = "w-full lg:w-auto" %>
+  <% if player.claimed_by?(current_user) %>
+    <div id="player-action" class="<%= wide %> lg:ml-auto">
+      <%= link_to t("players.show.edit_profile"), edit_profile_path, class: "vm-btn vm-btn--ghost #{wide}" %>
+    </div>
+  <% elsif current_user.admin? %>
+    <div id="player-action" class="<%= wide %> lg:ml-auto">
+      <%= link_to t("players.show.edit_profile"), avo.edit_resources_player_path(player), class: "vm-btn vm-btn--ghost #{wide}" %>
+    </div>
+  <% elsif existing_claim %>
+    <% if existing_claim.pending? %>
+      <p id="player-action" class="<%= wide %> text-sm text-ink-muted italic lg:ml-auto">
+        <%= existing_claim.dispute? ? t("players.show.dispute_pending") : t("players.show.claim_pending") %>
+      </p>
+    <% end %>
+  <% elsif player.claimed? && !current_user.claimed_player? && !current_user.pending_dispute? %>
+    <div id="player-action" class="<%= wide %> lg:ml-auto">
+      <%= link_to t("players.show.dispute_player"), new_player_dispute_path(player), class: "vm-btn vm-btn--ghost #{wide}" %>
+    </div>
+  <% elsif !player.claimed? && !current_user.claimed_player? && !current_user.pending_claim? %>
+    <div id="player-action" class="<%= wide %> lg:ml-auto">
+      <%= button_to t("players.show.claim_player"), player_claim_path(player),
+            data: { turbo_confirm: t("players.show.claim_confirm") }, class: "vm-btn vm-btn--primary #{wide}",
+            form_class: wide %>
+    </div>
+  <% end %>
+<% end %>

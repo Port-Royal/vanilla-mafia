@@ -896,6 +896,46 @@ en:
       win_rate: "Win rate"
       role_stats: "By roles"
       playing_since: "Playing since"
+    redesign:
+      news: "News"
+      competitions: "By competition"
+      competition: "Competition"
+      place: "Place"
+      games: "Games"
+      wins: "Wins"
+      rating: "Rating"
+      date: "Date"
+      game_column: "Game"
+      role: "Role"
+      result_column: "Result"
+      score: "Score"
+      place_of: "of %{count}"
+      running: "running"
+      no_games: "No games yet"
+      game: "Game %{number}"
+      game_in: "%{competition} · Game %{number}"
+      result:
+        win: "Win"
+        lose: "Loss"
+        draw: "Draw"
+      summary_sub:
+        games:
+          one: "%{count} game"
+          other: "%{count} games"
+        wins:
+          one: "%{count} win"
+          other: "%{count} wins"
+      numbers:
+        games:
+          one: "game"
+          other: "games"
+        wins_pct: "wins"
+        competitions:
+          one: "competition"
+          other: "competitions"
+        awards:
+          one: "award"
+          other: "awards"
   profiles:
     edit:
       title: "Edit profile"
