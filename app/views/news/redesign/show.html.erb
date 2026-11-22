@@ -1,0 +1,66 @@
+<% photos = @news.photos.select(&:variable?) %>
+<% related_links = news_related_links(@news) %>
+<% link_line = "underline decoration-gold-line underline-offset-3" %>
+
+<article id="news-article" class="max-w-[680px]">
+  <%= link_to t("news.show.back"), news_index_path, data: { part: "back" }, class: "text-xs text-ink-muted #{link_line}" %>
+
+  <h1 class="mt-2 font-serif text-[23px] leading-tight font-bold text-ink lg:text-[30px]"><%= @news.title %></h1>
+
+  <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+    <span data-part="meta" class="text-[12.5px] text-ink-muted">
+      <%= safe_join([
+            (format_date(@news.published_at) if @news.published_at),
+            (link_to(@news.author.player.name, player_path(@news.author.player), data: { part: "author" },
+                     class: link_line) if @news.author.claimed_player?)
+          ].compact, " · ") %>
+    </span>
+    <% @news.tags.each do |tag| %>
+      <span class="vm-pill vm-pill--neutral"><%= tag.name %></span>
+    <% end %>
+    <% if user_signed_in? && current_user.can_manage_news? %>
+      <%= link_to t("news.index.edit"), edit_admin_news_path(@news), data: { part: "edit" },
+            class: "vm-btn vm-btn--ghost ml-auto" %>
+    <% end %>
+  </div>
+
+  <% if photos.any? %>
+    <div class="mt-5">
+      <%= link_to rails_representation_path(news_photo_variant(photos.first, :zoom)),
+            aria: { label: @news.title }, class: "block cursor-zoom-in",
+            data: { part: "hero", controller: "lightbox", action: "click->lightbox#open" } do %>
+        <%= image_tag news_photo_variant(photos.first, :full), alt: @news.title,
+              class: "w-full rounded-lg border border-line object-cover" %>
+      <% end %>
+      <% if photos.size > 1 %>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <% photos.drop(1).each.with_index(2) do |photo, number| %>
+            <%= link_to rails_representation_path(news_photo_variant(photo, :zoom)),
+                  aria: { label: "#{@news.title} — #{number}" }, class: "block cursor-zoom-in",
+                  data: { part: "thumbnail", controller: "lightbox", action: "click->lightbox#open" } do %>
+              <%= image_tag news_photo_variant(photo, :card), alt: @news.title, width: 96, height: 72,
+                    class: "h-18 w-24 rounded-md object-cover" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div data-part="body" class="news-prose mt-5 text-[15.5px] text-ink lg:text-base">
+    <%= @news.content %>
+  </div>
+
+  <% if related_links.any? %>
+    <ul data-part="related" aria-label="<%= t("news.redesign.related.label") %>" class="mt-6 flex flex-wrap gap-2 border-t border-line pt-4">
+      <% related_links.each do |related| %>
+        <li data-kind="<%= related.kind %>">
+          <%= link_to related.path, class: "block rounded-md border border-line bg-panel px-2.5 py-1 text-[12.5px] text-ink hover:bg-gold-wash" do %>
+            <span class="block text-[10.5px] text-ink-muted"><%= t("news.redesign.related.#{related.kind}") %></span>
+            <%= related.label %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</article>

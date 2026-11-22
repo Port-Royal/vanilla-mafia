@@ -1,6 +1,10 @@
 class NewsController < ApplicationController
+  ARTICLE_PRELOADS = [ { author: :player }, :tags, :rich_text_content, :competition, { game: :competition },
+                       { player_mentions: :player }, { photos_attachments: :blob } ].freeze
+
   def index
-    scope = News.visible.recent.includes({ author: :player }, :tags, :rich_text_content, photos_attachments: :blob)
+    scope = News.visible.recent.includes({ author: :player }, :tags, :rich_text_content, :competition,
+                                          photos_attachments: :blob)
 
     if classic_pagination?
       @pagy, @news = pagy(scope, limit: news_per_page)
@@ -14,13 +18,16 @@ class NewsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html
+      format.html { render "news/redesign/index" if helpers.new_design? }
       format.turbo_stream if @pagination_mode == :infinite
     end
   end
 
   def show
-    @news = News.visible.find_by!(slug: params[:slug])
+    new_design = helpers.new_design?
+    scope = new_design ? News.visible.includes(ARTICLE_PRELOADS) : News.visible
+    @news = scope.find_by!(slug: params[:slug])
+    render "news/redesign/show" if new_design
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

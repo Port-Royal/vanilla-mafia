@@ -48,4 +48,47 @@ RSpec.describe NewsHelper, type: :helper do
       expect { helper.news_photo_variant(photo, :bogus) }.to raise_error(KeyError)
     end
   end
+
+  describe "#news_related_links" do
+    around { |example| I18n.with_locale(:ru) { example.run } }
+
+    let_it_be(:season) { create(:competition, :season, name: "Сезон 5") }
+    let_it_be(:game) { create(:game, competition: season, game_number: 3) }
+    let_it_be(:yakov) { create(:player, name: "Яков") }
+    let_it_be(:anna) { create(:player, name: "Анна") }
+    let_it_be(:boris) { create(:player, name: "Борис") }
+    let_it_be(:linked) { create(:news, :published, competition: season, game:) }
+    let_it_be(:bare) { create(:news, :published) }
+
+    before_all do
+      # Mentioned as Anna, Yakov, Boris: neither player id order (Yakov, Anna, Boris) nor name order (Anna, Boris,
+      # Yakov), so sorting by either would show.
+      linked.player_mentions.create!(player: anna)
+      linked.player_mentions.create!(player: yakov)
+      linked.player_mentions.create!(player: boris)
+    end
+
+    let(:links) { helper.news_related_links(linked) }
+
+    it "lists the competition, the game, then players in mention order" do
+      expect(links.map(&:kind)).to eq(%i[competition game player player player])
+    end
+
+    it "links the competition" do
+      expect([ links.first.label, links.first.path ]).to eq([ "Сезон 5", competition_path(slug: season.slug) ])
+    end
+
+    it "labels the game with its own competition, even a season" do
+      expect([ links.second.label, links.second.path ]).to eq([ "Сезон 5 · Игра 3", game_path(game) ])
+    end
+
+    it "lists mentioned players in the order they were mentioned" do
+      expect(links.last(3).map { |link| [ link.label, link.path ] })
+        .to eq([ [ "Анна", player_path(anna) ], [ "Яков", player_path(yakov) ], [ "Борис", player_path(boris) ] ])
+    end
+
+    it "returns nothing for news without links" do
+      expect(helper.news_related_links(bare)).to eq([])
+    end
+  end
 end

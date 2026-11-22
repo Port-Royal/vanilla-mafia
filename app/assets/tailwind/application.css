@@ -453,3 +453,14 @@
 @keyframes focus-toast-out {
   to { opacity: 0; visibility: hidden; }
 }
+
+/* Article body on the redesigned news page. Deliberately outside any @layer: Action Text's stylesheet is unlayered,
+   and an unlayered rule beats every layered utility whatever its specificity. Scoped to .news-prose, so the editor
+   and the old pages keep Trix's defaults. */
+.news-prose .trix-content { line-height: 1.65; }
+.news-prose .trix-content > * + * { margin-top: 0.875rem; }
+.news-prose .trix-content a { text-decoration: underline; text-decoration-color: var(--color-gold-line); text-underline-offset: 3px; }
+.news-prose .trix-content ul { list-style: disc; padding-left: 1.5rem; }
+.news-prose .trix-content ol { list-style: decimal; padding-left: 1.5rem; }
+.news-prose .trix-content li { margin-left: 0; }
+.news-prose .trix-content blockquote { margin-left: 0; border-left: 2px solid var(--color-line); padding-left: 1rem; color: var(--color-ink-muted); }
