@@ -1,0 +1,36 @@
+<% photo = card.photos.find(&:variable?) %>
+<% excerpt = card.truncated_content(250).to_plain_text.strip %>
+<article data-news-id="<%= card.id %>" class="flex gap-3 p-3 lg:gap-4 lg:p-4">
+  <% if photo %>
+    <%= image_tag news_photo_variant(photo, :card), alt: "", width: 160, height: 120, data: { part: "thumbnail" },
+          class: "h-15 w-20 flex-none rounded-md object-cover lg:h-30 lg:w-40" %>
+  <% end %>
+  <div class="min-w-0 flex-1">
+    <h2 class="text-[14.5px] font-semibold lg:text-base">
+      <%= link_to card.title, news_path(card), class: "text-ink hover:underline" %>
+    </h2>
+    <div class="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+      <span data-part="meta" class="text-xs text-ink-muted">
+        <%= safe_join([
+              (format_date(card.published_at) if card.published_at),
+              (link_to(card.author.player.name, player_path(card.author.player), data: { part: "author" },
+                       class: "underline decoration-gold-line underline-offset-3") if card.author.claimed_player?),
+              (link_to(card.competition.name, competition_path(slug: card.competition.slug), data: { part: "competition" },
+                       class: "underline decoration-gold-line underline-offset-3") if card.competition)
+            ].compact, " · ") %>
+      </span>
+      <% card.tags.each do |tag| %>
+        <span class="vm-pill vm-pill--neutral"><%= tag.name %></span>
+      <% end %>
+      <% if user_signed_in? && current_user.can_manage_news? %>
+        <%= link_to t("news.index.edit"), edit_admin_news_path(card), data: { part: "edit" },
+              class: "ml-auto text-xs text-ink-muted underline" %>
+      <% end %>
+    </div>
+    <% if excerpt.present? %>
+      <p data-part="excerpt" class="mt-2 line-clamp-3 text-[13px] leading-normal text-ink lg:line-clamp-none lg:text-[13.5px]"><%= excerpt %></p>
+    <% end %>
+    <%= link_to t("news.index.read_more"), news_path(card), data: { part: "read-more" },
+          class: "mt-2 hidden text-xs text-ink underline decoration-gold-line underline-offset-3 lg:inline-block" %>
+  </div>
+</article>

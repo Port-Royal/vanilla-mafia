@@ -566,6 +566,12 @@ ru:
     show:
       back: "← К новостям"
       linked_game: "Игра %{game}"
+    redesign:
+      game: "%{competition} · Игра %{number}"
+      related:
+        competition: "Турнир"
+        game: "Игра"
+        player: "Игрок"
   admin_news:
     index:
       title: "Новости"

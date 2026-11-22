@@ -388,6 +388,12 @@ en:
     show:
       back: "← Back to news"
       linked_game: "Game %{game}"
+    redesign:
+      game: "%{competition} · Game %{number}"
+      related:
+        competition: "Competition"
+        game: "Game"
+        player: "Player"
   admin_news:
     index:
       title: "News"
