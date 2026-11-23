@@ -38,6 +38,7 @@ RSpec.describe "Error pages" do
     it { expect(home_link.text.strip).to eq(I18n.t("errors.back_home")) }
     it { expect(home_link["href"]).to eq("/") }
     it { expect(document.at_css('meta[name="robots"]')["content"]).to eq("noindex, nofollow") }
+    it { expect(document.at_css("head title").text).to eq("#{I18n.t("errors.#{error_code}.title")} — Vanilla Mafia") }
   end
 
   context "with GET /404" do

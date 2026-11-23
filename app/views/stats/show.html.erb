@@ -1,3 +1,4 @@
+<% content_for :title, page_title(t("home.stats.title")) %>
 <% totals = @stats.totals %>
 <% results = @stats.results.reject { |result, count| result == :draw && count.zero? } %>
 <% results_total = results.values.sum %>
