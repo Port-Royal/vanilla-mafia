@@ -71,8 +71,11 @@ class CompetitionOverviewService
     Player.with_aggregated_stats.where(games: { competition_id: subtree_of(child.id) }).ranked.first
   end
 
-  def subtree_of(id)
-    [ id, *child_ids_by_parent_id.fetch(id, []).flat_map { |child_id| subtree_of(child_id) } ]
+  # Skips competitions already reached, so rows saved with parents in a loop can't recurse forever.
+  def subtree_of(id, seen = Set.new)
+    return [] unless seen.add?(id)
+
+    [ id, *child_ids_by_parent_id.fetch(id, []).flat_map { |child_id| subtree_of(child_id, seen) } ]
   end
 
   # The links inside the already known subtree, so a child's own subtree needs no recursive query of its own.

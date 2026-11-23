@@ -236,7 +236,19 @@ RSpec.describe CompetitionOverviewService do
         it { expect(links_queries.first).to include(%("competitions"."id" IN)) }
       end
 
-      context "when the competition is a leaf" do
+      context "when rows were saved with parents in a loop" do
+      let_it_be(:looped) { create(:competition, :season) }
+      let_it_be(:looped_child) { create(:competition, :series, parent: looped, ended_on: Date.new(2026, 1, 1)) }
+      let(:service) { described_class.new(looped.reload) }
+
+      before_all { looped.update_column(:parent_id, looped_child.id) }
+
+      it "still answers, with no winner for the child" do
+        expect(Timeout.timeout(5) { service.child_winners }).to eq(looped_child => nil)
+      end
+    end
+
+    context "when the competition is a leaf" do
         let(:service) { described_class.new(finished_child) }
 
         it { expect(child_winners).to eq({}) }

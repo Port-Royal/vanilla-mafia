@@ -29,8 +29,14 @@ class Competition < ApplicationRecord
     slug
   end
 
+  # In rows saved with parents in a loop, the loop's member created first stands in as the root, so every competition
+  # of that tree gets the same one wherever the walk starts.
   def root
-    parent_chain.last || self
+    path = [ self, *parent_chain ]
+    repeated = path.last.parent
+    return path.last if repeated.nil?
+
+    path.drop_while { |node| node.id != repeated.id }.min_by(&:id)
   end
 
   def ancestors

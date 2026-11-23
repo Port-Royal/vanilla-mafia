@@ -164,9 +164,10 @@ RSpec.describe Competition, type: :model do
   end
 
   describe 'parent loops' do
-    let_it_be(:season) { create(:competition, :season) }
-    let_it_be(:series) { create(:competition, :series, parent: season) }
-    let_it_be(:round) { create(:competition, :round, parent: series) }
+    # Examples change parents in memory, so each one gets fresh copies whatever order the suite runs in.
+    let_it_be(:season, refind: true) { create(:competition, :season) }
+    let_it_be(:series, refind: true) { create(:competition, :series, parent: season) }
+    let_it_be(:round, refind: true) { create(:competition, :round, parent: series) }
 
     context 'when the new parent is a child' do
       before { season.parent = series }
@@ -185,6 +186,12 @@ RSpec.describe Competition, type: :model do
       it { expect(season).not_to be_valid }
     end
 
+    context 'when the parent id is set, as the admin form does' do
+      before { season.parent_id = round.id }
+
+      it { expect(season).not_to be_valid }
+    end
+
     context 'when the new parent is in another branch' do
       let_it_be(:other_season) { create(:competition, :season) }
 
@@ -199,6 +206,21 @@ RSpec.describe Competition, type: :model do
       it { expect(competition).to be_valid }
     end
 
+    context 'when a competition created before the loop sits under it' do
+      let_it_be(:early) { create(:competition, :round) }
+      let_it_be(:looped) { create(:competition, :season) }
+      let_it_be(:looped_series) { create(:competition, :series, parent: looped) }
+
+      before_all do
+        looped.update_column(:parent_id, looped_series.id)
+        early.update_column(:parent_id, looped_series.id)
+      end
+
+      it 'takes its root from the loop, not from itself' do
+        expect(Timeout.timeout(5) { early.reload.root }).to eq(looped)
+      end
+    end
+
     context 'when rows were already saved in a loop' do
       let_it_be(:looped) { create(:competition, :season) }
       let_it_be(:looped_series) { create(:competition, :series, parent: looped) }
@@ -206,8 +228,9 @@ RSpec.describe Competition, type: :model do
 
       before_all { looped.update_column(:parent_id, looped_series.id) }
 
-      it 'still finds a root' do
-        expect(Timeout.timeout(5) { looped_round.reload.root }).to eq(looped)
+      it 'gives every competition of the tree the same root, the loop member created first' do
+        expect(Timeout.timeout(5) { [ looped, looped_series, looped_round ].map { |competition| competition.reload.root } })
+          .to eq([ looped, looped, looped ])
       end
 
       it 'still lists the ancestors, each once' do
