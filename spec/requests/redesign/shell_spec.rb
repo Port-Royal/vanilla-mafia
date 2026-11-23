@@ -54,7 +54,7 @@ RSpec.describe "Redesign layout shell" do
 
     it "lists the public links in today's order" do
       expect(nav.css("a").pluck("href"))
-        .to eq([ competition_path(slug: competition.slug), hall_path, news_index_path ])
+        .to eq([ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path ])
     end
 
     it "renders the page content inside main" do
@@ -138,6 +138,15 @@ RSpec.describe "Redesign layout shell" do
         let(:path) { news_path(slug: news.slug) }
 
         it { expect(news_link["aria-current"]).to eq("page") }
+        it { expect(hall_link["aria-current"]).to be_nil }
+      end
+
+      context "when on the stats page" do
+        let(:path) { stats_path }
+        let(:stats_link) { nav.at_css("a[href='#{stats_path}']") }
+
+        it { expect(stats_link.text).to eq(I18n.t("nav.stats")) }
+        it { expect(stats_link["aria-current"]).to eq("page") }
         it { expect(hall_link["aria-current"]).to be_nil }
       end
 
