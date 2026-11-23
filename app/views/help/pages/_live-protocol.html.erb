@@ -24,7 +24,7 @@
       <tbody>
         <% t("rows.#{stage}", scope:).each do |key, action| %>
           <tr>
-            <td class="whitespace-nowrap"><kbd><%= key %></kbd></td>
+            <td class="whitespace-nowrap"><%= help_key_caps(key) %></td>
             <td><%= action %></td>
           </tr>
         <% end %>
