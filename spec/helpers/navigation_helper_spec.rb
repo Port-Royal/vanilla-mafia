@@ -61,6 +61,19 @@ RSpec.describe NavigationHelper, type: :helper do
       it { expect(helper.nav_active?(news_index_path)).to be(false) }
     end
 
+    context "when on a document" do
+      let(:current_path) { "#{documents_path}/game-rules" }
+
+      it { expect(helper.nav_active?(documents_path)).to be(true) }
+      it { expect(helper.nav_active?(news_index_path)).to be(false) }
+    end
+
+    context "when on a path that only starts with the documents path" do
+      let(:current_path) { "#{documents_path}-archive" }
+
+      it { expect(helper.nav_active?(documents_path)).to be(false) }
+    end
+
     context "when on a page below the Hall of Fame path" do
       let(:current_path) { "#{hall_path}/some-player" }
 

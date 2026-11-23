@@ -2,13 +2,13 @@
 module NavigationHelper
   NavItem = Data.define(:key, :label, :path)
 
-  # Narrow reading: an item is active only on its own page; News also on its articles.
+  # Narrow reading: an item is active only on its own page; News and Documents also on their articles.
   # Like current_page?, only GET and HEAD requests mark an item active.
   def nav_active?(path)
     return false unless request.get? || request.head?
     return true if current_page?(path)
 
-    path == news_index_path && request.path.start_with?("#{news_index_path}/")
+    [ news_index_path, documents_path ].include?(path) && request.path.start_with?("#{path}/")
   end
 
   # Role-gated links for the signed-in menus, each shown only to the roles that may open it.

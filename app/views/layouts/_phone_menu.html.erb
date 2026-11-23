@@ -20,6 +20,7 @@
       <li><%= render "layouts/phone_nav_link", label: t("nav.hall_of_fame"), path: hall_path %></li>
       <li><%= render "layouts/phone_nav_link", label: t("nav.news"), path: news_index_path %></li>
       <li><%= render "layouts/phone_nav_link", label: t("nav.stats"), path: stats_path %></li>
+      <li><%= render "layouts/phone_nav_link", label: t("nav.documents"), path: documents_path %></li>
 
       <% if user_signed_in? %>
         <% role_nav_items(current_user).each_with_index do |item, index| %>

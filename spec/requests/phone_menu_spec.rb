@@ -25,7 +25,7 @@ RSpec.describe "Phone menu" do
       notification_settings: edit_notification_settings_path
     }
   end
-  let(:public_hrefs) { [ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path ] }
+  let(:public_hrefs) { [ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path, documents_path ] }
   let(:role_hrefs) { role_paths.values_at(*expected_keys) }
   let(:locale_target) { locale_path(locale: :en) }
   let(:menu_targets) do
@@ -225,6 +225,16 @@ RSpec.describe "Phone menu" do
 
       it { expect(stats_link.text).to eq(I18n.t("nav.stats")) }
       it { expect(stats_link["aria-current"]).to eq("page") }
+      it { expect(news_link["aria-current"]).to be_nil }
+    end
+
+    context "when on a document" do
+      let_it_be(:rules) { create(:document, :published) }
+      let(:path) { document_path(slug: rules.slug) }
+      let(:documents_link) { menu.at_css("a[href='#{documents_path}']") }
+
+      it { expect(documents_link.text).to eq(I18n.t("nav.documents")) }
+      it { expect(documents_link["aria-current"]).to eq("page") }
       it { expect(news_link["aria-current"]).to be_nil }
     end
   end

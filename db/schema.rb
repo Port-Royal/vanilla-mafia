@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_23_130000) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -183,6 +183,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.index ["parent_id", "ended_on"], name: "index_competitions_on_parent_id_and_ended_on"
     t.index ["parent_id"], name: "index_competitions_on_parent_id"
     t.index ["slug"], name: "index_competitions_on_slug", unique: true
+  end
+
+  create_table "documents", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "position", default: 0, null: false
+    t.boolean "published", default: false, null: false
+    t.string "slug", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["published", "position", "id"], name: "index_documents_on_published_and_position_and_id"
+    t.index ["slug"], name: "index_documents_on_slug", unique: true
   end
 
   create_table "episodes", force: :cascade do |t|

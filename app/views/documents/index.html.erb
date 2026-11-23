@@ -1,0 +1,16 @@
+<h1 class="mb-4 font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= t("documents.index.title") %></h1>
+
+<% if @documents.any? %>
+  <ul id="documents-list" class="vm-panel max-w-[680px] divide-y divide-line-soft">
+    <% @documents.each do |document| %>
+      <li>
+        <%= link_to document_path(slug: document.slug), class: "group flex items-center gap-3 px-4 py-3 text-ink hover:bg-gold-wash focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" do %>
+          <span data-part="title" class="min-w-0 flex-1 text-[15px] font-semibold group-hover:underline"><%= document.title %></span>
+          <span aria-hidden="true" class="flex-none text-lg text-ink-muted">›</span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p id="documents-empty" class="text-sm text-ink-muted"><%= t("common.coming_soon") %></p>
+<% end %>

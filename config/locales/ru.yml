@@ -4,6 +4,7 @@ ru:
       full_date: "%-d %B %Y"
   activerecord:
     models:
+      document: "Документ"
       player: "Игрок"
       game: "Игра"
       game_participation: "Участие в игре"
@@ -11,6 +12,12 @@ ru:
       role: "Роль"
       game_breakdown: "Разбор игры"
     attributes:
+      document:
+        title: "Название"
+        slug: "Адрес"
+        position: "Позиция"
+        published: "Опубликован"
+        body: "Текст"
       game_breakdown:
         title: "Название"
         played_on: "Дата игры"
@@ -103,6 +110,8 @@ ru:
   avo:
     competition:
       slug_hint: "Оставьте пустым для автогенерации из названия"
+    document:
+      slug_hint: "Латиница, цифры и дефисы, например league-rules. Оставьте пустым для автогенерации из названия"
   home:
     hero:
       title: "Vanilla Mafia"
@@ -665,6 +674,7 @@ ru:
     hall_of_fame: "Зал славы"
     news: "Новости"
     stats: "Статистика"
+    documents: "Документы"
     manage_news: "Управление новостями"
     telegram: "Telegram"
     protocols: "Протоколы"
@@ -680,6 +690,9 @@ ru:
     language_names:
       ru: "Русский"
       en: "English"
+  documents:
+    index:
+      title: "Документы"
   stats:
     show:
       finished_competitions: "Турниров завершено"
