@@ -61,12 +61,15 @@ class ClubStatsService
                        .transform_values { |pairs| pairs.map(&:last).uniq.size }
   end
 
-  # { competition id => its root's id }, from one query over the whole competitions table.
+  # { competition id => its root's id }, from one query over the whole competitions table. The walk stops at a
+  # competition it has already seen, so parents saved in a loop can't hang the page; such a loop has no root and is
+  # left out of the table.
   def root_ids
     @root_ids ||= begin
       parents = Competition.pluck(:id, :parent_id).to_h
       parents.keys.index_with do |id|
-        id = parents.fetch(id) while parents.fetch(id)
+        seen = Set[id]
+        id = parents.fetch(id) while parents.fetch(id) && seen.add?(parents.fetch(id))
         id
       end
     end

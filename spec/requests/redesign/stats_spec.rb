@@ -82,7 +82,7 @@ RSpec.describe "Redesigned stats page" do
         it { expect(number.(:games).at_css("[data-part='value']").text).to eq("3") }
         it { expect(number.(:games).at_css("[data-part='label']").text).to eq(I18n.t("home.stats.games")) }
         it { expect(number.(:competitions).at_css("[data-part='value']").text).to eq("1") }
-        it { expect(number.(:competitions).at_css("[data-part='label']").text).to eq(I18n.t("home.stats.competitions")) }
+        it { expect(number.(:competitions).at_css("[data-part='label']").text).to eq(I18n.t("stats.show.finished_competitions")) }
       end
 
       describe "who wins" do
