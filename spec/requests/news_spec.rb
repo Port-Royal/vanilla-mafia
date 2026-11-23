@@ -351,14 +351,7 @@ RSpec.describe "News pages" do
     end
 
     context "when several news link different competitions" do
-      let(:query_count) do
-        lambda do
-          count = 0
-          counter = ->(*, payload) { count += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) || payload[:cached] }
-          ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { get news_index_path }
-          count
-        end
-      end
+      let(:query_count) { -> { queries_during { get news_index_path }.size } }
       # Queries with the three links, then with none: the links should cost exactly one extra query.
       let(:linked_and_unlinked) do
         linked = query_count.()
@@ -372,6 +365,79 @@ RSpec.describe "News pages" do
 
       it "loads their competitions in one query" do
         expect(linked_and_unlinked.first - linked_and_unlinked.last).to eq(1)
+      end
+    end
+
+    context "when the cards show authors, tags, photos, text and competitions" do
+      let_it_be(:rich_cards) do
+        [ 4, 5, 6 ].map do |days_ago|
+          create(:news, :published, :with_photo, author: create(:user, player: create(:player)), content: "<p>Текст</p>",
+                                                 competition: create(:competition, :series), published_at: days_ago.days.ago)
+            .tap { |news| news.tags << create(:tag) }
+        end
+      end
+      # Queries with the three cards, then with one: more cards should not cost more queries.
+      let(:query_counts) { [] }
+
+      before do
+        query_counts << queries_during { get news_index_path }.size
+        News.where(id: rich_cards.drop(1)).update_all(status: "draft")
+        query_counts << queries_during { get news_index_path }.size
+      end
+
+      it "loads them for all cards at once" do
+        expect(query_counts.first).to eq(query_counts.last)
+      end
+    end
+
+    context "with neither pagination toggle" do
+      let(:news_queries) { queries_during { get news_index_path }.grep(/FROM "news"/) }
+
+      it "reads the news in one query, without counting or limiting them" do
+        expect(news_queries).to contain_exactly(a_string_matching(/\ASELECT "news"\.\* FROM "news" (?!.*\b(LIMIT|OFFSET)\b)/))
+      end
+
+      context "when asked for a turbo stream" do
+        before { get news_index_path(format: :turbo_stream) }
+
+        it "does not serve one" do
+          expect(response).to have_http_status(:not_acceptable)
+        end
+      end
+    end
+
+    context "with classic pagination and no page size set" do
+      before_all { create_list(:news, 24, :published, author:, published_at: 5.days.ago) }
+
+      before { toggle("news_classic_pagination") }
+
+      context "when loading the page" do
+        before { get news_index_path }
+
+        it "shows the default page of 25 cards" do
+          expect(cards.size).to eq(25)
+        end
+      end
+
+      context "when asked for a turbo stream" do
+        before { get news_index_path(page: 2, format: :turbo_stream) }
+
+        it "does not serve one" do
+          expect(response).to have_http_status(:not_acceptable)
+        end
+      end
+    end
+
+    context "with infinite scroll and no page size set" do
+      before_all { create_list(:news, 24, :published, author:, published_at: 5.days.ago) }
+
+      before do
+        toggle("news_infinite_scroll")
+        get news_index_path
+      end
+
+      it "puts the default page of 25 cards in the scrolling frame" do
+        expect(document.css("turbo-frame#news-list article[data-news-id]").size).to eq(25)
       end
     end
 
@@ -545,6 +611,22 @@ RSpec.describe "News pages" do
       end
     end
 
+    context "with several mentioned players and photos" do
+      # One article with one mention and one photo, another with three of each.
+      let_it_be(:articles) do
+        [ 1, 3 ].map do |count|
+          create(:news, :published, :with_photo, author:, photos_count: count).tap do |news|
+            count.times { news.player_mentions.create!(player: create(:player)) }
+          end
+        end
+      end
+      let(:queries_for) { ->(news) { queries_during { get news_path(news) }.size } }
+
+      it "loads them all at once" do
+        expect(queries_for.(articles.last)).to eq(queries_for.(articles.first))
+      end
+    end
+
     context "when the viewer edits news" do
       before do
         sign_in create(:user, :editor)
@@ -561,6 +643,14 @@ RSpec.describe "News pages" do
 
       it "is not found" do
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when loading the article fails for another reason" do
+      before { allow(News).to receive(:visible).and_raise(ActiveRecord::StatementInvalid, "database is locked") }
+
+      it "lets the error through instead of answering not found" do
+        expect { get news_path(older) }.to raise_error(ActiveRecord::StatementInvalid)
       end
     end
   end

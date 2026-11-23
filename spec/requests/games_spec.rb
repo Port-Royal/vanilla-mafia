@@ -290,6 +290,38 @@ RSpec.describe "Game page" do
     end
   end
 
+  describe "loading the rows" do
+    let_it_be(:don) { create(:role, code: "don", name: "Дон") }
+    let_it_be(:sheriff) { create(:role, code: "sheriff", name: "Шериф") }
+    let_it_be(:one_row) { create(:game, competition: series, game_number: 70, result: "draw") }
+    let_it_be(:three_rows) { create(:game, competition: series, game_number: 71, result: "draw") }
+    let(:queries_for) { ->(shown) { queries_during { get game_path(shown) }.size } }
+
+    # Each row has its own player and role, so a lazy load per row would be a fresh query, never a cache hit.
+    before_all do
+      create(:game_participation, game: one_row, seat: 1, role: peace)
+      [ mafia, don, sheriff ].each.with_index(1) { |role, seat| create(:game_participation, game: three_rows, seat:, role:) }
+    end
+
+    it "loads players and roles for all rows at once" do
+      expect(queries_for.(three_rows)).to eq(queries_for.(one_row))
+    end
+  end
+
+  # A query count can't tell a preloaded parent from a lazy one: both cost one query. Strict loading can: a lazy
+  # load of the game's series, or of the series' parent for the breadcrumbs and the title, would raise. Game is strict
+  # too, since a record lazily loaded from a lenient owner is made lenient as well.
+  describe "loading the competitions" do
+    before do
+      [ Game, Competition ].each { |model| allow(model).to receive(:strict_loading_by_default).and_return(true) }
+      get game_path(game)
+    end
+
+    it "loads the series and its season with the game" do
+      expect(crumbs.css("a").map(&:text)).to include(season.name, series.name)
+    end
+  end
+
   describe "a game in progress" do
     let_it_be(:live_series) { create(:competition, :series, parent: season, name: "Series 4") }
     let_it_be(:live) { create(:game, competition: live_series, game_number: 3, hide_roles: true) }

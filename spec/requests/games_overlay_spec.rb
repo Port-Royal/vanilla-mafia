@@ -48,6 +48,10 @@ RSpec.describe "Games#overlay" do
 
       before { get overlay_game_path(game) }
 
+      it "uses the transparent overlay layout instead of the site one" do
+        expect(document.at_css("body")["class"]).to eq("bg-transparent")
+      end
+
       it "renders the overlay as a full canvas" do
         expect(document.css("#game-overlay.overlay-canvas").size).to eq(1)
       end
