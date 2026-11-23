@@ -644,14 +644,7 @@ RSpec.describe "Player profile" do
     let_it_be(:quiet_player) { create(:player, name: "Редкий") }
     let_it_be(:sheriff) { create(:role, code: "sheriff", name: "Шериф") }
     let_it_be(:don) { create(:role, code: "don", name: "Дон") }
-    let(:queries_for) do
-      lambda do |profile|
-        count = 0
-        counter = ->(*, payload) { count += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) || payload[:cached] }
-        ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { get player_path(profile) }
-        count
-      end
-    end
+    let(:queries_for) { ->(profile) { queries_during { get player_path(profile) }.size } }
 
     # Each game sits in its own series with its own role, so a lazy load per row is a fresh query, never a cache hit.
     # The quiet player has two games, not one: with one, `id = ?` lookups repeat verbatim and the cache hides them.

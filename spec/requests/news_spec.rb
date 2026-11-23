@@ -226,20 +226,6 @@ RSpec.describe "News pages" do
     FeatureToggle.create!(key:, enabled: true, value:)
   end
 
-  # The SQL the block runs, leaving out schema, transaction and cached queries.
-  def queries_during(&)
-    queries = []
-    recorder = ->(*, payload) { queries << payload[:sql] unless payload[:name].in?(%w[SCHEMA TRANSACTION]) || payload[:cached] }
-    ActiveSupport::Notifications.subscribed(recorder, "sql.active_record", &)
-    queries
-  end
-
-  def attach_photo(news)
-    File.open(Rails.root.join("spec/fixtures/files/selfie.jpg"), "rb") do |file|
-      news.photos.attach(io: file, filename: "photo.jpg", content_type: "image/jpeg")
-    end
-  end
-
   describe "GET /news" do
     context "with the default paging" do
       before { get news_index_path }
@@ -365,14 +351,7 @@ RSpec.describe "News pages" do
     end
 
     context "when several news link different competitions" do
-      let(:query_count) do
-        lambda do
-          count = 0
-          counter = ->(*, payload) { count += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) || payload[:cached] }
-          ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { get news_index_path }
-          count
-        end
-      end
+      let(:query_count) { -> { queries_during { get news_index_path }.size } }
       # Queries with the three links, then with none: the links should cost exactly one extra query.
       let(:linked_and_unlinked) do
         linked = query_count.()
@@ -390,24 +369,24 @@ RSpec.describe "News pages" do
     end
 
     context "when the cards show authors, tags, photos, text and competitions" do
-      let(:add_card) do
-        lambda do |days_ago|
-          news = create(:news, :published, author: create(:user, player: create(:player)), content: "<p>Текст</p>",
-                                           competition: create(:competition, :series), published_at: days_ago.days.ago)
-          news.tags << create(:tag)
-          attach_photo(news)
+      let_it_be(:rich_cards) do
+        [ 4, 5, 6 ].map do |days_ago|
+          create(:news, :published, :with_photo, author: create(:user, player: create(:player)), content: "<p>Текст</p>",
+                                                 competition: create(:competition, :series), published_at: days_ago.days.ago)
+            .tap { |news| news.tags << create(:tag) }
         end
       end
-      # Queries with one such card, then with three: more cards should not cost more queries.
-      let(:extra_queries) do
-        add_card.(4)
-        with_one = queries_during { get news_index_path }.size
-        [ 5, 6 ].each { |days_ago| add_card.(days_ago) }
-        queries_during { get news_index_path }.size - with_one
+      # Queries with the three cards, then with one: more cards should not cost more queries.
+      let(:query_counts) { [] }
+
+      before do
+        query_counts << queries_during { get news_index_path }.size
+        News.where(id: rich_cards.drop(1)).update_all(status: "draft")
+        query_counts << queries_during { get news_index_path }.size
       end
 
       it "loads them for all cards at once" do
-        expect(extra_queries).to eq(0)
+        expect(query_counts.first).to eq(query_counts.last)
       end
     end
 
@@ -633,20 +612,18 @@ RSpec.describe "News pages" do
     end
 
     context "with several mentioned players and photos" do
-      let(:article_with) do
-        lambda do |count|
-          create(:news, :published, author:).tap do |news|
-            count.times do
-              news.player_mentions.create!(player: create(:player))
-              attach_photo(news)
-            end
+      # One article with one mention and one photo, another with three of each.
+      let_it_be(:articles) do
+        [ 1, 3 ].map do |count|
+          create(:news, :published, :with_photo, author:, photos_count: count).tap do |news|
+            count.times { news.player_mentions.create!(player: create(:player)) }
           end
         end
       end
       let(:queries_for) { ->(news) { queries_during { get news_path(news) }.size } }
 
       it "loads them all at once" do
-        expect(queries_for.(article_with.(3))).to eq(queries_for.(article_with.(1)))
+        expect(queries_for.(articles.last)).to eq(queries_for.(articles.first))
       end
     end
 
