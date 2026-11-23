@@ -212,6 +212,8 @@ ru:
       view: "Итог"
       all_news: "Все новости"
   help:
+    redesign:
+      contents: "Содержание"
     index:
       title: "Справка"
     pages:
@@ -555,6 +557,13 @@ ru:
     organizers: "Организаторы"
     all_awards: "Все награды"
     award: {}
+    redesign:
+      players: "Игроки"
+      awards_count:
+        one: "%{count} награда"
+        few: "%{count} награды"
+        many: "%{count} наград"
+        other: "%{count} награды"
   news:
     index:
       title: "Новости"

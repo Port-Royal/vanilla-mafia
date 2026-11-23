@@ -7,6 +7,7 @@ class HelpController < ApplicationController
 
   def index
     @pages = PAGES.select { |slug| available?(slug) }
+    render "help/redesign/index" if helpers.new_design?
   end
 
   # The whitelist check stands alone: show.html.erb renders the partial by slug, and Brakeman only
@@ -15,6 +16,7 @@ class HelpController < ApplicationController
     @slug = params[:slug]
     raise ActiveRecord::RecordNotFound unless PAGES.include?(@slug)
     raise ActiveRecord::RecordNotFound unless available?(@slug)
+    render "help/redesign/show" if helpers.new_design?
   end
 
   private

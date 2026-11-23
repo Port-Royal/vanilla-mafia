@@ -658,6 +658,8 @@ en:
       view: "Result"
       all_news: "View all news"
   help:
+    redesign:
+      contents: "Contents"
     index:
       title: "Help"
     pages:
@@ -885,6 +887,11 @@ en:
     organizers: "Organizers"
     all_awards: "All awards"
     award: {}
+    redesign:
+      players: "Players"
+      awards_count:
+        one: "%{count} award"
+        other: "%{count} awards"
   player_disputes:
     new:
       title: "Player %{player_name} is actually me"

@@ -6,7 +6,6 @@ class PlayerProfileService
   CompetitionGames = Data.define(:competition, :games)
   CompetitionSummary = Data.define(:competition, :participations, :place, :ranked_count, :games_count, :wins_count, :rating,
                                    :running)
-  AwardBadge = Data.define(:award, :competitions)
 
   def self.call(player_slug:)
     new(player_slug).call
