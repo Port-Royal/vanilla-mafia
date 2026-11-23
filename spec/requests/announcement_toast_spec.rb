@@ -6,6 +6,8 @@ RSpec.describe "Announcement toast notification" do
   let_it_be(:user) { create(:user) }
   let_it_be(:announcement) { create(:announcement, version: "2.0.0", message_ru: "Обновление тоста", message_en: "Toast update") }
 
+  let(:toast) { Nokogiri::HTML(response.body).at_css("[data-controller='announcement-dismiss'].fixed") }
+
   context "when signed in with toast_whats_new enabled" do
     let!(:toggle) { create(:feature_toggle, key: "toast_whats_new", enabled: true) }
 
@@ -15,7 +17,7 @@ RSpec.describe "Announcement toast notification" do
     end
 
     it "renders the toast container with fixed positioning" do
-      expect(response.body).to include("fixed bottom-4 right-4")
+      expect(toast["class"].split).to include("fixed", "bottom-4")
     end
 
     it "renders the localized announcement message in the toast" do
@@ -44,7 +46,7 @@ RSpec.describe "Announcement toast notification" do
     end
 
     it "does not render the toast" do
-      expect(response.body).not_to include("fixed bottom-4 right-4")
+      expect(toast).to be_nil
     end
   end
 
@@ -54,7 +56,7 @@ RSpec.describe "Announcement toast notification" do
     before { get root_path }
 
     it "does not render the toast" do
-      expect(response.body).not_to include("fixed bottom-4 right-4")
+      expect(toast).to be_nil
     end
   end
 
@@ -68,7 +70,7 @@ RSpec.describe "Announcement toast notification" do
     end
 
     it "does not render the toast" do
-      expect(response.body).not_to include("fixed bottom-4 right-4")
+      expect(toast).to be_nil
     end
   end
 end

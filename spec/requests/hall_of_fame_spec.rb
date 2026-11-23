@@ -1,80 +1,168 @@
 require "rails_helper"
 
-RSpec.describe HallOfFameController do
-  describe "GET /hall" do
-    context "when awards exist" do
-      let_it_be(:competition) { create(:competition, :season, name: "Сезон 5") }
-      let_it_be(:player) { create(:player, name: "Алексей") }
-      let_it_be(:organizer) { create(:player, name: "Ведущий") }
-      let_it_be(:award) do
-        create(:award, title: "Лучший игрок", staff: false).tap do |a|
-          a.icon.attach(io: StringIO.new("fake"), filename: "icon.png", content_type: "image/png")
-        end
-      end
-      let_it_be(:staff_award) { create(:award, title: "Лучший ведущий", staff: true) }
-      let_it_be(:player_award) { create(:player_award, player: player, award: award, competition: competition) }
-      let_it_be(:staff_player_award) { create(:player_award, player: organizer, award: staff_award, competition: competition) }
+RSpec.describe "Hall of fame" do
+  let(:document) { Nokogiri::HTML(response.body) }
+  let(:players_section) { document.at_css("#hall-players") }
+  let(:staff_section) { document.at_css("#hall-staff") }
+  let(:cards) { players_section.css("[data-player-card]") }
+  let(:card) { ->(player) { document.at_css("[data-player-card='#{player.id}']") } }
+  let(:badge_titles) { ->(player) { card.(player).css("[data-award] [data-part='title']").map { |t| t.text.strip } } }
 
-      before { get hall_path }
+  let_it_be(:old_season) { create(:competition, :season, name: "Сезон 1", started_on: Date.new(2021, 1, 1)) }
+  let_it_be(:new_season) { create(:competition, :season, name: "Сезон 2", started_on: Date.new(2022, 1, 1)) }
 
-      it "returns success" do
-        expect(response).to have_http_status(:ok)
-      end
+  context "when nobody has an award" do
+    before { get hall_path }
 
-      it "renders the hall of fame title" do
-        expect(response.body).to include("Зал Славы")
-      end
+    it "returns success" do
+      expect(response).to have_http_status(:ok)
+    end
 
-      it "renders player awards" do
-        expect(response.body).to include("Алексей")
-        expect(response.body).to include("Лучший игрок")
-      end
+    it "shows the title" do
+      expect(document.at_css("main h1").text.strip).to eq("Зал Славы")
+    end
 
-      it "links player name to player profile" do
-        assert_select "a[href=?]", player_path(player), text: "Алексей"
-      end
+    it "shows the coming soon note" do
+      expect(document.at_css("#hall-empty").text.strip).to eq(I18n.t("common.coming_soon"))
+    end
 
-      it "renders default photo for players without uploaded pictures" do
-        expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
-      end
+    it "shows no player cards" do
+      expect(players_section).to be_nil
+    end
 
-      it "renders competition name in award tooltip" do
-        assert_select "img[title=?]", "Лучший игрок — Сезон 5"
-      end
+    it "shows no organizers section" do
+      expect(staff_section).to be_nil
+    end
+  end
 
-      it "renders competition name as subtitle under award icon" do
-        assert_select ".award-competition", text: "Сезон 5"
-      end
+  context "when players have awards" do
+    let_it_be(:winner) { create(:award, title: "Победитель", position: 1) }
+    let_it_be(:corpse) { create(:award, title: "Почётный трупак", position: 2) }
+    let_it_be(:long_award) { create(:award, title: "Вот это поворот! Автор самой эпичной ошибки", position: 3) }
+    let_it_be(:finch) { create(:player, name: "Финчер") }
+    let_it_be(:remy) { create(:player, name: "Девятый Игрок Фол (ДИФ)") }
 
-      it "renders staff section" do
-        expect(response.body).to include("Организаторы")
-        expect(response.body).to include("Ведущий")
-        expect(response.body).to include("Лучший ведущий")
-      end
+    before_all do
+      create(:player_award, player: finch, award: corpse, competition: old_season)
+      create(:player_award, player: finch, award: corpse, competition: new_season)
+      create(:player_award, player: finch, award: winner, competition: new_season)
+      create(:player_award, player: remy, award: long_award)
+    end
 
-      it "renders staff award as title only" do
-        assert_select ".award-title", text: "Лучший ведущий"
-      end
+    before { get hall_path }
 
-      it "does not render competition subtitle for staff awards" do
-        assert_select ".award-staff .award-competition", count: 0
+    it "shows one card per awarded player, most awards first" do
+      expect(cards.map { |c| c["data-player-card"] }).to eq([ finch.id.to_s, remy.id.to_s ])
+    end
+
+    it "links the name to the profile" do
+      expect(card.(finch).at_css("a[href='#{player_path(finch)}']").text.strip).to eq("Финчер")
+    end
+
+    it "shows a long name in full" do
+      expect(card.(remy).at_css("[data-part='name']").text.strip).to eq("Девятый Игрок Фол (ДИФ)")
+    end
+
+    it "shows the first letter when there is no photo" do
+      expect(card.(finch).at_css("[data-part='initial']").text.strip).to eq("Ф")
+    end
+
+    it "hides the letter tile from screen readers" do
+      expect(card.(finch).at_css("[data-part='initial']")["aria-hidden"]).to eq("true")
+    end
+
+    it "counts every award record, pluralised" do
+      expect(card.(finch).at_css("[data-part='count']").text.strip).to eq("3 награды")
+    end
+
+    it "pluralises a single award" do
+      expect(card.(remy).at_css("[data-part='count']").text.strip).to eq("1 награда")
+    end
+
+    it "shows one badge per award, in award order" do
+      expect(badge_titles.(finch)).to eq([ "Победитель", "Почётный трупак" ])
+    end
+
+    it "lists the seasons of a repeated award, newest first" do
+      expect(card.(finch).css("[data-award] .vm-sub").map { |s| s.text.strip }).to eq([ "Сезон 2", "Сезон 2, Сезон 1" ])
+    end
+
+    it "shows a long award title in full" do
+      expect(badge_titles.(remy)).to eq([ "Вот это поворот! Автор самой эпичной ошибки" ])
+    end
+
+    it "shows no seasons line for an award won without a competition" do
+      expect(card.(remy).css("[data-award] .vm-sub")).to be_empty
+    end
+
+    it "marks player awards as player badges" do
+      expect(card.(finch).css("[data-award]").map { |b| b["data-award"] }.uniq).to eq([ "player" ])
+    end
+
+    it "shows no organizers section" do
+      expect(staff_section).to be_nil
+    end
+
+    it "shows no coming soon note" do
+      expect(document.at_css("#hall-empty")).to be_nil
+    end
+
+    it "does not use the old maroon colour" do
+      expect(document.at_css("main").to_html).not_to include("maroon")
+    end
+  end
+
+  context "when a player has a photo" do
+    let_it_be(:player) do
+      create(:player, name: "Фотогеничный").tap do |p|
+        p.photo.attach(io: Rails.root.join("spec/fixtures/files/selfie.jpg").open, filename: "photo.jpg",
+                       content_type: "image/jpeg")
       end
     end
 
-    context "when no awards exist" do
-      before { get hall_path }
+    before_all { create(:player_award, player:, award: create(:award, title: "Глаз-алмаз")) }
 
-      it "returns success" do
-        expect(response).to have_http_status(:ok)
-      end
+    before { get hall_path }
 
-      it "renders coming soon message" do
-        expect(response.body).to include("Скоро! Следите за обновлениями")
-      end
+    it "shows the photo with the player's name as alt text" do
+      expect(card.(player).at_css("img[data-part='photo']")["alt"]).to eq("Фотогеничный")
+    end
 
-      it "does not render organizers heading" do
-        expect(response.body).not_to include("Организаторы")
-      end
+    it "shows no letter tile" do
+      expect(card.(player).at_css("[data-part='initial']")).to be_nil
+    end
+  end
+
+  context "when there are staff awards" do
+    let_it_be(:organizer_award) { create(:award, title: "Организатор", staff: true) }
+    let_it_be(:organizer) { create(:player, name: "Ведущий") }
+
+    before_all { create(:player_award, player: organizer, award: organizer_award) }
+
+    before { get hall_path }
+
+    it "shows the organizers heading" do
+      expect(staff_section.at_css("h2").text.strip).to eq("Организаторы")
+    end
+
+    it "shows the organizer card" do
+      expect(staff_section.css("[data-player-card]").map { |c| c["data-player-card"] }).to eq([ organizer.id.to_s ])
+    end
+
+    it "shows the staff badge" do
+      expect(card.(organizer).at_css("[data-award]")["data-award"]).to eq("staff")
+    end
+
+    it "shows no count line for organizers" do
+      expect(card.(organizer).at_css("[data-part='count']")).to be_nil
+    end
+
+    it "shows no player cards when only staff awards exist" do
+      expect(players_section).to be_nil
+    end
+
+    it "shows no coming soon note" do
+      expect(document.at_css("#hall-empty")).to be_nil
     end
   end
 end

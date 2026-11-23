@@ -45,7 +45,7 @@ RSpec.describe "Season overview" do
   end
 
   it "displays player statistics" do
-    within("table#players-table") do
+    within("#competition-rating table") do
       expect(page).to have_content("Алексей")
       expect(page).to have_content("Борис")
     end

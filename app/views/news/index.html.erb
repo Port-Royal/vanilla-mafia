@@ -1,29 +1,29 @@
-<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title") %></h1>
+<h1 class="mb-4 font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= t("news.index.title") %></h1>
 
 <% if @news.any? %>
   <% if @pagination_mode == :infinite %>
     <div data-controller="infinite-scroll">
-      <turbo-frame id="news-list" target="_top" class="space-y-8">
-        <%= render partial: "news/article", collection: @news, as: :article %>
+      <turbo-frame id="news-list" target="_top" class="vm-panel block divide-y divide-line-soft">
+        <%= render partial: "news/card", collection: @news, as: :card %>
       </turbo-frame>
 
       <% if @pagy.next %>
         <div data-infinite-scroll-target="sentinel"
              data-next-url="<%= news_index_path(page: @pagy.next, format: :turbo_stream) %>"
-             data-loading-message="<%= t('news.index.loading') %>"
-             data-error-message="<%= t('news.index.load_error') %>">
+             data-loading-message="<%= t("news.index.loading") %>"
+             data-error-message="<%= t("news.index.load_error") %>">
         </div>
       <% end %>
     </div>
   <% else %>
-    <div class="space-y-8">
-      <%= render partial: "news/article", collection: @news, as: :article %>
+    <div id="news-list" class="vm-panel divide-y divide-line-soft">
+      <%= render partial: "news/card", collection: @news, as: :card %>
     </div>
 
     <% if @pagination_mode == :classic %>
-      <%= render "shared/pagy_nav", pagy: @pagy %>
+      <%= render "shared/paper_pagy_nav", pagy: @pagy %>
     <% end %>
   <% end %>
 <% else %>
-  <p class="text-neutral-500"><%= t(".empty") %></p>
+  <p class="text-sm text-ink-muted"><%= t("news.index.empty") %></p>
 <% end %>

@@ -1,26 +1,20 @@
-<section>
-  <h2 class="text-2xl font-bold text-maroon mb-6"><%= t(".title") %></h2>
-
-  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-    <% recently_finished.each do |competition| %>
-      <div class="border border-gray-200 rounded-lg p-4">
-        <h3 class="text-lg font-semibold mb-2">
-          <%= link_to competition.name, competition_path(slug: competition.slug),
-                class: "text-maroon hover:underline" %>
-        </h3>
-
-        <p class="text-sm text-neutral-500 mb-3">
-          <%= t(".ended_on") %>: <%= format_date(competition.ended_on) %>
-        </p>
-
-        <% winner = winners[competition] %>
-        <% if winner %>
-          <p class="text-sm">
-            <span class="font-medium"><%= t(".winner") %>:</span>
-            <%= link_to winner.name, player_path(winner), class: "text-maroon hover:underline" %>
-          </p>
-        <% end %>
-      </div>
+<section id="home-recently-finished" aria-labelledby="home-recently-finished-label">
+  <h2 id="home-recently-finished-label" class="vm-label mb-2"><%= t("home.redesign.recently_finished") %></h2>
+  <ul class="vm-panel divide-y divide-line-soft">
+    <% competitions.each do |competition| %>
+      <% winner = winners[competition] %>
+      <li class="px-3 py-2.5">
+        <%= link_to competition.name, competition_path(slug: competition.slug),
+              class: "text-sm font-semibold text-ink hover:underline" %>
+        <span class="vm-sub">
+          <%= format_date(competition.ended_on) %>
+          <% if winner %>
+            · <%= t("home.redesign.winner") %>
+            <%= link_to winner.name, player_path(winner),
+                  class: "text-ink underline decoration-gold-line underline-offset-2 hover:decoration-ink" %>
+          <% end %>
+        </span>
+      </li>
     <% end %>
-  </div>
+  </ul>
 </section>

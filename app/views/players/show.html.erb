@@ -1,135 +1,38 @@
-<h1 class="text-3xl font-bold text-maroon mb-6"><%= @player.name %></h1>
+<%= render "players/header", player: @player, stats: @stats, competitions_count: @competition_summaries.size,
+           awards_count: @player_awards.size %>
 
-<div class="rounded border border-maroon/20 p-4 mb-6">
-  <div class="flex flex-col md:flex-row gap-6">
-    <div id="player-photo" class="shrink-0">
-      <% if @player.photo.attached? %>
-        <%= image_tag @player.photo.variant(resize_to_limit: [300, 300]), alt: @player.name %>
-      <% else %>
-        <%= image_tag Player::DEFAULT_PHOTO_PATH, alt: @player.name %>
-      <% end %>
-    </div>
+<% if @award_badges.any? %>
+  <section id="player-awards" aria-labelledby="player-awards-label" class="mt-8">
+    <h2 id="player-awards-label" class="vm-label mb-2"><%= t("players.show.awards") %></h2>
+    <%= render "shared/award_badges", badges: @award_badges %>
+  </section>
+<% end %>
 
-    <div class="flex-1 space-y-4">
-      <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-        <div>
-          <span class="text-gray-500"><%= t(".total_games") %></span>
-          <p class="text-lg font-semibold"><%= @stats.total_games %></p>
-        </div>
-        <div>
-          <span class="text-gray-500"><%= t(".win_rate") %></span>
-          <p class="text-lg font-semibold"><%= @stats.win_rate %>%</p>
-        </div>
-        <% if @stats.first_game_date %>
-          <div>
-            <span class="text-gray-500"><%= t(".playing_since") %></span>
-            <p class="text-lg font-semibold"><%= format_date(@stats.first_game_date) %></p>
-          </div>
-        <% end %>
-      </div>
-
-      <% if @stats.role_stats.any? %>
-        <div>
-          <h3 class="text-sm text-gray-500 mb-2"><%= t(".role_stats") %></h3>
-          <div class="flex flex-wrap gap-3">
-            <% @stats.role_stats.each do |rs| %>
-              <div class="flex items-center gap-2 rounded bg-gray-50 px-3 py-1.5 text-sm">
-                <span class="font-medium"><%= rs.role_name %></span>
-                <span><%= rs.games %></span>
-                <span class="text-gray-400">|</span>
-                <span><%= rs.win_rate %>%</span>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-
-      <% if @player_awards.any? %>
-        <div id="player-awards">
-          <div class="flex flex-wrap gap-2">
-            <% @player_awards.each do |pa| %>
-              <%= render partial: "hall_of_fame/award", locals: { player_award: pa } %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    </div>
-  </div>
-</div>
+<% if @stats.role_stats.any? %>
+  <section id="player-roles" aria-labelledby="player-roles-label" class="mt-8">
+    <h2 id="player-roles-label" class="vm-label mb-2"><%= t("players.show.role_stats") %></h2>
+    <%= render "players/roles", role_stats: @stats.role_stats %>
+  </section>
+<% end %>
 
 <% if @player.bio.present? %>
-  <div id="player-bio" class="rounded border border-maroon/20 p-4 mb-6">
-    <h2 class="text-xl font-bold text-maroon mb-3"><%= t(".bio") %></h2>
-    <p class="text-sm text-neutral-700 whitespace-pre-line"><%= @player.bio %></p>
-  </div>
+  <section id="player-bio" aria-labelledby="player-bio-label" class="mt-8">
+    <h2 id="player-bio-label" class="vm-label mb-2"><%= t("players.show.bio") %></h2>
+    <p class="vm-panel whitespace-pre-line px-4 py-3 text-base leading-relaxed text-ink"><%= @player.bio %></p>
+  </section>
 <% end %>
 
-<% if user_signed_in? %>
-  <% if @player.claimed_by?(current_user) %>
-    <div class="mb-6">
-      <%= link_to t(".edit_profile"), edit_profile_path, class: "text-maroon hover:underline font-medium" %>
-    </div>
-  <% elsif current_user.admin? %>
-    <div class="mb-6">
-      <%= link_to t(".edit_profile"), avo.edit_resources_player_path(@player), class: "text-maroon hover:underline font-medium" %>
-    </div>
-  <% elsif (existing_claim = current_user.player_claims.find_by(player: @player)) %>
-    <% if existing_claim.pending? %>
-      <p class="text-gray-600 italic mb-6">
-        <%= existing_claim.dispute? ? t(".dispute_pending") : t(".claim_pending") %>
-      </p>
-    <% end %>
-  <% elsif @player.claimed? && !current_user.admin? && !current_user.claimed_player? && !current_user.pending_dispute? %>
-    <div class="mb-6">
-      <%= link_to t(".dispute_player"), new_player_dispute_path(@player),
-            class: "bg-maroon text-white px-4 py-2 rounded hover:bg-maroon/90 font-medium" %>
-    </div>
-  <% elsif !@player.claimed? && !current_user.claimed_player? && !current_user.pending_claim? %>
-    <div class="mb-6">
-      <%= button_to t(".claim_player"), player_claim_path(@player),
-            data: { turbo_confirm: t(".claim_confirm") },
-            class: "bg-maroon text-white px-4 py-2 rounded hover:bg-maroon/90 font-medium" %>
-    </div>
-  <% end %>
-<% end %>
-
-<% @competitions_with_games.each_with_index do |entry, i| %>
-  <details class="mt-4 border border-gray-200 rounded-lg" <%= "open" if i == 0 %>>
-    <summary class="px-4 py-3 cursor-pointer font-bold text-maroon hover:bg-gray-50">
-      <%= entry.competition.name %>
-      <span class="text-sm font-normal text-gray-500">(<%= entry.games.size %>)</span>
-    </summary>
-    <div class="scroll-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th><%= t(".date") %></th>
-            <th><%= t(".competition") %></th>
-            <th><%= t(".game") %></th>
-            <th><%= t(".role") %></th>
-            <th><%= t(".result") %></th>
-            <th><%= t(".score") %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% entry.games.each do |game| %>
-            <% participation = game.game_participations.find { |gp| gp.player_id == @player.id } %>
-            <tr>
-              <td><%= game.played_on %></td>
-              <td><%= link_to game.competition.name, competition_path(slug: game.competition.slug), class: "text-maroon hover:underline" %></td>
-              <td><%= link_to game.game_number, game_path(game), class: "text-maroon hover:underline" %></td>
-              <td><%= participation&.role&.name if game.roles_public? %></td>
-              <td><%= participation&.result %></td>
-              <td><%= participation&.total %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </details>
+<% if @competition_summaries.any? %>
+  <section id="player-competitions" aria-labelledby="player-competitions-label" class="mt-8">
+    <h2 id="player-competitions-label" class="vm-label mb-2"><%= t("players.redesign.competitions") %></h2>
+    <%= render "players/competitions", summaries: @competition_summaries %>
+  </section>
+<% else %>
+  <p id="player-no-games" class="mt-8 text-sm text-ink-muted"><%= t("players.redesign.no_games") %></p>
 <% end %>
 
 <% if @news_articles.any? %>
-  <h2 class="text-xl font-bold text-maroon mt-6 mb-3"><%= t(".news") %></h2>
-  <%= render "news/preview_list", articles: @news_articles %>
+  <section id="player-news" aria-labelledby="news-cards-label" class="mt-8">
+    <%= render "shared/news_cards", articles: @news_articles, heading: t("players.redesign.news"), all_link: nil %>
+  </section>
 <% end %>

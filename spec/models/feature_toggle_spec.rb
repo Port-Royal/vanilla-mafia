@@ -8,10 +8,10 @@ RSpec.describe FeatureToggle, type: :model do
     it { is_expected.to validate_uniqueness_of(:key) }
     it { is_expected.to validate_inclusion_of(:key).in_array(described_class::KEYS) }
 
-    context "with the public redesign key" do
+    context "with the retired public redesign key" do
       subject { build(:feature_toggle, key: "public_redesign") }
 
-      it { is_expected.to be_valid }
+      it { is_expected.not_to be_valid }
     end
   end
 
@@ -39,8 +39,8 @@ RSpec.describe FeatureToggle, type: :model do
       )
     end
 
-    it "includes public redesign toggle key" do
-      expect(described_class::KEYS).to include("public_redesign")
+    it "no longer includes the public redesign toggle key" do
+      expect(described_class::KEYS).not_to include("public_redesign")
     end
 
     it "includes live protocol toggle key" do

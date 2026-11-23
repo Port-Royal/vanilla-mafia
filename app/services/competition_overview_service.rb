@@ -18,9 +18,8 @@ class CompetitionOverviewService
     end
   end
 
-  # The top of each finished child's standings, as on the home page; a running child has no winner yet. Only the
-  # redesigned page shows them, so they are computed on demand: one query per finished child, plus one for the
-  # subtree's links when any child has finished.
+  # The top of each finished child's standings, as on the home page; a running child has no winner yet. Kept apart
+  # from #call: one query per finished child, plus one for the subtree's links when any child has finished.
   def child_winners
     children.index_with { |child| winner_of(child) unless child.ended_on.nil? }
   end

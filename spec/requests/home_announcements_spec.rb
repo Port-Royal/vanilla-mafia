@@ -9,13 +9,14 @@ RSpec.describe "Home announcements" do
   context "when user is signed in" do
     before { sign_in user }
 
-    context "when home_whats_new toggle is enabled" do
+    # Release notes reach the home page only through the toast.
+    context "when only home_whats_new toggle is enabled" do
       let!(:toggle) { create(:feature_toggle, key: "home_whats_new", enabled: true) }
 
-      it "loads announcements for the user" do
+      it "does not load announcements" do
         get root_path
 
-        expect(controller.instance_variable_get(:@announcements)).to include(announcement)
+        expect(controller.instance_variable_get(:@announcements)).to be_nil
       end
     end
 
@@ -41,7 +42,7 @@ RSpec.describe "Home announcements" do
     end
 
     context "when user has dismissed an announcement" do
-      let!(:toggle) { create(:feature_toggle, key: "home_whats_new", enabled: true) }
+      let!(:toggle) { create(:feature_toggle, key: "toast_whats_new", enabled: true) }
       let!(:dismissal) { create(:announcement_dismissal, user: user, announcement: announcement) }
 
       it "excludes dismissed announcements" do
@@ -54,7 +55,7 @@ RSpec.describe "Home announcements" do
 
   context "when user is not signed in" do
     context "when toggle is enabled" do
-      let!(:toggle) { create(:feature_toggle, key: "home_whats_new", enabled: true) }
+      let!(:toggle) { create(:feature_toggle, key: "toast_whats_new", enabled: true) }
 
       it "does not load announcements" do
         get root_path

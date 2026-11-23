@@ -1,0 +1,32 @@
+<header id="site-top-bar" class="relative border-b border-line bg-paper text-ink">
+  <div class="vm-container flex min-h-14 items-center gap-6">
+    <%= link_to root_path, class: "flex-shrink-0" do %>
+      <img src="/img/chi_light.png" alt="Vanilla Mafia" class="vm-logo">
+    <% end %>
+
+    <nav aria-label="<%= t("nav.primary") %>" class="hidden min-w-0 lg:block">
+      <ul class="-my-1 flex items-center gap-5 overflow-x-auto whitespace-nowrap py-1 text-sm">
+        <% featured_competitions.each do |competition| %>
+          <li><%= render "layouts/nav_link", label: competition.name, path: competition_path(slug: competition.slug) %></li>
+        <% end %>
+        <li><%= render "layouts/nav_link", label: t("nav.hall_of_fame"), path: hall_path %></li>
+        <li><%= render "layouts/nav_link", label: t("nav.news"), path: news_index_path %></li>
+        <li><%= render "layouts/nav_link", label: t("nav.stats"), path: stats_path %></li>
+      </ul>
+    </nav>
+
+    <div class="ml-auto hidden flex-shrink-0 items-center gap-4 lg:flex">
+      <%= render "layouts/locale_switcher" %>
+
+      <div id="site-user-area" class="flex items-center">
+        <% if user_signed_in? %>
+          <%= render "layouts/user_menu" %>
+        <% else %>
+          <%= link_to t("nav.sign_in"), new_user_session_path, class: "vm-btn vm-btn--ghost" %>
+        <% end %>
+      </div>
+    </div>
+
+    <%= render "layouts/phone_menu" %>
+  </div>
+</header>

@@ -1,0 +1,41 @@
+<header id="player-header">
+  <div class="flex flex-wrap items-start gap-4 lg:flex-nowrap lg:gap-5">
+    <% if player.photo.attached? %>
+      <%= image_tag player.photo.variant(resize_to_fill: [ 224, 224 ]), alt: player.name, data: { part: "photo" },
+            class: "size-18 shrink-0 rounded-lg border border-line object-cover lg:size-28" %>
+    <% else %>
+      <span data-part="initial" aria-hidden="true"
+            class="grid size-18 shrink-0 place-items-center rounded-lg border border-line bg-linear-135 from-bronze to-[#c9b48a] font-serif text-3xl font-bold text-panel lg:size-28 lg:text-[40px]"><%= player_initial(player.name) %></span>
+    <% end %>
+
+    <div class="min-w-0 flex-1">
+      <h1 class="font-serif text-[22px] font-bold break-words text-ink lg:text-[28px]"><%= player.name %></h1>
+      <% if stats.first_game_date %>
+        <p id="player-since" class="mt-1 text-xs text-ink-muted"><%= t("players.show.playing_since") %> <%= format_date(stats.first_game_date) %></p>
+      <% end %>
+
+      <div class="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+        <p data-number="games">
+          <span class="block text-xl font-bold tabular-nums text-ink"><%= stats.total_games %></span>
+          <span class="block text-xs text-ink-muted"><%= profile_number_label(:games, stats.total_games) %></span>
+        </p>
+        <p data-number="win_rate">
+          <span class="block text-xl font-bold tabular-nums text-ink"><%= stats.win_rate %>%</span>
+          <span class="block text-xs text-ink-muted"><%= t("players.redesign.numbers.wins_pct") %></span>
+        </p>
+        <p data-number="competitions">
+          <span class="block text-xl font-bold tabular-nums text-ink"><%= competitions_count %></span>
+          <span class="block text-xs text-ink-muted"><%= profile_number_label(:competitions, competitions_count) %></span>
+        </p>
+        <% if awards_count.positive? %>
+          <p data-number="awards">
+            <span class="block text-xl font-bold tabular-nums text-ink"><%= awards_count %></span>
+            <span class="block text-xs text-ink-muted"><%= profile_number_label(:awards, awards_count) %></span>
+          </p>
+        <% end %>
+      </div>
+    </div>
+
+    <%= render "players/action", player: %>
+  </div>
+</header>

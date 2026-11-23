@@ -25,7 +25,6 @@ class FeatureToggle < ApplicationRecord
     telegram_force_import_max_range
     game_breakdown
     live_protocol
-    public_redesign
   ].freeze
   CACHE_TTL = 5.minutes
 

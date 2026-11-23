@@ -102,7 +102,7 @@ RSpec.describe HallOfFameService do
       end
     end
   end
-  describe "entries for the redesigned page" do
+  describe "entries for the hall of fame page" do
     let_it_be(:old_season) { create(:competition, :season, name: "Сезон 1", started_on: Date.new(2021, 1, 1)) }
     let_it_be(:new_season) { create(:competition, :season, name: "Сезон 2", started_on: Date.new(2022, 1, 1)) }
     # Created before first_award, so id order and position order disagree; 10 sorts before 2 as text.

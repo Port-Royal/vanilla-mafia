@@ -1,7 +1,7 @@
 class HallOfFameService
   Result = Data.define(:player_awards, :staff_awards, :player_entries, :staff_entries)
 
-  # A player's card on the redesigned page: every award record of theirs, newest competition first.
+  # A player's card on the hall of fame page: every award record of theirs, newest competition first.
   Entry = Data.define(:player, :player_awards) do
     def awards_count
       player_awards.size

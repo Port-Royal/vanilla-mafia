@@ -3,7 +3,6 @@ class HomeController < ApplicationController
   RECENTLY_FINISHED_LIMIT = 3
   RECENT_GAMES_LIMIT = 5
   LATEST_NEWS_LIMIT = 3
-  HALL_OF_FAME_LIMIT = 6
 
   def index
     @block_visible = load_block_visibility
@@ -19,26 +18,15 @@ class HomeController < ApplicationController
     end
 
     @recent_games = Game.finished.recent.includes(competition: :parent).limit(RECENT_GAMES_LIMIT).load if @block_visible[:recent_games]
-    return render_new_design if helpers.new_design?
-
-    @latest_news = News.visible.recent.limit(LATEST_NEWS_LIMIT) if @block_visible[:latest_news]
+    @latest_news = load_news_cards if @block_visible[:latest_news]
     @announcements = load_announcements
-    @hall_of_fame_players = load_hall_of_fame_players if @block_visible[:hall_of_fame]
-    @stats = ClubStatsService.totals if @block_visible[:stats]
   end
 
   private
 
-  BLOCK_KEYS = %i[hero whats_new running_tournaments recently_finished recent_games latest_news hall_of_fame stats documents].freeze
+  BLOCK_KEYS = %i[running_tournaments recently_finished recent_games latest_news].freeze
 
-  # News cards show each article's photo, author and excerpt, so those are preloaded; release notes reach this page
-  # only through the toast.
-  def render_new_design
-    @latest_news = load_news_cards if @block_visible[:latest_news]
-    @announcements = load_announcements if FeatureToggle.enabled?("toast_whats_new")
-    render "home/redesign/index"
-  end
-
+  # News cards show each article's photo, author and excerpt, so those are preloaded.
   def load_news_cards
     News.visible.recent.with_attached_photos.includes(:rich_text_content, author: :player).limit(LATEST_NEWS_LIMIT).load
   end
@@ -59,19 +47,11 @@ class HomeController < ApplicationController
     end
   end
 
+  # Release notes reach this page only through the toast.
   def load_announcements
     return unless user_signed_in?
-    return unless FeatureToggle.enabled?("home_whats_new") || FeatureToggle.enabled?("toast_whats_new")
+    return unless FeatureToggle.enabled?("toast_whats_new")
 
     Announcement.for_user(current_user)
-  end
-
-  def load_hall_of_fame_players
-    Player
-      .joins(:player_awards)
-      .merge(PlayerAward.joins(:award).where(awards: { staff: false }))
-      .distinct
-      .includes(photo_attachment: :blob)
-      .limit(HALL_OF_FAME_LIMIT)
   end
 end

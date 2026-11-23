@@ -1,9 +1,5 @@
 <%= turbo_stream.append "news-list" do %>
-  <% if new_design? %>
-    <%= render partial: "news/redesign/card", collection: @news, as: :card %>
-  <% else %>
-    <%= render partial: "news/article", collection: @news, as: :article %>
-  <% end %>
+  <%= render partial: "news/card", collection: @news, as: :card %>
 <% end %>
 
 <% if @pagy.next %>

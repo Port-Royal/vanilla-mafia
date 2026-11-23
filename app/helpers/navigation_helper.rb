@@ -1,4 +1,4 @@
-# Navigation state for the redesigned shell.
+# Navigation state for the site shell.
 module NavigationHelper
   NavItem = Data.define(:key, :label, :path)
 

@@ -515,14 +515,6 @@ en:
     language_names:
       ru: "Русский"
       en: "English"
-  design:
-    offer:
-      label: "New site design"
-      text: "There's a new design — want to try it?"
-      try: "Try it"
-      decline: "No thanks"
-    switch_to_new: "New design"
-    switch_to_old: "Back to the old design"
   stats:
     show:
       since: "Playing since %{date}"
@@ -560,42 +552,23 @@ en:
   home:
     hero:
       title: "Vanilla Mafia"
-      tagline: "Competitive Mafia club"
-      cta: "Current tournament"
     whats_new:
-      title: "What's New"
       toast_title: "What's New"
-      version: "Version %{version}"
       dismiss: "Dismiss"
-    recently_finished:
-      title: "Recently finished tournaments"
-      winner: "Winner"
-      ended_on: "Ended"
     recent_games:
       title: "Recent games"
       judge: "Judge"
     latest_news:
-      title: "Latest news"
       all_news: "All news"
-    hall_of_fame:
-      title: "Hall of Fame"
-      view_all: "View all"
     stats:
       title: "Club in numbers"
       players: "Players"
       games: "Games played"
       competitions: "Tournaments"
-    documents:
-      title: "Documents"
-      league_rules: "League rules"
-      game_rules: "Game rules"
-      rating_system: "Rating system"
     running_tournaments:
-      running_tournaments: "Running tournaments"
       rank: "Rank"
       player: "Player"
       rating: "Rating"
-      view_all: "View all"
     redesign:
       running: "Running now"
       table_link: "table"
@@ -605,17 +578,12 @@ en:
       news: "News"
   competitions:
     show:
-      by_children: "Competitions"
-      name: "Name"
-      by_players: "By players"
       rank: "Rank"
       player: "Player"
       rating: "Rating"
       games: "Games"
       win_rate: "Win rate"
-      view: "Result"
       total: "Total"
-      news: "News"
     redesign:
       running: "Running"
       running_short: "running"
@@ -836,10 +804,7 @@ en:
     show:
       seat: "Seat"
       player: "Player"
-      role: "Role"
       base_score: "Score"
-      additional_score: "Bonus"
-      best_move: "Best move"
       total: "Total"
       judge: "Judge: %{name}"
       table_number: "Table: %{number}"
@@ -921,8 +886,6 @@ en:
       dispute_pending: "Dispute pending"
       edit_profile: "Edit profile"
       bio: "About"
-      total_games: "Games played"
-      win_rate: "Win rate"
       role_stats: "By roles"
       playing_since: "Playing since"
     redesign:

@@ -23,8 +23,10 @@ RSpec.describe "Series totals" do
   end
 
   it "displays game columns" do
-    expect(page).to have_content("Игра 1")
-    expect(page).to have_content("Игра 2")
+    within("#competition-matrix thead") do
+      expect(page).to have_link(href: game_path(game1))
+      expect(page).to have_link(href: game_path(game2))
+    end
   end
 
   it "displays a total column" do

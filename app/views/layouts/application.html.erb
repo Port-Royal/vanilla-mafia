@@ -4,13 +4,25 @@
     <%= render "layouts/head" %>
   </head>
 
-  <% if new_design? %>
-    <body class="min-h-screen bg-paper font-sans" data-controller="time-zone">
-      <%= render "layouts/redesign/shell", content: yield %>
-    </body>
-  <% else %>
-    <body class="min-h-screen bg-white font-sans" data-controller="menu time-zone">
-      <%= render "layouts/legacy/shell", content: yield %>
-    </body>
-  <% end %>
+  <% show_toast = @announcements.present? && FeatureToggle.enabled?("toast_whats_new") %>
+
+  <body class="min-h-screen bg-paper font-sans" data-controller="time-zone">
+    <%# Below lg the toast spans the screen bottom, so the page keeps room to scroll the footer clear of it. %>
+    <div class="flex min-h-screen flex-col <%= "pb-40 lg:pb-0" if show_toast %>">
+      <div class="vm-chrome">
+        <%= render "layouts/top_bar" %>
+      </div>
+
+      <main id="site-main" class="vm-container flex-1 py-6 lg:py-10">
+        <%= render "layouts/flash" %>
+        <%= yield %>
+      </main>
+
+      <%= render "layouts/footer" %>
+    </div>
+
+    <% if show_toast %>
+      <%= render "layouts/announcement_toast", announcements: @announcements %>
+    <% end %>
+  </body>
 </html>
