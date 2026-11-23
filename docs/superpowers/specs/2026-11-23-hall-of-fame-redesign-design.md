@@ -54,8 +54,11 @@ awards without icons):
 ## The page
 
 - Title «Зал Славы» (existing `hall_of_fame.title`), serif page title.
-- **Players**: a grid of cards — one column on phones, two from `sm`, three from `lg`. Card (`vm-panel`):
-  - photo 56 px square (8 px radius, line border, `resize_to_fill`), or the profile's letter tile (`aria-hidden`);
+- **Players**: a section labelled by a visually hidden `h2` («Игроки», `hall_of_fame.redesign.players`), so the
+  headings go h1 → h2 → h3 like the organizers section; inside, a grid of cards — one column on phones, two from
+  `sm`, three from `lg`. Card (`vm-panel`):
+  - photo 56 px square (8 px radius, line border, `resize_to_fill`, empty `alt` since the name follows it), or the
+    profile's letter tile (`aria-hidden`);
   - name as a link to the profile, semibold, wraps (no truncation);
   - a `vm-sub` line with the number of award records, pluralised («10 наград») — a repeat win counts each time, as on
     the profile header;
@@ -65,7 +68,9 @@ awards without icons):
   stable.
 - **Badges in a card**: one per award, in the awards' `position` order (awards without a position last, then id);
   the badge's sub line lists the seasons newest first, as the page loads them. An award without a competition has no
-  sub line.
+  sub line. This differs on purpose from the player profile, which puts staff badges first and then orders by the
+  player's first win: the profile tells one player's story, the hall compares players, so the same award sits in the
+  same place on every card. Both pages share `AwardBadge` and the badge partial; only the sort differs.
 - **Organizers** (existing `hall_of_fame.organizers`), only when there are staff awards: a `vm-label` heading and the
   same cards, with the dark staff badges and **no** count line (the badge already says what they do).
 - **Empty** (no awards at all): «Скоро! Следите за обновлениями» (existing `common.coming_soon`), muted.

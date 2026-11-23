@@ -853,6 +853,7 @@ en:
     all_awards: "All awards"
     award: {}
     redesign:
+      players: "Players"
       awards_count:
         one: "%{count} award"
         other: "%{count} awards"

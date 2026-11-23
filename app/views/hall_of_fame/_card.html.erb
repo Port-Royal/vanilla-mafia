@@ -2,7 +2,7 @@
 <li data-player-card="<%= player.id %>" class="vm-panel p-3 lg:p-4">
   <div class="flex items-center gap-3">
     <% if player.photo.attached? %>
-      <%= image_tag player.photo.variant(resize_to_fill: [ 112, 112 ]), alt: player.name, data: { part: "photo" },
+      <%= image_tag player.photo.variant(resize_to_fill: [ 112, 112 ]), alt: "", data: { part: "photo" },
             size: "56x56", loading: "lazy", class: "size-14 shrink-0 rounded-lg border border-line object-cover" %>
     <% else %>
       <span data-part="initial" aria-hidden="true"

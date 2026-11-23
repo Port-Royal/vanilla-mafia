@@ -5,10 +5,13 @@
 <% end %>
 
 <% if @player_entries.any? %>
-  <ul id="hall-players" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-    <%= render partial: "hall_of_fame/card", collection: @player_entries, as: :entry,
-               locals: { show_count: true } %>
-  </ul>
+  <section id="hall-players" aria-labelledby="hall-players-label">
+    <h2 id="hall-players-label" class="sr-only"><%= t("hall_of_fame.redesign.players") %></h2>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <%= render partial: "hall_of_fame/card", collection: @player_entries, as: :entry,
+                 locals: { show_count: true } %>
+    </ul>
+  </section>
 <% end %>
 
 <% if @staff_entries.any? %>

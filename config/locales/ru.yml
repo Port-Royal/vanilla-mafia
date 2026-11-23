@@ -522,6 +522,7 @@ ru:
     all_awards: "Все награды"
     award: {}
     redesign:
+      players: "Игроки"
       awards_count:
         one: "%{count} награда"
         few: "%{count} награды"
