@@ -1,5 +1,5 @@
 class HallOfFameService
-  Result = Data.define(:player_awards, :staff_awards, :player_entries, :staff_entries)
+  Result = Data.define(:player_entries, :staff_entries)
 
   # A player's card on the hall of fame page: every award record of theirs, newest competition first.
   Entry = Data.define(:player, :player_awards) do
@@ -20,13 +20,9 @@ class HallOfFameService
   end
 
   def call
-    player_awards = grouped_awards(Award.for_players)
-    staff_awards = grouped_awards(Award.for_staff)
     Result.new(
-      player_awards:,
-      staff_awards:,
-      player_entries: entries(player_awards),
-      staff_entries: entries(staff_awards)
+      player_entries: entries(grouped_awards(Award.for_players)),
+      staff_entries: entries(grouped_awards(Award.for_staff))
     )
   end
 

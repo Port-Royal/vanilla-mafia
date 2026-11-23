@@ -18,7 +18,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.bigint "record_id", null: false
     t.string "record_type", null: false
     t.datetime "updated_at", null: false
-    t.index [ "record_type", "record_id", "name" ], name: "index_action_text_rich_texts_uniqueness", unique: true
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -27,8 +27,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "name", null: false
     t.bigint "record_id", null: false
     t.string "record_type", null: false
-    t.index [ "blob_id" ], name: "index_active_storage_attachments_on_blob_id"
-    t.index [ "record_type", "record_id", "name", "blob_id" ], name: "index_active_storage_attachments_uniqueness", unique: true
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
   create_table "active_storage_blobs", force: :cascade do |t|
@@ -40,13 +40,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "key", null: false
     t.text "metadata"
     t.string "service_name", null: false
-    t.index [ "key" ], name: "index_active_storage_blobs_on_key", unique: true
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
   create_table "active_storage_variant_records", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
-    t.index [ "blob_id", "variation_digest" ], name: "index_active_storage_variant_records_uniqueness", unique: true
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "announcement_dismissals", force: :cascade do |t|
@@ -54,9 +54,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index [ "announcement_id" ], name: "index_announcement_dismissals_on_announcement_id"
-    t.index [ "user_id", "announcement_id" ], name: "index_announcement_dismissals_on_user_id_and_announcement_id", unique: true
-    t.index [ "user_id" ], name: "index_announcement_dismissals_on_user_id"
+    t.index ["announcement_id"], name: "index_announcement_dismissals_on_announcement_id"
+    t.index ["user_id", "announcement_id"], name: "index_announcement_dismissals_on_user_id_and_announcement_id", unique: true
+    t.index ["user_id"], name: "index_announcement_dismissals_on_user_id"
   end
 
   create_table "announcements", force: :cascade do |t|
@@ -66,7 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.text "message_ru", null: false
     t.datetime "updated_at", null: false
     t.string "version", null: false
-    t.index [ "grant_code" ], name: "index_announcements_on_grant_code"
+    t.index ["grant_code"], name: "index_announcements_on_grant_code"
   end
 
   create_table "awards", force: :cascade do |t|
@@ -76,7 +76,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.boolean "staff", default: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index [ "staff" ], name: "index_awards_on_staff"
+    t.index ["staff"], name: "index_awards_on_staff"
   end
 
   create_table "breakdown_moves", force: :cascade do |t|
@@ -92,8 +92,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "target_seat"
     t.text "text"
     t.datetime "updated_at", null: false
-    t.index [ "breakdown_speech_id" ], name: "index_breakdown_moves_on_breakdown_speech_id"
-    t.index [ "breakdown_vote_round_id" ], name: "index_breakdown_moves_on_breakdown_vote_round_id"
+    t.index ["breakdown_speech_id"], name: "index_breakdown_moves_on_breakdown_speech_id"
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_moves_on_breakdown_vote_round_id"
     t.check_constraint "(breakdown_speech_id IS NULL) <> (breakdown_vote_round_id IS NULL)", name: "breakdown_moves_exactly_one_context"
   end
 
@@ -105,7 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.boolean "tactical_miss", default: false, null: false
     t.integer "target_seat"
     t.datetime "updated_at", null: false
-    t.index [ "breakdown_phase_id" ], name: "index_breakdown_night_actions_on_breakdown_phase_id"
+    t.index ["breakdown_phase_id"], name: "index_breakdown_night_actions_on_breakdown_phase_id"
   end
 
   create_table "breakdown_phases", force: :cascade do |t|
@@ -115,8 +115,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "night_outcome"
     t.integer "position", null: false
     t.datetime "updated_at", null: false
-    t.index [ "game_breakdown_id", "position" ], name: "index_breakdown_phases_on_game_breakdown_id_and_position", unique: true
-    t.index [ "game_breakdown_id" ], name: "index_breakdown_phases_on_game_breakdown_id"
+    t.index ["game_breakdown_id", "position"], name: "index_breakdown_phases_on_game_breakdown_id_and_position", unique: true
+    t.index ["game_breakdown_id"], name: "index_breakdown_phases_on_game_breakdown_id"
   end
 
   create_table "breakdown_seats", force: :cascade do |t|
@@ -127,10 +127,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "player_id"
     t.string "role_code"
     t.datetime "updated_at", null: false
-    t.index [ "game_breakdown_id", "number" ], name: "index_breakdown_seats_on_game_breakdown_id_and_number", unique: true
-    t.index [ "game_breakdown_id" ], name: "index_breakdown_seats_on_game_breakdown_id"
-    t.index [ "player_id" ], name: "index_breakdown_seats_on_player_id"
-    t.index [ "role_code" ], name: "index_breakdown_seats_on_role_code"
+    t.index ["game_breakdown_id", "number"], name: "index_breakdown_seats_on_game_breakdown_id_and_number", unique: true
+    t.index ["game_breakdown_id"], name: "index_breakdown_seats_on_game_breakdown_id"
+    t.index ["player_id"], name: "index_breakdown_seats_on_player_id"
+    t.index ["role_code"], name: "index_breakdown_seats_on_role_code"
   end
 
   create_table "breakdown_speeches", force: :cascade do |t|
@@ -142,8 +142,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "speaker_seat", null: false
     t.text "summary"
     t.datetime "updated_at", null: false
-    t.index [ "breakdown_phase_id" ], name: "index_breakdown_speeches_on_breakdown_phase_id"
-    t.index [ "breakdown_vote_round_id" ], name: "index_breakdown_speeches_on_breakdown_vote_round_id"
+    t.index ["breakdown_phase_id"], name: "index_breakdown_speeches_on_breakdown_phase_id"
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_speeches_on_breakdown_vote_round_id"
   end
 
   create_table "breakdown_vote_rounds", force: :cascade do |t|
@@ -152,8 +152,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "kind", null: false
     t.integer "number", null: false
     t.datetime "updated_at", null: false
-    t.index [ "breakdown_phase_id", "number" ], name: "index_breakdown_vote_rounds_on_breakdown_phase_id_and_number", unique: true
-    t.index [ "breakdown_phase_id" ], name: "index_breakdown_vote_rounds_on_breakdown_phase_id"
+    t.index ["breakdown_phase_id", "number"], name: "index_breakdown_vote_rounds_on_breakdown_phase_id_and_number", unique: true
+    t.index ["breakdown_phase_id"], name: "index_breakdown_vote_rounds_on_breakdown_phase_id"
   end
 
   create_table "breakdown_votes", force: :cascade do |t|
@@ -163,8 +163,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.boolean "for_lift"
     t.datetime "updated_at", null: false
     t.integer "voter_seat", null: false
-    t.index [ "breakdown_vote_round_id", "voter_seat" ], name: "index_breakdown_votes_on_round_and_voter_seat", unique: true
-    t.index [ "breakdown_vote_round_id" ], name: "index_breakdown_votes_on_breakdown_vote_round_id"
+    t.index ["breakdown_vote_round_id", "voter_seat"], name: "index_breakdown_votes_on_round_and_voter_seat", unique: true
+    t.index ["breakdown_vote_round_id"], name: "index_breakdown_votes_on_breakdown_vote_round_id"
   end
 
   create_table "competitions", force: :cascade do |t|
@@ -178,11 +178,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "slug", null: false
     t.date "started_on"
     t.datetime "updated_at", null: false
-    t.index [ "featured" ], name: "index_competitions_on_featured"
-    t.index [ "kind" ], name: "index_competitions_on_kind"
-    t.index [ "parent_id", "ended_on" ], name: "index_competitions_on_parent_id_and_ended_on"
-    t.index [ "parent_id" ], name: "index_competitions_on_parent_id"
-    t.index [ "slug" ], name: "index_competitions_on_slug", unique: true
+    t.index ["featured"], name: "index_competitions_on_featured"
+    t.index ["kind"], name: "index_competitions_on_kind"
+    t.index ["parent_id", "ended_on"], name: "index_competitions_on_parent_id_and_ended_on"
+    t.index ["parent_id"], name: "index_competitions_on_parent_id"
+    t.index ["slug"], name: "index_competitions_on_slug", unique: true
   end
 
   create_table "episodes", force: :cascade do |t|
@@ -193,7 +193,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "status", default: "draft", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index [ "status", "published_at" ], name: "index_episodes_on_status_and_published_at"
+    t.index ["status", "published_at"], name: "index_episodes_on_status_and_published_at"
   end
 
   create_table "feature_toggles", force: :cascade do |t|
@@ -203,7 +203,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "key", null: false
     t.datetime "updated_at", null: false
     t.string "value"
-    t.index [ "key" ], name: "index_feature_toggles_on_key", unique: true
+    t.index ["key"], name: "index_feature_toggles_on_key", unique: true
   end
 
   create_table "game_breakdowns", force: :cascade do |t|
@@ -219,8 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.string "video_url"
-    t.index [ "author_id" ], name: "index_game_breakdowns_on_author_id"
-    t.index [ "game_id" ], name: "index_game_breakdowns_on_game_id"
+    t.index ["author_id"], name: "index_game_breakdowns_on_author_id"
+    t.index ["game_id"], name: "index_game_breakdowns_on_game_id"
   end
 
   create_table "game_participations", force: :cascade do |t|
@@ -238,11 +238,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.boolean "win", default: false
-    t.index [ "game_id", "player_id" ], name: "index_game_participations_on_game_id_and_player_id", unique: true
-    t.index [ "game_id", "seat" ], name: "index_game_participations_on_game_id_and_seat", unique: true
-    t.index [ "game_id" ], name: "index_game_participations_on_game_id"
-    t.index [ "player_id" ], name: "index_game_participations_on_player_id"
-    t.index [ "status" ], name: "index_game_participations_on_status"
+    t.index ["game_id", "player_id"], name: "index_game_participations_on_game_id_and_player_id", unique: true
+    t.index ["game_id", "seat"], name: "index_game_participations_on_game_id_and_seat", unique: true
+    t.index ["game_id"], name: "index_game_participations_on_game_id"
+    t.index ["player_id"], name: "index_game_participations_on_player_id"
+    t.index ["status"], name: "index_game_participations_on_status"
   end
 
   create_table "game_protocol_events", force: :cascade do |t|
@@ -259,9 +259,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.json "target_seats", default: [], null: false
     t.text "text"
     t.datetime "updated_at", null: false
-    t.index [ "game_id", "action_id" ], name: "index_game_protocol_events_on_game_id_and_action_id"
-    t.index [ "game_id", "client_id" ], name: "index_game_protocol_events_on_game_id_and_client_id", unique: true
-    t.index [ "game_id", "position" ], name: "index_game_protocol_events_on_game_id_and_position", unique: true
+    t.index ["game_id", "action_id"], name: "index_game_protocol_events_on_game_id_and_action_id"
+    t.index ["game_id", "client_id"], name: "index_game_protocol_events_on_game_id_and_client_id", unique: true
+    t.index ["game_id", "position"], name: "index_game_protocol_events_on_game_id_and_position", unique: true
   end
 
   create_table "games", force: :cascade do |t|
@@ -280,16 +280,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "table_number"
     t.datetime "updated_at", null: false
     t.index "competition_id, COALESCE(played_on, ''), COALESCE(table_number, 0), game_number", name: "index_games_on_competition_day_table_and_number", unique: true
-    t.index [ "competition_id" ], name: "index_games_on_competition_id"
-    t.index [ "played_on", "game_number" ], name: "index_games_on_played_on_and_game_number"
-    t.index [ "slug" ], name: "index_games_on_slug", unique: true
+    t.index ["competition_id"], name: "index_games_on_competition_id"
+    t.index ["played_on", "game_number"], name: "index_games_on_played_on_and_game_number"
+    t.index ["slug"], name: "index_games_on_slug", unique: true
   end
 
   create_table "grants", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "code" ], name: "index_grants_on_code", unique: true
+    t.index ["code"], name: "index_grants_on_code", unique: true
   end
 
   create_table "news", force: :cascade do |t|
@@ -305,12 +305,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.datetime "telegram_thread_started_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index [ "author_id", "status", "telegram_thread_last_message_at" ], name: "index_news_on_author_status_thread"
-    t.index [ "author_id" ], name: "index_news_on_author_id"
-    t.index [ "competition_id" ], name: "index_news_on_competition_id"
-    t.index [ "game_id" ], name: "index_news_on_game_id"
-    t.index [ "published_at" ], name: "index_news_on_published_at"
-    t.index [ "slug" ], name: "index_news_on_slug", unique: true
+    t.index ["author_id", "status", "telegram_thread_last_message_at"], name: "index_news_on_author_status_thread"
+    t.index ["author_id"], name: "index_news_on_author_id"
+    t.index ["competition_id"], name: "index_news_on_competition_id"
+    t.index ["game_id"], name: "index_news_on_game_id"
+    t.index ["published_at"], name: "index_news_on_published_at"
+    t.index ["slug"], name: "index_news_on_slug", unique: true
   end
 
   create_table "news_player_mentions", force: :cascade do |t|
@@ -318,9 +318,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "news_id", null: false
     t.integer "player_id", null: false
     t.datetime "updated_at", null: false
-    t.index [ "news_id", "player_id" ], name: "index_news_player_mentions_on_news_id_and_player_id", unique: true
-    t.index [ "news_id" ], name: "index_news_player_mentions_on_news_id"
-    t.index [ "player_id" ], name: "index_news_player_mentions_on_player_id"
+    t.index ["news_id", "player_id"], name: "index_news_player_mentions_on_news_id_and_player_id", unique: true
+    t.index ["news_id"], name: "index_news_player_mentions_on_news_id"
+    t.index ["player_id"], name: "index_news_player_mentions_on_player_id"
   end
 
   create_table "playback_positions", force: :cascade do |t|
@@ -330,9 +330,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "position_seconds", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index [ "episode_id" ], name: "index_playback_positions_on_episode_id"
-    t.index [ "user_id", "episode_id" ], name: "index_playback_positions_on_user_id_and_episode_id", unique: true
-    t.index [ "user_id" ], name: "index_playback_positions_on_user_id"
+    t.index ["episode_id"], name: "index_playback_positions_on_episode_id"
+    t.index ["user_id", "episode_id"], name: "index_playback_positions_on_user_id_and_episode_id", unique: true
+    t.index ["user_id"], name: "index_playback_positions_on_user_id"
   end
 
   create_table "player_awards", force: :cascade do |t|
@@ -342,10 +342,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "player_id", null: false
     t.integer "position"
     t.datetime "updated_at", null: false
-    t.index [ "award_id" ], name: "index_player_awards_on_award_id"
-    t.index [ "competition_id" ], name: "index_player_awards_on_competition_id"
-    t.index [ "player_id", "award_id", "competition_id" ], name: "idx_on_player_id_award_id_competition_id_3f522704bb", unique: true
-    t.index [ "player_id" ], name: "index_player_awards_on_player_id"
+    t.index ["award_id"], name: "index_player_awards_on_award_id"
+    t.index ["competition_id"], name: "index_player_awards_on_competition_id"
+    t.index ["player_id", "award_id", "competition_id"], name: "idx_on_player_id_award_id_competition_id_3f522704bb", unique: true
+    t.index ["player_id"], name: "index_player_awards_on_player_id"
   end
 
   create_table "player_claims", force: :cascade do |t|
@@ -359,11 +359,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index [ "player_id" ], name: "index_player_claims_on_player_id"
-    t.index [ "reviewed_by_id" ], name: "index_player_claims_on_reviewed_by_id"
-    t.index [ "status" ], name: "index_player_claims_on_status"
-    t.index [ "user_id", "player_id" ], name: "index_player_claims_on_user_id_and_player_id", unique: true
-    t.index [ "user_id" ], name: "index_player_claims_on_user_id"
+    t.index ["player_id"], name: "index_player_claims_on_player_id"
+    t.index ["reviewed_by_id"], name: "index_player_claims_on_reviewed_by_id"
+    t.index ["status"], name: "index_player_claims_on_status"
+    t.index ["user_id", "player_id"], name: "index_player_claims_on_user_id_and_player_id", unique: true
+    t.index ["user_id"], name: "index_player_claims_on_user_id"
   end
 
   create_table "players", force: :cascade do |t|
@@ -374,8 +374,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "position"
     t.string "slug", null: false
     t.datetime "updated_at", null: false
-    t.index [ "name" ], name: "index_players_on_name", unique: true
-    t.index [ "slug" ], name: "index_players_on_slug", unique: true
+    t.index ["name"], name: "index_players_on_name", unique: true
+    t.index ["slug"], name: "index_players_on_slug", unique: true
   end
 
   create_table "playlist_episodes", force: :cascade do |t|
@@ -384,10 +384,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "playlist_id", null: false
     t.integer "position", null: false
     t.datetime "updated_at", null: false
-    t.index [ "episode_id" ], name: "index_playlist_episodes_on_episode_id"
-    t.index [ "playlist_id", "episode_id" ], name: "index_playlist_episodes_on_playlist_id_and_episode_id", unique: true
-    t.index [ "playlist_id", "position" ], name: "index_playlist_episodes_on_playlist_id_and_position", unique: true
-    t.index [ "playlist_id" ], name: "index_playlist_episodes_on_playlist_id"
+    t.index ["episode_id"], name: "index_playlist_episodes_on_episode_id"
+    t.index ["playlist_id", "episode_id"], name: "index_playlist_episodes_on_playlist_id_and_episode_id", unique: true
+    t.index ["playlist_id", "position"], name: "index_playlist_episodes_on_playlist_id_and_position", unique: true
+    t.index ["playlist_id"], name: "index_playlist_episodes_on_playlist_id"
   end
 
   create_table "playlists", force: :cascade do |t|
@@ -402,8 +402,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index [ "token" ], name: "index_podcast_feed_tokens_on_token", unique: true
-    t.index [ "user_id" ], name: "index_podcast_feed_tokens_on_user_id", unique: true
+    t.index ["token"], name: "index_podcast_feed_tokens_on_token", unique: true
+    t.index ["user_id"], name: "index_podcast_feed_tokens_on_user_id", unique: true
   end
 
   create_table "podcasts", force: :cascade do |t|
@@ -419,7 +419,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
   create_table "roles", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
-    t.index [ "code" ], name: "index_roles_on_code", unique: true
+    t.index ["code"], name: "index_roles_on_code", unique: true
   end
 
   create_table "taggings", force: :cascade do |t|
@@ -428,9 +428,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "taggable_id", null: false
     t.string "taggable_type", null: false
     t.datetime "updated_at", null: false
-    t.index [ "tag_id", "taggable_type", "taggable_id" ], name: "index_taggings_on_tag_id_and_taggable_type_and_taggable_id", unique: true
-    t.index [ "tag_id" ], name: "index_taggings_on_tag_id"
-    t.index [ "taggable_type", "taggable_id" ], name: "index_taggings_on_taggable"
+    t.index ["tag_id", "taggable_type", "taggable_id"], name: "index_taggings_on_tag_id_and_taggable_type_and_taggable_id", unique: true
+    t.index ["tag_id"], name: "index_taggings_on_tag_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
   end
 
   create_table "tags", force: :cascade do |t|
@@ -438,8 +438,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "name", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
-    t.index [ "name" ], name: "index_tags_on_name", unique: true
-    t.index [ "slug" ], name: "index_tags_on_slug", unique: true
+    t.index ["name"], name: "index_tags_on_name", unique: true
+    t.index ["slug"], name: "index_tags_on_slug", unique: true
   end
 
   create_table "telegram_authors", force: :cascade do |t|
@@ -448,9 +448,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "telegram_user_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
-    t.index [ "player_id" ], name: "index_telegram_authors_on_player_id"
-    t.index [ "telegram_user_id" ], name: "index_telegram_authors_on_telegram_user_id", unique: true
-    t.index [ "user_id" ], name: "index_telegram_authors_on_user_id"
+    t.index ["player_id"], name: "index_telegram_authors_on_player_id"
+    t.index ["telegram_user_id"], name: "index_telegram_authors_on_telegram_user_id", unique: true
+    t.index ["user_id"], name: "index_telegram_authors_on_user_id"
   end
 
   create_table "user_grants", force: :cascade do |t|
@@ -458,9 +458,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.integer "grant_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index [ "grant_id" ], name: "index_user_grants_on_grant_id"
-    t.index [ "user_id", "grant_id" ], name: "index_user_grants_on_user_id_and_grant_id", unique: true
-    t.index [ "user_id" ], name: "index_user_grants_on_user_id"
+    t.index ["grant_id"], name: "index_user_grants_on_grant_id"
+    t.index ["user_id", "grant_id"], name: "index_user_grants_on_user_id_and_grant_id", unique: true
+    t.index ["user_id"], name: "index_user_grants_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -481,11 +481,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_120000) do
     t.string "uid"
     t.string "unlock_token"
     t.datetime "updated_at", null: false
-    t.index [ "email" ], name: "index_users_on_email", unique: true
-    t.index [ "player_id" ], name: "index_users_on_player_id", unique: true
-    t.index [ "provider", "uid" ], name: "index_users_on_provider_and_uid", unique: true
-    t.index [ "reset_password_token" ], name: "index_users_on_reset_password_token", unique: true
-    t.index [ "unlock_token" ], name: "index_users_on_unlock_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["player_id"], name: "index_users_on_player_id", unique: true
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

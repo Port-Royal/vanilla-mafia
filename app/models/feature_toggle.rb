@@ -1,15 +1,10 @@
 class FeatureToggle < ApplicationRecord
   KEYS = %w[
     require_approval
-    home_hero
     home_running_tournaments
     home_recently_finished
     home_recent_games
     home_latest_news
-    home_hall_of_fame
-    home_stats
-    home_documents
-    home_whats_new
     toast_whats_new
     news_classic_pagination
     news_infinite_scroll

@@ -5,7 +5,7 @@ require "rails_helper"
 RSpec.describe Avo::Resources::FeatureToggle do
   subject(:resource) { described_class.new(record: toggle, view: view) }
 
-  let_it_be(:toggle) { create(:feature_toggle, key: "home_hero", value: "banner.jpg") }
+  let_it_be(:toggle) { create(:feature_toggle, key: "news_per_page", value: "10") }
 
   before { resource.detect_fields }
 
@@ -20,7 +20,7 @@ RSpec.describe Avo::Resources::FeatureToggle do
 
       it "reads from the value attribute" do
         field = resource.get_field(:toggle_value)
-        expect(field.value).to eq("banner.jpg")
+        expect(field.value).to eq("10")
       end
     end
 

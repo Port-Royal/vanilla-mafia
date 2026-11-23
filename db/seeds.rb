@@ -26,15 +26,10 @@ end
 toggle.save!
 
 [
-  { key: "home_hero", description: "Show hero section on main page" },
   { key: "home_running_tournaments", description: "Show running tournaments on main page" },
   { key: "home_recently_finished", description: "Show recently finished tournaments on main page" },
   { key: "home_recent_games", description: "Show recent games on main page" },
   { key: "home_latest_news", description: "Show latest news on main page" },
-  { key: "home_hall_of_fame", description: "Show hall of fame teaser on main page" },
-  { key: "home_stats", description: "Show stats block on main page" },
-  { key: "home_documents", description: "Show documents section on main page" },
-  { key: "home_whats_new", description: "Show What's New block on main page" },
   { key: "toast_whats_new", description: "Show What's New toast notification" },
   { key: "news_classic_pagination", description: "Use classic pagination on news page" },
   { key: "news_infinite_scroll", description: "Use infinite scroll on news page" },

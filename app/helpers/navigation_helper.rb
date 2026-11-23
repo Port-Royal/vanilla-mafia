@@ -11,7 +11,7 @@ module NavigationHelper
     path == news_index_path && request.path.start_with?("#{news_index_path}/")
   end
 
-  # Role-gated links in the old sidebar's order and under its conditions.
+  # Role-gated links for the signed-in menus, each shown only to the roles that may open it.
   def role_nav_items(user)
     items = []
     items << nav_item(:podcast, podcast_episodes_path) if user.subscriber? || user.admin?

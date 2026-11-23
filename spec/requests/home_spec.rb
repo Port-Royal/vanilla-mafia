@@ -643,13 +643,6 @@ RSpec.describe "Home page" do
         get root_path
       end
 
-      context "when only home_whats_new is enabled" do
-        let(:toggles) { %w[home_whats_new] }
-
-        it { expect(controller.instance_variable_get(:@announcements)).to be_nil }
-        it { expect(response.body).not_to include("Заметка о выпуске") }
-      end
-
       context "when toast_whats_new is enabled" do
         let(:toggles) { %w[toast_whats_new] }
 

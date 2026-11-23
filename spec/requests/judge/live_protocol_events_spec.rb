@@ -34,12 +34,12 @@ RSpec.describe "Judge live protocol" do
       expect(JSON.parse(node["data-live-protocol-events-value"]).map { |row| row["client_id"] }).to eq([ "saved" ])
     end
 
-    it "renders without the site sidebar" do
-      expect(css_select("#site-sidebar")).to be_empty
+    it "renders without the site top bar" do
+      expect(css_select("#site-top-bar")).to be_empty
     end
 
-    it "renders without the mobile header" do
-      expect(css_select("#site-mobile-header")).to be_empty
+    it "renders without the site footer" do
+      expect(css_select("#site-footer")).to be_empty
     end
 
     it "links back to the protocols list" do

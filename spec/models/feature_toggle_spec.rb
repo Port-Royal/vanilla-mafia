@@ -8,16 +8,18 @@ RSpec.describe FeatureToggle, type: :model do
     it { is_expected.to validate_uniqueness_of(:key) }
     it { is_expected.to validate_inclusion_of(:key).in_array(described_class::KEYS) }
 
-    context "with the retired public redesign key" do
-      subject { build(:feature_toggle, key: "public_redesign") }
+    %w[public_redesign home_hero home_hall_of_fame home_stats home_documents home_whats_new].each do |key|
+      context "with the retired #{key} key" do
+        subject { build(:feature_toggle, key:) }
 
-      it { is_expected.not_to be_valid }
+        it { is_expected.not_to be_valid }
+      end
     end
   end
 
   describe "KEYS" do
     it "includes announcement toggle keys" do
-      expect(described_class::KEYS).to include("home_whats_new", "toast_whats_new")
+      expect(described_class::KEYS).to include("toast_whats_new")
     end
 
     it "includes news autolink players toggle key" do
@@ -92,24 +94,24 @@ RSpec.describe FeatureToggle, type: :model do
 
   describe ".disabled?" do
     context "when toggle exists and is disabled" do
-      let!(:toggle) { create(:feature_toggle, key: "home_hero", enabled: false) }
+      let!(:toggle) { create(:feature_toggle, key: "home_latest_news", enabled: false) }
 
       it "returns true" do
-        expect(described_class.disabled?(:home_hero)).to be true
+        expect(described_class.disabled?(:home_latest_news)).to be true
       end
     end
 
     context "when toggle exists and is enabled" do
-      let!(:toggle) { create(:feature_toggle, key: "home_hero", enabled: true) }
+      let!(:toggle) { create(:feature_toggle, key: "home_latest_news", enabled: true) }
 
       it "returns false" do
-        expect(described_class.disabled?(:home_hero)).to be false
+        expect(described_class.disabled?(:home_latest_news)).to be false
       end
     end
 
     context "when toggle does not exist" do
       it "returns false" do
-        expect(described_class.disabled?(:home_hero)).to be false
+        expect(described_class.disabled?(:home_latest_news)).to be false
       end
     end
 
@@ -117,13 +119,13 @@ RSpec.describe FeatureToggle, type: :model do
       cache = instance_double(ActiveSupport::Cache::Store)
       allow(Rails).to receive(:cache).and_return(cache)
       allow(cache).to receive(:fetch)
-        .with("feature_toggle/home_hero_disabled", expires_in: 5.minutes)
+        .with("feature_toggle/home_latest_news_disabled", expires_in: 5.minutes)
         .and_return(false)
 
-      result = described_class.disabled?(:home_hero)
+      result = described_class.disabled?(:home_latest_news)
 
       expect(cache).to have_received(:fetch)
-        .with("feature_toggle/home_hero_disabled", expires_in: 5.minutes)
+        .with("feature_toggle/home_latest_news_disabled", expires_in: 5.minutes)
       expect(result).to be false
     end
   end
