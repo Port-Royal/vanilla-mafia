@@ -1,27 +1,26 @@
-<div class="mb-6">
-  <%= link_to t(".back"), podcast_playlists_path,
-        class: "text-maroon hover:underline text-sm" %>
+<div class="mb-2">
+  <%= link_to t(".back"), podcast_playlists_path, class: "vm-link text-xs text-ink-muted" %>
 </div>
 
-<h1 class="text-3xl font-bold text-maroon mb-6"><%= @playlist.title %></h1>
+<h1 class="vm-page-title mb-4"><%= @playlist.title %></h1>
 
 <% if @playlist.playlist_episodes.any? %>
-  <ol class="space-y-4">
+  <ol class="vm-panel divide-y divide-line-soft">
     <% @playlist.playlist_episodes.each do |playlist_episode| %>
       <% episode = playlist_episode.episode %>
-      <li class="flex items-start gap-4 border-b border-neutral-200 pb-4">
-        <span class="text-neutral-400 font-bold text-lg w-8 shrink-0"><%= playlist_episode.position %></span>
+      <li class="flex items-start gap-4 px-4 py-3">
+        <span class="w-8 shrink-0 text-lg font-bold text-ink-muted tabular-nums"><%= playlist_episode.position %></span>
         <div>
-          <h2 class="text-lg font-bold">
-            <%= link_to episode.title, podcast_episode_path(episode), class: "text-maroon hover:underline" %>
+          <h2 class="text-base font-semibold">
+            <%= link_to episode.title, podcast_episode_path(episode), class: "text-ink hover:underline" %>
           </h2>
           <% if episode.published_at.present? %>
-            <div class="text-sm text-neutral-500"><%= format_datetime(episode.published_at) %></div>
+            <div class="text-xs text-ink-muted"><%= format_datetime(episode.published_at) %></div>
           <% end %>
         </div>
       </li>
     <% end %>
   </ol>
 <% else %>
-  <p class="text-neutral-500"><%= t(".no_episodes") %></p>
+  <p class="text-sm text-ink-muted"><%= t(".no_episodes") %></p>
 <% end %>

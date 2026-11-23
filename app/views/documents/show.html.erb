@@ -1,3 +1,4 @@
+<% content_for :title, page_title(@document.title) %>
 <article id="document-article" class="max-w-[680px]">
   <nav aria-label="Breadcrumb" class="mb-1.5 text-xs text-ink-muted">
     <%= link_to t("documents.index.title"), documents_path,

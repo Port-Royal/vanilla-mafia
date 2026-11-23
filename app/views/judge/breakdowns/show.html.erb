@@ -2,35 +2,35 @@
 <% roles_by_seat = breakdown_roles_by_seat(@breakdown) %>
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
-  <h1 class="text-2xl font-bold"><%= @breakdown.title %></h1>
+  <h1 class="vm-page-title"><%= @breakdown.title %></h1>
   <div class="flex items-center gap-4 text-sm whitespace-nowrap">
-    <%= link_to t("game_breakdowns.view.edit"), edit_judge_breakdown_path(@breakdown), class: "text-maroon hover:underline" %>
-    <%= link_to t("game_breakdowns.editor.back"), judge_breakdowns_path, class: "text-maroon hover:underline" %>
+    <%= link_to t("game_breakdowns.view.edit"), edit_judge_breakdown_path(@breakdown), class: "vm-link" %>
+    <%= link_to t("game_breakdowns.editor.back"), judge_breakdowns_path, class: "vm-link" %>
   </div>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <dl class="divide-y text-sm">
+<div class="vm-panel mb-6">
+  <dl class="divide-y divide-line-soft text-sm">
     <% breakdown_view_metadata(@breakdown).each do |label, value| %>
       <div class="flex flex-col sm:flex-row px-4 py-2 gap-1">
-        <dt class="w-48 shrink-0 font-semibold text-gray-600"><%= label %></dt>
+        <dt class="w-48 shrink-0 font-semibold text-ink-muted"><%= label %></dt>
         <dd class="break-words"><%= value %></dd>
       </div>
     <% end %>
   </dl>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+<div class="vm-panel mb-6">
+  <div class="vm-panel-title">
     <%= t("game_breakdowns.editor.seats_panel") %>
   </div>
   <%= render "judge/breakdowns/warnings", warnings: @timeline.warnings_for(@breakdown) %>
-  <ul class="divide-y text-sm">
+  <ul class="divide-y divide-line-soft text-sm">
     <% @breakdown.seats.each do |seat| %>
       <li class="flex items-baseline gap-3 px-4 py-2">
         <span class="w-8 shrink-0 font-semibold text-center"><%= seat.number %></span>
         <span class="grow"><%= seat.name.presence || "—" %></span>
-        <span class="text-gray-500"><%= seat.role ? seat.role.name : "—" %></span>
+        <span class="text-ink-muted"><%= seat.role ? seat.role.name : "—" %></span>
         <%= render "judge/breakdowns/seat_fouls", seat: seat %>
       </li>
     <% end %>
@@ -38,8 +38,8 @@
 </div>
 
 <% if @breakdown.open? && @breakdown.mafia_acquaintance.present? %>
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-    <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+  <div class="vm-panel mb-6">
+    <div class="vm-panel-title">
       <%= GameBreakdown.human_attribute_name(:mafia_acquaintance) %>
     </div>
     <p class="px-4 py-3 text-sm whitespace-pre-line break-words"><%= @breakdown.mafia_acquaintance %></p>
@@ -54,13 +54,13 @@
   <% end %>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm">
-  <div class="flex flex-col sm:flex-row px-4 py-3 gap-1 text-sm border-b border-gray-200">
-    <span class="w-48 shrink-0 font-semibold text-gray-600"><%= t("game_breakdowns.editor.result") %></span>
+<div class="vm-panel">
+  <div class="flex flex-col gap-1 border-b border-line px-4 py-3 text-sm sm:flex-row">
+    <span class="w-48 shrink-0 font-semibold text-ink-muted"><%= t("game_breakdowns.editor.result") %></span>
     <span class="font-medium"><%= breakdown_result_label(@timeline.result) %></span>
   </div>
   <div class="flex flex-col sm:flex-row px-4 py-3 gap-1 text-sm">
-    <span class="w-48 shrink-0 font-semibold text-gray-600"><%= GameBreakdown.human_attribute_name(:conclusion) %></span>
+    <span class="w-48 shrink-0 font-semibold text-ink-muted"><%= GameBreakdown.human_attribute_name(:conclusion) %></span>
     <span class="whitespace-pre-line break-words"><%= @breakdown.conclusion.presence || "—" %></span>
   </div>
 </div>

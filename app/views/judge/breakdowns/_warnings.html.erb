@@ -1,10 +1,10 @@
 <% if warnings.any? %>
-  <ul class="bg-amber-50 border-l-4 border-amber-400 text-amber-800 px-4 py-2 text-sm space-y-1">
+  <ul class="vm-warnings">
     <% warnings.each do |warning| %>
       <li>
         <%= warning.message %>
         <% if warning.rule %>
-          <span class="text-amber-600">(<%= t("game_breakdowns.editor.rule", rule: warning.rule) %>)</span>
+          <span class="text-label">(<%= t("game_breakdowns.editor.rule", rule: warning.rule) %>)</span>
         <% end %>
       </li>
     <% end %>

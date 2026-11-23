@@ -1,3 +1,4 @@
+<% content_for :title, page_title(@news.title) %>
 <% photos = @news.photos.select(&:variable?) %>
 <% related_links = news_related_links(@news) %>
 <% link_line = "underline decoration-gold-line underline-offset-3" %>

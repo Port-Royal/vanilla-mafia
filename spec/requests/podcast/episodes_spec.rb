@@ -227,6 +227,28 @@ RSpec.describe "Podcast::Episodes" do
           get "/podcast/episodes/#{episode_with_audio.id}"
           expect(response.body).not_to include("audio-player-placeholder")
         end
+
+        context "with the player controls" do
+          let(:player) { Nokogiri::HTML(response.body).at_css("[data-controller='audio-player']") }
+
+          before { get "/podcast/episodes/#{episode_with_audio.id}" }
+
+          it "labels the play button from the locale" do
+            expect(player.at_css("[data-audio-player-target='playButton']")["aria-label"]).to eq(I18n.t("podcast.episodes.show.play"))
+          end
+
+          it "labels the speed button from the locale" do
+            expect(player.at_css("[data-audio-player-target='speedButton']")["aria-label"]).to eq(I18n.t("podcast.episodes.show.playback_speed"))
+          end
+
+          it "passes the play label to the controller" do
+            expect(player["data-audio-player-play-label-value"]).to eq(I18n.t("podcast.episodes.show.play"))
+          end
+
+          it "passes the pause label to the controller" do
+            expect(player["data-audio-player-pause-label-value"]).to eq(I18n.t("podcast.episodes.show.pause"))
+          end
+        end
       end
 
       it "defaults saved position to zero on placeholder when no audio" do

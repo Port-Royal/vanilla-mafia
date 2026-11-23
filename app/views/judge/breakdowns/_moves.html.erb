@@ -5,7 +5,7 @@
 </ul>
 
 <details class="mt-2">
-  <summary class="text-xs text-maroon cursor-pointer"><%= t("game_breakdowns.editor.add_move") %></summary>
+  <summary class="cursor-pointer text-xs font-semibold text-ink"><%= t("game_breakdowns.editor.add_move") %></summary>
   <%= form_with model: BreakdownMove.new(breakdown_move_defaults(context)),
         url: judge_breakdown_moves_path(@breakdown, context.move_context_param),
         method: :post, scope: :breakdown_move, namespace: dom_id(context, :new_move) do |form| %>

@@ -552,7 +552,7 @@ RSpec.describe GameBreakdownsHelper do
     let(:breakdown) { build_stubbed(:game_breakdown, video_url: video_url) }
 
     def link_markup(url)
-      %(<a target="_blank" rel="noopener noreferrer" class="text-maroon hover:underline" href="#{url}">#{url}</a>)
+      %(<a target="_blank" rel="noopener noreferrer" class="vm-link" href="#{url}">#{url}</a>)
     end
 
     context "with an https address" do
@@ -639,7 +639,7 @@ RSpec.describe GameBreakdownsHelper do
       let(:game) { build_stubbed(:game, slug: "cup-game-1") }
 
       it "links the club game by its full name" do
-        expect(link).to eq(%(<a class="text-maroon hover:underline" href="#{game_path(game)}">#{game.full_name}</a>))
+        expect(link).to eq(%(<a class="vm-link" href="#{game_path(game)}">#{game.full_name}</a>))
       end
     end
   end

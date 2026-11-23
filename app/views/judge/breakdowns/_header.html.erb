@@ -1,36 +1,36 @@
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+<div class="vm-panel mb-6">
+  <div class="vm-panel-title">
     <%= t("game_breakdowns.editor.header_panel") %>
   </div>
   <%= form_with model: @breakdown, url: judge_breakdown_path(@breakdown), method: :patch,
         data: { controller: "autosave-form", action: "change->autosave-form#submit input->autosave-form#submitLater" } do |form| %>
-    <div class="divide-y">
+    <div class="divide-y divide-line-soft">
       <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-        <%= form.label :title, class: "w-40 font-semibold text-sm sm:text-right" %>
-        <%= form.text_field :title, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        <%= form.label :title, class: "w-40 shrink-0 text-sm font-semibold text-ink sm:text-right" %>
+        <%= form.text_field :title, class: "vm-input" %>
       </div>
       <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-        <%= form.label :played_on, class: "w-40 font-semibold text-sm sm:text-right" %>
-        <%= form.date_field :played_on, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        <%= form.label :played_on, class: "w-40 shrink-0 text-sm font-semibold text-ink sm:text-right" %>
+        <%= form.date_field :played_on, class: "vm-input" %>
       </div>
       <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-        <%= form.label :video_url, class: "w-40 font-semibold text-sm sm:text-right" %>
-        <%= form.url_field :video_url, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        <%= form.label :video_url, class: "w-40 shrink-0 text-sm font-semibold text-ink sm:text-right" %>
+        <%= form.url_field :video_url, class: "vm-input" %>
       </div>
       <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-        <%= form.label :judge_name, class: "w-40 font-semibold text-sm sm:text-right" %>
-        <%= form.text_field :judge_name, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+        <%= form.label :judge_name, class: "w-40 shrink-0 text-sm font-semibold text-ink sm:text-right" %>
+        <%= form.text_field :judge_name, class: "vm-input" %>
       </div>
       <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-        <%= form.label :roles_mode, class: "w-40 font-semibold text-sm sm:text-right" %>
+        <%= form.label :roles_mode, class: "w-40 shrink-0 text-sm font-semibold text-ink sm:text-right" %>
         <%= form.select :roles_mode,
               GameBreakdown.roles_modes.keys.map { |mode| [ t("game_breakdowns.roles_modes.#{mode}"), mode ] },
-              {}, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+              {}, class: "vm-input" %>
       </div>
     </div>
     <noscript>
-      <div class="px-4 py-3 border-t border-gray-200 flex justify-end">
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+      <div class="flex justify-end border-t border-line px-4 py-3">
+        <button type="submit" class="vm-btn vm-btn--primary">
           <%= t("game_breakdowns.editor.save") %>
         </button>
       </div>

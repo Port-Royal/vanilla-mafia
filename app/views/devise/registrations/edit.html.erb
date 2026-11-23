@@ -1,54 +1,53 @@
 <div class="mx-auto max-w-sm">
-  <h1 class="text-3xl font-bold text-maroon mb-6"><%= t("devise.registrations.edit.title") %></h1>
-
+  <h1 class="vm-page-title mb-4"><%= t("devise.registrations.edit.title") %></h1>
 
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="space-y-4">
+    <div class="vm-panel space-y-4 p-6">
       <div>
-        <%= f.label :email, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+        <%= f.label :email, class: "vm-field-label" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
-        <%= f.label :password, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-        <p class="text-xs text-neutral-500 mb-1">
+        <%= f.label :password, class: "vm-field-label" %>
+        <p class="mb-1 text-xs text-ink-muted">
           (<%= t("devise.registrations.edit.leave_blank") %>)
         </p>
         <%= f.password_field :password, autocomplete: "new-password",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
-        <%= f.label :password_confirmation, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+        <%= f.label :password_confirmation, class: "vm-field-label" %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
-        <%= f.label :current_password, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-        <p class="text-xs text-neutral-500 mb-1">
+        <%= f.label :current_password, class: "vm-field-label" %>
+        <p class="mb-1 text-xs text-ink-muted">
           (<%= t("devise.registrations.edit.current_password_hint") %>)
         </p>
         <%= f.password_field :current_password, autocomplete: "current-password",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
         <%= f.submit t("devise.registrations.edit.update"),
-              class: "w-full rounded-md bg-neutral-900 px-6 py-2 text-white text-sm font-medium hover:bg-neutral-700 transition-colors cursor-pointer" %>
+              class: "vm-btn vm-btn--primary w-full" %>
       </div>
     </div>
   <% end %>
 
-  <div class="mt-10 border-t border-neutral-200 pt-6">
-    <h2 class="text-lg font-medium text-red-700 mb-2"><%= t("devise.registrations.edit.cancel_account") %></h2>
+  <div class="vm-panel mt-8 p-6">
+    <h2 class="mb-3 text-lg font-semibold text-alert-ink"><%= t("devise.registrations.edit.cancel_account") %></h2>
     <%= button_to t("devise.registrations.edit.cancel_account"), registration_path(resource_name),
           method: :delete,
           data: { turbo_confirm: t("devise.registrations.edit.cancel_confirm") },
-          class: "rounded-md border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors cursor-pointer" %>
+          class: "vm-btn vm-btn--danger" %>
   </div>
 
   <%= render "devise/shared/links" %>

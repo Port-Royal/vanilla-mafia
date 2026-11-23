@@ -65,6 +65,10 @@ RSpec.describe "Admin::TelegramSettings" do
       it "displays the player nickname" do
         expect(response.body).to include("Игрок Один")
       end
+
+      it "displays the linked user's email" do
+        expect(response.body).to include(linked_user.email)
+      end
     end
 
     context "with telegram author not linked to any user" do

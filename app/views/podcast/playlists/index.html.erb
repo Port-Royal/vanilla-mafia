@@ -1,18 +1,18 @@
-<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title") %></h1>
+<h1 class="vm-page-title mb-4"><%= t(".title") %></h1>
 
 <% if @playlists.any? %>
-  <div class="space-y-6">
+  <div class="vm-panel divide-y divide-line-soft">
     <% @playlists.each do |playlist| %>
-      <article class="border-b border-neutral-200 pb-6">
-        <h2 class="text-xl font-bold mb-1">
-          <%= link_to playlist.title, podcast_playlist_path(playlist), class: "text-maroon hover:underline" %>
+      <article class="px-4 py-3">
+        <h2 class="text-lg font-semibold">
+          <%= link_to playlist.title, podcast_playlist_path(playlist), class: "text-ink hover:underline" %>
         </h2>
-        <div class="text-sm text-neutral-500">
+        <div class="mt-0.5 text-xs text-ink-muted">
           <%= t(".episode_count", count: playlist.playlist_episodes.size) %>
         </div>
       </article>
     <% end %>
   </div>
 <% else %>
-  <p class="text-neutral-500"><%= t(".empty") %></p>
+  <p class="text-sm text-ink-muted"><%= t(".empty") %></p>
 <% end %>
