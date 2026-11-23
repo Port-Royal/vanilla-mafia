@@ -15,15 +15,8 @@ class CompetitionsController < ApplicationController
       @players_sorted = result.players_sorted
     end
 
-    render_new_design(overview) if helpers.new_design?
-  end
-
-  private
-
-  # The header counts every game in the subtree, as the standings do; a child's row lists only its direct games.
-  def render_new_design(overview)
     @child_winners = overview.child_winners
+    # The header counts every game in the subtree, as the standings do; a child's row lists only its direct games.
     @games_count = Game.where(competition_id: @competition.subtree_ids).count
-    render "competitions/redesign/show"
   end
 end

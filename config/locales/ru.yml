@@ -106,42 +106,23 @@ ru:
   home:
     hero:
       title: "Vanilla Mafia"
-      tagline: "Клуб спортивной мафии"
-      cta: "Текущий турнир"
     whats_new:
-      title: "Что нового"
       toast_title: "Что нового"
-      version: "Версия %{version}"
       dismiss: "Скрыть"
-    recently_finished:
-      title: "Недавно завершённые турниры"
-      winner: "Победитель"
-      ended_on: "Завершён"
     recent_games:
       title: "Последние игры"
       judge: "Судья"
     latest_news:
-      title: "Последние новости"
       all_news: "Все новости"
-    hall_of_fame:
-      title: "Зал Славы"
-      view_all: "Подробнее"
     stats:
       title: "Клуб в цифрах"
       players: "Игроков"
       games: "Игр сыграно"
       competitions: "Турниров"
-    documents:
-      title: "Документы"
-      league_rules: "Регламент лиги"
-      game_rules: "Правила игры"
-      rating_system: "Система рейтинга"
     running_tournaments:
-      running_tournaments: "Текущие турниры"
       rank: "Место"
       player: "Игрок"
       rating: "Рейтинг"
-      view_all: "Подробнее"
     redesign:
       running: "Идёт сейчас"
       table_link: "таблица"
@@ -151,17 +132,12 @@ ru:
       news: "Новости"
   competitions:
     show:
-      by_children: "Соревнования"
-      name: "Название"
-      by_players: "По игрокам"
       rank: "Место"
       player: "Игрок"
       rating: "Рейтинг"
       games: "Игры"
       win_rate: "Процент побед"
-      view: "Итог"
       total: "Итого"
-      news: "Новости"
     redesign:
       running: "Идёт"
       running_short: "идёт"
@@ -390,10 +366,7 @@ ru:
     show:
       seat: "Место"
       player: "Игрок"
-      role: "Роль"
       base_score: "Балл"
-      additional_score: "Доп. балл"
-      best_move: "Лучший ход"
       total: "Итого"
       judge: "Судья: %{name}"
       table_number: "Стол: %{number}"
@@ -464,12 +437,6 @@ ru:
         dispute_already_exists: "Запрос на оспаривание этого игрока уже существует."
   players:
     show:
-      date: "Дата"
-      competition: "Турнир"
-      game: "Игра"
-      role: "Роль"
-      result: "Результат"
-      score: "Баллы"
       awards: "Награды"
       claim_player: "Это я"
       claim_confirm: "Подтвердить, что это ваш профиль?"
@@ -478,11 +445,8 @@ ru:
       dispute_pending: "Запрос на оспаривание на рассмотрении"
       edit_profile: "Редактировать профиль"
       bio: "О себе"
-      total_games: "Игр сыграно"
-      win_rate: "Процент побед"
       role_stats: "По ролям"
       playing_since: "Играет с"
-      news: "Новости"
     redesign:
       news: "Новости"
       competitions: "По турнирам"
@@ -716,14 +680,6 @@ ru:
     language_names:
       ru: "Русский"
       en: "English"
-  design:
-    offer:
-      label: "Новый дизайн сайта"
-      text: "У сайта новый дизайн — хотите попробовать?"
-      try: "Попробовать"
-      decline: "Нет, спасибо"
-    switch_to_new: "Новый дизайн"
-    switch_to_old: "Вернуться к старому дизайну"
   stats:
     show:
       finished_competitions: "Турниров завершено"

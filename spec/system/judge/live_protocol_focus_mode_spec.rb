@@ -13,12 +13,12 @@ RSpec.describe "Live protocol focus mode" do
       expect(page).to have_css("#lp-work")
     end
 
-    it "hides the site sidebar" do
-      expect(page).to have_no_css("#site-sidebar", visible: :all)
+    it "hides the site top bar" do
+      expect(page).to have_no_css("#site-top-bar", visible: :all)
     end
 
-    it "hides the mobile header" do
-      expect(page).to have_no_css("#site-mobile-header", visible: :all)
+    it "hides the site footer" do
+      expect(page).to have_no_css("#site-footer", visible: :all)
     end
 
     context "when copying the overlay link" do
@@ -69,8 +69,8 @@ RSpec.describe "Live protocol focus mode" do
   context "when on the protocol form" do
     before { visit edit_judge_protocol_path(game) }
 
-    it "shows the site sidebar" do
-      expect(page).to have_css("#site-sidebar")
+    it "shows the site top bar" do
+      expect(page).to have_css("#site-top-bar")
     end
   end
 end

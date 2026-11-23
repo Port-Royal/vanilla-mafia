@@ -1,0 +1,23 @@
+<% player = entry.player %>
+<li data-player-card="<%= player.id %>" class="vm-panel p-3 lg:p-4">
+  <div class="flex items-center gap-3">
+    <% if player.photo.attached? %>
+      <%= image_tag player.photo.variant(resize_to_fill: [ 112, 112 ]), alt: "", data: { part: "photo" },
+            size: "56x56", loading: "lazy", class: "size-14 shrink-0 rounded-lg border border-line object-cover" %>
+    <% else %>
+      <span data-part="initial" aria-hidden="true"
+            class="grid size-14 shrink-0 place-items-center rounded-lg border border-line bg-linear-135 from-bronze to-[#c9b48a] font-serif text-2xl font-bold text-panel"><%= player_initial(player.name) %></span>
+    <% end %>
+    <div class="min-w-0">
+      <h3 class="text-base font-semibold break-words">
+        <%= link_to player.name, player_path(player), data: { part: "name" }, class: "text-ink hover:underline" %>
+      </h3>
+      <% if show_count %>
+        <p data-part="count" class="vm-sub"><%= t("hall_of_fame.redesign.awards_count", count: entry.awards_count) %></p>
+      <% end %>
+    </div>
+  </div>
+  <div class="mt-3">
+    <%= render "shared/award_badges", badges: entry.badges %>
+  </div>
+</li>

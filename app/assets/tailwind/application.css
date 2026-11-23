@@ -3,7 +3,6 @@
 
 @theme {
   --color-maroon: #75000A;
-  --color-row-alt: #eeeeee;
   --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
 
   /* "Warm paper" redesign. Gold is for non-text marks only; text on ink uses gold-bright. */
@@ -28,7 +27,7 @@
 }
 
 @layer components {
-  /* Redesign shell components: opt-in only, nothing here styles bare elements outside a vm-* scope. */
+  /* Site components: opt-in only, nothing here styles bare elements outside a vm-* scope. */
   .vm-container { @apply mx-auto w-full max-w-6xl px-4 lg:px-6; }
   .vm-btn { @apply inline-flex min-h-11 items-center justify-center gap-2 cursor-pointer rounded-md border border-transparent px-4 text-sm font-semibold no-underline lg:min-h-9; }
   .vm-btn:focus-visible { @apply outline-2 outline-offset-2 outline-ink; }
@@ -147,34 +146,6 @@
   .lp-entry:hover .lp-x { @apply visible; }
   .lp-flash { @apply fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-sm text-white; }
   .focus-toast { animation: focus-toast-out 0.4s ease-in 6s forwards; }
-
-  .data-table {
-    @apply w-full border-collapse text-sm;
-  }
-
-  .data-table thead th {
-    @apply bg-maroon text-white text-left px-3 py-2 font-medium;
-  }
-
-  .data-table tbody td {
-    @apply px-3 py-2 border-b border-maroon/20;
-  }
-
-  .data-table tbody tr:nth-child(even) {
-    @apply bg-row-alt;
-  }
-
-  .data-table tbody tr:hover {
-    @apply bg-maroon/5;
-  }
-
-  .data-table a {
-    @apply text-maroon hover:underline;
-  }
-
-  .scroll-wrapper {
-    @apply overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0;
-  }
 
   /*
    * OBS overlay: fills the browser source, which is sized to the stream canvas.
@@ -470,9 +441,9 @@
   to { opacity: 0; visibility: hidden; }
 }
 
-/* Article body on the redesigned news page. Deliberately outside any @layer: Action Text's stylesheet is unlayered,
+/* Article body on the news article page. Deliberately outside any @layer: Action Text's stylesheet is unlayered,
    and an unlayered rule beats every layered utility whatever its specificity. Scoped to .news-prose, so the editor
-   and the old pages keep Trix's defaults. */
+   and the admin pages keep Trix's defaults. */
 .news-prose .trix-content { line-height: 1.65; }
 .news-prose .trix-content > * + * { margin-top: 0.875rem; }
 .news-prose .trix-content a { text-decoration: underline; text-decoration-color: var(--color-gold-line); text-underline-offset: 3px; }

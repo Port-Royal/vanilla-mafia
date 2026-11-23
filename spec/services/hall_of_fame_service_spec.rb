@@ -19,71 +19,77 @@ RSpec.describe HallOfFameService do
     let_it_be(:staff_award1) { create(:player_award, player: organizer1, award: staff_award_type, competition: season4, position: 1) }
     let_it_be(:staff_award3) { create(:player_award, player: organizer2, award: staff_award_type, competition: season4, position: 3) }
     let(:result) { described_class.call }
+    let(:player_awards) { result.player_entries.to_h { |entry| [ entry.player, entry.player_awards ] } }
+    let(:staff_awards) { result.staff_entries.to_h { |entry| [ entry.player, entry.player_awards ] } }
 
     it "returns a Result" do
       expect(result).to be_a(described_class::Result)
     end
 
+    it "returns only the cards' entries" do
+      expect(described_class::Result.members).to eq(%i[player_entries staff_entries])
+    end
+
     it "returns player awards grouped by player" do
-      expect(result.player_awards.keys).to contain_exactly(player1, player2)
-      expect(result.player_awards.fetch(player1)).to eq([ player_award2, player_award1 ])
-      expect(result.player_awards.fetch(player2)).to eq([ player_award3 ])
+      expect(player_awards.keys).to contain_exactly(player1, player2)
+      expect(player_awards.fetch(player1)).to eq([ player_award2, player_award1 ])
+      expect(player_awards.fetch(player2)).to eq([ player_award3 ])
     end
 
     it "returns staff awards grouped by player" do
-      expect(result.staff_awards.keys).to contain_exactly(organizer1, organizer2)
-      expect(result.staff_awards.fetch(organizer1)).to eq([ staff_award2, staff_award1 ])
-      expect(result.staff_awards.fetch(organizer2)).to eq([ staff_award3 ])
+      expect(staff_awards.keys).to contain_exactly(organizer1, organizer2)
+      expect(staff_awards.fetch(organizer1)).to eq([ staff_award2, staff_award1 ])
+      expect(staff_awards.fetch(organizer2)).to eq([ staff_award3 ])
     end
 
     it "does not include staff awards in player awards" do
-      expect(result.player_awards.keys).not_to include(organizer1, organizer2)
+      expect(player_awards.keys).not_to include(organizer1, organizer2)
     end
 
     it "does not include player awards in staff awards" do
-      expect(result.staff_awards.keys).not_to include(player1, player2)
+      expect(staff_awards.keys).not_to include(player1, player2)
     end
 
     it "eager loads player association on player awards" do
-      expect(result.player_awards.fetch(player1).first.association(:player)).to be_loaded
+      expect(player_awards.fetch(player1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on player awards" do
-      expect(result.player_awards.fetch(player1).first.association(:award)).to be_loaded
+      expect(player_awards.fetch(player1).first.association(:award)).to be_loaded
     end
 
     it "eager loads player association on staff awards" do
-      expect(result.staff_awards.fetch(organizer1).first.association(:player)).to be_loaded
+      expect(staff_awards.fetch(organizer1).first.association(:player)).to be_loaded
     end
 
     it "eager loads award association on staff awards" do
-      expect(result.staff_awards.fetch(organizer1).first.association(:award)).to be_loaded
+      expect(staff_awards.fetch(organizer1).first.association(:award)).to be_loaded
     end
 
     it "eager loads competition association on player awards" do
-      expect(result.player_awards.fetch(player1).first.association(:competition)).to be_loaded
+      expect(player_awards.fetch(player1).first.association(:competition)).to be_loaded
     end
 
     it "eager loads competition association on staff awards" do
-      expect(result.staff_awards.fetch(organizer1).first.association(:competition)).to be_loaded
+      expect(staff_awards.fetch(organizer1).first.association(:competition)).to be_loaded
     end
 
     it "eager loads photo attachment on players" do
-      player_award = result.player_awards.fetch(player1).first
+      player_award = player_awards.fetch(player1).first
       expect(player_award.player.association(:photo_attachment)).to be_loaded
     end
 
     it "eager loads icon attachment on awards" do
-      player_award = result.player_awards.fetch(player1).first
+      player_award = player_awards.fetch(player1).first
       expect(player_award.award.association(:icon_attachment)).to be_loaded
     end
 
     it "returns player awards ordered by competition started_on descending" do
-      expect(result.player_awards.fetch(player1)).to eq([ player_award2, player_award1 ])
+      expect(player_awards.fetch(player1)).to eq([ player_award2, player_award1 ])
     end
 
     it "returns staff awards ordered by competition started_on descending" do
-      expect(result.staff_awards.fetch(organizer1)).to eq([ staff_award2, staff_award1 ])
+      expect(staff_awards.fetch(organizer1)).to eq([ staff_award2, staff_award1 ])
     end
 
     context "when no awards exist" do
@@ -94,15 +100,15 @@ RSpec.describe HallOfFameService do
       end
 
       it "returns empty player_awards" do
-        expect(empty_result.player_awards).to be_empty
+        expect(empty_result.player_entries).to be_empty
       end
 
       it "returns empty staff_awards" do
-        expect(empty_result.staff_awards).to be_empty
+        expect(empty_result.staff_entries).to be_empty
       end
     end
   end
-  describe "entries for the redesigned page" do
+  describe "entries for the hall of fame page" do
     let_it_be(:old_season) { create(:competition, :season, name: "Сезон 1", started_on: Date.new(2021, 1, 1)) }
     let_it_be(:new_season) { create(:competition, :season, name: "Сезон 2", started_on: Date.new(2022, 1, 1)) }
     # Created before first_award, so id order and position order disagree; 10 sorts before 2 as text.

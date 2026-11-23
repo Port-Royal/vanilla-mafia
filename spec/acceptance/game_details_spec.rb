@@ -5,7 +5,7 @@ RSpec.describe "Game details" do
   let_it_be(:role_mafia) { create(:role, code: "mafia", name: "Мафия") }
   let_it_be(:game) do
     create(:game, game_number: 1,
-           played_on: Date.new(2025, 1, 10), name: "Финал")
+           played_on: Date.new(2025, 1, 10), name: "Финал", result: "peace_victory")
   end
   let_it_be(:player1) { create(:player, name: "Алексей") }
   let_it_be(:player2) { create(:player, name: "Борис") }
@@ -20,8 +20,9 @@ RSpec.describe "Game details" do
 
   before { visit game_path(game) }
 
-  it "displays game header with full name" do
-    expect(page).to have_content(game.full_name)
+  it "displays game header with number and name" do
+    expect(page).to have_css("h1", text: "Игра 1")
+    expect(page).to have_css("h1", text: "Финал")
   end
 
   it "displays player names as links to profiles" do
@@ -45,16 +46,17 @@ RSpec.describe "Game details" do
   end
 
   it "displays participation scores" do
-    expect(page).to have_content("3.0")
-    expect(page).to have_content("0.5")
+    expect(page).to have_css("tr[data-seat='1'] td[data-column='plus']", text: "3")
+    expect(page).to have_css("tr[data-seat='1'] td[data-column='best_move']", text: "0.5")
+    expect(page).to have_css("tr[data-seat='5'] td[data-column='total']", text: "0.5")
   end
 
-  it "displays updated table headers" do
-    expect(page).to have_content("Место")
-    expect(page).to have_content("Роль")
-    expect(page).to have_content("Балл")
-    expect(page).to have_content("Доп. балл")
-    expect(page).to have_content("Лучший ход")
-    expect(page).to have_content("Итого")
+  it "displays table headers" do
+    within("table thead") do
+      expect(page).to have_content("Место")
+      expect(page).to have_content("Игрок")
+      expect(page).to have_content("Балл")
+      expect(page).to have_content("Итого")
+    end
   end
 end

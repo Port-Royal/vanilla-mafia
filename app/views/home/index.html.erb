@@ -1,44 +1,31 @@
-<div class="space-y-12">
-  <% if @block_visible[:hero] %>
-    <%= render "home/hero" %>
-  <% end %>
+<% show_running = @block_visible[:running_tournaments] && @running_competitions.any? %>
+<% show_finished = @block_visible[:recently_finished] && @recently_finished.any? %>
+<% show_games = @block_visible[:recent_games] && @recent_games.any? %>
+<% show_results = show_running || show_finished || show_games %>
+<% show_news = @block_visible[:latest_news] && @latest_news.any? %>
 
-  <% if @block_visible[:whats_new] && @announcements&.any? %>
-    <%= render "home/whats_new", announcements: @announcements %>
-  <% end %>
+<h1 class="sr-only"><%= t("home.hero.title") %></h1>
 
-  <% if @block_visible[:running_tournaments] && @running_competitions.any? %>
-    <%= render "home/running_tournaments",
-         running_competitions: @running_competitions,
-         mini_standings: @mini_standings %>
-  <% end %>
+<%= render "home/event_slot" %>
 
-  <% if @block_visible[:recently_finished] && @recently_finished.any? %>
-    <%= render "home/recently_finished",
-         recently_finished: @recently_finished,
-         winners: @winners %>
-  <% end %>
+<% if show_results || show_news %>
+  <div id="home-columns" class="grid items-start gap-8 lg:gap-10 <%= "lg:grid-cols-[11fr_9fr]" if show_results && show_news %>">
+    <% if show_results %>
+      <div id="home-results" class="space-y-8">
+        <% if show_running %>
+          <%= render "home/running", competitions: @running_competitions, standings: @mini_standings %>
+        <% end %>
+        <% if show_finished %>
+          <%= render "home/recently_finished", competitions: @recently_finished, winners: @winners %>
+        <% end %>
+        <% if show_games %>
+          <%= render "home/recent_games", games: @recent_games %>
+        <% end %>
+      </div>
+    <% end %>
 
-  <% if @block_visible[:recent_games] && @recent_games.any? %>
-    <%= render "home/recent_games",
-         recent_games: @recent_games %>
-  <% end %>
-
-  <% if @block_visible[:latest_news] && @latest_news.any? %>
-    <%= render "home/latest_news",
-         latest_news: @latest_news %>
-  <% end %>
-
-  <% if @block_visible[:hall_of_fame] && @hall_of_fame_players.any? %>
-    <%= render "home/hall_of_fame",
-         hall_of_fame_players: @hall_of_fame_players %>
-  <% end %>
-
-  <% if @block_visible[:stats] %>
-    <%= render "home/stats", stats: @stats %>
-  <% end %>
-
-  <% if @block_visible[:documents] %>
-    <%= render "home/documents" %>
-  <% end %>
-</div>
+    <% if show_news %>
+      <%= render "home/news", articles: @latest_news %>
+    <% end %>
+  </div>
+<% end %>

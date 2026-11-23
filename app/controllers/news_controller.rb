@@ -18,16 +18,13 @@ class NewsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html { render "news/redesign/index" if helpers.new_design? }
+      format.html
       format.turbo_stream if @pagination_mode == :infinite
     end
   end
 
   def show
-    new_design = helpers.new_design?
-    scope = new_design ? News.visible.includes(ARTICLE_PRELOADS) : News.visible
-    @news = scope.find_by!(slug: params[:slug])
-    render "news/redesign/show" if new_design
+    @news = News.visible.includes(ARTICLE_PRELOADS).find_by!(slug: params[:slug])
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

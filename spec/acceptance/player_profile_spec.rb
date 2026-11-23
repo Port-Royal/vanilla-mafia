@@ -8,7 +8,8 @@ RSpec.describe "Player profile" do
     create(:game, competition: series_competition, game_number: 1,
            played_on: Date.new(2025, 1, 10))
   end
-  let_it_be(:participation) { create(:game_participation, game:, player:, plus: 3.0, minus: 0.5, win: true) }
+  let_it_be(:role) { create(:role, code: "peace", name: "Мирный") }
+  let_it_be(:participation) { create(:game_participation, game:, player:, role:, plus: 3.0, minus: 0.5, win: true) }
   let_it_be(:award) { create(:award, title: "Лучший игрок", staff: false) }
   let_it_be(:player_award) { create(:player_award, player:, award:) }
 

@@ -26,15 +26,10 @@ end
 toggle.save!
 
 [
-  { key: "home_hero", description: "Show hero section on main page" },
   { key: "home_running_tournaments", description: "Show running tournaments on main page" },
   { key: "home_recently_finished", description: "Show recently finished tournaments on main page" },
   { key: "home_recent_games", description: "Show recent games on main page" },
   { key: "home_latest_news", description: "Show latest news on main page" },
-  { key: "home_hall_of_fame", description: "Show hall of fame teaser on main page" },
-  { key: "home_stats", description: "Show stats block on main page" },
-  { key: "home_documents", description: "Show documents section on main page" },
-  { key: "home_whats_new", description: "Show What's New block on main page" },
   { key: "toast_whats_new", description: "Show What's New toast notification" },
   { key: "news_classic_pagination", description: "Use classic pagination on news page" },
   { key: "news_infinite_scroll", description: "Use infinite scroll on news page" },
@@ -49,8 +44,7 @@ toggle.save!
   { key: "telegram_force_import_enabled", description: "Allow operators to force-import a specific Telegram message into a news draft via DM to the bot", enabled: false },
   { key: "telegram_force_import_max_range", description: "Maximum number of consecutive Telegram messages allowed in one force-import (the +N suffix)", enabled: false, value: "50" },
   { key: "game_breakdown", description: "Enable the internal game breakdown tool for judges and admins", enabled: false },
-  { key: "live_protocol", description: "Live judge protocol: keyboard console that records game events during play", enabled: false },
-  { key: "public_redesign", description: "Public site redesign: value 'opt_in' lets visitors choose it, 'everyone' shows it to all", enabled: false, value: "opt_in" }
+  { key: "live_protocol", description: "Live judge protocol: keyboard console that records game events during play", enabled: false }
 ].each do |attrs|
   block_toggle = FeatureToggle.find_or_initialize_by(key: attrs[:key])
   if block_toggle.new_record?

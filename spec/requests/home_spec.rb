@@ -27,32 +27,6 @@ RSpec.describe HomeController do
     it "renders the club name" do
       expect(response.body).to include(I18n.t("home.hero.title"))
     end
-
-    it "renders the tagline" do
-      expect(response.body).to include(I18n.t("home.hero.tagline"))
-    end
-
-    context "when a running competition exists" do
-      let_it_be(:competition) { create(:competition, :season, name: "Season 7", ended_on: nil) }
-
-      before { get root_path }
-
-      it "renders the CTA button linking to the current tournament" do
-        expect(response.body).to include(competition_path(slug: competition.slug))
-      end
-
-      it "renders the CTA button text" do
-        expect(response.body).to include(I18n.t("home.hero.cta"))
-      end
-    end
-
-    context "when no running competition exists" do
-      before { get root_path }
-
-      it "does not render the CTA button" do
-        expect(response.body).not_to include(I18n.t("home.hero.cta"))
-      end
-    end
   end
 
   describe "running tournaments block" do
@@ -72,10 +46,6 @@ RSpec.describe HomeController do
       end
 
       before { get root_path }
-
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.running_tournaments.running_tournaments"))
-      end
 
       it "renders the competition name" do
         expect(response.body).to include("Season 6")
@@ -139,7 +109,7 @@ RSpec.describe HomeController do
       before { get root_path }
 
       it "does not render the running tournaments section" do
-        expect(response.body).not_to include(I18n.t("home.running_tournaments.running_tournaments"))
+        assert_select "#home-running", count: 0
       end
     end
 
@@ -150,10 +120,6 @@ RSpec.describe HomeController do
 
       it "renders the competition name" do
         expect(response.body).to include("Empty Season")
-      end
-
-      it "does not render a standings table for it" do
-        expect(response.body).not_to include("<table")
       end
     end
   end
@@ -175,10 +141,6 @@ RSpec.describe HomeController do
       end
 
       before { get root_path }
-
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.recently_finished.title"))
-      end
 
       it "renders the competition name" do
         expect(response.body).to include("Season 5")
@@ -233,7 +195,7 @@ RSpec.describe HomeController do
       before { get root_path }
 
       it "does not render the recently finished section" do
-        expect(response.body).not_to include(I18n.t("home.recently_finished.title"))
+        assert_select "#home-recently-finished", count: 0
       end
     end
 
@@ -272,10 +234,6 @@ RSpec.describe HomeController do
       end
 
       before { get root_path }
-
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.recent_games.title"))
-      end
 
       it "renders a link to the game page" do
         expect(response.body).to include(game_path(game))
@@ -367,10 +325,6 @@ RSpec.describe HomeController do
 
       before { get root_path }
 
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.latest_news.title"))
-      end
-
       it "renders the article title" do
         expect(response.body).to include("Big Tournament Recap")
       end
@@ -415,7 +369,7 @@ RSpec.describe HomeController do
       before { get root_path }
 
       it "does not render the latest news section" do
-        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
+        assert_select "#home-news", count: 0
       end
     end
 
@@ -423,277 +377,359 @@ RSpec.describe HomeController do
       before { get root_path }
 
       it "does not render the latest news section" do
-        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
+        assert_select "#home-news", count: 0
       end
     end
   end
+end
 
-  describe "hall of fame teaser block" do
-    context "when player awards exist" do
-      let_it_be(:award) { create(:award, title: "Best Player") }
-      let_it_be(:player) { create(:player, name: "Star Player") }
-      let_it_be(:player_award) { create(:player_award, player: player, award: award) }
+RSpec.describe "Home page" do
+  let(:document) { Nokogiri::HTML(response.body) }
+  let(:main) { document.at_css("main#site-main") }
+  let(:columns) { document.at_css("#home-columns") }
+  let(:results) { document.at_css("#home-results") }
+  let(:news_column) { document.at_css("#home-news") }
+  let(:running) { document.at_css("#home-running") }
+  let(:recently_finished) { document.at_css("#home-recently-finished") }
+  let(:recent_games) { document.at_css("#home-recent-games") }
+  let(:two_columns_class) { "lg:grid-cols-[11fr_9fr]" }
+
+  context "with results and news" do
+    let_it_be(:role) { create(:role) }
+    let_it_be(:season) { create(:competition, :season, name: "Season 6", ended_on: nil) }
+    let_it_be(:series) { create(:competition, :series, parent: season, name: "Series 3") }
+    let_it_be(:players) { (1..6).map { |i| create(:player, name: "Player #{i}") } }
+    let_it_be(:game) do
+      create(:game, competition: series, played_on: Date.new(2026, 3, 20), result: "peace_victory",
+                    judge: "Judge Judy", game_number: 14)
+    end
+    let_it_be(:finished_season) { create(:competition, :season, name: "Season 5", ended_on: Date.new(2026, 3, 1)) }
+    let_it_be(:finished_series) { create(:competition, :series, parent: finished_season, name: "Series F") }
+    let_it_be(:finished_game) do
+      create(:game, competition: finished_series, played_on: Date.new(2026, 2, 1), result: "mafia_victory",
+                    game_number: 2)
+    end
+    let_it_be(:runner_up) { create(:player, name: "Runner Bob") }
+    let_it_be(:champion) { create(:player, name: "Champion Alice") }
+    let_it_be(:article) do
+      create(:news, :published, title: "Big Recap", content: "<p>Twelve players and <strong>eight</strong> games</p>",
+                                published_at: Time.zone.local(2026, 3, 21, 12))
+    end
+
+    before_all do
+      players.each_with_index do |player, i|
+        create(:game_participation, game: game, player: player, role: role, plus: i + 1)
+      end
+      create(:game_participation, game: finished_game, player: runner_up, role: role, plus: 1)
+      create(:game_participation, game: finished_game, player: champion, role: role, plus: 5)
+    end
+
+    describe "heading" do
+      before { get root_path }
+
+      it { expect(main.css("h1").size).to eq(1) }
+      it { expect(main.at_css("h1")["class"].split).to eq(%w[sr-only]) }
+      it { expect(main.at_css("h1").text).to eq(I18n.t("home.hero.title")) }
+    end
+
+    describe "columns" do
+      before { get root_path }
+
+      it { expect(columns["class"].split).to include("grid", two_columns_class) }
+      it { expect(columns.element_children.map { |child| child["id"] }).to eq(%w[home-results home-news]) }
+    end
+
+    describe "running now" do
+      let(:panel) { running.at_css(".vm-panel") }
+      let(:rows) { panel.css("tbody tr") }
+      let(:competition_links) { panel.css("a[href='#{competition_path(slug: season.slug)}']") }
+      let(:table_link) { competition_links.last }
 
       before { get root_path }
 
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.hall_of_fame.title"))
-      end
+      it { expect(running.at_css(".vm-label").text).to eq(I18n.t("home.redesign.running")) }
+      it { expect(panel.at_css("a[href='#{competition_path(slug: season.slug)}']").text.strip).to eq("Season 6") }
+      it { expect(competition_links.size).to eq(2) }
+      it { expect(table_link.text.strip).to start_with(I18n.t("home.redesign.table_link")) }
+      it { expect(table_link.at_css("span[aria-hidden='true']").text).to eq("→") }
+      it { expect(table_link["aria-label"]).to eq(I18n.t("home.redesign.table_link_label", competition: "Season 6")) }
+      it { expect(panel.at_css("table")["class"]).to include("vm-table") }
+      it { expect(rows.map { |row| row.at_css("a").text }).to eq([ "Player 6", "Player 5", "Player 4", "Player 3", "Player 2" ]) }
+      it { expect(rows.first.at_css("a")["href"]).to eq(player_path(players.last)) }
+      it { expect(rows.map { |row| row.at_css(".vm-medal").text }).to eq(%w[1 2 3 4 5]) }
+      it { expect(rows.first.at_css(".vm-medal")["class"].split).to include("vm-medal--1") }
+      it { expect(rows[1].at_css(".vm-medal")["class"].split).to include("vm-medal--2") }
+      it { expect(rows[2].at_css(".vm-medal")["class"].split).to include("vm-medal--3") }
+      it { expect(rows[3].at_css(".vm-medal")["class"].split).to contain_exactly("vm-medal", "text-ink-muted") }
+      it { expect(rows.first.css("td").last.text.strip).to eq("6.0") }
+      it { expect(rows.first.css("td").last["class"].split).to include("text-right", "tabular-nums") }
 
-      it "renders the player name" do
-        expect(response.body).to include("Star Player")
-      end
+      context "when a running competition has no players yet" do
+        let_it_be(:empty_season) { create(:competition, :season, name: "Empty Season", ended_on: nil, position: 99) }
 
-      it "renders a link to the hall of fame page" do
-        expect(response.body).to include(hall_path)
-      end
+        let(:empty_panel) { running.css(".vm-panel").last }
 
-      it "renders the player photo placeholder" do
-        expect(response.body).to include(Player::DEFAULT_PHOTO_PATH)
-      end
-
-      it "links player name to player profile" do
-        assert_select "a[href=?]", player_path(player), text: "Star Player"
+        it { expect(response).to have_http_status(:ok) }
+        it { expect(empty_panel.text).to include("Empty Season") }
+        it { expect(empty_panel.css("tbody tr")).to be_empty }
       end
     end
 
-    context "when more than 6 awarded players exist" do
-      let_it_be(:award) { create(:award, title: "Top Award") }
-      let_it_be(:players) do
-        (1..7).map { |i| create(:player, name: "Awarded #{i}") }
-      end
-
-      before_all do
-        players.each { |p| create(:player_award, player: p, award: award) }
-      end
+    describe "recently finished" do
+      let(:rows) { recently_finished.css("li") }
 
       before { get root_path }
 
-      it "shows only 6 players" do
-        (1..6).each do |i|
-          expect(response.body).to include("Awarded #{i}")
+      it { expect(recently_finished.at_css(".vm-label").text).to eq(I18n.t("home.redesign.recently_finished")) }
+      it { expect(rows.first.at_css("a[href='#{competition_path(slug: finished_season.slug)}']").text).to eq("Season 5") }
+      it { expect(rows.first.text).to include(DatetimeFormatter.call(finished_season.ended_on, type: :date)) }
+      it { expect(rows.first.text).to include(I18n.t("home.redesign.winner")) }
+      it { expect(rows.first.at_css("a[href='#{player_path(champion)}']").text).to eq("Champion Alice") }
+      it { expect(rows.first.at_css("a[href='#{player_path(champion)}']")["class"].split).to include("decoration-gold-line") }
+
+      context "when a finished competition has no games" do
+        let_it_be(:empty_finished) { create(:competition, :season, name: "Empty Finished", ended_on: Date.new(2026, 4, 1)) }
+
+        it { expect(rows.first.text).to include("Empty Finished") }
+        it { expect(rows.first.text).not_to include(I18n.t("home.redesign.winner")) }
+      end
+
+      context "when a child competition has finished" do
+        let_it_be(:finished_child) do
+          create(:competition, :series, parent: season, name: "Finished Child", ended_on: Date.new(2026, 4, 1))
+        end
+
+        it { expect(recently_finished.text).not_to include("Finished Child") }
+      end
+
+      context "when more than three competitions have finished" do
+        let_it_be(:more_finished) do
+          (1..3).map { |i| create(:competition, :season, name: "Later #{i}", ended_on: Date.new(2026, 4, i)) }
+        end
+
+        it { expect(rows.map { |row| row.at_css("a").text }).to eq([ "Later 3", "Later 2", "Later 1" ]) }
+      end
+    end
+
+    describe "recent games" do
+      let(:rows) { recent_games.css("li") }
+      let(:game_row) { rows.find { |row| row.at_css("a[href='#{game_path(game)}']") } }
+
+      before { get root_path }
+
+      it { expect(recent_games.at_css(".vm-label").text).to eq(I18n.t("home.recent_games.title")) }
+      it { expect(rows.size).to eq(2) }
+      it { expect(game_row.at_css("a").text).to eq("#{I18n.t('common.game')} 14") }
+      it { expect(game_row.text).to include("Series 3") }
+      it { expect(game_row.text).to include(DatetimeFormatter.call(game.played_on, type: :date)) }
+      it { expect(game_row.text).to include("Judge Judy") }
+      it { expect(game_row.at_css(".vm-pill--gold").text).to eq(I18n.t("activerecord.attributes.game.results.peace_victory")) }
+      it { expect(rows.last.at_css(".vm-pill--alert")).to be_present }
+    end
+
+    describe "news" do
+      let(:items) { news_column.css("article") }
+      let(:item) { items.first }
+      let(:all_news_link) { news_column.at_css("a[href='#{news_index_path}']") }
+
+      before { get root_path }
+
+      it { expect(news_column.at_css(".vm-label").text).to eq(I18n.t("home.redesign.news")) }
+      it { expect(all_news_link.text.strip).to eq(I18n.t("home.latest_news.all_news")) }
+      it { expect(all_news_link["class"].split).to include("decoration-gold-line") }
+      it { expect(item.at_css("h3 > a[href='#{news_path(article)}']").text).to eq("Big Recap") }
+      it { expect(item.text).to include(DatetimeFormatter.call(article.published_at, type: :date)) }
+      it { expect(item.at_css("p").text.strip).to eq("Twelve players and eight games") }
+      it { expect(item.at_css("p strong")).to be_nil }
+      it { expect(item.at_css("img")).to be_nil }
+
+      context "when the article text is long" do
+        let_it_be(:long_article) do
+          create(:news, :published, title: "Long Read", content: "<p>#{'word ' * 100}</p>",
+                                    published_at: Time.zone.local(2026, 3, 22))
+        end
+
+        it { expect(item.at_css("p").text.strip).to end_with("…") }
+        it { expect(item.at_css("p").text.length).to be <= 160 }
+      end
+
+      context "when more than three articles are visible" do
+        let_it_be(:more_articles) do
+          (1..3).map { |i| create(:news, :published, title: "Later #{i}", published_at: Time.zone.local(2026, 4, i)) }
+        end
+
+        it { expect(items.map { |entry| entry.at_css("a").text }).to eq([ "Later 3", "Later 2", "Later 1" ]) }
+      end
+
+      context "when a newer article is a draft" do
+        let_it_be(:draft) { create(:news, title: "Draft Recap", published_at: Time.zone.local(2026, 4, 1)) }
+
+        it { expect(news_column.text).not_to include("Draft Recap") }
+      end
+
+      context "when the author is a claimed player" do
+        let_it_be(:author_player) { create(:player, name: "Writer Wren") }
+        let_it_be(:claimed_article) do
+          create(:news, :published, title: "By a player", author: create(:user, player: author_player),
+                                    published_at: Time.zone.local(2026, 3, 23))
+        end
+
+        it { expect(item.text).to include("Writer Wren") }
+      end
+
+      context "when the article has a photo" do
+        let_it_be(:photo_article) do
+          create(:news, :published, :with_photo, title: "With photo", published_at: Time.zone.local(2026, 3, 23))
+        end
+
+        let(:card_path) do
+          rails_representation_path(photo_article.photos.first.variant(NewsHelper::NEWS_PHOTO_VARIANTS[:card]), only_path: true)
+        end
+
+        it { expect(item.at_css("img")["src"]).to end_with(card_path) }
+      end
+
+      context "when the article has only an attachment that cannot be resized" do
+        let_it_be(:pdf_article) do
+          create(:news, :published, title: "With a PDF", published_at: Time.zone.local(2026, 3, 23)).tap do |news|
+            blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("%PDF-1.4"), filename: "rules.pdf",
+                                                          content_type: "application/pdf")
+            ActiveStorage::Attachment.create!(name: "photos", record: news, blob: blob)
+          end
+        end
+
+        it { expect(response).to have_http_status(:ok) }
+        it { expect(item.at_css("a").text).to eq("With a PDF") }
+        it { expect(item.at_css("img")).to be_nil }
+      end
+    end
+
+    describe "database queries" do
+      let(:sql) { [] }
+      let(:queries_from) { ->(table) { sql.count { |query| query.include?(%(FROM "#{table}")) } } }
+
+      let_it_be(:photo_articles) do
+        (1..3).map do |i|
+          author = create(:user, player: create(:player, name: "Writer #{i}"))
+          create(:news, :published, :with_photo, title: "Photo #{i}", author: author,
+                                                 published_at: Time.zone.local(2026, 5, i))
         end
       end
 
-      it "does not show the 7th player" do
-        expect(response.body).not_to include("Awarded 7")
+      before do
+        ActiveSupport::Notifications.subscribed(->(*, payload) { sql << payload[:sql] }, "sql.active_record") do
+          get root_path
+        end
+      end
+
+      it { expect(news_column.css("article img").size).to eq(3) }
+      it { expect(queries_from.call("action_text_rich_texts")).to eq(1) }
+      # One for the photos, one for the blobs' preview images: three articles, so a query per article would show.
+      it { expect(queries_from.call("active_storage_attachments")).to eq(2) }
+      it { expect(queries_from.call("active_storage_blobs")).to eq(1) }
+      it { expect(queries_from.call("users")).to eq(1) }
+      it { expect(sql.grep(/FROM "players" WHERE "players"."id" = /)).to be_empty }
+      it { expect(sql.grep(/FROM "competitions" WHERE "competitions"."id" = /)).to be_empty }
+      it { expect(sql.grep(/SELECT 1 AS one/)).to be_empty }
+    end
+
+    describe "release notes" do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:announcement) { create(:announcement, message_ru: "Заметка о выпуске", message_en: "Release note") }
+
+      before do
+        toggles.each { |key| create(:feature_toggle, key: key, enabled: true) }
+        sign_in user
+        get root_path
+      end
+
+      context "when toast_whats_new is enabled" do
+        let(:toggles) { %w[toast_whats_new] }
+
+        it { expect(controller.instance_variable_get(:@announcements)).to include(announcement) }
+        it { expect(response.body).to include("Заметка о выпуске") }
       end
     end
 
-    context "when a player has multiple awards" do
-      let_it_be(:award1) { create(:award, title: "Award A") }
-      let_it_be(:award2) { create(:award, title: "Award B") }
-      let_it_be(:player) { create(:player, name: "Multi Winner") }
-
-      before_all do
-        create(:player_award, player: player, award: award1)
-        create(:player_award, player: player, award: award2)
+    describe "block toggles" do
+      before do
+        toggles.each { |key| create(:feature_toggle, key: key, enabled: false) }
+        get root_path
       end
 
-      before { get root_path }
+      context "when home_running_tournaments is disabled" do
+        let(:toggles) { %w[home_running_tournaments] }
 
-      it "renders the player only once" do
-        expect(response.body.scan(">Multi Winner<").count).to eq(1)
-      end
-    end
-
-    context "when only staff awards exist" do
-      let_it_be(:staff_award) { create(:award, title: "Best Judge", staff: true) }
-      let_it_be(:player) { create(:player, name: "Staff Member") }
-      let_it_be(:player_award) { create(:player_award, player: player, award: staff_award) }
-
-      before { get root_path }
-
-      it "does not render the hall of fame teaser" do
-        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
-      end
-    end
-
-    context "when no awards exist" do
-      before { get root_path }
-
-      it "does not render the hall of fame teaser" do
-        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
-      end
-    end
-  end
-
-  describe "stats block" do
-    context "when players and games exist" do
-      let_it_be(:finished_comp) { create(:competition, :season, name: "Stats Season", ended_on: Date.new(2025, 12, 31)) }
-      let_it_be(:running_comp) { create(:competition, :season, name: "Running Season", ended_on: nil) }
-      let_it_be(:finished_child) { create(:competition, :series, parent: finished_comp, name: "Stats Series", ended_on: Date.new(2025, 11, 30)) }
-      let_it_be(:running_child) { create(:competition, :series, parent: running_comp, name: "Running Series") }
-      let_it_be(:role) { create(:role) }
-      let_it_be(:players) { (1..3).map { |i| create(:player, name: "Stat Player #{i}") } }
-      let_it_be(:finished_game) { create(:game, competition: finished_child, result: "peace_victory") }
-      let_it_be(:in_progress_game) { create(:game, competition: running_child, result: "in_progress") }
-
-      before_all do
-        players.each { |p| create(:game_participation, game: finished_game, player: p, role: role) }
+        it { expect(running).to be_nil }
+        it { expect(controller.instance_variable_get(:@mini_standings)).to be_nil }
+        it { expect(recently_finished).to be_present }
       end
 
-      before { get root_path }
+      context "when home_recently_finished is disabled" do
+        let(:toggles) { %w[home_recently_finished] }
 
-      it "renders the section title" do
-        expect(response.body).to include(I18n.t("home.stats.title"))
+        it { expect(recently_finished).to be_nil }
+        it { expect(controller.instance_variable_get(:@winners)).to be_nil }
+        it { expect(recent_games).to be_present }
       end
 
-      it "renders the players label" do
-        expect(response.body).to include(I18n.t("home.stats.players"))
+      context "when home_recent_games is disabled" do
+        let(:toggles) { %w[home_recent_games] }
+
+        it { expect(recent_games).to be_nil }
+        it { expect(controller.instance_variable_get(:@recent_games)).to be_nil }
+        it { expect(running).to be_present }
       end
 
-      it "renders the games label" do
-        expect(response.body).to include(I18n.t("home.stats.games"))
+      context "when home_latest_news is disabled" do
+        let(:toggles) { %w[home_latest_news] }
+
+        it { expect(news_column).to be_nil }
+        it { expect(controller.instance_variable_get(:@latest_news)).to be_nil }
+        it { expect(columns["class"].split).not_to include(two_columns_class) }
       end
 
-      it "renders the competitions label" do
-        expect(response.body).to include(I18n.t("home.stats.competitions"))
+      context "when every results block is disabled" do
+        let(:toggles) { %w[home_running_tournaments home_recently_finished home_recent_games] }
+
+        it { expect(results).to be_nil }
+        it { expect(news_column).to be_present }
+        it { expect(columns["class"].split).not_to include(two_columns_class) }
       end
 
-      it "renders player count as a number" do
-        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
-        expect(stats_section).to include(">#{Player.count}<")
-      end
+      context "when every block is disabled" do
+        let(:toggles) { %w[home_running_tournaments home_recently_finished home_recent_games home_latest_news] }
 
-      it "counts only finished games" do
-        finished_count = Game.finished.count
-        total_count = Game.count
-        expect(finished_count).to be < total_count
-        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
-        expect(stats_section).to include(">#{finished_count}<")
-        expect(stats_section).not_to include(">#{total_count}<")
-      end
-
-      it "counts only root finished competitions" do
-        roots_finished = Competition.roots.finished.count
-        all_finished = Competition.finished.count
-        expect(roots_finished).to be < all_finished
-        stats_section = response.body[/#{I18n.t('home.stats.title')}.*#{I18n.t('home.stats.competitions')}/m]
-        expect(stats_section).to include(">#{roots_finished}<")
-        expect(stats_section).not_to include(">#{all_finished}<")
+        it { expect(columns).to be_nil }
       end
     end
   end
 
-  describe "documents block" do
+  context "with nothing to show" do
     before { get root_path }
 
-    it "renders the section title" do
-      expect(response.body).to include(I18n.t("home.documents.title"))
-    end
-
-    it "renders the league rules link" do
-      expect(response.body).to include(I18n.t("home.documents.league_rules"))
-    end
-
-    it "renders the game rules link" do
-      expect(response.body).to include(I18n.t("home.documents.game_rules"))
-    end
-
-    it "renders the rating system link" do
-      expect(response.body).to include(I18n.t("home.documents.rating_system"))
-    end
+    it { expect(response).to have_http_status(:ok) }
+    it { expect(columns).to be_nil }
+    it { expect(main.at_css("h1.sr-only").text).to eq(I18n.t("home.hero.title")) }
   end
 
-  describe "block visibility toggles" do
-    let_it_be(:competition) { create(:competition, :season, name: "Toggle Season", ended_on: nil) }
-    let_it_be(:child) { create(:competition, :series, parent: competition, name: "Toggle Series") }
-    let_it_be(:role) { create(:role) }
-    let_it_be(:player) { create(:player, name: "Toggle Player") }
-    let_it_be(:game) { create(:game, competition: child, result: "peace_victory", played_on: Date.new(2026, 3, 1)) }
-    let_it_be(:article) { create(:news, :published, title: "Toggle News") }
-    let_it_be(:award) { create(:award, title: "Toggle Award") }
-    let_it_be(:player_award) { create(:player_award, player: player, award: award) }
+  context "with only news" do
+    let_it_be(:article) { create(:news, :published, title: "Lonely News") }
 
-    before_all do
-      create(:game_participation, game: game, player: player, role: role, plus: 10)
-    end
+    before { get root_path }
 
-    context "when home_hero toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_hero", enabled: false) }
+    it { expect(results).to be_nil }
+    it { expect(news_column.text).to include("Lonely News") }
+    it { expect(columns["class"].split).not_to include(two_columns_class) }
+  end
 
-      before { get root_path }
+  context "with no news" do
+    let_it_be(:game) { create(:game, played_on: Date.new(2026, 3, 1), result: "draw") }
 
-      it "does not render the hero section" do
-        expect(response.body).not_to include(I18n.t("home.hero.tagline"))
-      end
-    end
+    before { get root_path }
 
-    context "when home_running_tournaments toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_running_tournaments", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the running tournaments section" do
-        expect(response.body).not_to include(I18n.t("home.running_tournaments.running_tournaments"))
-      end
-    end
-
-    context "when home_recent_games toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_recent_games", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the recent games section" do
-        expect(response.body).not_to include(I18n.t("home.recent_games.title"))
-      end
-    end
-
-    context "when home_latest_news toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_latest_news", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the latest news section" do
-        expect(response.body).not_to include(I18n.t("home.latest_news.title"))
-      end
-    end
-
-    context "when home_hall_of_fame toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_hall_of_fame", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the hall of fame section" do
-        expect(response.body).not_to include(I18n.t("home.hall_of_fame.title"))
-      end
-    end
-
-    context "when home_stats toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_stats", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the stats section" do
-        expect(response.body).not_to include(I18n.t("home.stats.title"))
-      end
-    end
-
-    context "when home_documents toggle is disabled" do
-      let_it_be(:toggle) { create(:feature_toggle, key: "home_documents", enabled: false) }
-
-      before { get root_path }
-
-      it "does not render the documents section" do
-        expect(response.body).not_to include(I18n.t("home.documents.title"))
-      end
-    end
-
-    context "when toggle does not exist (defaults to enabled)" do
-      before { get root_path }
-
-      it "renders the hero section" do
-        expect(response.body).to include(I18n.t("home.hero.tagline"))
-      end
-
-      it "renders the stats section" do
-        expect(response.body).to include(I18n.t("home.stats.title"))
-      end
-
-      it "renders the documents section" do
-        expect(response.body).to include(I18n.t("home.documents.title"))
-      end
-    end
+    it { expect(news_column).to be_nil }
+    it { expect(recent_games.at_css(".vm-pill--neutral")).to be_present }
+    it { expect(columns["class"].split).not_to include(two_columns_class) }
   end
 end
