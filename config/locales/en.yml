@@ -517,6 +517,7 @@ en:
       en: "English"
   stats:
     show:
+      finished_competitions: "Tournaments finished"
       since: "Playing since %{date}"
       results: "Who wins"
       peace_victory: "Town wins"

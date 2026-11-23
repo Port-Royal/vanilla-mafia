@@ -682,6 +682,7 @@ ru:
       en: "English"
   stats:
     show:
+      finished_competitions: "Турниров завершено"
       since: "Играем с %{date}"
       results: "Кто побеждает"
       peace_victory: "Победы мирных"

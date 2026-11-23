@@ -129,6 +129,41 @@ RSpec.describe ClubStatsService do
         # Three totals, the first game date, games by competition and result, the competition links, the
         # participants and the roots.
         it { expect(sql.size).to eq(8) }
+
+        context "when the data grows" do
+          let_it_be(:another_root) { create(:competition, :season, name: "Another", position: 6) }
+          let_it_be(:another_series) { create(:competition, :series, parent: another_root) }
+          let_it_be(:another_round) { create(:competition, :round, parent: another_series) }
+          let_it_be(:more_games) do
+            [ another_series, another_round ].flat_map do |competition|
+              create_list(:game, 2, competition:, result: "peace_victory")
+            end
+          end
+
+          before_all do
+            more_games.each { |game| create(:game_participation, game:, player: create(:player)) }
+          end
+
+          it "stays the same" do
+            expect(sql.size).to eq(8)
+          end
+        end
+      end
+
+      context "when an admin saved competitions in a loop" do
+        let_it_be(:looped) { create(:competition, :season, name: "Looped", position: 7) }
+        let_it_be(:looped_series) { create(:competition, :series, parent: looped) }
+        let_it_be(:looped_game) { create(:game, competition: looped_series, result: "draw") }
+
+        before_all { looped.update_column(:parent_id, looped_series.id) }
+
+        it "still answers" do
+          expect(Timeout.timeout(5) { result }).to be_a(ClubStatsService::Result)
+        end
+
+        it "leaves the loop out of the table, since it has no root" do
+          expect(Timeout.timeout(5) { row_names }).not_to include("Looped")
+        end
       end
     end
   end

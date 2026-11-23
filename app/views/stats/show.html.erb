@@ -10,10 +10,11 @@
 </header>
 
 <div id="stats-numbers" class="vm-panel grid grid-cols-3 divide-x divide-line-soft">
-  <% %i[players games competitions].each do |key| %>
+  <% { players: t("home.stats.players"), games: t("home.stats.games"),
+       competitions: t("stats.show.finished_competitions") }.each do |key, label| %>
     <p data-number="<%= key %>" class="px-2 py-4 text-center lg:py-6">
       <span data-part="value" class="block text-2xl font-bold tabular-nums text-ink lg:text-4xl"><%= totals[key] %></span>
-      <span data-part="label" class="mt-1 block text-xs text-ink-muted lg:text-sm"><%= t("home.stats.#{key}") %></span>
+      <span data-part="label" class="mt-1 block text-xs text-ink-muted lg:text-sm"><%= label %></span>
     </p>
   <% end %>
 </div>
