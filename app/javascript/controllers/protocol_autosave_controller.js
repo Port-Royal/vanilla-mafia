@@ -28,10 +28,9 @@ export default class extends Controller {
     this.toggleTarget.textContent = this.active
       ? this.toggleTarget.dataset.labelOn
       : this.toggleTarget.dataset.labelOff
-    this.toggleTarget.classList.toggle("bg-green-500", this.active)
-    this.toggleTarget.classList.toggle("text-white", this.active)
-    this.toggleTarget.classList.toggle("bg-gray-200", !this.active)
-    this.toggleTarget.classList.toggle("text-gray-700", !this.active)
+    this.toggleTarget.classList.toggle("vm-btn--primary", this.active)
+    this.toggleTarget.classList.toggle("vm-btn--ghost", !this.active)
+    this.toggleTarget.setAttribute("aria-pressed", String(this.active))
   }
 
   fieldChanged(event) {
@@ -140,24 +139,24 @@ export default class extends Controller {
     if (!this.hasStatusTarget) return
 
     const target = this.statusTarget
-    target.classList.remove("text-gray-500", "text-green-600", "text-red-600")
+    target.classList.remove("text-ink-muted", "text-gold-ink", "text-alert-ink")
     clearTimeout(this.savedTimer)
 
     switch (state) {
       case "saving":
         target.textContent = this.savingTextValue
-        target.classList.add("text-gray-500")
+        target.classList.add("text-ink-muted")
         break
       case "saved":
         target.textContent = this.savedTextValue
-        target.classList.add("text-green-600")
+        target.classList.add("text-gold-ink")
         this.savedTimer = setTimeout(() => {
           target.textContent = ""
         }, 2000)
         break
       case "error":
         target.textContent = this.errorTextValue
-        target.classList.add("text-red-600")
+        target.classList.add("text-alert-ink")
         break
     }
   }

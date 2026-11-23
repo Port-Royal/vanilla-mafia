@@ -1,5 +1,5 @@
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+<div class="vm-panel mb-6">
+  <div class="vm-panel-title">
     <%= t("game_breakdowns.editor.seats_panel") %>
   </div>
 
@@ -7,7 +7,7 @@
 
   <%= render "shared/player_options", players: @players %>
 
-  <div class="divide-y">
+  <div class="divide-y divide-line-soft">
     <% @breakdown.seats.each do |seat| %>
       <%= render "judge/breakdowns/seat", seat: seat %>
     <% end %>

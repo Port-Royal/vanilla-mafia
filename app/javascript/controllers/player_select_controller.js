@@ -88,7 +88,7 @@ export default class extends Controller {
       const matchesQuery = name.toLowerCase().includes(query)
       const alreadyTaken = taken.has(name)
       option.classList.toggle("hidden", !matchesQuery || alreadyTaken)
-      option.classList.remove("bg-gray-100")
+      option.classList.remove("bg-gold-wash")
     })
 
     this.activeIndex = -1
@@ -193,7 +193,7 @@ export default class extends Controller {
 
   highlight(index) {
     const options = this.visibleOptions()
-    options.forEach((option) => option.classList.remove("bg-gray-100"))
+    options.forEach((option) => option.classList.remove("bg-gold-wash"))
 
     const active = options[index]
     if (!active) {
@@ -201,7 +201,7 @@ export default class extends Controller {
       return
     }
 
-    active.classList.add("bg-gray-100")
+    active.classList.add("bg-gold-wash")
     active.scrollIntoView({ block: "nearest" })
     this.activeIndex = index
   }

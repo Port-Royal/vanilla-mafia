@@ -9,7 +9,7 @@ Pagy::OPTIONS[:limit] = 25
 # require and `:overflow => :last_page` option are no longer needed.
 #
 # Pagination labels and aria-labels are rendered through the standard Rails
-# I18n gem in app/views/shared/_pagy_nav.html.erb (see the `pagy:` keys in
+# I18n gem in app/views/shared/_paper_pagy_nav.html.erb (see the `pagy:` keys in
 # config/locales/*.yml), so the former `pagy/extras/i18n` require is gone too.
 
 # Pagy 43 made Pagy#series protected (it is meant to be consumed by the built-in

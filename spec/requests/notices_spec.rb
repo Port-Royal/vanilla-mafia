@@ -75,7 +75,7 @@ RSpec.describe "Notices" do
   describe "flash messages" do
     let_it_be(:user) { create(:user) }
 
-    let(:flash_panels) { document.css("main#site-main .vm-panel, main#site-main .bg-emerald-50, main#site-main .bg-red-50") }
+    let(:flash_panels) { document.css("main#site-main .vm-panel[role], main#site-main .bg-emerald-50, main#site-main .bg-red-50") }
     let(:flash_panel) { flash_panels.first }
     let(:failed_sign_in_message) do
       I18n.t("devise.failure.invalid", authentication_keys: User.human_attribute_name(:email).downcase)

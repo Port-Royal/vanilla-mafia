@@ -1,66 +1,66 @@
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold"><%= t("admin_news.index.title") %></h1>
-  <%= link_to t("admin_news.index.new"), new_admin_news_path,
-        class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="vm-page-title"><%= t("admin_news.index.title") %></h1>
+  <%= link_to t("admin_news.index.new"), new_admin_news_path, class: "vm-btn vm-btn--primary" %>
 </div>
 
 <% active_filter = News.statuses.key?(params[:status]) ? params[:status] : nil %>
-<div class="flex gap-2 mb-4 text-sm">
-  <%= link_to t("admin_news.index.filter.all"), admin_news_index_path,
-        class: "px-3 py-1 rounded #{active_filter.nil? ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
-  <%= link_to t("admin_news.index.filter.draft"), admin_news_index_path(status: :draft),
-        class: "px-3 py-1 rounded #{active_filter == 'draft' ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
-  <%= link_to t("admin_news.index.filter.published"), admin_news_index_path(status: :published),
-        class: "px-3 py-1 rounded #{active_filter == 'published' ? 'bg-maroon text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}" %>
-</div>
+<nav class="mb-4 flex flex-wrap gap-2" aria-label="<%= News.human_attribute_name(:status) %>">
+  <% [ [ nil, t("admin_news.index.filter.all") ], [ "draft", t("admin_news.index.filter.draft") ],
+       [ "published", t("admin_news.index.filter.published") ] ].each do |status, label| %>
+    <%= link_to label, admin_news_index_path(status: status),
+          aria: { current: (active_filter == status) || nil },
+          class: "vm-btn #{active_filter == status ? 'vm-btn--primary' : 'vm-btn--ghost'}" %>
+  <% end %>
+</nav>
 
 <% if @news.any? %>
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-    <table class="w-full text-sm">
+  <div class="vm-panel overflow-x-auto">
+    <table class="vm-table">
       <thead>
-        <tr class="bg-gray-50 text-left">
-          <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:title) %></th>
-          <th class="px-4 py-3 font-semibold"><%= t("admin_news.index.author") %></th>
-          <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:status) %></th>
-          <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:created_at) %></th>
-          <th class="px-4 py-3 font-semibold"><%= News.human_attribute_name(:published_at) %></th>
-          <th class="px-4 py-3 font-semibold"></th>
+        <tr>
+          <th><%= News.human_attribute_name(:title) %></th>
+          <th><%= t("admin_news.index.author") %></th>
+          <th><%= News.human_attribute_name(:status) %></th>
+          <th><%= News.human_attribute_name(:created_at) %></th>
+          <th><%= News.human_attribute_name(:published_at) %></th>
+          <th></th>
         </tr>
       </thead>
-      <tbody class="divide-y">
+      <tbody>
         <% @news.each do |article| %>
           <tr>
-            <td class="px-4 py-3">
-              <%= link_to truncate(article.title, length: 100), admin_news_path(article), class: "text-blue-600 hover:underline" %>
+            <td>
+              <%= link_to truncate(article.title, length: 100), admin_news_path(article), class: "vm-link font-medium" %>
             </td>
-            <td class="px-4 py-3">
+            <td>
               <% if article.author.player %>
-                <%= link_to article.author.player.name, player_path(article.author.player), class: "text-blue-600 hover:underline" %>
+                <%= link_to article.author.player.name, player_path(article.author.player), class: "vm-link" %>
               <% else %>
                 <%= article.author.email %>
               <% end %>
             </td>
-            <td class="px-4 py-3">
-              <span class="inline-block px-2 py-0.5 rounded text-xs font-medium <%= article.published? ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+            <td>
+              <span class="vm-pill <%= article.published? ? 'vm-pill--gold' : 'vm-pill--neutral' %>">
                 <%= t("admin_news.status.#{article.status}") %>
               </span>
             </td>
-            <td class="px-4 py-3"><%= format_date(article.created_at) %></td>
-            <td class="px-4 py-3"><%= format_datetime(article.published_at) %></td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">
-              <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article),
-                    class: "text-blue-600 hover:underline text-sm" %>
+            <td class="whitespace-nowrap tabular-nums"><%= format_date(article.created_at) %></td>
+            <td class="whitespace-nowrap tabular-nums"><%= format_datetime(article.published_at) %></td>
+            <td class="text-right whitespace-nowrap">
+              <%= link_to t("admin_news.index.edit"), edit_admin_news_path(article), class: "vm-link" %>
               <% if article.published? %>
                 <%= button_to t("admin_news.index.unpublish"), unpublish_admin_news_path(article),
                       method: :patch,
                       data: { turbo_confirm: t("admin_news.index.unpublish_confirm") },
-                      class: "text-yellow-600 hover:underline text-sm ml-2 inline" %>
+                      form_class: "inline",
+                      class: "vm-link ml-3 cursor-pointer" %>
               <% end %>
               <% if article.draft? && policy(article).destroy? %>
                 <%= button_to t("admin_news.index.delete"), admin_news_path(article),
                       method: :delete,
                       data: { turbo_confirm: t("admin_news.index.delete_confirm") },
-                      class: "text-red-600 hover:underline text-sm ml-2 inline" %>
+                      form_class: "inline",
+                      class: "vm-link ml-3 cursor-pointer text-alert-ink" %>
               <% end %>
             </td>
           </tr>
@@ -69,7 +69,7 @@
     </table>
   </div>
 
-  <%= render "shared/pagy_nav", pagy: @pagy %>
+  <%= render "shared/paper_pagy_nav", pagy: @pagy %>
 <% else %>
-  <p class="text-gray-500"><%= t("admin_news.index.empty") %></p>
+  <p class="text-sm text-ink-muted"><%= t("admin_news.index.empty") %></p>
 <% end %>

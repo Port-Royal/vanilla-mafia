@@ -1,17 +1,16 @@
-<div class="mb-6">
-  <%= link_to t("admin_news.show.back"), admin_news_index_path,
-        class: "text-blue-600 hover:underline text-sm" %>
+<div class="mb-4">
+  <%= link_to t("admin_news.show.back"), admin_news_index_path, class: "vm-link text-xs text-ink-muted" %>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-  <div class="flex items-start justify-between mb-4">
-    <h1 class="text-2xl font-bold"><%= @news.title %></h1>
-    <span class="inline-block px-2 py-0.5 rounded text-xs font-medium <%= @news.published? ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+<article class="vm-panel mb-6 p-6">
+  <div class="mb-3 flex items-start justify-between gap-3">
+    <h1 class="vm-page-title"><%= @news.title %></h1>
+    <span class="vm-pill <%= @news.published? ? 'vm-pill--gold' : 'vm-pill--neutral' %>">
       <%= t("admin_news.status.#{@news.status}") %>
     </span>
   </div>
 
-  <div class="text-sm text-gray-500 mb-4">
+  <div class="mb-4 text-sm text-ink-muted">
     <%= t("admin_news.show.by_author", author: @news.author.email) %>
     <% if @news.competition %>
       · <%= t("admin_news.show.linked_competition", competition: @news.competition.name) %>
@@ -27,29 +26,28 @@
 
   <%= render "news/photos", photos: @news.photos, alt: @news.title, size: :full %>
 
-  <div class="prose max-w-none">
+  <div class="news-prose max-w-none text-ink">
     <%= @news.content %>
   </div>
-</div>
+</article>
 
-<div class="flex gap-2">
-  <%= link_to t("admin_news.show.edit"), edit_admin_news_path(@news),
-        class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+<div class="flex flex-wrap gap-2">
+  <%= link_to t("admin_news.show.edit"), edit_admin_news_path(@news), class: "vm-btn vm-btn--primary" %>
   <% if @news.draft? %>
     <%= button_to t("admin_news.show.publish"), publish_admin_news_path(@news),
           method: :patch,
-          class: "bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+          class: "vm-btn vm-btn--ghost" %>
   <% end %>
   <% if @news.published? %>
     <%= button_to t("admin_news.show.unpublish"), unpublish_admin_news_path(@news),
           method: :patch,
           data: { turbo_confirm: t("admin_news.show.unpublish_confirm") },
-          class: "bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+          class: "vm-btn vm-btn--ghost" %>
   <% end %>
   <% if policy(@news).destroy? %>
     <%= button_to t("admin_news.show.delete"), admin_news_path(@news),
           method: :delete,
           data: { turbo_confirm: t("admin_news.show.delete_confirm") },
-          class: "bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md text-sm" %>
+          class: "vm-btn vm-btn--danger" %>
   <% end %>
 </div>

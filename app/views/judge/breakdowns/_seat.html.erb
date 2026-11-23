@@ -5,14 +5,14 @@
     <span class="w-8 font-semibold text-sm text-center"><%= seat.number %></span>
     <div class="relative overflow-visible w-full sm:w-64" data-controller="player-select">
       <%= form.text_field :name, autocomplete: "off", id: "#{dom_id(seat)}_name",
-            class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm",
+            class: "vm-input vm-input--sm",
             data: { player_select_target: "search",
                     action: "focus->player-select#open input->player-select#filter keydown->player-select#onKeydown blur->player-select#scheduleClose" } %>
-      <div class="hidden fixed border border-gray-300 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto z-50"
+      <div class="vm-panel vm-panel--raised fixed z-50 hidden max-h-60 overflow-y-auto"
            data-player-select-target="menu"></div>
     </div>
     <%= form.collection_select :role_code, @roles, :code, :name, { include_blank: true },
-          id: "#{dom_id(seat)}_role_code", class: "w-full sm:w-48 border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          id: "#{dom_id(seat)}_role_code", class: "vm-input vm-input--sm sm:w-48" %>
     <%= render "judge/breakdowns/seat_link", seat: seat %>
     <%= render "judge/breakdowns/seat_fouls", seat: seat %>
   </div>

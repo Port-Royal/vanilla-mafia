@@ -125,13 +125,13 @@ module GameBreakdownsHelper
     return "—" if url.blank?
     return url unless url.match?(%r{\Ahttps?://}i)
 
-    link_to(url, url, target: "_blank", rel: "noopener noreferrer", class: "text-maroon hover:underline")
+    link_to(url, url, target: "_blank", rel: "noopener noreferrer", class: "vm-link")
   end
 
   def breakdown_game_link(breakdown)
     return "—" if breakdown.game.nil?
 
-    link_to(breakdown.game.full_name, game_path(breakdown.game), class: "text-maroon hover:underline")
+    link_to(breakdown.game.full_name, game_path(breakdown.game), class: "vm-link")
   end
 
   # One line per night: the morning outcome, then whatever the open-roles table recorded inside it — narrowed to one

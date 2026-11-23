@@ -1,23 +1,24 @@
-<div class="mb-6">
-  <%= link_to t(".back"), podcast_episodes_path,
-        class: "text-maroon hover:underline text-sm" %>
+<div class="mb-2">
+  <%= link_to t(".back"), podcast_episodes_path, class: "vm-link text-xs text-ink-muted" %>
 </div>
 
-<h1 class="text-3xl font-bold text-maroon mb-4"><%= @episode.title %></h1>
+<h1 class="vm-page-title mb-1"><%= @episode.title %></h1>
 
-<div class="text-sm text-neutral-500 mb-6">
+<div class="mb-6 text-xs text-ink-muted">
   <% if @episode.published_at.present? %>
     <%= format_datetime(@episode.published_at) %>
   <% end %>
 </div>
 
 <% if @episode.audio.attached? %>
-  <div class="bg-neutral-100 border border-neutral-300 rounded-lg p-4 mb-6"
+  <div class="vm-panel mb-6 p-4"
        data-controller="audio-player"
        data-audio-player-saved-position-value="<%= @saved_position %>"
        data-audio-player-saved-speed-value="<%= @saved_speed %>"
        data-audio-player-episode-title-value="<%= @episode.title %>"
-       data-audio-player-position-url-value="<%= podcast_episode_position_path(@episode) %>">
+       data-audio-player-position-url-value="<%= podcast_episode_position_path(@episode) %>"
+       data-audio-player-play-label-value="<%= t(".play") %>"
+       data-audio-player-pause-label-value="<%= t(".pause") %>">
 
     <audio data-audio-player-target="audio"
            data-action="loadedmetadata->audio-player#audioLoaded
@@ -32,13 +33,13 @@
     <div class="flex items-center gap-3">
       <button data-audio-player-target="playButton"
               data-action="click->audio-player#togglePlay"
-              aria-label="Play"
-              class="w-10 h-10 flex items-center justify-center rounded-full bg-maroon text-white text-lg hover:bg-maroon/90 transition-colors shrink-0">
+              aria-label="<%= t(".play") %>"
+              class="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-lg text-gold-bright hover:bg-ink/90">
         ▶
       </button>
 
       <span data-audio-player-target="currentTime"
-            class="text-sm text-neutral-600 w-12 text-right tabular-nums shrink-0">0:00</span>
+            class="w-12 shrink-0 text-right text-sm text-ink-muted tabular-nums">0:00</span>
 
       <div data-audio-player-target="progress"
            data-action="mousedown->audio-player#seekStart
@@ -54,31 +55,31 @@
            aria-valuenow="0"
            aria-valuemin="0"
            aria-valuemax="100"
-           class="flex-1 h-2 bg-neutral-300 rounded-full cursor-pointer relative">
+           class="relative h-2 flex-1 cursor-pointer rounded-full bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
         <div data-audio-player-target="progressBar"
-             class="h-full bg-maroon rounded-full transition-[width] duration-100"
+             class="h-full rounded-full bg-gold transition-[width] duration-100"
              style="width: 0%"></div>
       </div>
 
       <span data-audio-player-target="duration"
-            class="text-sm text-neutral-600 w-12 tabular-nums shrink-0">0:00</span>
+            class="w-12 shrink-0 text-sm text-ink-muted tabular-nums">0:00</span>
 
       <button data-audio-player-target="speedButton"
               data-action="click->audio-player#cycleSpeed"
-              aria-label="Playback speed"
-              class="text-sm font-medium text-neutral-600 hover:text-maroon transition-colors px-2 py-1 rounded border border-neutral-300 shrink-0">
+              aria-label="<%= t(".playback_speed") %>"
+              class="shrink-0 rounded-md border border-[#d8cba9] px-2 py-1 text-sm font-medium text-ink hover:bg-gold-wash">
         1x
       </button>
     </div>
   </div>
 <% else %>
-  <div id="audio-player-placeholder" class="bg-neutral-100 border border-neutral-300 rounded-lg p-6 mb-6" data-saved-position="<%= @saved_position %>">
-    <p class="text-neutral-500 text-center"><%= t(".audio_player_coming_soon") %></p>
+  <div id="audio-player-placeholder" class="vm-panel mb-6 p-6" data-saved-position="<%= @saved_position %>">
+    <p class="text-center text-sm text-ink-muted"><%= t(".audio_player_coming_soon") %></p>
   </div>
 <% end %>
 
 <% if @episode.description.present? %>
-  <div class="prose max-w-none text-neutral-700">
+  <div class="max-w-[680px] space-y-3.5 leading-[1.65] text-ink">
     <%= simple_format(@episode.description) %>
   </div>
 <% end %>

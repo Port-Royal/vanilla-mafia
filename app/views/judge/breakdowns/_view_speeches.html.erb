@@ -4,7 +4,7 @@
       <li>
         <div class="flex flex-wrap items-baseline gap-2">
           <span class="font-medium"><%= breakdown_seat_label(seat_names, speech.speaker_seat) %></span>
-          <span class="text-gray-500"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
+          <span class="text-ink-muted"><%= t("game_breakdowns.speech_kinds.#{speech.kind}") %></span>
         </div>
         <%= render "judge/breakdowns/view_speech_summary", speech: speech %>
         <%= render "judge/breakdowns/view_moves", moves: @seat_filter.speech_moves(speech), seat_names: seat_names %>

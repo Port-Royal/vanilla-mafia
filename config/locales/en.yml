@@ -494,6 +494,9 @@ en:
         back: "← Back to episodes"
         audio_player_coming_soon: "Audio player coming soon"
         seek: "Seek"
+        play: "Play"
+        pause: "Pause"
+        playback_speed: "Playback speed"
     playlists:
       index:
         title: "Playlists"

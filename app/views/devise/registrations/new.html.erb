@@ -1,48 +1,47 @@
 <div class="mx-auto max-w-sm">
-  <h1 class="text-3xl font-bold text-maroon mb-6"><%= t("devise.registrations.new.title") %></h1>
-
+  <h1 class="vm-page-title mb-4"><%= t("devise.registrations.new.title") %></h1>
 
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="space-y-4">
+    <div class="vm-panel space-y-4 p-6">
       <div>
-        <%= f.label :email, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+        <%= f.label :email, class: "vm-field-label" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
-        <%= f.label :password, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+        <%= f.label :password, class: "vm-field-label" %>
         <%= f.password_field :password, autocomplete: "new-password",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
-        <%= f.label :password_confirmation, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+        <%= f.label :password_confirmation, class: "vm-field-label" %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password",
-              class: "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:ring-maroon focus:outline-none" %>
+              class: "vm-input" %>
       </div>
 
       <div>
         <%= f.submit t("devise.registrations.new.sign_up"),
-              class: "w-full rounded-md bg-neutral-900 px-6 py-2 text-white text-sm font-medium hover:bg-neutral-700 transition-colors cursor-pointer" %>
+              class: "vm-btn vm-btn--primary w-full" %>
       </div>
     </div>
   <% end %>
 
   <div class="relative my-6">
     <div class="absolute inset-0 flex items-center">
-      <div class="w-full border-t border-neutral-300"></div>
+      <div class="w-full border-t border-line"></div>
     </div>
     <div class="relative flex justify-center text-sm">
-      <span class="bg-white px-2 text-neutral-500"><%= t("devise.shared.links.or") %></span>
+      <span class="bg-paper px-2 text-ink-muted"><%= t("devise.shared.links.or") %></span>
     </div>
   </div>
 
   <%= button_to user_google_oauth2_omniauth_authorize_path, method: :post, data: { turbo: false },
-        class: "w-full rounded-md border border-neutral-300 px-6 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 cursor-pointer" do %>
-    <svg class="w-5 h-5" viewBox="0 0 24 24">
+        class: "vm-btn vm-btn--ghost w-full", form_class: "w-full" do %>
+    <svg class="size-5" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>

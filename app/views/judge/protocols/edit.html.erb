@@ -4,11 +4,11 @@
      data-protocol-autosave-saved-text-value="<%= t('game_protocols.autosave.saved') %>"
      data-protocol-autosave-error-text-value="<%= t('game_protocols.autosave.error') %>">
 
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold"><%= t("game_protocols.edit.title") %></h1>
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="vm-page-title"><%= t("game_protocols.edit.title") %></h1>
     <div class="flex items-center gap-3">
       <% if FeatureToggle.enabled?("live_protocol") %>
-        <%= link_to t("live_protocols.live_link"), live_judge_protocol_path(@game), class: "text-maroon hover:underline text-sm" %>
+        <%= link_to t("live_protocols.live_link"), live_judge_protocol_path(@game), class: "vm-link text-sm" %>
       <% end %>
       <span data-protocol-autosave-target="status" class="text-sm font-medium"></span>
       <button type="button"
@@ -16,7 +16,8 @@
               data-action="click->protocol-autosave#toggle"
               data-label-on="<%= t('game_protocols.autosave.toggle_on') %>"
               data-label-off="<%= t('game_protocols.autosave.toggle_off') %>"
-              class="px-3 py-1 rounded-md text-sm font-semibold bg-gray-200 text-gray-700">
+              aria-pressed="false"
+              class="vm-btn vm-btn--ghost">
         <%= t("game_protocols.autosave.toggle_off") %>
       </button>
     </div>

@@ -1,6 +1,6 @@
 <% if f.object.errors.any? %>
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <ul class="list-disc list-inside text-sm text-red-600">
+  <div class="vm-errors">
+    <ul class="list-inside list-disc">
       <% f.object.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
@@ -8,52 +8,53 @@
   </div>
 <% end %>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="divide-y">
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-      <%= f.label :title, class: "w-40 font-semibold text-sm text-right pt-2" %>
-      <%= f.text_field :title, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm", required: true %>
+<% label_classes = "w-40 shrink-0 pt-2 text-sm font-semibold text-ink sm:text-right" %>
+<div class="vm-panel mb-6">
+  <div class="divide-y divide-line-soft">
+    <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row">
+      <%= f.label :title, class: label_classes %>
+      <%= f.text_field :title, class: "vm-input", required: true %>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-      <%= f.label :content, class: "w-40 font-semibold text-sm text-right pt-2" %>
+    <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row">
+      <%= f.label :content, class: label_classes %>
       <div class="w-full">
-        <%= f.rich_text_area :content, class: "w-full", style: "min-height: 20em" %>
+        <%= f.rich_text_area :content, class: "w-full bg-white", style: "min-height: 20em" %>
       </div>
     </div>
 
     <% if f.object.photos.attached? %>
-      <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-        <span class="w-40 font-semibold text-sm text-right pt-2"><%= t("admin_news.form.photos") %></span>
+      <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row">
+        <span class="<%= label_classes %>"><%= t("admin_news.form.photos") %></span>
         <div class="flex flex-wrap gap-2">
           <% f.object.photos.each do |photo| %>
             <% if photo.variable? %>
-              <%= image_tag news_photo_variant(photo, :admin_form), alt: f.object.title, class: "rounded" %>
+              <%= image_tag news_photo_variant(photo, :admin_form), alt: f.object.title, class: "rounded-md" %>
             <% end %>
           <% end %>
         </div>
       </div>
     <% end %>
 
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-      <%= f.label :photos, t("admin_news.form.add_photos"), class: "w-40 font-semibold text-sm text-right pt-2" %>
-      <%= f.file_field :photos, multiple: true, class: "text-sm", accept: "image/*" %>
+    <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row">
+      <%= f.label :photos, t("admin_news.form.add_photos"), class: label_classes %>
+      <%= f.file_field :photos, multiple: true, class: "vm-file pt-1", accept: "image/*" %>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2">
-      <%= f.label :published_at, t("admin_news.form.published_at"), class: "w-40 font-semibold text-sm text-right pt-2" %>
-      <%= f.datetime_local_field :published_at, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm" %>
+    <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row">
+      <%= f.label :published_at, t("admin_news.form.published_at"), class: label_classes %>
+      <%= f.datetime_local_field :published_at, class: "vm-input" %>
     </div>
 
     <% selected_competition = f.object.competition %>
     <% selected_season_id = selected_competition ? (selected_competition.parent_id || selected_competition.id) : nil %>
-    <div class="flex flex-col sm:flex-row items-start px-4 py-3 gap-2"
+    <div class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row"
          data-controller="cascade-select"
          data-cascade-select-options-value="<%= @stages_by_season.transform_values { |stages| stages.map { |s| [s.name, s.id] } }.to_json %>">
-      <%= f.label :competition_id, t("admin_news.form.season"), class: "w-40 font-semibold text-sm text-right pt-2" %>
+      <%= f.label :competition_id, t("admin_news.form.season"), class: label_classes %>
       <div class="flex w-full gap-2">
         <select data-cascade-select-target="parent" data-action="cascade-select#updateChild"
-                class="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm">
+                class="vm-input w-1/2">
           <option value=""></option>
           <% @seasons.each do |season| %>
             <option value="<%= season.id %>" <%= "selected" if season.id == selected_season_id %>><%= season.name %></option>
@@ -62,19 +63,18 @@
         <%= f.select :competition_id,
               options_from_collection_for_select(@stages_by_season.values.flatten, :id, :name, f.object.competition_id),
               { include_blank: true },
-              class: "w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm",
+              class: "vm-input w-1/2",
               data: { cascade_select_target: "child", selected_value: f.object.competition_id } %>
       </div>
     </div>
   </div>
 </div>
 
-<div class="flex justify-end gap-2 mt-4">
+<div class="mt-4 flex flex-wrap justify-end gap-2">
   <%= f.submit local_assigns[:submit_label] || (f.object.new_record? ? t("admin_news.form.submit_create") : t("admin_news.form.submit_update")),
-        class: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm cursor-pointer" %>
+        class: "vm-btn vm-btn--primary" %>
   <% if f.object.persisted? && f.object.draft? %>
-    <button type="submit" name="publish" value="1"
-            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm cursor-pointer">
+    <button type="submit" name="publish" value="1" class="vm-btn vm-btn--ghost">
       <%= t("admin_news.form.submit_save_and_publish") %>
     </button>
   <% end %>

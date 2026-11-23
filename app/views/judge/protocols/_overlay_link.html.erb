@@ -1,25 +1,25 @@
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6" data-controller="clipboard">
-  <h2 class="text-sm font-semibold text-gray-700 mb-2"><%= t("game_protocols.edit.overlay_link.title") %></h2>
-  <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+<div class="vm-panel mb-6 p-4" data-controller="clipboard">
+  <h2 class="vm-label mb-2"><%= t("game_protocols.edit.overlay_link.title") %></h2>
+  <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
     <input type="text"
            readonly
            value="<%= table_overlay_url_for(game) %>"
            data-clipboard-target="source"
-           class="w-full sm:w-auto sm:flex-1 min-w-0 text-sm bg-white border border-gray-300 rounded px-3 py-2 text-gray-600 select-all">
+           class="vm-input min-w-0 text-ink-muted select-all sm:w-auto sm:flex-1">
     <button type="button"
             data-action="click->clipboard#copy"
             data-clipboard-target="button"
-            class="px-3 py-2 bg-maroon text-white text-sm rounded hover:bg-maroon/90 transition-colors shrink-0">
+            class="vm-btn vm-btn--primary shrink-0">
       <%= t("game_protocols.edit.overlay_link.copy") %>
     </button>
     <%= link_to t("game_protocols.edit.overlay_link.open"), table_overlay_url_for(game),
                 target: "_blank", rel: "noopener",
-                class: "px-3 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors shrink-0" %>
+                class: "vm-btn vm-btn--ghost shrink-0" %>
   </div>
-  <p class="text-xs text-gray-500 mt-2">
+  <p class="mt-2 text-xs text-ink-muted">
     <%= t("game_protocols.edit.overlay_link.hint") %>
     <%= link_to t("game_protocols.edit.overlay_link.game_only"), overlay_game_url(game),
-                target: "_blank", rel: "noopener", class: "text-maroon hover:underline" %>
-    <%= link_to t("game_protocols.edit.overlay_link.help"), help_path(slug: "obs-overlay"), class: "text-maroon hover:underline" %>
+                target: "_blank", rel: "noopener", class: "vm-link" %>
+    <%= link_to t("game_protocols.edit.overlay_link.help"), help_path(slug: "obs-overlay"), class: "vm-link" %>
   </p>
 </div>
