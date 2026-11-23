@@ -1,4 +1,5 @@
 <% title = t("help.pages.#{@slug}.title") %>
+<% content_for :title, page_title(title) %>
 <% body = render("help/pages/#{@slug}") %>
 <% sections = help_sections %>
 

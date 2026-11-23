@@ -1,3 +1,4 @@
+<% content_for :title, page_title(@player.name) %>
 <%= render "players/header", player: @player, stats: @stats, competitions_count: @competition_summaries.size,
            awards_count: @player_awards.size %>
 
