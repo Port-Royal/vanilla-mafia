@@ -33,8 +33,15 @@ en:
       full_date: "%-d %B %Y"
   activerecord:
     models:
+      document: "Document"
       game_breakdown: "Game breakdown"
     attributes:
+      document:
+        title: "Title"
+        slug: "Slug"
+        position: "Position"
+        published: "Published"
+        body: "Text"
       game_participation:
         minus: "Minus"
         best_move_seats: "Best move seats"
@@ -103,6 +110,8 @@ en:
   avo:
     competition:
       slug_hint: "Leave blank to auto-generate from name"
+    document:
+      slug_hint: "Lowercase Latin letters, digits and hyphens, e.g. league-rules. Leave blank to generate from the title"
   hello: "Hello world"
   live_protocols:
     edit_link: "Protocol form"
@@ -500,6 +509,7 @@ en:
     hall_of_fame: "Hall of Fame"
     news: "News"
     stats: "Stats"
+    documents: "Documents"
     manage_news: "Manage news"
     telegram: "Telegram"
     protocols: "Protocols"
@@ -515,6 +525,11 @@ en:
     language_names:
       ru: "Русский"
       en: "English"
+  documents:
+    index:
+      title: "Documents"
+    show:
+      draft: "Draft: visible to admins only"
   stats:
     show:
       finished_competitions: "Tournaments finished"

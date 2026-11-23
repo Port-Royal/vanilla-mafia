@@ -86,6 +86,7 @@ Rails.application.routes.draw do
 
   get "hall", to: "hall_of_fame#show"
   get "stats", to: "stats#show"
+  resources :documents, only: [ :index, :show ], param: :slug
 
   match "/404", to: "errors#show", via: :all, defaults: { code: 404 }
   match "/422", to: "errors#show", via: :all, defaults: { code: 422 }

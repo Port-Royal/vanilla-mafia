@@ -19,6 +19,7 @@ RSpec.describe "Avo admin resources" do
   let_it_be(:claimed_player) { create(:player, user: create(:user)) }
   let_it_be(:dispute_claim) { create(:player_claim, :dispute, user: admin, player: claimed_player) }
   let_it_be(:game_breakdown) { create(:game_breakdown, author: admin) }
+  let_it_be(:document) { create(:document, body: "<p>Text</p>") }
 
   shared_examples "admin-only endpoint" do
     context "when not signed in" do
@@ -61,7 +62,8 @@ RSpec.describe "Avo admin resources" do
     "episodes" => :episode,
     "playlists" => :playlist,
     "playlist_episodes" => :playlist_episode,
-    "game_breakdowns" => :game_breakdown
+    "game_breakdowns" => :game_breakdown,
+    "documents" => :document
   }.each do |resource_name, record_method|
     describe resource_name do
       describe "GET /avo/resources/#{resource_name}" do
@@ -75,6 +77,49 @@ RSpec.describe "Avo admin resources" do
 
         include_examples "admin-only endpoint"
       end
+    end
+  end
+
+  describe "documents editing" do
+    describe "GET /avo/resources/documents/:id/edit" do
+      define_method(:make_request) { get "/avo/resources/documents/#{document.slug}/edit" }
+
+      include_examples "admin-only endpoint"
+    end
+
+    describe "GET /avo/resources/documents/new" do
+      define_method(:make_request) { get "/avo/resources/documents/new" }
+
+      include_examples "admin-only endpoint"
+    end
+
+    describe "the new document form" do
+      let(:form) { Nokogiri::HTML(response.body) }
+
+      before do
+        sign_in admin
+        get "/avo/resources/documents/new"
+      end
+
+      it { expect(form.at_css("[data-field-id='title'] .text-danger-content").text.strip).to eq("*") }
+      it { expect(form.at_css("[data-field-id='slug']").text).to include(I18n.t("avo.document.slug_hint")) }
+      it { expect(form.at_css("input[type='number'][name='document[position]']")).to be_present }
+      it { expect(form.at_css("input[type='checkbox'][name='document[published]']")).to be_present }
+      it { expect(form.at_css("trix-editor[input='trix_document_body']")).to be_present }
+    end
+
+    describe "POST /avo/resources/documents" do
+      let(:created) { Document.find_by(title: "Правила игры") }
+
+      before do
+        sign_in admin
+        post "/avo/resources/documents",
+             params: { document: { title: "Правила игры", slug: "", position: "3", published: "1", body: "<p>Text</p>" } }
+      end
+
+      it { expect(created.slug).to eq("pravila-igry") }
+      it { expect(created.body.to_plain_text).to eq("Text") }
+      it { expect(created).to have_attributes(position: 3, published: true) }
     end
   end
 

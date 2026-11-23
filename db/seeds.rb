@@ -59,6 +59,18 @@ end
 missing_keys = FeatureToggle::KEYS - FeatureToggle.pluck(:key)
 raise "Missing feature toggle seeds: #{missing_keys.join(', ')}" if missing_keys.any?
 
+# Club documents: unpublished drafts with titles only; admins write the text and publish them in Avo.
+[
+  { slug: "league-rules", title: "Регламент лиги", position: 1 },
+  { slug: "game-rules", title: "Правила игры", position: 2 },
+  { slug: "rating-system", title: "Система рейтинга", position: 3 }
+].each do |attrs|
+  Document.find_or_create_by!(slug: attrs[:slug]) do |document|
+    document.title = attrs[:title]
+    document.position = attrs[:position]
+  end
+end
+
 # Sample announcements
 [
   { version: "1.0.0", grant_code: nil, message_ru: "Добро пожаловать на обновлённый сайт Vanilla Mafia!", message_en: "Welcome to the updated Vanilla Mafia website!" },

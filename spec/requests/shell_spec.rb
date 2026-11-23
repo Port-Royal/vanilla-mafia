@@ -42,7 +42,7 @@ RSpec.describe "Layout shell" do
 
   it "lists the public links in today's order" do
     expect(nav.css("a").pluck("href"))
-      .to eq([ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path ])
+      .to eq([ competition_path(slug: competition.slug), hall_path, news_index_path, stats_path, documents_path ])
   end
 
   it "renders the page content inside main" do
@@ -136,6 +136,23 @@ RSpec.describe "Layout shell" do
       it { expect(stats_link.text).to eq(I18n.t("nav.stats")) }
       it { expect(stats_link["aria-current"]).to eq("page") }
       it { expect(hall_link["aria-current"]).to be_nil }
+    end
+
+    context "when on the documents page" do
+      let(:path) { documents_path }
+      let(:documents_link) { nav.at_css("a[href='#{documents_path}']") }
+
+      it { expect(documents_link.text).to eq(I18n.t("nav.documents")) }
+      it { expect(documents_link["aria-current"]).to eq("page") }
+      it { expect(news_link["aria-current"]).to be_nil }
+    end
+
+    context "when on a document" do
+      let_it_be(:rules) { create(:document, :published) }
+      let(:path) { document_path(slug: rules.slug) }
+
+      it { expect(nav.at_css("a[href='#{documents_path}']")["aria-current"]).to eq("page") }
+      it { expect(news_link["aria-current"]).to be_nil }
     end
 
     context "when on a competition page" do
