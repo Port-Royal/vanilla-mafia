@@ -127,24 +127,29 @@ RSpec.describe "Working screens in the paper style" do
     let_it_be(:player) { create(:player, name: "Свой") }
     let_it_be(:user) { create(:user, :editor, player: player) }
     let_it_be(:claimed) { create(:player, name: "Чужой").tap { |claimed| create(:user, player: claimed) } }
-
-    before { sign_in user }
+    let_it_be(:outsider) { create(:user) }
 
     context "with the profile form showing errors" do
-      before { patch profile_path, params: { player: { name: "" } } }
+      before do
+        sign_in user
+        patch profile_path, params: { player: { name: "" } }
+      end
 
       it_behaves_like "a page in the paper style"
     end
 
     context "with the notification settings" do
-      before { get edit_notification_settings_path }
+      before do
+        sign_in user
+        get edit_notification_settings_path
+      end
 
       it_behaves_like "a page in the paper style"
     end
 
     context "with the dispute form" do
       before do
-        sign_in create(:user)
+        sign_in outsider
         get new_player_dispute_path(claimed)
       end
 
@@ -154,11 +159,9 @@ RSpec.describe "Working screens in the paper style" do
 
   describe "judge protocols" do
     let_it_be(:stale) { create(:game, played_on: Date.current - 1) }
+    let_it_be(:live_protocol) { create(:feature_toggle, key: "live_protocol", enabled: true) }
 
-    before do
-      create(:feature_toggle, key: "live_protocol", enabled: true)
-      sign_in admin
-    end
+    before { sign_in admin }
 
     context "with the list" do
       before { get judge_protocols_path }
@@ -173,18 +176,30 @@ RSpec.describe "Working screens in the paper style" do
     end
 
     context "with the edit form" do
+      let(:autosave_toggle) { Nokogiri::HTML(response.body).at_css("[data-protocol-autosave-target='toggle']") }
+
       before { get edit_judge_protocol_path(stale) }
 
       it_behaves_like "a page in the paper style"
+
+      it "draws the autosave toggle as an unpressed ghost button" do
+        expect(autosave_toggle["class"].split).to include("vm-btn", "vm-btn--ghost")
+      end
+
+      it "announces the autosave toggle as off" do
+        expect(autosave_toggle["aria-pressed"]).to eq("false")
+      end
     end
   end
 
   describe "judge breakdowns" do
-    let(:breakdown) { create(:game_breakdown, author: admin, title: "Финал", roles_mode: "open", judge_name: "Иванов") }
-    let(:zero_round) { breakdown.phases.find_by(position: 0) }
+    let_it_be(:breakdown) do
+      create(:game_breakdown, author: admin, title: "Финал", roles_mode: "open", judge_name: "Иванов")
+    end
+    let_it_be(:zero_round) { breakdown.phases.find_by(position: 0) }
+    let_it_be(:game_breakdown_toggle) { create(:feature_toggle, key: "game_breakdown", enabled: true) }
 
-    before do
-      create(:feature_toggle, key: "game_breakdown", enabled: true)
+    before_all do
       assign_roles(mafia: [ 2, 3 ], don: 4, sheriff: 5)
       nominate(zero_round, 1, 4)
       nominate(zero_round, 2, 5)
@@ -192,8 +207,9 @@ RSpec.describe "Working screens in the paper style" do
       night(1)
       second_day = day(2)
       speech(second_day, 7, kind: "farewell")
-      sign_in admin
     end
+
+    before { sign_in admin }
 
     context "with the list" do
       before { get judge_breakdowns_path }

@@ -16,7 +16,8 @@
               data-action="click->protocol-autosave#toggle"
               data-label-on="<%= t('game_protocols.autosave.toggle_on') %>"
               data-label-off="<%= t('game_protocols.autosave.toggle_off') %>"
-              class="vm-btn bg-gray-200 text-gray-700">
+              aria-pressed="false"
+              class="vm-btn vm-btn--ghost">
         <%= t("game_protocols.autosave.toggle_off") %>
       </button>
     </div>

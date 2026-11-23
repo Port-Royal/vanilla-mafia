@@ -1,22 +1,23 @@
 # The redesign draws every in-shell screen with the warm-paper tokens and the vm-* components. OLD_PALETTE matches the
-# in-page colours it replaced: maroon and Tailwind's stock greys, blues, greens, yellows and reds.
+# in-page colours it replaced: maroon and any of Tailwind's stock palettes with a shade (gray-100, red-600, ...). The
+# paper tokens (ink, gold, line, alert-ink, ...) carry no shade, so they never match.
 module PaperStyle
-  OLD_PALETTE = /maroon|-(?:neutral|gray|blue|green|yellow|red|amber|emerald)-\d{2,3}\b/
+  STOCK_PALETTES = %w[
+    slate gray zinc neutral stone red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple
+    fuchsia pink rose
+  ].freeze
 
-  # Markup whose classes a Stimulus controller owns: the player suggestions template (player_select_controller.js
-  # marks the active option) and the autosave toggle and status (protocol_autosave_controller.js).
-  JS_STYLED = "template, [data-protocol-autosave-target]".freeze
+  OLD_PALETTE = /maroon|-(?:#{STOCK_PALETTES.join("|")})-\d{2,3}\b/
+
+  # The flash notice is a vm-panel on every page; it says nothing about the page's own markup.
+  FOUNDATION = ".vm-panel:not([role]), .vm-table, .vm-btn".freeze
 end
 
 RSpec.shared_examples "a page in the paper style" do
-  let(:paper_main) do
-    Nokogiri::HTML(response.body).at_css("main#site-main").tap do |main|
-      main.css(PaperStyle::JS_STYLED).each(&:remove)
-    end
-  end
+  let(:paper_main) { Nokogiri::HTML(response.body).at_css("main#site-main") }
 
   it "draws with the foundation components" do
-    expect(paper_main.css(".vm-panel, .vm-table, .vm-btn")).not_to be_empty
+    expect(paper_main.css(PaperStyle::FOUNDATION)).not_to be_empty
   end
 
   it "keeps none of the old palette" do

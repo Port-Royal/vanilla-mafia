@@ -17,7 +17,9 @@ export default class extends Controller {
     savedPosition: { type: Number, default: 0 },
     savedSpeed: { type: Number, default: 1 },
     episodeTitle: { type: String, default: "" },
-    positionUrl: { type: String, default: "" }
+    positionUrl: { type: String, default: "" },
+    playLabel: String,
+    pauseLabel: String
   }
 
   connect() {
@@ -63,14 +65,14 @@ export default class extends Controller {
 
   playing() {
     this.playButtonTarget.textContent = "⏸"
-    this.playButtonTarget.setAttribute("aria-label", "Pause")
+    this.playButtonTarget.setAttribute("aria-label", this.pauseLabelValue)
     this.updateMediaPositionState()
     this.startAutoSave()
   }
 
   paused() {
     this.playButtonTarget.textContent = "▶"
-    this.playButtonTarget.setAttribute("aria-label", "Play")
+    this.playButtonTarget.setAttribute("aria-label", this.playLabelValue)
     this.stopAutoSave()
     this.savePosition()
   }
@@ -146,7 +148,7 @@ export default class extends Controller {
 
   ended() {
     this.playButtonTarget.textContent = "▶"
-    this.playButtonTarget.setAttribute("aria-label", "Play")
+    this.playButtonTarget.setAttribute("aria-label", this.playLabelValue)
     this.progressBarTarget.style.width = "0%"
     this.currentTimeTarget.textContent = this.formatTime(0)
     this.stopAutoSave()

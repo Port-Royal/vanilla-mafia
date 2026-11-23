@@ -16,7 +16,9 @@
        data-audio-player-saved-position-value="<%= @saved_position %>"
        data-audio-player-saved-speed-value="<%= @saved_speed %>"
        data-audio-player-episode-title-value="<%= @episode.title %>"
-       data-audio-player-position-url-value="<%= podcast_episode_position_path(@episode) %>">
+       data-audio-player-position-url-value="<%= podcast_episode_position_path(@episode) %>"
+       data-audio-player-play-label-value="<%= t(".play") %>"
+       data-audio-player-pause-label-value="<%= t(".pause") %>">
 
     <audio data-audio-player-target="audio"
            data-action="loadedmetadata->audio-player#audioLoaded
@@ -31,7 +33,7 @@
     <div class="flex items-center gap-3">
       <button data-audio-player-target="playButton"
               data-action="click->audio-player#togglePlay"
-              aria-label="Play"
+              aria-label="<%= t(".play") %>"
               class="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-lg text-gold-bright hover:bg-ink/90">
         ▶
       </button>
@@ -64,7 +66,7 @@
 
       <button data-audio-player-target="speedButton"
               data-action="click->audio-player#cycleSpeed"
-              aria-label="Playback speed"
+              aria-label="<%= t(".playback_speed") %>"
               class="shrink-0 rounded-md border border-[#d8cba9] px-2 py-1 text-sm font-medium text-ink hover:bg-gold-wash">
         1x
       </button>
