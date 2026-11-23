@@ -1,0 +1,25 @@
+<h1 class="mb-4 font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= t("hall_of_fame.title") %></h1>
+
+<% if @player_entries.empty? && @staff_entries.empty? %>
+  <p id="hall-empty" class="text-sm text-ink-muted"><%= t("common.coming_soon") %></p>
+<% end %>
+
+<% if @player_entries.any? %>
+  <section id="hall-players" aria-labelledby="hall-players-label">
+    <h2 id="hall-players-label" class="sr-only"><%= t("hall_of_fame.redesign.players") %></h2>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <%= render partial: "hall_of_fame/redesign/card", collection: @player_entries, as: :entry,
+                 locals: { show_count: true } %>
+    </ul>
+  </section>
+<% end %>
+
+<% if @staff_entries.any? %>
+  <section id="hall-staff" aria-labelledby="hall-staff-label" class="mt-8">
+    <h2 id="hall-staff-label" class="vm-label mb-2"><%= t("hall_of_fame.organizers") %></h2>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <%= render partial: "hall_of_fame/redesign/card", collection: @staff_entries, as: :entry,
+                 locals: { show_count: false } %>
+    </ul>
+  </section>
+<% end %>
