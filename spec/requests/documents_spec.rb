@@ -70,6 +70,44 @@ RSpec.describe "Documents" do
       it { expect(response).to have_http_status(:not_found) }
     end
 
+    context "with a draft and a signed-in user without any role" do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:draft) { create(:document, slug: "draft") }
+
+      before do
+        sign_in user
+        get document_path(slug: draft.slug)
+      end
+
+      it { expect(response).to have_http_status(:not_found) }
+    end
+
+    context "with a draft and a signed-in admin" do
+      let_it_be(:admin) { create(:user, :admin) }
+      let_it_be(:draft) { create(:document, title: "Регламент лиги", slug: "draft") }
+
+      before do
+        sign_in admin
+        get document_path(slug: draft.slug)
+      end
+
+      it { expect(response).to have_http_status(:ok) }
+      it { expect(document.at_css("main h1").text.strip).to eq("Регламент лиги") }
+      it { expect(document.at_css("#document-draft").text.strip).to eq(I18n.t("documents.show.draft")) }
+    end
+
+    context "with a published document and a signed-in admin" do
+      let_it_be(:admin) { create(:user, :admin) }
+      let_it_be(:rules) { create(:document, :published, slug: "rules") }
+
+      before do
+        sign_in admin
+        get document_path(slug: rules.slug)
+      end
+
+      it { expect(document.at_css("#document-draft")).to be_nil }
+    end
+
     context "with an unknown slug" do
       before { get document_path(slug: "missing") }
 

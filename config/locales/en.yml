@@ -528,6 +528,8 @@ en:
   documents:
     index:
       title: "Documents"
+    show:
+      draft: "Draft: visible to admins only"
   stats:
     show:
       finished_competitions: "Tournaments finished"

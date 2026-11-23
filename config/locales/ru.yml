@@ -693,6 +693,8 @@ ru:
   documents:
     index:
       title: "Документы"
+    show:
+      draft: "Черновик: виден только администраторам"
   stats:
     show:
       finished_competitions: "Турниров завершено"

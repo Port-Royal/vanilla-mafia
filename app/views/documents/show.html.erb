@@ -7,6 +7,10 @@
 
   <h1 class="mb-5 font-serif text-[22px] font-bold text-ink lg:text-[28px]"><%= @document.title %></h1>
 
+  <% unless @document.published %>
+    <p id="document-draft" class="vm-sub -mt-3 mb-5"><%= t("documents.show.draft") %></p>
+  <% end %>
+
   <% if @document.body.present? %>
     <div data-part="body" class="news-prose text-[15.5px] text-ink lg:text-base">
       <%= @document.body %>
