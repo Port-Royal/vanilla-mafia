@@ -78,7 +78,7 @@ RSpec.describe Competition, type: :model do
       competition = create(:competition)
       competition.parent_id = competition.id
       expect(competition).not_to be_valid
-      expect(competition.errors[:parent_id]).to include("cannot reference itself")
+      expect(competition.errors[:parent_id]).to eq([ "cannot reference itself" ])
     end
 
     it 'is valid when parent_id differs from own id' do
@@ -159,6 +159,98 @@ RSpec.describe Competition, type: :model do
         loaded = Competition.includes(:parent).find(child.id)
         expect(loaded.association(:parent)).to be_loaded
         expect(loaded.root).to eq(parent)
+      end
+    end
+  end
+
+  describe 'parent loops' do
+    # Examples change parents in memory, so each one gets fresh copies whatever order the suite runs in.
+    let_it_be(:season, refind: true) { create(:competition, :season) }
+    let_it_be(:series, refind: true) { create(:competition, :series, parent: season) }
+    let_it_be(:round, refind: true) { create(:competition, :round, parent: series) }
+
+    context 'when the new parent is a child' do
+      before { season.parent = series }
+
+      it { expect(season).not_to be_valid }
+
+      it 'names the loop' do
+        season.valid?
+        expect(season.errors[:parent_id]).to include(I18n.t('errors.messages.parent_loop'))
+      end
+    end
+
+    context 'when the new parent is a deeper descendant' do
+      before { season.parent = round }
+
+      it { expect(season).not_to be_valid }
+    end
+
+    context 'when the parent id is set, as the admin form does' do
+      before { season.parent_id = round.id }
+
+      it { expect(season).not_to be_valid }
+    end
+
+    context 'when the new parent is in another branch' do
+      let_it_be(:other_season) { create(:competition, :season) }
+
+      before { series.parent = other_season }
+
+      it { expect(series).to be_valid }
+    end
+
+    context 'when a new competition gets a parent' do
+      let(:competition) { build(:competition, :round, parent: round) }
+
+      it { expect(competition).to be_valid }
+    end
+
+    context 'when a competition created before the loop sits under it' do
+      let_it_be(:early) { create(:competition, :round) }
+      let_it_be(:looped) { create(:competition, :season) }
+      let_it_be(:looped_series) { create(:competition, :series, parent: looped) }
+
+      before_all do
+        looped.update_column(:parent_id, looped_series.id)
+        early.update_column(:parent_id, looped_series.id)
+      end
+
+      it 'takes its root from the loop, not from itself' do
+        expect(Timeout.timeout(5) { early.reload.root }).to eq(looped)
+      end
+    end
+
+    context 'when rows were already saved in a loop' do
+      let_it_be(:looped) { create(:competition, :season) }
+      let_it_be(:looped_series) { create(:competition, :series, parent: looped) }
+      let_it_be(:looped_round) { create(:competition, :round, parent: looped_series) }
+
+      before_all { looped.update_column(:parent_id, looped_series.id) }
+
+      it 'gives every competition of the tree the same root, the loop member created first' do
+        expect(Timeout.timeout(5) { [ looped, looped_series, looped_round ].map { |competition| competition.reload.root } })
+          .to eq([ looped, looped, looped ])
+      end
+
+      it 'still lists the ancestors, each once' do
+        expect(Timeout.timeout(5) { looped_round.reload.ancestors }).to eq([ looped, looped_series ])
+      end
+
+      it 'still lists the subtree, each once' do
+        expect(Timeout.timeout(5) { looped.reload.subtree_ids }).to contain_exactly(looped.id, looped_series.id, looped_round.id)
+      end
+
+      it 'rejects saving the loop again' do
+        expect(looped.reload).not_to be_valid
+      end
+
+      it 'lists the ancestors of a competition inside the loop without itself' do
+        expect(Timeout.timeout(5) { looped.reload.ancestors }).to eq([ looped_series ])
+      end
+
+      it 'still validates a competition under the loop' do
+        expect(Timeout.timeout(5) { looped_round.reload.valid? }).to be true
       end
     end
   end
