@@ -290,6 +290,31 @@ RSpec.describe "Game page" do
     end
   end
 
+  describe "loading the rows" do
+    let_it_be(:don) { create(:role, code: "don", name: "Дон") }
+    let_it_be(:sheriff) { create(:role, code: "sheriff", name: "Шериф") }
+    let_it_be(:one_row) { create(:game, competition: series, game_number: 70, result: "draw") }
+    let_it_be(:three_rows) { create(:game, competition: series, game_number: 71, result: "draw") }
+    let(:queries_for) do
+      lambda do |shown|
+        count = 0
+        counter = ->(*, payload) { count += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) || payload[:cached] }
+        ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { get game_path(shown) }
+        count
+      end
+    end
+
+    # Each row has its own player and role, so a lazy load per row would be a fresh query, never a cache hit.
+    before_all do
+      create(:game_participation, game: one_row, seat: 1, role: peace)
+      [ mafia, don, sheriff ].each.with_index(1) { |role, seat| create(:game_participation, game: three_rows, seat:, role:) }
+    end
+
+    it "loads players and roles for all rows at once" do
+      expect(queries_for.(three_rows)).to eq(queries_for.(one_row))
+    end
+  end
+
   describe "a game in progress" do
     let_it_be(:live_series) { create(:competition, :series, parent: season, name: "Series 4") }
     let_it_be(:live) { create(:game, competition: live_series, game_number: 3, hide_roles: true) }
