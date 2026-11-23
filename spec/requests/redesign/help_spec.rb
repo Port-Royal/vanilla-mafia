@@ -200,9 +200,18 @@ RSpec.describe "Redesigned help pages" do
           .to eq(%w[all roles deal speech vote night leaving].map { |stage| I18n.t("help.pages.live-protocol.stages.#{stage}") })
       end
 
-      it "shows every key of a stage as a key cap" do
+      it "gives each key of a stage its own key cap" do
         expect(key_tables.first.css("kbd").map(&:text))
+          .to eq([ "F", "G", "X", "Shift+F", "Shift+G", "Ctrl+Z", "H", "Q", "Shift+D" ])
+      end
+
+      it "keeps each key cell's text" do
+        expect(key_tables.first.css("tbody tr td:first-child").map(&:text))
           .to eq(I18n.t("help.pages.live-protocol.rows.all").map(&:first))
+      end
+
+      it "keeps a cell in words as one key cap" do
+        expect(key_tables[1].css("kbd").map(&:text)).to include(I18n.t("help.pages.live-protocol.rows.roles").first.first)
       end
 
       it "names the columns" do
@@ -232,6 +241,36 @@ RSpec.describe "Redesigned help pages" do
 
       it "returns not found" do
         expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "page content" do
+    def page_texts(node)
+      case node
+      when Hash then node.values.flat_map { |value| page_texts(value) }
+      when Array then node.flat_map { |value| page_texts(value) }
+      else [ node.to_s.squish ]
+      end
+    end
+
+    before do
+      toggle("game_breakdown")
+      toggle("live_protocol")
+    end
+
+    HelpController::PAGES.each do |slug|
+      context "with the #{slug} page" do
+        let(:page_text) { main.text.squish }
+        let(:missing_texts) do
+          page_texts(I18n.t("help.pages.#{slug}").except(:title, :summary)).reject { |text| page_text.include?(text) }
+        end
+
+        before { get help_path(slug:) }
+
+        it "renders every text the page has in the locale file" do
+          expect(missing_texts).to be_empty
+        end
       end
     end
   end
