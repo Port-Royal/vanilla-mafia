@@ -61,6 +61,7 @@ RSpec.describe ClubStatsService do
           create(:game_participation, game: older_games[2], player: bob),
           create(:game_participation, game: newer_games[0], player: alice),
           create(:game_participation, game: newer_games[1], player: alice),
+          create(:game_participation, game: newer_games[1], player: bob),
           create(:game_participation, game: unstarted_game, player: carol)
         ]
       end
@@ -83,7 +84,7 @@ RSpec.describe ClubStatsService do
       it { expect(newer_row).to have_attributes(games_count: 2, peace_wins: 0, mafia_wins: 2) }
 
       it "counts each player once per root" do
-        expect([ older_row.players_count, newer_row.players_count ]).to eq([ 2, 1 ])
+        expect([ older_row.players_count, newer_row.players_count ]).to eq([ 2, 2 ])
       end
 
       context "when two roots share a position" do
@@ -109,7 +110,7 @@ RSpec.describe ClubStatsService do
         let_it_be(:open_game) { create(:game, competition: newer_series) }
         let_it_be(:open_participation) { create(:game_participation, game: open_game, player: dave) }
 
-        it { expect(newer_row.players_count).to eq(1) }
+        it { expect(newer_row.players_count).to eq(2) }
       end
 
       context "when a root has games but nobody took part" do
