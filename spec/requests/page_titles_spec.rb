@@ -18,12 +18,21 @@ RSpec.describe "Page titles" do
     it { expect(title).to eq("Сезон 5 & финал — Vanilla Mafia") }
   end
 
+  context "with a nested competition" do
+    let_it_be(:season) { create(:competition, :season, name: "Сезон 5") }
+    let_it_be(:series) { create(:competition, :series, name: "Серия 2", parent: season) }
+    let(:path) { competition_path(slug: series.slug) }
+
+    it { expect(title).to eq("Серия 2 — Сезон 5 — Vanilla Mafia") }
+  end
+
   context "with a game" do
-    let_it_be(:series) { create(:competition, :series, name: "Серия 2") }
+    let_it_be(:season) { create(:competition, :season, name: "Сезон 5") }
+    let_it_be(:series) { create(:competition, :series, name: "Серия 2", parent: season) }
     let_it_be(:game) { create(:game, competition: series, game_number: 7) }
     let(:path) { game_path(slug: game.slug) }
 
-    it { expect(title).to eq("#{I18n.t('common.game')} 7 — Серия 2 — Vanilla Mafia") }
+    it { expect(title).to eq("#{I18n.t('common.game')} 7 — Серия 2 — Сезон 5 — Vanilla Mafia") }
   end
 
   context "with a player" do

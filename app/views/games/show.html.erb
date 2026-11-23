@@ -1,5 +1,5 @@
 <% game_label = "#{t("common.game")} #{@game.game_number}" %>
-<% content_for :title, page_title(game_label, @game.competition.name) %>
+<% content_for :title, page_title(game_label, *competition_title_parts(@game.competition)) %>
 <% show_scores = !@game.in_progress? %>
 <% crumb_link = "text-ink-muted underline decoration-[#e0cf9f] underline-offset-3 hover:text-ink" %>
 

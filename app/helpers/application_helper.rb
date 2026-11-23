@@ -10,4 +10,9 @@ module ApplicationHelper
   def page_title(*parts)
     safe_join(parts + [ SITE_NAME ], TITLE_SEPARATOR)
   end
+
+  # A competition's name, then its ancestors' names up to the root: series names repeat across seasons.
+  def competition_title_parts(competition)
+    [ competition, *competition.ancestors.reverse ].map(&:name)
+  end
 end

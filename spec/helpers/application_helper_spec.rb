@@ -41,4 +41,18 @@ RSpec.describe ApplicationHelper, type: :helper do
       it { expect(helper.page_title("<b>".html_safe)).to eq("<b> — Vanilla Mafia") }
     end
   end
+
+  describe '#competition_title_parts' do
+    let_it_be(:season) { create(:competition, :season, name: "Season 5") }
+    let_it_be(:series) { create(:competition, :series, name: "Series 2", parent: season) }
+    let_it_be(:round) { create(:competition, :round, name: "Round 1", parent: series) }
+
+    context 'with a root competition' do
+      it { expect(helper.competition_title_parts(season)).to eq([ "Season 5" ]) }
+    end
+
+    context 'with a nested competition' do
+      it { expect(helper.competition_title_parts(round)).to eq([ "Round 1", "Series 2", "Season 5" ]) }
+    end
+  end
 end

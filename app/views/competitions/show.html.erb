@@ -1,4 +1,4 @@
-<% content_for :title, page_title(@competition.name) %>
+<% content_for :title, page_title(*competition_title_parts(@competition)) %>
 <%= render "competitions/header", competition: @competition %>
 
 <% if @parent_view %>
