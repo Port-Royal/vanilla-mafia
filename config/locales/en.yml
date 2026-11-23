@@ -1143,6 +1143,7 @@ en:
       must_be_day: "must be a day"
       must_be_open_roles_mode: "must belong to a breakdown with open roles"
       must_belong_to_phase: "must belong to the same phase"
+      parent_loop: "cannot be nested inside this competition"
       own_seat: "cannot include the player's own seat"
       exactly_one_context: "Move must belong to either a speech or a vote round"
     "404":

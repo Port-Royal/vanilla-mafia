@@ -14,6 +14,7 @@ class Competition < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
   validate :parent_is_not_self
+  validate :parent_does_not_loop_back
 
   scope :featured, -> { where(featured: true) }
   scope :ordered, -> { order(position: :asc, id: :asc) }
@@ -29,19 +30,11 @@ class Competition < ApplicationRecord
   end
 
   def root
-    node = self
-    node = node.parent while node.parent
-    node
+    parent_chain.last || self
   end
 
   def ancestors
-    result = []
-    node = self
-    while node.parent
-      node = node.parent
-      result.unshift(node)
-    end
-    result
+    parent_chain.reverse
   end
 
   def subtree_ids
@@ -50,19 +43,32 @@ class Competition < ApplicationRecord
 
   private
 
+  # Parents from the nearest up. The walk stops at a competition it has already passed, so rows saved in a loop
+  # before the loop check existed can't hang a page.
+  def parent_chain
+    chain = []
+    seen = Set[id]
+    node = parent
+    while node && seen.add?(node.id)
+      chain << node
+      node = node.parent
+    end
+    chain
+  end
+
+  # UNION (not UNION ALL) drops rows already found, so a loop in saved rows ends the recursion.
   def subtree_ids_sql
     sanitized_id = self.class.connection.quote(id)
     <<~SQL
       WITH RECURSIVE subtree AS (
         SELECT id FROM competitions WHERE id = #{sanitized_id}
-        UNION ALL
+        UNION
         SELECT c.id FROM competitions c
         INNER JOIN subtree s ON c.parent_id = s.id
       )
       SELECT id FROM subtree
     SQL
   end
-
 
   def generate_slug
     self.slug = name.parameterize
@@ -72,5 +78,23 @@ class Competition < ApplicationRecord
     if parent_id && parent_id == id
       errors.add(:parent_id, "cannot reference itself")
     end
+  end
+
+  # A parent whose own parents lead back here would make the tree a loop. Self-parenting is reported above.
+  def parent_does_not_loop_back
+    return if parent_id == id
+
+    errors.add(:parent_id, :parent_loop) if parent_leads_back?
+  end
+
+  def parent_leads_back?
+    seen = Set.new
+    node = parent
+    while node && seen.add?(node.id)
+      return true if node.id == id
+
+      node = node.parent
+    end
+    false
   end
 end
