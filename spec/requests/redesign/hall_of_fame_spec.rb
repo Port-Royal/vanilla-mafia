@@ -74,6 +74,15 @@ RSpec.describe "Redesigned hall of fame" do
       expect(cards.map { |c| c["data-player-card"] }).to eq([ finch.id.to_s, remy.id.to_s ])
     end
 
+    it "labels the players section with a heading for screen readers" do
+      expect(document.at_css("##{players_section['aria-labelledby']}").text.strip)
+        .to eq(I18n.t("hall_of_fame.redesign.players"))
+    end
+
+    it "puts the players heading one level under the page title" do
+      expect(players_section.at_css("h2.sr-only")).to be_present
+    end
+
     it "links the name to the profile" do
       expect(card.(finch).at_css("a[href='#{player_path(finch)}']").text.strip).to eq("Финчер")
     end
@@ -143,8 +152,8 @@ RSpec.describe "Redesigned hall of fame" do
 
     before { get hall_path }
 
-    it "shows the photo with the player's name as alt text" do
-      expect(card.(player).at_css("img[data-part='photo']")["alt"]).to eq("Фотогеничный")
+    it "shows the photo as decoration, since the name follows it" do
+      expect(card.(player).at_css("img[data-part='photo']")["alt"]).to eq("")
     end
 
     it "shows no letter tile" do
