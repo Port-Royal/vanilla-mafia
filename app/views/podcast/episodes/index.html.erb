@@ -1,46 +1,43 @@
-<h1 class="text-3xl font-bold text-maroon mb-8"><%= t(".title") %></h1>
+<h1 class="vm-page-title mb-4"><%= t(".title") %></h1>
 
-<div class="bg-neutral-50 border border-neutral-200 rounded-lg p-4 mb-8"
-     data-controller="clipboard">
-  <h2 class="text-sm font-semibold text-neutral-700 mb-2"><%= t(".feed_url_title") %></h2>
-  <div class="flex items-center gap-2">
+<div class="vm-panel mb-6 p-4" data-controller="clipboard">
+  <h2 class="vm-label mb-2"><%= t(".feed_url_title") %></h2>
+  <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
     <input type="text"
            readonly
            value="<%= podcast_feed_url(format: :rss, token: @feed_token.token) %>"
            data-clipboard-target="source"
-           class="flex-1 text-sm bg-white border border-neutral-300 rounded px-3 py-2 text-neutral-600 select-all">
+           class="vm-input min-w-0 flex-1 text-ink-muted select-all">
     <button data-action="click->clipboard#copy"
             data-clipboard-target="button"
-            class="px-3 py-2 bg-maroon text-white text-sm rounded hover:bg-maroon/90 transition-colors shrink-0">
+            class="vm-btn vm-btn--primary shrink-0">
       <%= t(".copy") %>
     </button>
   </div>
-  <p class="text-xs text-neutral-500 mt-2">
+  <p class="mt-2 text-xs text-ink-muted">
     <%= t(".feed_url_hint") %>
-    <%= link_to t(".feed_url_help"), help_path(slug: "podcast-feed"), class: "text-maroon hover:underline" %>
+    <%= link_to t(".feed_url_help"), help_path(slug: "podcast-feed"), class: "vm-link" %>
   </p>
 </div>
 
 <% if @episodes.any? %>
-  <div class="space-y-6">
+  <div class="vm-panel divide-y divide-line-soft">
     <% @episodes.each do |episode| %>
-      <article class="border-b border-neutral-200 pb-6">
-        <h2 class="text-xl font-bold mb-1">
-          <%= link_to episode.title, podcast_episode_path(episode), class: "text-maroon hover:underline" %>
+      <article class="px-4 py-4">
+        <h2 class="text-lg font-semibold">
+          <%= link_to episode.title, podcast_episode_path(episode), class: "text-ink hover:underline" %>
         </h2>
-        <div class="text-sm text-neutral-500 mb-3">
-          <% if episode.published_at.present? %>
-            <%= format_datetime(episode.published_at) %>
-          <% end %>
-        </div>
+        <% if episode.published_at.present? %>
+          <div class="mt-0.5 text-xs text-ink-muted"><%= format_datetime(episode.published_at) %></div>
+        <% end %>
         <% if episode.description.present? %>
-          <p class="text-neutral-700"><%= truncate(episode.description, length: 300) %></p>
+          <p class="mt-2 text-sm text-ink"><%= truncate(episode.description, length: 300) %></p>
         <% end %>
       </article>
     <% end %>
   </div>
 
-  <%= render "shared/pagy_nav", pagy: @pagy %>
+  <%= render "shared/paper_pagy_nav", pagy: @pagy %>
 <% else %>
-  <p class="text-neutral-500"><%= t(".empty") %></p>
+  <p class="text-sm text-ink-muted"><%= t(".empty") %></p>
 <% end %>

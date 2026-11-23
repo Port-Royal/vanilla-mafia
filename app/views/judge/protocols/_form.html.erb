@@ -1,24 +1,24 @@
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+<div class="vm-panel mb-6">
+  <div class="vm-panel-title">
     <%= t("game_protocols.form.game_panel") %>
   </div>
   <% next_game_number_url = local_assigns[:next_game_number_url] %>
-  <div class="divide-y" <%= tag.attributes(data: { controller: "next-game-number", next_game_number_url_value: next_game_number_url }) if next_game_number_url %>>
+  <div class="divide-y divide-line-soft" <%= tag.attributes(data: { controller: "next-game-number", next_game_number_url_value: next_game_number_url }) if next_game_number_url %>>
     <% selected_competition = @game.competition %>
     <% selected_parent_id = selected_competition ? (selected_competition.parent_id || selected_competition.id) : nil %>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2"
          data-controller="cascade-select"
          data-cascade-select-options-value="<%= @stages_by_competition.transform_values { |stages| stages.map { |s| [s.name, s.id] } }.to_json %>">
-      <label class="w-40 font-semibold text-sm text-right" for="game_competition_id"><%= t("game_protocols.form.competition") %></label>
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_competition_id"><%= t("game_protocols.form.competition") %></label>
       <div class="flex w-full gap-2">
-        <select name="game[competition_id]" id="game_competition_id" class="w-1/3 border border-gray-300 rounded-md px-3 py-2 text-sm" required
+        <select name="game[competition_id]" id="game_competition_id" class="vm-input w-1/3" required
                 data-cascade-select-target="parent" data-next-game-number-target="competition" data-action="cascade-select#updateChild next-game-number#refresh">
           <option value=""></option>
           <% @competitions.each do |comp| %>
             <option value="<%= comp.id %>" <%= "selected" if comp.id == selected_parent_id %>><%= comp.name %></option>
           <% end %>
         </select>
-        <select name="game[stage_id]" id="game_stage_id" class="w-1/3 border border-gray-300 rounded-md px-3 py-2 text-sm"
+        <select name="game[stage_id]" id="game_stage_id" class="vm-input w-1/3"
                 data-cascade-select-target="child" data-next-game-number-target="stage" data-action="next-game-number#refresh"
                 data-selected-value="<%= selected_competition && selected_competition.parent_id ? selected_competition.id : '' %>">
           <option value=""></option>
@@ -28,59 +28,59 @@
         </select>
         <input type="text" name="game[new_stage_name]" id="game_new_stage_name"
                placeholder="<%= t("game_protocols.form.new_stage") %>"
-               class="w-1/3 border border-gray-300 rounded-md px-3 py-2 text-sm" />
+               class="vm-input w-1/3" />
       </div>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_game_number"><%= Game.human_attribute_name(:game_number) %></label>
       <div class="w-full flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="w-full">
-          <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" required
+          <input type="number" name="game[game_number]" id="game_game_number" value="<%= @game.game_number %>" class="vm-input" required
                  data-next-game-number-target="number" data-action="input->next-game-number#numberTyped" />
           <% if next_game_number_url %>
-            <p id="game_number_hint" class="mt-1 text-xs text-gray-500" data-next-game-number-target="hint" hidden></p>
+            <p id="game_number_hint" class="mt-1 text-xs text-ink-muted" data-next-game-number-target="hint" hidden></p>
           <% end %>
         </div>
-        <label class="w-40 self-center sm:w-auto shrink-0 whitespace-nowrap font-semibold text-sm text-right sm:pl-2" for="game_games_total"><%= Game.human_attribute_name(:games_total) %></label>
-        <input type="number" name="game[games_total]" id="game_games_total" value="<%= @game.games_total %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+        <label class="w-40 shrink-0 self-center text-sm font-semibold whitespace-nowrap text-ink sm:w-auto sm:pl-2 sm:text-right" for="game_games_total"><%= Game.human_attribute_name(:games_total) %></label>
+        <input type="number" name="game[games_total]" id="game_games_total" value="<%= @game.games_total %>" min="1" class="vm-input" />
       </div>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_table_number"><%= Game.human_attribute_name(:table_number) %></label>
-      <input type="number" name="game[table_number]" id="game_table_number" value="<%= @game.table_number %>" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_table_number"><%= Game.human_attribute_name(:table_number) %></label>
+      <input type="number" name="game[table_number]" id="game_table_number" value="<%= @game.table_number %>" min="1" class="vm-input"
              data-next-game-number-target="table" data-action="next-game-number#refresh" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_played_on"><%= Game.human_attribute_name(:played_on) %></label>
-      <input type="date" name="game[played_on]" id="game_played_on" value="<%= @game.played_on %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_played_on"><%= Game.human_attribute_name(:played_on) %></label>
+      <input type="date" name="game[played_on]" id="game_played_on" value="<%= @game.played_on %>" class="vm-input"
              data-next-game-number-target="date" data-action="next-game-number#refresh" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>
-      <input type="text" name="game[name]" id="game_name" value="<%= @game.name %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_name"><%= Game.human_attribute_name(:name) %></label>
+      <input type="text" name="game[name]" id="game_name" value="<%= @game.name %>" class="vm-input" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <span class="w-40 font-semibold text-sm text-right"><%= Game.human_attribute_name(:result) %></span>
+      <span class="w-40 text-sm font-semibold text-ink sm:text-right"><%= Game.human_attribute_name(:result) %></span>
       <div class="w-full flex items-center gap-6">
         <% Game.results.each_key do |key| %>
           <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
-            <input type="radio" name="game[result]" value="<%= key %>" <%= "checked" if @game.result == key %> class="text-blue-500" />
+            <input type="radio" name="game[result]" value="<%= key %>" <%= "checked" if @game.result == key %> class="size-4 accent-ink" />
             <%= t("activerecord.attributes.game.results.#{key}") %>
           </label>
         <% end %>
       </div>
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <label class="w-40 font-semibold text-sm text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
-      <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+      <label class="w-40 text-sm font-semibold text-ink sm:text-right" for="game_judge"><%= t("game_protocols.form.judge") %></label>
+      <input type="text" name="game[judge]" id="game_judge" value="<%= @game.judge %>" class="vm-input" />
     </div>
     <div class="flex flex-col sm:flex-row items-center px-4 py-3 gap-2">
-      <span class="w-40 font-semibold text-sm text-right"><%= t("game_protocols.form.overlay") %></span>
+      <span class="w-40 text-sm font-semibold text-ink sm:text-right"><%= t("game_protocols.form.overlay") %></span>
       <div class="w-full flex flex-wrap items-center gap-6">
         <% %i[hide_roles hide_game_info hide_table_info].each do |setting| %>
           <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
             <input type="hidden" name="game[<%= setting %>]" value="0" />
-            <input type="checkbox" name="game[<%= setting %>]" value="1" <%= "checked" if @game.public_send(setting) %> class="rounded" />
+            <input type="checkbox" name="game[<%= setting %>]" value="1" <%= "checked" if @game.public_send(setting) %> class="size-4 accent-ink" />
             <%= Game.human_attribute_name(setting) %>
           </label>
         <% end %>
@@ -89,88 +89,88 @@
   </div>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-  <div class="px-4 py-3 border-b border-gray-200 font-semibold text-lg">
+<div class="vm-panel mb-6">
+  <div class="vm-panel-title">
     <%= t("game_protocols.form.protocol_panel") %>
   </div>
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="vm-table">
       <thead>
-        <tr class="bg-gray-50 text-left">
-          <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.seat") %></th>
-          <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.player") %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:role_code) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:plus) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:minus) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:first_shoot) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:best_move_seats) %></th>
-          <th class="px-3 py-2 font-semibold"><%= GameParticipation.human_attribute_name(:status) %></th>
-          <th class="px-3 py-2 font-semibold"><%= t("game_protocols.form.notes") %></th>
+        <tr>
+          <th><%= t("game_protocols.form.seat") %></th>
+          <th><%= t("game_protocols.form.player") %></th>
+          <th><%= GameParticipation.human_attribute_name(:role_code) %></th>
+          <th><%= GameParticipation.human_attribute_name(:plus) %></th>
+          <th><%= GameParticipation.human_attribute_name(:minus) %></th>
+          <th><%= GameParticipation.human_attribute_name(:best_move) %></th>
+          <th><%= GameParticipation.human_attribute_name(:first_shoot) %></th>
+          <th><%= GameParticipation.human_attribute_name(:best_move_seats) %></th>
+          <th><%= GameParticipation.human_attribute_name(:status) %></th>
+          <th><%= t("game_protocols.form.notes") %></th>
         </tr>
       </thead>
-      <tbody class="divide-y">
+      <tbody>
         <%= render "shared/player_options", players: @players %>
         <% @participations.each_with_index do |participation, index| %>
           <% seat = index + 1 %>
           <tr>
-            <td class="px-3 py-2 text-center font-medium">
+            <td class="text-center font-medium tabular-nums">
               <%= seat %>
             </td>
-            <td class="px-3 py-2 min-w-48 overflow-visible">
+            <td class="min-w-48 overflow-visible">
               <div class="relative overflow-visible" data-controller="player-select">
                 <input
                   type="text"
                   name="participations[<%= seat %>][player_name]"
                   value="<%= participation.player&.name %>"
-                  class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                  class="vm-input vm-input--sm"
                   autocomplete="off"
                   data-player-select-target="search"
                   data-action="focus->player-select#open input->player-select#filter keydown->player-select#onKeydown blur->player-select#scheduleClose"
                 />
-                <div class="hidden fixed border border-gray-300 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto z-50" data-player-select-target="menu">
+                <div class="vm-panel vm-panel--raised fixed z-50 hidden max-h-60 overflow-y-auto" data-player-select-target="menu">
                 </div>
               </div>
             </td>
-            <td class="px-3 py-2">
-              <select name="participations[<%= seat %>][role_code]" class="w-auto max-w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
+            <td>
+              <select name="participations[<%= seat %>][role_code]" class="vm-input vm-input--sm w-auto max-w-full">
                 <option value=""></option>
                 <% @roles.each do |role| %>
                   <option value="<%= role.code %>" <%= "selected" if participation.role_code == role.code %>><%= role.name %></option>
                 <% end %>
               </select>
             </td>
-            <td class="px-3 py-2">
-              <input type="number" step="0.1" name="participations[<%= seat %>][plus]" value="<%= participation.plus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+            <td>
+              <input type="number" step="0.1" name="participations[<%= seat %>][plus]" value="<%= participation.plus %>" class="vm-input vm-input--sm w-20" />
             </td>
-            <td class="px-3 py-2">
-              <input type="number" step="0.1" name="participations[<%= seat %>][minus]" value="<%= participation.minus %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+            <td>
+              <input type="number" step="0.1" name="participations[<%= seat %>][minus]" value="<%= participation.minus %>" class="vm-input vm-input--sm w-20" />
             </td>
-            <td class="px-3 py-2">
-              <input type="number" step="0.1" name="participations[<%= seat %>][best_move]" value="<%= participation.best_move %>" class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm" />
+            <td>
+              <input type="number" step="0.1" name="participations[<%= seat %>][best_move]" value="<%= participation.best_move %>" class="vm-input vm-input--sm w-20" />
             </td>
-            <td class="px-3 py-2 text-center">
+            <td class="text-center">
               <input type="hidden" name="participations[<%= seat %>][first_shoot]" value="0" />
-              <input type="checkbox" name="participations[<%= seat %>][first_shoot]" value="1" <%= "checked" if participation.first_shoot %> class="rounded" />
+              <input type="checkbox" name="participations[<%= seat %>][first_shoot]" value="1" <%= "checked" if participation.first_shoot %> class="size-4 accent-ink" />
             </td>
-            <td class="px-3 py-2">
+            <td>
               <div class="flex gap-1">
                 <% BestMoveSeatsValidator::SEATS_COUNT.each do |index| %>
-                  <select name="participations[<%= seat %>][best_move_seats][]" class="w-14 border border-gray-300 rounded-md px-1 py-1 text-sm">
+                  <select name="participations[<%= seat %>][best_move_seats][]" class="vm-input vm-input--sm w-14 px-1">
                     <%= options_for_select([ "" ] + (GameBreakdown::SEAT_NUMBERS.to_a - [ seat ]), participation.best_move_seats.to_a[index - 1]) %>
                   </select>
                 <% end %>
               </div>
             </td>
-            <td class="px-3 py-2">
-              <select name="participations[<%= seat %>][status]" class="w-auto max-w-full border border-gray-300 rounded-md px-2 py-1 text-sm">
+            <td>
+              <select name="participations[<%= seat %>][status]" class="vm-input vm-input--sm w-auto max-w-full">
                 <% GameParticipation.statuses.each_key do |status_key| %>
                   <option value="<%= status_key %>" <%= "selected" if participation.status == status_key %>><%= t("games.overlay.status.#{status_key}") %></option>
                 <% end %>
               </select>
             </td>
-            <td class="px-3 py-2">
-              <input type="text" name="participations[<%= seat %>][notes]" value="<%= participation.notes %>" class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm" />
+            <td>
+              <input type="text" name="participations[<%= seat %>][notes]" value="<%= participation.notes %>" class="vm-input vm-input--sm" />
             </td>
           </tr>
         <% end %>
@@ -180,7 +180,7 @@
 </div>
 
 <div class="flex justify-end mt-4">
-  <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+  <button type="submit" class="vm-btn vm-btn--primary">
     <%= local_assigns[:submit_label] %>
   </button>
 </div>

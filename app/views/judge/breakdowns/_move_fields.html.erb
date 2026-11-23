@@ -3,62 +3,62 @@
      data-move-form-optional-value="<%= BreakdownMove::OPTIONAL_FIELDS.to_json %>"
      data-move-form-hints-value="<%= breakdown_move_kind_hints.to_json %>"
      data-move-form-labels-value="<%= breakdown_move_field_labels.to_json %>">
-  <label class="text-xs text-gray-600">
+  <label class="text-xs text-ink-muted">
     <%= BreakdownMove.human_attribute_name(:kind) %>
     <%= form.select :kind,
           BreakdownMove.kinds.keys.map { |kind| [ t("game_breakdowns.move_kinds.#{kind}"), kind ] },
-          {}, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm",
+          {}, class: "vm-input vm-input--sm",
           data: { move_form_target: "kind", action: "change->move-form#kindChanged" } %>
   </label>
 
-  <p class="text-xs text-gray-500 sm:col-span-2 sm:order-last" data-move-form-target="hint" hidden></p>
+  <p class="text-xs text-ink-muted sm:col-span-2 sm:order-last" data-move-form-target="hint" hidden></p>
 
-  <label class="text-xs text-gray-600">
+  <label class="text-xs text-ink-muted">
     <%= BreakdownMove.human_attribute_name(:actor_seat) %>
     <%= form.select :actor_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
-          class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          class: "vm-input vm-input--sm" %>
   </label>
 
-  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="target_seat">
+  <label class="text-xs text-ink-muted" data-move-form-target="field" data-field="target_seat">
     <span data-move-form-target="label" data-field="target_seat" data-default-label="<%= BreakdownMove.human_attribute_name(:target_seat) %>">
       <%= BreakdownMove.human_attribute_name(:target_seat) %>
     </span>
     <%= form.select :target_seat, GameBreakdown::SEAT_NUMBERS.to_a, { include_blank: true },
-          class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          class: "vm-input vm-input--sm" %>
   </label>
 
-  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="claimed_color">
+  <label class="text-xs text-ink-muted" data-move-form-target="field" data-field="claimed_color">
     <%= BreakdownMove.human_attribute_name(:claimed_color) %>
     <%= form.select :claimed_color,
           BreakdownMove.claimed_colors.keys.map { |color| [ t("game_breakdowns.claimed_colors.#{color}"), color ] },
-          { include_blank: true }, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          { include_blank: true }, class: "vm-input vm-input--sm" %>
   </label>
 
-  <label class="text-xs text-gray-600" data-move-form-target="field" data-field="removal_reason">
+  <label class="text-xs text-ink-muted" data-move-form-target="field" data-field="removal_reason">
     <%= BreakdownMove.human_attribute_name(:removal_reason) %>
     <%= form.select :removal_reason,
           BreakdownMove.removal_reasons.keys.map { |reason| [ t("game_breakdowns.removal_reasons.#{reason}"), reason ] },
-          { include_blank: true }, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+          { include_blank: true }, class: "vm-input vm-input--sm" %>
   </label>
 
-  <div class="text-xs text-gray-600" data-move-form-target="field" data-field="best_move_seats">
+  <div class="text-xs text-ink-muted" data-move-form-target="field" data-field="best_move_seats">
     <%= BreakdownMove.human_attribute_name(:best_move_seats) %>
     <div class="flex gap-1">
       <% BreakdownMove::BEST_MOVE_SEATS_COUNT.each do |index| %>
         <%= select_tag "breakdown_move[best_move_seats][]",
               options_for_select(GameBreakdown::SEAT_NUMBERS.to_a, form.object.best_move_seats.to_a[index - 1]),
-              include_blank: true, id: form.field_id(:best_move_seats, index), class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+              include_blank: true, id: form.field_id(:best_move_seats, index), class: "vm-input vm-input--sm" %>
       <% end %>
     </div>
   </div>
 
-  <label class="text-xs text-gray-600 sm:col-span-2" data-move-form-target="field" data-field="text">
+  <label class="text-xs text-ink-muted sm:col-span-2" data-move-form-target="field" data-field="text">
     <%= BreakdownMove.human_attribute_name(:text) %>
-    <%= form.text_field :text, class: "w-full border border-gray-300 rounded-md px-2 py-1 text-sm" %>
+    <%= form.text_field :text, class: "vm-input vm-input--sm" %>
   </label>
 
   <div class="sm:col-span-2">
-    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-xs">
+    <button type="submit" class="vm-btn vm-btn--primary">
       <%= submit_label %>
     </button>
   </div>
