@@ -1,0 +1,86 @@
+<% scope = "help.pages.obs-overlay" %>
+
+<%= help_heading "setup", t("setup_title", scope:) %>
+
+<ol>
+  <li><%= t("step_open_obs", scope:) %></li>
+  <li><%= t("step_add_source", scope:) %></li>
+  <li>
+    <%= t("step_enter_url", scope:) %>
+    <pre><%= t("url_example", scope:) %></pre>
+    <p class="help-note"><%= t("url_hint", scope:) %></p>
+    <p class="help-note"><%= t("table_follow", scope:) %></p>
+    <p class="help-note"><%= t("game_url_hint", scope:) %></p>
+    <pre><%= t("game_url_example", scope:) %></pre>
+  </li>
+  <li><%= t("step_set_size", scope:) %></li>
+  <li><%= t("step_position", scope:) %></li>
+  <li><%= t("step_done", scope:) %></li>
+</ol>
+
+<%= help_heading "recommended", t("recommended_title", scope:) %>
+
+<div class="help-table vm-panel">
+  <table class="vm-table">
+    <tbody>
+      <tr>
+        <td class="font-medium"><%= t("setting_width", scope:) %></td>
+        <td><%= t("setting_width_value", scope:) %></td>
+      </tr>
+      <tr>
+        <td class="font-medium"><%= t("setting_height", scope:) %></td>
+        <td><%= t("setting_height_value", scope:) %></td>
+      </tr>
+      <tr>
+        <td class="font-medium"><%= t("setting_fps", scope:) %></td>
+        <td class="tabular-nums">1</td>
+      </tr>
+      <tr>
+        <td class="font-medium"><%= t("setting_css", scope:) %></td>
+        <td><code>body { background-color: rgba(0,0,0,0); }</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<%= help_heading "display", t("display_title", scope:) %>
+
+<p><%= t("display_description", scope:) %></p>
+
+<div class="help-table vm-panel">
+  <table class="vm-table">
+    <tbody>
+      <% %i[hide_roles hide_game_info hide_table_info].each do |setting| %>
+        <tr>
+          <td class="font-medium"><%= Game.human_attribute_name(setting) %></td>
+          <td><%= t("display_#{setting}", scope:) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<p><%= t("display_game_number", scope:) %></p>
+
+<%= help_heading "judge", t("judge_title", scope:) %>
+
+<ol>
+  <li><%= t("judge_step_open", scope:) %></li>
+  <li><%= t("judge_step_enable", scope:) %></li>
+  <li><%= t("judge_step_fill", scope:) %></li>
+  <li><%= t("judge_step_auto", scope:) %></li>
+</ol>
+
+<%= help_heading "blocks", t("blocks_title", scope:) %>
+
+<p><%= t("blocks_description", scope:) %></p>
+
+<ul>
+  <% %w[badges fouls eliminated best_move nominees night].each do |block| %>
+    <li><%= t("block_#{block}", scope:) %></li>
+  <% end %>
+</ul>
+
+<%= help_heading "realtime", t("realtime_title", scope:) %>
+
+<p><%= t("realtime_description", scope:) %></p>

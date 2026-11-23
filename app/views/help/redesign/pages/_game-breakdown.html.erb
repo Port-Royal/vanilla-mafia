@@ -1,0 +1,60 @@
+<% scope = "help.pages.game-breakdown" %>
+
+<p data-part="intro" class="help-intro"><%= t("intro", scope:) %></p>
+
+<%= help_heading "difference", t("difference_title", scope:) %>
+
+<p><%= t("difference_description", scope:) %></p>
+
+<%= help_heading "create", t("create_title", scope:) %>
+
+<ol>
+  <% %w[metadata roles_mode game seats].each do |step| %>
+    <li><%= t("create_step_#{step}", scope:) %></li>
+  <% end %>
+</ol>
+
+<p><%= t("create_note", scope:) %></p>
+
+<%= help_heading "roles-mode", t("roles_mode_title", scope:) %>
+
+<ul>
+  <li><%= t("roles_mode_open", scope:) %></li>
+  <li><%= t("roles_mode_closed", scope:) %></li>
+</ul>
+
+<%= help_heading "phases", t("phases_title", scope:) %>
+
+<p><%= t("phases_description", scope:) %></p>
+
+<ul>
+  <% %w[night day delete fouls speech_summary].each do |phase| %>
+    <li><%= t("phases_#{phase}", scope:) %></li>
+  <% end %>
+</ul>
+
+<%= help_heading "automatic", t("automatic_title", scope:) %>
+
+<p><%= t("automatic_description", scope:) %></p>
+
+<ul>
+  <% %w[main_round revote lift farewell].each do |rule| %>
+    <li><%= t("automatic_#{rule}", scope:) %></li>
+  <% end %>
+</ul>
+
+<p><%= t("automatic_no_deletion", scope:) %></p>
+
+<%= help_heading "warnings", t("warnings_title", scope:) %>
+
+<p><%= t("warnings_description", scope:) %></p>
+
+<p><%= t("warnings_broken_vote", scope:) %></p>
+
+<%= help_heading "result", t("result_title", scope:) %>
+
+<p><%= t("result_description", scope:) %></p>
+
+<%= help_heading "view", t("view_title", scope:) %>
+
+<p><%= t("view_description", scope:) %></p>
