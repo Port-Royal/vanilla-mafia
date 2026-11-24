@@ -94,22 +94,11 @@ module GamesHelper
     )
   end
 
-  def overlay_table_label(game)
-    return if game.table_number.blank?
+  # The value of the game row in the overlay info block: "3", or "3/8" once the total is known.
+  def overlay_game_value(game)
+    return game.game_number.to_s if game.games_total.nil?
 
-    t("games.overlay.table", number: game.table_number)
-  end
-
-  def overlay_game_label(game)
-    return t("games.overlay.game", number: game.game_number) if game.games_total.nil?
-
-    t("games.overlay.game_of_total", number: game.game_number, total: game.games_total)
-  end
-
-  def overlay_judge_label(game)
-    return if game.judge.blank?
-
-    t("games.overlay.judge", name: game.judge)
+    t("games.overlay.info.game_of_total", number: game.game_number, total: game.games_total)
   end
 
   MINUS_SIGN = "\u2212".freeze

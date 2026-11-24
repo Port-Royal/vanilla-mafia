@@ -16,9 +16,6 @@ export default class extends Controller {
     defaultPhoto: String,
     seatRoles: Object,
     bestMoveColours: Object,
-    tableTemplate: String,
-    judgeTemplate: String,
-    gameTemplate: String,
     gameOfTotalTemplate: String,
     nominees: Array,
     shots: Array,
@@ -82,25 +79,23 @@ export default class extends Controller {
       return
     }
 
-    const slots = {
-      table_number: [this.tableTarget, this.tableTemplateValue],
-      judge: [this.judgeTarget, this.judgeTemplateValue]
-    }
-    const slot = slots[data.field]
-    if (!slot) return
+    const slots = { table_number: this.tableTarget, judge: this.judgeTarget }
+    const target = slots[data.field]
+    if (!target) return
 
-    const [target, template] = slot
+    // Mirrors games/overlay.html.erb: an info row without a value is left out.
     const value = (data.value || "").trim()
-    target.textContent = value === "" ? "" : template.replace("%VALUE%", () => value)
+    target.textContent = value
+    target.closest(".overlay-info-row").hidden = value === ""
   }
 
   updateGameNumber(key, value) {
     const target = this.gameNumberTarget
     target.dataset[key] = (value || "").trim()
 
+    // Mirrors GamesHelper#overlay_game_value.
     const { number, total } = target.dataset
-    const template = total === "" ? this.gameTemplateValue : this.gameOfTotalTemplateValue
-    target.textContent = template.replace("%NUMBER%", () => number).replace("%TOTAL%", () => total)
+    target.textContent = total === "" ? number : this.gameOfTotalTemplateValue.replace("%NUMBER%", () => number).replace("%TOTAL%", () => total)
   }
 
   updateParticipation(data) {

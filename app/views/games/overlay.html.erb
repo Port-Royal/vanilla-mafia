@@ -11,30 +11,39 @@
      data-game-overlay-default-photo-value="<%= Player::DEFAULT_PHOTO_PATH %>"
      data-game-overlay-seat-roles-value="<%= seat_roles.to_json %>"
      data-game-overlay-best-move-colours-value="<%= GamesHelper::OVERLAY_BEST_MOVE_COLOURS.to_json %>"
-     data-game-overlay-table-template-value="<%= t("games.overlay.table", number: "%VALUE%") %>"
-     data-game-overlay-judge-template-value="<%= t("games.overlay.judge", name: "%VALUE%") %>"
-     data-game-overlay-game-template-value="<%= t("games.overlay.game", number: "%NUMBER%") %>"
-     data-game-overlay-game-of-total-template-value="<%= t("games.overlay.game_of_total", number: "%NUMBER%", total: "%TOTAL%") %>"
+     data-game-overlay-game-of-total-template-value="<%= t("games.overlay.info.game_of_total", number: "%NUMBER%", total: "%TOTAL%") %>"
      class="<%= overlay_canvas_class(@game) %>">
   <div class="overlay-header">
-    <div id="overlay-header-start" class="justify-self-start">
-      <div id="overlay-table" data-game-overlay-target="table"><%= overlay_table_label(@game) %></div>
-      <%= render "games/night_block", rows: overlay_night_rows(@shots, @checks) %>
-    </div>
-    <div id="overlay-game-number" class="justify-self-center"
-         data-game-overlay-target="gameNumber"
-         data-number="<%= @game.game_number %>"
-         data-total="<%= @game.games_total %>"><%= overlay_game_label(@game) %></div>
-    <div id="overlay-header-end" class="justify-self-end">
-      <div id="overlay-judge" data-game-overlay-target="judge"><%= overlay_judge_label(@game) %></div>
+    <div id="overlay-header-start" class="overlay-header-start">
       <div id="overlay-nominees" class="overlay-night-row overlay-nominees" data-game-overlay-target="nominees" <%= "hidden" if @nominees.empty? %>>
         <span class="overlay-nominees-title"><%= t("games.overlay.nominees") %></span>
         <span class="overlay-night-cells" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><%= tag.span(seat, class: "overlay-night-cell", data: { colour: overlay_seat_colour(seat_roles[seat]) }) %><% end %></span>
       </div>
+      <%= render "games/night_block", rows: overlay_night_rows(@shots, @checks) %>
+    </div>
+    <%# A label column and a value column; a row without a value is hidden, the rest stay aligned. game_overlay_controller.js updates the values live. %>
+    <div id="overlay-info" class="overlay-info">
+      <div id="overlay-table-row" class="overlay-info-row" <%= "hidden" if @game.table_number.blank? %>>
+        <span class="overlay-info-label"><%= t("games.overlay.info.table") %></span>
+        <span id="overlay-table" class="overlay-info-value" data-game-overlay-target="table"><%= @game.table_number %></span>
+      </div>
+      <div id="overlay-game-row" class="overlay-info-row">
+        <span class="overlay-info-label"><%= t("games.overlay.info.game") %></span>
+        <span id="overlay-game-number" class="overlay-info-value"
+              data-game-overlay-target="gameNumber"
+              data-number="<%= @game.game_number %>"
+              data-total="<%= @game.games_total %>"><%= overlay_game_value(@game) %></span>
+      </div>
+      <div id="overlay-tournament-row" class="overlay-info-row">
+        <span class="overlay-info-label"><%= t("games.overlay.info.tournament") %></span>
+        <span id="overlay-tournament" class="overlay-info-value"><%= @game.competition.name %></span>
+      </div>
+      <div id="overlay-judge-row" class="overlay-info-row" <%= "hidden" if @game.judge.blank? %>>
+        <span class="overlay-info-label"><%= t("games.overlay.info.judge") %></span>
+        <span id="overlay-judge" class="overlay-info-value" data-game-overlay-target="judge"><%= @game.judge.presence %></span>
+      </div>
     </div>
   </div>
-
-
 
   <% GamesHelper::OVERLAY_ELIMINATED_STATUSES.each do |status| %>
     <template data-game-overlay-target="statusIconTemplate" data-status="<%= status %>"><%= overlay_status_icon(status) %></template>

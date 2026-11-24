@@ -189,15 +189,46 @@
 
   .overlay-header {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr auto;
     align-items: start;
     gap: 1em;
+  }
+
+  /* Top-left corner: the nominees above the night block. */
+  .overlay-header-start {
+    display: grid;
+    justify-items: start;
+    gap: 0.4em;
+  }
+
+  /* Top-right corner: one label column and one value column without visible lines. */
+  .overlay-info {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 0.6em;
+    row-gap: 0.15em;
+    justify-self: end;
+  }
+
+  .overlay-info-row {
+    display: contents;
+  }
+
+  .overlay-info-row[hidden] {
+    display: none;
+  }
+
+  .overlay-info-label {
+    opacity: 0.7;
+  }
+
+  .overlay-info-value {
+    font-weight: 600;
   }
 
   .overlay-night {
     display: grid;
     gap: 0.25em;
-    margin-top: 0.4em;
   }
 
   .overlay-night[hidden],
@@ -272,11 +303,6 @@
     bottom: -0.1em;
     font-size: 0.55em;
     color: #facc15;
-  }
-
-  .overlay-nominees {
-    justify-content: flex-end;
-    margin-top: 0.4em;
   }
 
   .overlay-nominees[hidden] {
@@ -419,9 +445,9 @@
     box-shadow: none;
   }
 
-  .overlay-canvas--hide-game-info #overlay-game-number,
-  .overlay-canvas--hide-table-info #overlay-table {
-    visibility: hidden;
+  .overlay-canvas--hide-game-info #overlay-game-row,
+  .overlay-canvas--hide-table-info #overlay-table-row {
+    display: none;
   }
 
   .overlay-photo {
