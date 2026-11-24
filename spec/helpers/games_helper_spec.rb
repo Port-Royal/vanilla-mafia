@@ -144,6 +144,29 @@ RSpec.describe GamesHelper do
     end
   end
 
+  describe "#overlay_night_icon" do
+    let(:icon) { Nokogiri::HTML5.fragment(helper.overlay_night_icon(row)).at_css("svg") }
+
+    %i[shots don sheriff].each do |row_key|
+      context "when the row is #{row_key}" do
+        let(:row) { row_key }
+        let(:source) { Nokogiri::XML(Rails.root.join("app/assets/images/overlay/night/#{row_key}.svg").read).root }
+
+        it "inlines the #{row_key} icon file" do
+          expect(icon.at_css("path")["d"]).to eq(source.at_xpath("//*[local-name()='path']")["d"])
+        end
+
+        it "returns markup safe to inline" do
+          expect(helper.overlay_night_icon(row)).to be_html_safe
+        end
+
+        it "hides the icon from assistive technology, the row title names it" do
+          expect(icon["aria-hidden"]).to eq("true")
+        end
+      end
+    end
+  end
+
   describe "#overlay_game_value" do
     let(:game) { Game.new(game_number: 5, games_total: games_total) }
 

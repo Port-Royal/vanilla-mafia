@@ -14,7 +14,7 @@
      data-game-overlay-game-of-total-template-value="<%= t("games.overlay.info.game_of_total", number: "%NUMBER%", total: "%TOTAL%") %>"
      class="<%= overlay_canvas_class(@game) %>">
   <div class="overlay-header">
-    <div id="overlay-header-start" class="overlay-header-start">
+    <div id="overlay-header-start" class="overlay-header-start overlay-backing">
       <div id="overlay-nominees" class="overlay-night-row overlay-nominees" data-game-overlay-target="nominees" <%= "hidden" if @nominees.empty? %>>
         <span class="overlay-nominees-title"><%= t("games.overlay.nominees") %></span>
         <span class="overlay-night-cells" data-game-overlay-target="nomineesList"><% @nominees.each do |seat| %><%= tag.span(seat, class: "overlay-night-cell", data: { colour: overlay_seat_colour(seat_roles[seat]) }) %><% end %></span>
