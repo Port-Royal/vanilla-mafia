@@ -22,7 +22,7 @@
       <%= render "games/night_block", rows: overlay_night_rows(@shots, @checks) %>
     </div>
     <%# A label column and a value column; a row without a value is hidden, the rest stay aligned. game_overlay_controller.js updates the values live. %>
-    <div id="overlay-info" class="overlay-info">
+    <div id="overlay-info" class="overlay-info overlay-backing">
       <div id="overlay-table-row" class="overlay-info-row" <%= "hidden" if @game.table_number.blank? %>>
         <span class="overlay-info-label"><%= t("games.overlay.info.table") %></span>
         <span id="overlay-table" class="overlay-info-value" data-game-overlay-target="table"><%= @game.table_number %></span>
