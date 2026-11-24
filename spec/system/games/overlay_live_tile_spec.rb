@@ -155,8 +155,8 @@ RSpec.describe "Game overlay live tiles" do
     context "with a player eliminated on load" do
       let(:payloads) { [] }
 
-      it "shows the photo lowered by a third of the tile" do
-        expect(settled_drop.call(1, 30)).to eq(30)
+      it "shows the photo lowered by a tenth of the tile" do
+        expect(settled_drop.call(1, 10)).to eq(10)
       end
 
       it "keeps the name readable above the photo" do
@@ -180,7 +180,7 @@ RSpec.describe "Game overlay live tiles" do
       let(:payloads) { [ { scope: "participation", seat: 2, field: "player_name", value: "Новый" }, { scope: "participation", seat: 2, field: "status", value: "killed_by_mafia" } ] }
 
       it "lowers the photo" do
-        expect(settled_drop.call(2, 30)).to eq(30)
+        expect(settled_drop.call(2, 10)).to eq(10)
       end
     end
   end
