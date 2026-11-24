@@ -385,8 +385,12 @@ RSpec.describe GamesHelper do
   end
 
   describe "#overlay_foul_pips" do
-    it "gives a foul pip per foul and a tech mark per technical foul" do
+    it "gives a foul bar per foul, then a tech bar per technical foul" do
       expect(helper.overlay_foul_pips({ fouls: 2, tech: 1 })).to eq(%w[foul foul tech])
+    end
+
+    it "gives only tech bars for a seat with technical fouls alone" do
+      expect(helper.overlay_foul_pips({ fouls: 0, tech: 2 })).to eq(%w[tech tech])
     end
 
     it "gives nothing for a clean seat" do
