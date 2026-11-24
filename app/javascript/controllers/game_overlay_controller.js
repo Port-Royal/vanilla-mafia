@@ -4,6 +4,11 @@ import { createConsumer } from "@rails/actioncable"
 // Mirrors Game::TEAMS.
 const TEAMS = { don: "black", mafia: "black", sheriff: "red", peace: "red" }
 
+// A nickname too wide for its bar shrinks in 5% steps, down to 60% of the base size set in CSS;
+// a name that does not fit even there keeps the minimum and ends in the ellipsis.
+const NAME_FIT_STEP_PERCENT = 5
+const NAME_FIT_MIN_PERCENT = 60
+
 export default class extends Controller {
   static values = {
     gameId: Number,
@@ -26,6 +31,8 @@ export default class extends Controller {
     this.nominees = this.nomineesValue
     this.shots = this.shotsValue
     this.checks = this.checksValue
+    this.fitNames()
+    if (document.fonts) document.fonts.ready.then(() => this.fitNames())
     this.subscription = createConsumer().subscriptions.create(
       { channel: "GameProtocolChannel", game_id: this.gameIdValue },
       { received: (data) => this.handleUpdate(data) }
@@ -115,9 +122,36 @@ export default class extends Controller {
   updatePlayerName(seat, name) {
     const trimmed = (name || "").trim()
     const nameTarget = this.seatTarget(this.playerNameTargets, seat)
-    if (nameTarget) nameTarget.textContent = trimmed
+    if (nameTarget) {
+      nameTarget.textContent = trimmed
+      this.fitName(nameTarget)
+    }
 
     if (trimmed === "") this.clearSeat(seat)
+  }
+
+  // Also runs on window resize: OBS can resize the browser source, and the web font can land after connect.
+  fitNames() {
+    this.playerNameTargets.forEach((name) => this.fitName(name))
+  }
+
+  fitName(name) {
+    name.style.removeProperty("--overlay-name-fit")
+    let percent = 100
+    while (percent > NAME_FIT_MIN_PERCENT && this.nameOverflows(name)) {
+      percent -= NAME_FIT_STEP_PERCENT
+      name.style.setProperty("--overlay-name-fit", String(percent / 100))
+    }
+  }
+
+  // Measured in fractional pixels: scrollWidth and clientWidth round, and miss the sub-pixel
+  // overflow that still brings up the ellipsis.
+  nameOverflows(name) {
+    const text = document.createRange()
+    text.selectNodeContents(name)
+    const style = getComputedStyle(name)
+    const room = name.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    return text.getBoundingClientRect().width > room
   }
 
   clearSeat(seat) {

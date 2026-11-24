@@ -438,10 +438,20 @@
     z-index: 1;
   }
 
+  /* The bar keeps one height off the tile width, whatever its nickname, so no tile's bar jumps. */
+  .overlay-bottom {
+    --overlay-bar-height: calc(var(--overlay-tile-width) * 0.185);
+
+    height: var(--overlay-bar-height);
+  }
+
   /* The nickname reads on stream: a size up from the canvas text, still in em off the tile width.
-     The seat cell stretches to the taller bar and centres its number; long names truncate on one line. */
+     The game-overlay controller sets --overlay-name-fit to shrink a long name until it fits on one
+     line; one too long even at its minimum truncates. The line box fills the bar, so any size sits
+     in its middle, and the seat cell stretches to the bar and centres its number. */
   .overlay-name {
-    font-size: 1.18em;
+    font-size: calc(1.32em * var(--overlay-name-fit, 1));
+    line-height: var(--overlay-bar-height);
   }
 
   .overlay-seat {

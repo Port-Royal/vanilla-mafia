@@ -1,31 +1,51 @@
 require "rails_helper"
 
 # The nickname reads on stream: a size above the canvas text, set off the tile width so it scales
-# with the browser source, one line with an ellipsis for long names, and the badge kept clear of it.
+# with the browser source. A name too long for the bar shrinks until it fits on one line; only a
+# name too long even at the smallest size falls back to the ellipsis. The bar keeps one height.
 RSpec.describe "Game overlay name bar" do
   let_it_be(:role_sheriff) { create(:role, code: "sheriff") }
   let_it_be(:game) { create(:game) }
+  let_it_be(:names) do
+    {
+      1 => "Кот",
+      2 => "Младшенький",
+      3 => "Профессионалка",
+      4 => "Шерлок-Холмсыч",
+      5 => "Очень длинный никнейм игрока номер пять"
+    }
+  end
   let_it_be(:participations) do
-    (1..10).map do |seat|
-      create(:game_participation, game: game, seat: seat, role_code: "sheriff",
-                                  player: create(:player, name: "Очень длинный никнейм игрока номер #{seat}"))
+    names.map do |seat, name|
+      create(:game_participation, game: game, seat: seat, role_code: "sheriff", player: create(:player, name: name))
     end
   end
 
-  let(:bars) do
-    page.evaluate_script(<<~JS)
+  let(:base_ratio) { 0.132 }
+  let(:min_ratio) { 0.132 * 0.6 }
+  let(:controller_js) do
+    'window.Stimulus.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")'
+  end
+  let(:fitted) { settled_bars }
+
+  def bars
+    page.evaluate_script(<<~JS).to_h { |bar| [ bar["seat"], bar ] }
       Array.from(document.querySelectorAll(".overlay-tile")).map((tile) => {
         const name = tile.querySelector(".overlay-name")
         const style = getComputedStyle(name)
         const height = (selector) => tile.querySelector(selector).getBoundingClientRect().height
+        const tileWidth = tile.getBoundingClientRect().width
+        const text = document.createRange()
+        text.selectNodeContents(name)
+        const room = name.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
         return {
-          tileWidth: tile.getBoundingClientRect().width,
-          fontSize: parseFloat(style.fontSize),
-          lineHeight: parseFloat(style.lineHeight),
-          nameHeight: height(".overlay-name"),
-          seatHeight: height(".overlay-seat"),
+          seat: Number(tile.dataset.seat),
+          size: parseFloat(style.fontSize) / tileWidth,
+          barHeight: height(".overlay-bottom") / tileWidth,
+          nameHeight: height(".overlay-name") / tileWidth,
+          seatHeight: height(".overlay-seat") / tileWidth,
           seatAlign: getComputedStyle(tile.querySelector(".overlay-seat")).alignItems,
-          overflowing: name.scrollWidth > name.clientWidth,
+          overflowing: text.getBoundingClientRect().width > room + 0.01,
           ellipsis: style.textOverflow === "ellipsis" && style.whiteSpace === "nowrap",
           badgeBottom: tile.querySelector(".overlay-role-badge").getBoundingClientRect().bottom,
           barTop: tile.querySelector(".overlay-bottom").getBoundingClientRect().top
@@ -34,41 +54,110 @@ RSpec.describe "Game overlay name bar" do
     JS
   end
 
+  def settled_bars
+    page.document.synchronize do
+      current = bars
+      raise Capybara::ExpectationNotMet, "nicknames are not fitted yet" if current.dig(2, "size") >= base_ratio - 0.002
+
+      current
+    end
+  end
+
   before do
-    width, height = viewport_size
-    page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride", width: width, height: height, deviceScaleFactor: 1, mobile: false)
+    resize_to(*viewport_size)
     visit overlay_game_path(game)
   end
 
   after { page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride") }
 
+  def resize_to(width, height)
+    page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride", width: width, height: height, deviceScaleFactor: 1, mobile: false)
+  end
+
+  shared_examples "a fitted name bar" do
+    it "sets a short nickname at 0.132 of the tile width" do
+      expect(fitted.dig(1, "size")).to be_within(0.002).of(base_ratio)
+    end
+
+    it "shows 11 to 14 character nicknames in full" do
+      expect(fitted.values_at(2, 3, 4).map { |bar| bar["overflowing"] }).to all(be(false))
+    end
+
+    it "shrinks those nicknames to fit, no smaller than the minimum" do
+      expect(fitted.values_at(2, 3, 4).map { |bar| bar["size"] }).to all(be_between(min_ratio - 0.002, base_ratio - 0.002))
+    end
+
+    it "sets a nickname too long even at the minimum at the minimum size" do
+      expect(fitted.dig(5, "size")).to be_within(0.002).of(min_ratio)
+    end
+
+    it "truncates that nickname with an ellipsis" do
+      expect(fitted[5].values_at("overflowing", "ellipsis")).to eq([ true, true ])
+    end
+
+    it "keeps every name bar at one height, whatever the nickname" do
+      expect(fitted.values.map { |bar| bar["barHeight"] }).to all(be_within(0.002).of(0.185))
+    end
+
+    it "keeps every nickname on one line inside the bar" do
+      expect(fitted.values.map { |bar| bar["nameHeight"] - bar["barHeight"] }).to all(be <= 0.002)
+    end
+
+    it "keeps the seat cell as tall as the bar" do
+      expect(fitted.values.map { |bar| bar["seatHeight"] - bar["barHeight"] }).to all(be_within(0.002).of(0))
+    end
+
+    it "centres the seat number in its cell" do
+      expect(fitted.values.map { |bar| bar["seatAlign"] }).to all(eq("center"))
+    end
+
+    it "keeps the role badge above the name bar" do
+      expect(fitted.values.map { |bar| bar["badgeBottom"] <= bar["barTop"] }).to all(be(true))
+    end
+  end
+
   [ [ 1920, 1080 ], [ 1280, 720 ] ].each do |size|
     context "when the browser source is #{size.join('×')}" do
       let(:viewport_size) { size }
 
-      it "sets the nickname at 0.118 of the tile width" do
-        expect(bars.map { |bar| bar["fontSize"].fdiv(bar["tileWidth"]) }).to all(be_within(0.002).of(0.118))
-      end
+      it_behaves_like "a fitted name bar"
+    end
+  end
 
-      it "keeps every nickname on one line" do
-        expect(bars.map { |bar| bar["nameHeight"] <= bar["lineHeight"] + 1 }).to all(be(true))
-      end
+  context "when the browser source is resized" do
+    let(:viewport_size) { [ 1920, 1080 ] }
 
-      it "truncates long nicknames with an ellipsis" do
-        expect(bars.map { |bar| bar.values_at("overflowing", "ellipsis") }).to all(eq([ true, true ]))
-      end
+    before do
+      settled_bars
+      resize_to(1280, 720)
+    end
 
-      it "keeps the seat cell as tall as the nickname" do
-        expect(bars.map { |bar| bar["seatHeight"] - bar["nameHeight"] }).to all(be_within(0.5).of(0))
-      end
+    it_behaves_like "a fitted name bar"
+  end
 
-      it "centres the seat number in its taller cell" do
-        expect(bars.map { |bar| bar["seatAlign"] }).to all(eq("center"))
-      end
+  context "when a short nickname is renamed live to a long one" do
+    let(:viewport_size) { [ 1920, 1080 ] }
 
-      it "keeps the role badge above the name bar" do
-        expect(bars.map { |bar| bar["badgeBottom"] <= bar["barTop"] }).to all(be(true))
-      end
+    before do
+      settled_bars
+      page.execute_script("#{controller_js}.handleUpdate(arguments[0])", { scope: "participation", seat: 1, field: "player_name", value: "Младшенький" })
+    end
+
+    it "shrinks it to fit" do
+      expect(bars[1].values_at("size", "overflowing")).to eq(bars[2].values_at("size", "overflowing"))
+    end
+  end
+
+  context "when a long nickname is renamed live to a short one" do
+    let(:viewport_size) { [ 1920, 1080 ] }
+
+    before do
+      settled_bars
+      page.execute_script("#{controller_js}.handleUpdate(arguments[0])", { scope: "participation", seat: 2, field: "player_name", value: "Кот" })
+    end
+
+    it "brings it back to the base size" do
+      expect(bars.dig(2, "size")).to be_within(0.002).of(base_ratio)
     end
   end
 end

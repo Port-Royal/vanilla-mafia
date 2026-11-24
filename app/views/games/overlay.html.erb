@@ -2,6 +2,7 @@
 
 <div id="game-overlay"
      data-controller="game-overlay"
+     data-action="resize@window->game-overlay#fitNames"
      data-game-overlay-game-id-value="<%= @game.id %>"
      data-game-overlay-nominees-value="<%= @nominees.to_json %>"
      data-game-overlay-shots-value="<%= @shots.to_json %>"
