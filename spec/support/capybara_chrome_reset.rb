@@ -1,8 +1,9 @@
 # Chrome 158 rejects the `origin: "*"` that Capybara 3.40's ChromeDriver#reset! passes to Storage.clearDataForOrigin
 # ("invalid argument: * is not a valid URL"), so every system spec fails on session reset. This applies the fix from
 # teamcapybara/capybara#2868 (issue #2865): remember the page's origin before navigating to about:blank, and when Chrome
-# refuses "*" clear the cookies with Network.clearBrowserCookies and the local storage of that origin instead.
-# Delete this file once a Capybara release includes the fix.
+# refuses "*" clear the cookies with Network.clearBrowserCookies and the local storage of that origin instead. Unlike
+# "*", that leaves the local storage of other origins the example visited; this app runs on one host.
+# Delete this file once a Capybara release includes the fix; until then a newer Capybara prints a warning to recheck.
 require "capybara/selenium/driver"
 
 module CapybaraChromeReset
@@ -17,7 +18,8 @@ module CapybaraChromeReset
     origin = nil
     timer = Capybara::Helpers.timer(expire_in: 10)
     begin
-      origin = current_origin
+      # Read once: after an alert on leaving the page, the retry would already be on about:blank.
+      origin ||= current_origin
       clear_storage unless uniform_storage_clear?
       @browser.navigate.to("about:blank")
       wait_for_empty_page(timer)
@@ -46,6 +48,9 @@ module CapybaraChromeReset
   end
 end
 
-if Gem::Version.new(Capybara::VERSION) <= Gem::Version.new("3.40.0")
-  Capybara::Selenium::Driver::ChromeDriver.prepend(CapybaraChromeReset)
+# Applied on any version: a newer Capybara without the fix would otherwise break every system spec again, silently.
+if Gem::Version.new(Capybara::VERSION) > Gem::Version.new("3.40.0")
+  warn "spec/support/capybara_chrome_reset.rb: Capybara #{Capybara::VERSION} is newer than 3.40.0. " \
+       "If it includes teamcapybara/capybara#2868, delete this file."
 end
+Capybara::Selenium::Driver::ChromeDriver.prepend(CapybaraChromeReset)

@@ -52,6 +52,14 @@ RSpec.describe "Capybara session reset" do
       Capybara.reset_sessions!
     end
 
+    # The stubbed reset cleared nothing and left the page on about:blank, and Capybara skips its own reset after an
+    # example that does not touch the page again. Back on the app, Capybara's reset clears the cookie and the local
+    # storage for real, so they do not leak into the next spec.
+    after do
+      RSpec::Mocks.space.proxy_for(page.driver).reset
+      visit root_path
+    end
+
     it "clears the browser data with the wildcard origin" do
       expect(page.driver).to have_received(:execute_cdp).with(*wildcard_clear).once
     end
