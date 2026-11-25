@@ -36,7 +36,7 @@
       </div>
       <div id="overlay-tournament-row" class="overlay-info-row">
         <span class="overlay-info-label"><%= t("games.overlay.info.tournament") %></span>
-        <span id="overlay-tournament" class="overlay-info-value"><%= @game.competition.name %></span>
+        <span id="overlay-tournament" class="overlay-info-value" data-game-overlay-target="tournament"><%= @game.competition.name %></span>
       </div>
       <div id="overlay-judge-row" class="overlay-info-row" <%= "hidden" if @game.judge.blank? %>>
         <span class="overlay-info-label"><%= t("games.overlay.info.judge") %></span>

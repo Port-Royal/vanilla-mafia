@@ -533,7 +533,7 @@ describe("GameOverlayController info block", () => {
         <div id="overlay-info">
           <div id="overlay-table-row" class="overlay-info-row"><span>Стол</span><span id="overlay-table" data-game-overlay-target="table">1</span></div>
           <div id="overlay-game-row" class="overlay-info-row"><span>Игра</span><span id="overlay-game-number" data-game-overlay-target="gameNumber" data-number="3" data-total="">3</span></div>
-          <div id="overlay-tournament-row" class="overlay-info-row"><span>Турнир</span><span>Кубок</span></div>
+          <div id="overlay-tournament-row" class="overlay-info-row"><span>Турнир</span><span id="overlay-tournament" data-game-overlay-target="tournament">Кубок</span></div>
           <div id="overlay-judge-row" class="overlay-info-row" hidden><span>Судья</span><span id="overlay-judge" data-game-overlay-target="judge"></span></div>
         </div>
       </div>
@@ -596,6 +596,18 @@ describe("GameOverlayController info block", () => {
     })
   })
 
+  describe("when the competition changes", () => {
+    beforeEach(() => send("competition", " Кубок Зимы $& "))
+
+    it("shows the trimmed name as is", () => {
+      expect(text("overlay-tournament")).toBe("Кубок Зимы $&")
+    })
+
+    it("keeps the tournament row", () => {
+      expect(rows()).toEqual(["overlay-table-row", "overlay-game-row", "overlay-tournament-row"])
+    })
+  })
+
   describe("when the total is set", () => {
     beforeEach(() => send("games_total", " 8 "))
 
@@ -631,8 +643,8 @@ describe("GameOverlayController info block", () => {
     beforeEach(() => send("name", "Финал"))
 
     it("leaves the info block untouched", () => {
-      expect([text("overlay-table"), text("overlay-game-number"), text("overlay-judge"), rows()])
-        .toEqual(["1", "3", "", ["overlay-table-row", "overlay-game-row", "overlay-tournament-row"]])
+      expect([text("overlay-table"), text("overlay-game-number"), text("overlay-tournament"), text("overlay-judge"), rows()])
+        .toEqual(["1", "3", "Кубок", "", ["overlay-table-row", "overlay-game-row", "overlay-tournament-row"]])
     })
   })
 })

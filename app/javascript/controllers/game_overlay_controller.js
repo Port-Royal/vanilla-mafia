@@ -21,7 +21,7 @@ export default class extends Controller {
     shots: Array,
     checks: Array
   }
-  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "gameNumber", "bestMove", "nominees", "nomineesList", "night", "nightNumbers", "shotsRow", "shotsCells", "donRow", "donCells", "sheriffRow", "sheriffCells", "fouls"]
+  static targets = ["tile", "photo", "playerName", "roleBadge", "status", "statusIconTemplate", "table", "judge", "tournament", "gameNumber", "bestMove", "nominees", "nomineesList", "night", "nightNumbers", "shotsRow", "shotsCells", "donRow", "donCells", "sheriffRow", "sheriffCells", "fouls"]
 
   connect() {
     this.seatRoles = { ...this.seatRolesValue }
@@ -79,7 +79,7 @@ export default class extends Controller {
       return
     }
 
-    const slots = { table_number: this.tableTarget, judge: this.judgeTarget }
+    const slots = { table_number: this.tableTarget, judge: this.judgeTarget, competition: this.tournamentTarget }
     const target = slots[data.field]
     if (!target) return
 

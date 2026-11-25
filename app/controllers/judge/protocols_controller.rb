@@ -105,7 +105,14 @@ class Judge::ProtocolsController < ApplicationController
 
     payload = { scope: params[:scope], field: params[:field], value: params[:value] }
     payload[:seat] = params[:seat].to_i if params[:seat].present?
-    GameProtocolChannel.broadcast_to(@game, payload)
+    GameProtocolChannel.broadcast_to(@game, payload.merge(competition_payload))
+  end
+
+  # The overlay shows the competition by name, not by id.
+  def competition_payload
+    return {} unless params[:field] == "competition_id"
+
+    { field: "competition", value: @game.competition.name }
   end
 
   # GameProtocolChannel admits anyone while the game runs. hide_roles reaches the overlay
