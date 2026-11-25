@@ -27,6 +27,11 @@ export function digitOf(code) {
   return Number(match[1]) || 10
 }
 
+// The numpad has its own Enter, and a judge typing seats there confirms with it.
+export function keyCode(code) {
+  return code === "NumpadEnter" ? "Enter" : code
+}
+
 const toggle = (seats, seat) => (seats.includes(seat) ? seats.filter((other) => other !== seat) : [...seats, seat])
 const open = (ui, type, mode, focus) => ({ ui: { ...ui, pending: { type, mode, seats: [] } }, ...(focus ? { focus } : {}) })
 const fire = (ui, action) => ({ ui: { ...ui, pending: null, marks: [], miss: false }, action })
@@ -136,8 +141,9 @@ function sanctionKey(ui, state, key) {
   return null
 }
 
-export function handleKey(ui, state, key) {
-  if (key.repeat) return { ui }
+export function handleKey(ui, state, pressed) {
+  if (pressed.repeat) return { ui }
+  const key = { ...pressed, code: keyCode(pressed.code) }
   if (key.ctrl) return key.code === "KeyZ" ? { ui, undo: true } : { ui }
   if (key.code === "KeyH") return { ui: { ...ui, reveal: true } }
   if (key.code === "Escape") return { ui: { ...ui, pending: null, marks: [], miss: false, filter: null } }

@@ -35,6 +35,19 @@ RSpec.describe "Live protocol console" do
     expect(game.reload.result).to eq("peace_victory")
   end
 
+  it "confirms with the numpad Enter" do
+    press_keys("1", "2", "3", "4", :enter)
+    expect(page).to have_css("[data-role='don']")
+    press_keys(:enter)
+    expect(page).to have_text("Игрок1")
+    press_keys("n", "3", :space, "n", "4", "v", "1", "2", "5", "6", "7", "8", :enter)
+    expect(page).to have_text(I18n.t("live_protocols.screen.best.eyebrow"))
+    press_keys(:enter)
+    expect(page).to have_css("#lp-will")
+    press_keys(:enter)
+    expect(page).to have_text(I18n.t("live_protocols.screen.night.shot"))
+  end
+
   it "shows the sheet in its tab" do
     start_game.call
     click_button I18n.t("live_protocols.screen.sheet.title")
