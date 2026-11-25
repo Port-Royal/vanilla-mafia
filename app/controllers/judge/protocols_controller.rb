@@ -108,9 +108,9 @@ class Judge::ProtocolsController < ApplicationController
     GameProtocolChannel.broadcast_to(@game, payload.merge(competition_payload))
   end
 
-  # The overlay shows the competition by name, not by id.
+  # The overlay shows the competition by name, not by id. Picking a stage changes the competition too.
   def competition_payload
-    return {} unless params[:field] == "competition_id"
+    return {} unless params[:field].in?(%w[competition_id stage_id])
 
     { field: "competition", value: @game.competition.name }
   end

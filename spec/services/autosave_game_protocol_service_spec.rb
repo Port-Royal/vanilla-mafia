@@ -86,6 +86,59 @@ RSpec.describe AutosaveGameProtocolService do
         end
       end
 
+      context "when field is stage_id" do
+        let_it_be(:stage) { create(:competition, :round, parent: competition) }
+        let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: competition) }
+        let(:result) { described_class.call(game: game, scope: "game", field: "stage_id", value: stage.id.to_s) }
+
+        it "returns success" do
+          expect(result.success).to be true
+        end
+
+        it "moves the game to the stage" do
+          expect { result }.to change { game.reload.competition_id }.from(competition.id).to(stage.id)
+        end
+      end
+
+      context "when stage_id is blank" do
+        let_it_be(:stage) { create(:competition, :round, parent: competition) }
+        let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: stage) }
+        let(:result) { described_class.call(game: game, scope: "game", field: "stage_id", value: "") }
+
+        it "returns success" do
+          expect(result.success).to be true
+        end
+
+        it "keeps the competition" do
+          expect { result }.not_to change { game.reload.competition_id }
+        end
+      end
+
+      context "when stage_id points to no competition" do
+        let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: competition) }
+        let(:result) { described_class.call(game: game, scope: "game", field: "stage_id", value: "0") }
+
+        it "returns failure" do
+          expect(result.success).to be false
+        end
+
+        it "keeps the competition" do
+          expect { result }.not_to change { game.reload.competition_id }
+        end
+      end
+
+      context "when field is new_stage_name" do
+        let(:result) { described_class.call(game: game, scope: "game", field: "new_stage_name", value: "Финал") }
+
+        it "returns failure" do
+          expect(result.success).to be false
+        end
+
+        it "creates no stage" do
+          expect { result }.not_to change(Competition, :count)
+        end
+      end
+
       context "when field is disallowed" do
         let(:result) { described_class.call(game: game, scope: "game", field: "id", value: "999") }
 

@@ -58,6 +58,8 @@ export default class extends Controller {
   parseFieldInfo(input) {
     const name = input.name
     if (!name) return null
+    // A field marked to skip is saved only with the whole form.
+    if (input.hasAttribute("data-protocol-autosave-skip")) return null
 
     const gameMatch = name.match(/^game\[(\w+)\]$/)
     if (gameMatch) {
