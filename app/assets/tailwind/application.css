@@ -205,11 +205,17 @@
     gap: 1em;
   }
 
-  /* Top-left corner: the nominees above the night block. */
+  /* Top-left corner: the nominees above the night block, both on one backing. */
   .overlay-header-start {
     display: grid;
+    justify-self: start;
     justify-items: start;
     gap: 0.4em;
+  }
+
+  /* Neither block has anything to show, so no empty backing; :has() follows the live [hidden] toggles. */
+  .overlay-header-start:not(:has(> :not([hidden]))) {
+    display: none;
   }
 
   /* Top-right corner: one label column and one value column without visible lines. */
@@ -218,6 +224,8 @@
     grid-template-columns: auto auto;
     column-gap: 0.6em;
     row-gap: 0.15em;
+    /* Stays in the right column when the left corner is not displayed. */
+    grid-column: 2;
     justify-self: end;
     font-size: 1.2em;
   }
@@ -317,12 +325,15 @@
     font-weight: 400;
   }
 
+  /* The sheriff badge from the night block's sheriff row, drawn in yellow below the number. */
   .overlay-night-cell[data-mark="sheriff"]::after {
-    content: "★";
+    content: "";
     position: absolute;
-    bottom: -0.1em;
-    font-size: 0.55em;
-    color: #facc15;
+    bottom: -0.2em;
+    width: 0.65em;
+    height: 0.65em;
+    background: #facc15;
+    mask: url("/overlay/night/sheriff.svg") center / contain no-repeat;
   }
 
   .overlay-nominees[hidden] {

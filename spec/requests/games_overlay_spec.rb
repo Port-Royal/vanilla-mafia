@@ -45,6 +45,9 @@ RSpec.describe "Games#overlay" do
       let(:document) { response.parsed_body }
       let(:header_slots) { document.css(".overlay-header > div").map { |slot| slot["id"] } }
       let(:tile_ids) { document.css(".overlay-tiles > .overlay-tile").map { |tile| tile["id"] } }
+      let(:night_icon_paths) { ->(icon_of) { %w[shots don sheriff].map { |row| icon_of.(row).at_xpath(".//*[local-name()='path']")["d"] } } }
+      let(:rendered_icon) { ->(row) { document.at_css("#overlay-night [data-row='#{row}'] .overlay-night-icon svg") } }
+      let(:icon_file) { ->(row) { Nokogiri::XML(Rails.root.join("app/assets/images/overlay/night/#{row}.svg").read).root } }
 
       before { get overlay_game_path(game) }
 
@@ -62,6 +65,14 @@ RSpec.describe "Games#overlay" do
 
       it "puts the nominees above the night block in the left corner" do
         expect(document.css("#overlay-header-start > div").map { |block| block["id"] }).to eq(%w[overlay-nominees overlay-night])
+      end
+
+      it "puts the left corner on the shared backing" do
+        expect(document.at_css("#overlay-header-start")["class"].split).to include("overlay-backing")
+      end
+
+      it "draws each night row's icon from its asset file" do
+        expect(night_icon_paths.(rendered_icon)).to eq(night_icon_paths.(icon_file))
       end
 
       it "lists the table, the game, the tournament and the judge in the info block" do

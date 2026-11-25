@@ -3,6 +3,7 @@ module GamesHelper
   OVERLAY_ROLE_BADGE_CODES = %w[sheriff don mafia].freeze
   OVERLAY_ELIMINATED_STATUSES = %i[killed_by_mafia voted_out banned].freeze
   OVERLAY_STATUS_ICONS_DIR = Rails.root.join("app/assets/images/overlay/status")
+  OVERLAY_NIGHT_ICONS_DIR = Rails.root.join("app/assets/images/overlay/night")
   # Best move cells: black when the named player is mafia (a hit), red when a civilian (a miss).
   OVERLAY_BEST_MOVE_COLOURS = { "mafia" => "black", "don" => "black", "peace" => "red", "sheriff" => "red" }.freeze
   OVERLAY_BEST_MOVE_NEUTRAL = "neutral".freeze
@@ -31,11 +32,12 @@ module GamesHelper
   def overlay_status_icon(status)
     return unless overlay_eliminated?(status)
 
-    svg = Nokogiri::XML(OVERLAY_STATUS_ICONS_DIR.join("#{status}.svg")).root
-    svg["class"] = "h-full w-full drop-shadow"
-    svg["data-status"] = status
-    svg["aria-hidden"] = "true"
-    svg.to_xml.html_safe # rubocop:disable Rails/OutputSafety -- our own asset files, not user input
+    overlay_inline_svg(OVERLAY_STATUS_ICONS_DIR.join("#{status}.svg"), "class" => "h-full w-full drop-shadow", "data-status" => status)
+  end
+
+  # The icon of a night block row (shots, don, sheriff); the row's title names it.
+  def overlay_night_icon(row)
+    overlay_inline_svg(OVERLAY_NIGHT_ICONS_DIR.join("#{row}.svg"))
   end
 
   def overlay_best_move_colour(role_code)
@@ -141,6 +143,12 @@ module GamesHelper
   end
 
   private
+
+  def overlay_inline_svg(path, attributes = {})
+    svg = Nokogiri::XML(path).root
+    attributes.merge("aria-hidden" => "true").each { |name, value| svg[name] = value }
+    svg.to_xml.html_safe # rubocop:disable Rails/OutputSafety -- our own asset files, not user input
+  end
 
   def overlay_night_row(entries, nights)
     (1..nights).map do |night|
