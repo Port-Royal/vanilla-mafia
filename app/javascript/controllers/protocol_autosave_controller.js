@@ -9,6 +9,12 @@ export default class extends Controller {
     errorText: { type: String, default: "!" }
   }
 
+  // Earlier connections of this element that still have requests in flight, so that a value one of them left waiting
+  // can be dropped when a newer connection saves the same field.
+  initialize() {
+    this.retiredStates = new Set()
+  }
+
   connect() {
     this.active = false
     // Each connection keeps its own state, so a request of an earlier connection that settles late cannot touch it.
@@ -22,8 +28,10 @@ export default class extends Controller {
       failedFields: new Set()
     }
     this.pageLeft = () => this.flushOnLeave()
+    // Hiding is often just a tab switch that keeps the page loaded, so only typed values are saved and a waiting value
+    // keeps following its field's request.
     this.visibilityChanged = () => {
-      if (document.visibilityState === "hidden") this.flushOnLeave()
+      if (document.visibilityState === "hidden") this.saveTypedValues()
     }
     window.addEventListener("pagehide", this.pageLeft)
     document.addEventListener("visibilitychange", this.visibilityChanged)
@@ -37,6 +45,7 @@ export default class extends Controller {
     clearTimeout(this.savedTimer)
     this.state.connected = false
     this.saveTypedValues()
+    if (this.state.requests.size > 0) this.retiredStates.add(this.state)
   }
 
   // The page may be unloaded after this, so nothing can wait: a value waiting for its field's request is sent now.
@@ -141,6 +150,8 @@ export default class extends Controller {
     this.showStatus(state, "saving")
 
     const key = this.fieldKey(fieldInfo)
+    // It would be sent after this value and overwrite it.
+    this.retiredStates.forEach((retired) => retired.waitingValues.delete(key))
     if (state.requests.has(key)) {
       state.waitingValues.set(key, fieldInfo)
     } else {
@@ -171,11 +182,13 @@ export default class extends Controller {
       body: JSON.stringify(body),
       keepalive: true
     }).then(response => response.ok, () => false)
-    this.recordResult(state, key, ok)
-    // The page may have sent a newer value for this field meanwhile, so only this request's own entry is removed.
-    if (state.requests.get(key) === request) state.requests.delete(key)
+    // Leaving the page may have sent a newer value for this field meanwhile; that request records and sends from now.
+    if (state.requests.get(key) !== request) return
 
+    state.requests.delete(key)
+    this.recordResult(state, key, ok)
     this.sendWaitingValue(state, key)
+    if (state.requests.size === 0) this.retiredStates.delete(state)
   }
 
   recordResult(state, key, ok) {

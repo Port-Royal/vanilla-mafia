@@ -447,6 +447,44 @@ describe("ProtocolAutosaveController", () => {
       })
     })
 
+    describe("when the controller reconnects while a value waits for an earlier request", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[name]", "Quarterfinal")
+        await edit("game[notes]", "Late")
+        await edit("game[notes]", "Late start")
+        const controller = application.getControllerForElementAndIdentifier(document.querySelector("[data-controller]"), "protocol-autosave")
+        controller.disconnect()
+        controller.connect()
+        toggle().click()
+        await edit("game[name]", "Final")
+      })
+
+      it("sends the newest value right away", () => {
+        expect(sent().map((body) => body.value)).toEqual([ "Semifinal", "Late", "Final" ])
+      })
+
+      it("drops the earlier connection's waiting value of that field", async () => {
+        await answer(0, { ok: true })
+
+        expect(sent().map((body) => body.value)).toEqual([ "Semifinal", "Late", "Final" ])
+      })
+
+      it("still sends the earlier connection's waiting value of another field", async () => {
+        await answer(1, { ok: true })
+
+        expect(sent().map((body) => body.value)).toEqual([ "Semifinal", "Late", "Final", "Late start" ])
+      })
+
+      it("drops a waiting value of the earlier connection after another of its requests is answered", async () => {
+        await answer(0, { ok: true })
+        await edit("game[notes]", "Early start")
+        await answer(1, { ok: true })
+
+        expect(sent().map((body) => body.value)).toEqual([ "Semifinal", "Late", "Final", "Early start" ])
+      })
+    })
+
     describe("while typing", () => {
       const type = async (name, value) => {
         field(name).value = value
@@ -669,6 +707,46 @@ describe("ProtocolAutosaveController", () => {
         })
       })
 
+      // A page restored from the back-forward cache keeps its controller, so the field can be edited again while the
+      // request that the leaving replaced is still in flight.
+      describe("when the field is edited again after the page was left with a value waiting", () => {
+        beforeEach(async () => {
+          await edit("game[name]", "Semifinal")
+          await edit("game[name]", "Quarterfinal")
+          window.dispatchEvent(new Event("pagehide"))
+          await settle()
+          await edit("game[name]", "Final")
+        })
+
+        it("does not send the newest value when the replaced request is answered", async () => {
+          await answer(0, { ok: true })
+
+          expect(fetchMock).toHaveBeenCalledTimes(2)
+        })
+
+        it("sends the newest value once the request that replaced it is answered", async () => {
+          await answer(0, { ok: true })
+          await answer(1, { ok: true })
+
+          expect(sent()[2]).toEqual({ scope: "game", field: "name", value: "Final" })
+        })
+      })
+
+      describe("when a request replaced on leaving fails after the one that replaced it", () => {
+        beforeEach(async () => {
+          await edit("game[name]", "Semifinal")
+          await edit("game[name]", "Final")
+          window.dispatchEvent(new Event("pagehide"))
+          await settle()
+          await answer(1, { ok: true })
+          await answer(0, { ok: false })
+        })
+
+        it("keeps the saved text of the newer request", () => {
+          expect(status().textContent).toBe("Saved")
+        })
+      })
+
       describe("when the page is hidden before the typing pauses", () => {
         beforeEach(async () => {
           await type("game[name]", "Semi")
@@ -677,6 +755,49 @@ describe("ProtocolAutosaveController", () => {
 
         it("sends the typed value right away", () => {
           expect(sent()).toEqual([{ scope: "game", field: "name", value: "Semi" }])
+        })
+      })
+
+      // A plain tab switch hides the page too, and the page stays loaded, so the waiting value keeps the server order.
+      describe("when the page is hidden while a field waits for its request", () => {
+        beforeEach(async () => {
+          await edit("game[name]", "Semifinal")
+          await edit("game[name]", "Quarterfinal")
+          await type("game[name]", "Final")
+          await hide("hidden")
+        })
+
+        it("waits for the request in flight", () => {
+          expect(fetchMock).toHaveBeenCalledTimes(1)
+        })
+
+        it("then sends the latest value", async () => {
+          await answer(0, { ok: true })
+
+          expect(sent()).toEqual([
+            { scope: "game", field: "name", value: "Semifinal" },
+            { scope: "game", field: "name", value: "Final" }
+          ])
+        })
+
+        describe("and then left", () => {
+          beforeEach(async () => {
+            window.dispatchEvent(new Event("pagehide"))
+            await settle()
+          })
+
+          it("sends the latest value right away", () => {
+            expect(sent()[1]).toEqual({ scope: "game", field: "name", value: "Final" })
+          })
+
+          it("sends nothing more, even when the controller disconnects and the request is answered", async () => {
+            controllerElement().removeAttribute("data-controller")
+            await settle()
+            await answer(0, { ok: true })
+            await answer(1, { ok: true })
+
+            expect(fetchMock).toHaveBeenCalledTimes(2)
+          })
         })
       })
 
