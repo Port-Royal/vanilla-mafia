@@ -1,7 +1,7 @@
 class AutosaveGameProtocolService
   Result = Data.define(:success, :errors)
 
-  GAME_FIELDS = %w[game_number played_on name result judge competition_id table_number games_total hide_roles hide_game_info hide_table_info].freeze
+  GAME_FIELDS = %w[game_number played_on name result judge competition_id stage_id table_number games_total hide_roles hide_game_info hide_table_info].freeze
   PARTICIPATION_FIELDS = %w[player_name role_code plus minus best_move first_shoot notes status best_move_seats].freeze
 
   def self.call(game:, scope:, field:, value:, seat: nil)
@@ -32,12 +32,20 @@ class AutosaveGameProtocolService
   def update_game_field
     return Result.new(success: false, errors: [ "Field not allowed: #{@field}" ]) unless GAME_FIELDS.include?(@field)
 
-    @game.assign_attributes(@field => @value)
+    @game.assign_attributes(game_attributes)
     if @game.save
       Result.new(success: true, errors: [])
     else
       Result.new(success: false, errors: @game.errors.full_messages)
     end
+  end
+
+  # The stage select names the game's competition, as on a full protocol submit: the stage itself, or the parent
+  # competition through its blank option. A blank stage leaves the competition as it is.
+  def game_attributes
+    return { @field => @value } unless @field == "stage_id"
+
+    @value.blank? ? {} : { "competition_id" => @value }
   end
 
   def update_participation_field

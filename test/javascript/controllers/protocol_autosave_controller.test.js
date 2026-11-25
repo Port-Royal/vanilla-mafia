@@ -188,4 +188,42 @@ describe("ProtocolAutosaveController", () => {
       expect(fetchMock).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe("on a field kept out of autosave", () => {
+    let fetchMock
+
+    beforeEach(() => {
+      fetchMock = vi.fn(() => new Promise(() => {}))
+      vi.stubGlobal("fetch", fetchMock)
+      document.querySelector("form").insertAdjacentHTML("beforeend",
+        '<input name="game[new_stage_name]" value="Final" data-protocol-autosave-skip>')
+      document.querySelector("form").setAttribute("data-action",
+        "change->protocol-autosave#fieldChanged input->protocol-autosave#fieldInput")
+      toggle().click()
+    })
+
+    const skipped = () => document.querySelector("[name='game[new_stage_name]']")
+
+    it("does not save it on change", async () => {
+      skipped().dispatchEvent(new Event("change", { bubbles: true }))
+      await settle()
+
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it("does not save it while typing", async () => {
+      skipped().dispatchEvent(new Event("input", { bubbles: true }))
+      vi.advanceTimersByTime(500)
+      await settle()
+
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it("leaves the status empty", async () => {
+      skipped().dispatchEvent(new Event("change", { bubbles: true }))
+      await settle()
+
+      expect(status().textContent).toBe("")
+    })
+  })
 })

@@ -288,6 +288,10 @@ RSpec.describe "Judge::Protocols" do
       it "renders a new stage name input" do
         assert_select "input[name='game[new_stage_name]']"
       end
+
+      it "keeps the new stage name out of autosave" do
+        assert_select "input[name='game[new_stage_name]'][data-protocol-autosave-skip]"
+      end
     end
 
     context "when user is judge" do

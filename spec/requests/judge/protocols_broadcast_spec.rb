@@ -41,6 +41,32 @@ RSpec.describe "GameProtocol broadcasting" do
       end
     end
 
+    context "when picking a stage" do
+      let_it_be(:stage) { create(:competition, :round, parent: competition, name: "Финал") }
+      let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: competition) }
+
+      it "broadcasts the stage name for the overlay" do
+        expect {
+          patch autosave_judge_protocol_path(game), params: { scope: "game", field: "stage_id", value: stage.id.to_s }, as: :json
+        }.to have_broadcasted_to(game).from_channel(GameProtocolChannel).with(
+          { scope: "game", field: "competition", value: "Финал" }
+        )
+      end
+    end
+
+    context "when clearing the stage" do
+      let_it_be(:stage) { create(:competition, :round, parent: competition, name: "Финал") }
+      let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: stage) }
+
+      it "broadcasts the parent competition name for the overlay" do
+        expect {
+          patch autosave_judge_protocol_path(game), params: { scope: "game", field: "stage_id", value: competition.id.to_s }, as: :json
+        }.to have_broadcasted_to(game).from_channel(GameProtocolChannel).with(
+          { scope: "game", field: "competition", value: competition.name }
+        )
+      end
+    end
+
     context "when switching a display setting" do
       it "broadcasts the update to the game channel" do
         expect {

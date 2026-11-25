@@ -88,6 +88,23 @@ RSpec.describe "Judge::Protocols#autosave" do
           expect(game.reload.competition_id).to eq(other_competition.id)
         end
 
+        context "when picking a stage" do
+          let_it_be(:stage) { create(:competition, :round, parent: competition) }
+          let_it_be(:game, reload: true) { create(:game, game_number: 2, competition: competition) }
+
+          before do
+            patch autosave_judge_protocol_path(game), params: { scope: "game", field: "stage_id", value: stage.id.to_s }, as: :json
+          end
+
+          it "responds with success" do
+            expect(response).to have_http_status(:ok)
+          end
+
+          it "moves the game to the stage" do
+            expect(game.reload.competition).to eq(stage)
+          end
+        end
+
         it "updates game_number" do
           patch autosave_judge_protocol_path(game), params: {
             scope: "game", field: "game_number", value: "42"
