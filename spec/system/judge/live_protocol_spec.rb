@@ -35,6 +35,7 @@ RSpec.describe "Live protocol console" do
     expect(game.reload.result).to eq("peace_victory")
   end
 
+  # :enter is the numpad Enter on purpose (key actions send it as NumpadEnter); the main Enter is :return.
   it "confirms with the numpad Enter" do
     press_keys("1", "2", "3", "4", :enter)
     expect(page).to have_css("[data-role='don']")
