@@ -2,6 +2,7 @@
 
 <div id="game-overlay"
      data-controller="game-overlay"
+     data-action="resize@window->game-overlay#fitNames"
      data-game-overlay-game-id-value="<%= @game.id %>"
      data-game-overlay-nominees-value="<%= @nominees.to_json %>"
      data-game-overlay-shots-value="<%= @shots.to_json %>"
@@ -73,7 +74,7 @@
 
           <div class="overlay-bottom flex items-stretch bg-black/70 font-semibold">
             <div class="overlay-seat flex-none bg-white/15 px-[0.4em] text-center"><%= seat %></div>
-            <div class="overlay-name min-w-0 flex-1 truncate px-[0.4em]"
+            <div class="overlay-name min-w-0 flex-1 truncate"
                  data-game-overlay-target="playerName"
                  data-seat="<%= seat %>"><%= player ? player.name : "" %></div>
           </div>

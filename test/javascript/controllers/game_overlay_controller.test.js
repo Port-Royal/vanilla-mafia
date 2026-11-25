@@ -97,6 +97,133 @@ describe("GameOverlayController role hiding", () => {
   })
 })
 
+describe("GameOverlayController name fitting", () => {
+  let application
+  let controller
+
+  // jsdom lays nothing out, so each name's text is 10px wide per character at its fitted size, in a
+  // bar 110px wide with 10px of padding: ten characters fill it exactly, eleven need 0.9, and more
+  // than sixteen cannot fit even at 0.6.
+  let charWidth
+  const fit = (seat) => nameOf(seat).style.getPropertyValue("--overlay-name-fit")
+  const nameOf = (seat) => document.querySelector(`[data-game-overlay-target="playerName"][data-seat="${seat}"]`)
+  const fitOf = (name) => Number(name.style.getPropertyValue("--overlay-name-fit") || 1)
+  const layOut = (name) => {
+    name.getBoundingClientRect = () => ({ width: 110 })
+  }
+  const start = async () => {
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  }
+
+  beforeEach(async () => {
+    charWidth = 10
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay" data-action="resize@window->game-overlay#fitNames">
+        <div style="padding: 0 3px 0 7px" data-game-overlay-target="playerName" data-seat="1">Кот</div>
+        <div style="padding: 0 3px 0 7px" data-game-overlay-target="playerName" data-seat="2">Младшенький</div>
+        <div style="padding: 0 3px 0 7px" data-game-overlay-target="playerName" data-seat="3">Десятьбукв</div>
+        <div style="padding: 0 3px 0 7px" data-game-overlay-target="playerName" data-seat="4">Шестнадцатьбукв!</div>
+        <div style="padding: 0 3px 0 7px" data-game-overlay-target="playerName" data-seat="5">Очень длинный никнейм игрока</div>
+      </div>
+    `
+    document.querySelectorAll("[data-game-overlay-target='playerName']").forEach(layOut)
+    Range.prototype.getBoundingClientRect = function () {
+      return { width: this.startContainer.textContent.length * charWidth * fitOf(this.startContainer) }
+    }
+    await start()
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+    delete document.fonts
+    delete Range.prototype.getBoundingClientRect
+  })
+
+  it("leaves a name that fits at the base size", () => {
+    expect(fit(1)).toBe("")
+  })
+
+  it("leaves a name that fills the bar exactly at the base size", () => {
+    expect(fit(3)).toBe("")
+  })
+
+  it("shrinks a name a fraction of a pixel too wide", () => {
+    charWidth = 10.01
+    controller.fitNames()
+
+    expect(fit(3)).toBe("0.95")
+  })
+
+  it("steps a long name down to the first size that fits", () => {
+    expect(fit(2)).toBe("0.9")
+  })
+
+  it("shrinks a name that fits only at the minimum to the minimum", () => {
+    expect(fit(4)).toBe("0.6")
+  })
+
+  it("stops at the minimum when the name does not fit even there", () => {
+    expect(fit(5)).toBe("0.6")
+  })
+
+  it("connects in a browser without the font loading API", () => {
+    expect(controller.subscription).toBeDefined()
+  })
+
+  describe("when a name changes live", () => {
+    it("ignores a seat with no name bar", () => {
+      expect(() => controller.handleUpdate({ scope: "participation", seat: 9, field: "player_name", value: "Кот" })).not.toThrow()
+    })
+
+    it("fits the longer name", () => {
+      controller.handleUpdate({ scope: "participation", seat: 1, field: "player_name", value: "Младшенький" })
+
+      expect(fit(1)).toBe("0.9")
+    })
+
+    it("brings a shorter name back to the base size", () => {
+      controller.handleUpdate({ scope: "participation", seat: 2, field: "player_name", value: "Кот" })
+
+      expect(fit(2)).toBe("")
+    })
+
+    it("leaves the other names alone", () => {
+      nameOf(4).style.removeProperty("--overlay-name-fit")
+      controller.handleUpdate({ scope: "participation", seat: 1, field: "player_name", value: "Младшенький" })
+
+      expect(fit(4)).toBe("")
+    })
+  })
+
+  describe("when the browser source is resized", () => {
+    it("fits the names again", () => {
+      charWidth = 5
+      window.dispatchEvent(new Event("resize"))
+
+      expect([fit(2), fit(4), fit(5)]).toEqual(["", "", "0.7"])
+    })
+  })
+
+  describe("when the web font finishes loading", () => {
+    it("fits the names again once it is ready", async () => {
+      application.stop()
+      let fontsLoaded
+      Object.defineProperty(document, "fonts", { configurable: true, value: { ready: new Promise((resolve) => { fontsLoaded = resolve }) } })
+      await start()
+      charWidth = 5
+      fontsLoaded()
+      await document.fonts.ready
+      await Promise.resolve()
+
+      expect(fit(2)).toBe("")
+    })
+  })
+})
+
 describe("GameOverlayController nominees", () => {
   let application
   let controller
