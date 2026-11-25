@@ -11,17 +11,51 @@ export default class extends Controller {
 
   connect() {
     this.active = false
-    this.debounceTimers = {}
-    // One request in flight per field; a value changed meanwhile waits and is sent when it finishes.
-    this.requests = new Map()
-    this.waitingValues = new Map()
-    this.failedFields = new Set()
+    // Each connection keeps its own state, so a request of an earlier connection that settles late cannot touch it.
+    this.state = {
+      connected: true,
+      // A typed value waits for the typing to pause before it is saved.
+      typedValues: new Map(),
+      // One request in flight per field; a value changed meanwhile waits and is sent when it finishes.
+      requests: new Map(),
+      waitingValues: new Map(),
+      failedFields: new Set()
+    }
+    this.pageLeft = () => this.flushOnLeave()
+    this.visibilityChanged = () => {
+      if (document.visibilityState === "hidden") this.flushOnLeave()
+    }
+    window.addEventListener("pagehide", this.pageLeft)
+    document.addEventListener("visibilitychange", this.visibilityChanged)
   }
 
+  // Requests in flight finish on their own: they are sent with keepalive, and a value waiting for one of them follows
+  // it, as the page itself stays loaded when the controller disconnects.
   disconnect() {
-    Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer))
+    window.removeEventListener("pagehide", this.pageLeft)
+    document.removeEventListener("visibilitychange", this.visibilityChanged)
     clearTimeout(this.savedTimer)
-    this.requests.forEach(request => request.abort())
+    this.state.connected = false
+    this.saveTypedValues()
+  }
+
+  // The page may be unloaded after this, so nothing can wait: a value waiting for its field's request is sent now.
+  flushOnLeave() {
+    this.saveTypedValues()
+
+    const state = this.state
+    state.waitingValues.forEach((fieldInfo, key) => this.send(state, key, fieldInfo))
+    state.waitingValues.clear()
+  }
+
+  // A value typed while autosave was on is saved even if it was switched off since, as the pause would have saved it.
+  saveTypedValues() {
+    const state = this.state
+    state.typedValues.forEach(({ timer, fieldInfo }) => {
+      clearTimeout(timer)
+      this.save(state, fieldInfo)
+    })
+    state.typedValues.clear()
   }
 
   toggle() {
@@ -41,7 +75,7 @@ export default class extends Controller {
     const fieldInfo = this.parseFieldInfo(input)
     if (!fieldInfo) return
 
-    this.save(fieldInfo)
+    this.save(this.state, fieldInfo)
   }
 
   fieldInput(event) {
@@ -51,9 +85,14 @@ export default class extends Controller {
     const fieldInfo = this.parseFieldInfo(input)
     if (!fieldInfo) return
 
+    const state = this.state
     const key = this.fieldKey(fieldInfo)
-    clearTimeout(this.debounceTimers[key])
-    this.debounceTimers[key] = setTimeout(() => this.save(fieldInfo), 500)
+    if (state.typedValues.has(key)) clearTimeout(state.typedValues.get(key).timer)
+    const timer = setTimeout(() => {
+      state.typedValues.delete(key)
+      this.save(state, fieldInfo)
+    }, 500)
+    state.typedValues.set(key, { timer, fieldInfo })
   }
 
   fieldKey(fieldInfo) {
@@ -98,18 +137,18 @@ export default class extends Controller {
       .map((element) => element.value)
   }
 
-  save(fieldInfo) {
-    this.showStatus("saving")
+  save(state, fieldInfo) {
+    this.showStatus(state, "saving")
 
     const key = this.fieldKey(fieldInfo)
-    if (this.requests.has(key)) {
-      this.waitingValues.set(key, fieldInfo)
+    if (state.requests.has(key)) {
+      state.waitingValues.set(key, fieldInfo)
     } else {
-      this.send(key, fieldInfo)
+      this.send(state, key, fieldInfo)
     }
   }
 
-  async send(key, fieldInfo) {
+  async send(state, key, fieldInfo) {
     const body = {
       scope: fieldInfo.scope,
       field: fieldInfo.field,
@@ -119,58 +158,53 @@ export default class extends Controller {
       body.seat = fieldInfo.seat
     }
 
-    const controller = new AbortController()
-    this.requests.set(key, controller)
+    const request = {}
+    state.requests.set(key, request)
 
-    try {
-      const response = await fetch(this.urlValue, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken
-        },
-        body: JSON.stringify(body),
-        signal: controller.signal
-      })
+    // keepalive lets the request finish if the page is unloaded meanwhile.
+    const ok = await fetch(this.urlValue, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": this.csrfToken
+      },
+      body: JSON.stringify(body),
+      keepalive: true
+    }).then(response => response.ok, () => false)
+    this.recordResult(state, key, ok)
+    // The page may have sent a newer value for this field meanwhile, so only this request's own entry is removed.
+    if (state.requests.get(key) === request) state.requests.delete(key)
 
-      if (!controller.signal.aborted) this.recordResult(key, response.ok)
-    } catch {
-      if (!controller.signal.aborted) this.recordResult(key, false)
-    }
-    // Aborted on disconnect: nothing to record or show, and a waiting value is dropped. A reconnect may already have
-    // started a new request for this field, so only this request's own entry is removed.
-    if (this.requests.get(key) === controller) this.requests.delete(key)
-    if (controller.signal.aborted) return
-
-    this.sendWaitingValue(key)
+    this.sendWaitingValue(state, key)
   }
 
-  recordResult(key, ok) {
+  recordResult(state, key, ok) {
     if (ok) {
-      this.failedFields.delete(key)
+      state.failedFields.delete(key)
     } else {
-      this.failedFields.add(key)
+      state.failedFields.add(key)
     }
   }
 
-  sendWaitingValue(key) {
-    const waiting = this.waitingValues.get(key)
+  sendWaitingValue(state, key) {
+    const waiting = state.waitingValues.get(key)
     if (waiting) {
-      this.waitingValues.delete(key)
-      this.send(key, waiting)
-    } else if (this.requests.size === 0) {
-      this.showStatus(this.failedFields.size > 0 ? "error" : "saved")
+      state.waitingValues.delete(key)
+      this.send(state, key, waiting)
+    } else if (state.requests.size === 0) {
+      this.showStatus(state, state.failedFields.size > 0 ? "error" : "saved")
     }
   }
 
-  showStatus(state) {
-    if (!this.hasStatusTarget) return
+  // Only the current connection shows its saves.
+  showStatus(state, status) {
+    if (!state.connected || !this.hasStatusTarget) return
 
     const target = this.statusTarget
     target.classList.remove("text-ink-muted", "text-gold-ink", "text-alert-ink")
     clearTimeout(this.savedTimer)
 
-    switch (state) {
+    switch (status) {
       case "saving":
         target.textContent = this.savingTextValue
         target.classList.add("text-ink-muted")
