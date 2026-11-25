@@ -7,8 +7,7 @@ RSpec.describe "Live protocol console" do
   let(:game) { create(:game) }
   let!(:seats) { (1..10).map { |seat| create(:game_participation, game:, seat:, role_code: nil, player: create(:player, name: "Игрок#{seat}")) } }
 
-  let(:press) { ->(*keys) { keys.each { |key| find("body").send_keys(key) } } }
-  let(:start_game) { -> { press.call("1", "2", "3", "4", :enter); expect(page).to have_css("[data-role='don']"); press.call(:enter); expect(page).to have_text("Игрок1") } }
+  let(:start_game) { -> { press_keys("1", "2", "3", "4", :return); expect(page).to have_css("[data-role='don']"); press_keys(:return); expect(page).to have_text("Игрок1") } }
 
   before do
     sign_in admin
@@ -18,20 +17,20 @@ RSpec.describe "Live protocol console" do
 
   it "plays a short game from the keyboard" do
     start_game.call
-    press.call("n", "3", :space, "n", "4", "v")
+    press_keys("n", "3", :space, "n", "4", "v")
     expect(page).to have_css(".lp-vote--now")
     expect(page).to have_css(".lp-not-voted", exact_text: I18n.t("live_protocols.screen.vote.not_voted", seats: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10"))
-    press.call("1", "2", "5", "6", "7", "8")
+    press_keys("1", "2", "5", "6", "7", "8")
     expect(page).to have_css(".lp-not-voted", exact_text: I18n.t("live_protocols.screen.vote.not_voted", seats: "3, 4, 9, 10"))
-    press.call(:enter)
+    press_keys(:return)
     expect(page).to have_text(I18n.t("live_protocols.screen.best.eyebrow"))
-    press.call(:enter)
+    press_keys(:return)
     expect(page).to have_css("#lp-will")
-    press.call(:enter)
+    press_keys(:return)
     expect(page).to have_text(I18n.t("live_protocols.screen.night.shot"))
-    press.call("x", "1", "x", "4")
+    press_keys("x", "1", "x", "4")
     expect(page).to have_text(I18n.t("live_protocols.screen.results.peace_victory"))
-    press.call("q")
+    press_keys("q")
     expect(page).to have_current_path(edit_judge_protocol_path(game))
     expect(game.reload.result).to eq("peace_victory")
   end
@@ -47,26 +46,26 @@ RSpec.describe "Live protocol console" do
   context "with a finished game" do
     before do
       start_game.call
-      press.call("s", "4", :enter)
-      find("body").send_keys([ :shift, "d" ])
+      press_keys("s", "4", :return)
+      press_keys([ :shift, "d" ])
       expect(page).to have_current_path(edit_judge_protocol_path(game))
       visit live_judge_protocol_path(game)
       expect(page).to have_text(I18n.t("live_protocols.screen.finish.done"))
     end
 
     it "shows the chosen player's blocks" do
-      press.call("4")
+      press_keys("4")
       expect(page).to have_css(".lp-filter", text: "4 Игрок4")
       expect(page).to have_text(I18n.t("live_protocols.screen.filter.received"))
     end
 
     it "reads 0 as seat 10" do
-      press.call("0")
+      press_keys("0")
       expect(page).to have_css(".lp-filter", text: "10 Игрок10")
     end
 
     it "drops the filter on Esc" do
-      press.call("4", :escape)
+      press_keys("4", :escape)
       expect(page).to have_no_css(".lp-filter")
     end
 
@@ -78,25 +77,25 @@ RSpec.describe "Live protocol console" do
 
   it "does not filter during the game" do
     start_game.call
-    press.call("4")
+    press_keys("4")
     expect(page).to have_no_css(".lp-filter")
   end
 
   it "reads 0 as seat 10" do
     start_game.call
-    press.call("n", "0")
+    press_keys("n", "0")
     expect(page).to have_css(".lp-chip", text: "10")
   end
 
   it "cancels the pending action on Esc" do
     start_game.call
-    press.call("n", :escape, "3")
+    press_keys("n", :escape, "3")
     expect(page).to have_text(I18n.t("live_protocols.screen.errors.choose_action"))
   end
 
   it "writes nothing for a number with no action" do
     start_game.call
-    press.call("3")
+    press_keys("3")
     expect(page).to have_no_css(".lp-chip")
   end
 
@@ -141,7 +140,7 @@ RSpec.describe "Live protocol console" do
 
   it "opens a finished game read-only with everything revealed" do
     start_game.call
-    find("body").send_keys([ :shift, "d" ])
+    press_keys([ :shift, "d" ])
     expect(page).to have_current_path(edit_judge_protocol_path(game))
     visit live_judge_protocol_path(game)
     expect(page).to have_css("[data-role='don']")
@@ -150,10 +149,10 @@ RSpec.describe "Live protocol console" do
 
   it "puts seat numbers in the log on their role colours only once the roles are open" do
     start_game.call
-    press.call("n", "5")
+    press_keys("n", "5")
     expect(page).to have_css(".lp-entry", text: "5")
     expect(page).to have_no_css(".lp-sn")
-    find("body").send_keys([ :shift, "d" ])
+    press_keys([ :shift, "d" ])
     expect(page).to have_current_path(edit_judge_protocol_path(game))
     visit live_judge_protocol_path(game)
     expect(page).to have_css(".lp-a .lp-sn--black", exact_text: "1")
@@ -162,23 +161,23 @@ RSpec.describe "Live protocol console" do
 
   it "focuses the will field in the leaving speech" do
     start_game.call
-    press.call("v", "5", :enter, :enter)
+    press_keys("v", "5", :return, :return)
     expect(page).to have_text(I18n.t("live_protocols.screen.best.eyebrow"))
-    press.call(:enter)
+    press_keys(:return)
     expect(page.evaluate_script("document.activeElement.id")).to eq("lp-will")
   end
 
   it "undoes a whole action group with Ctrl+Z" do
     start_game.call
-    press.call("g", "5", "g", "5")
+    press_keys("g", "5", "g", "5")
     expect(page).to have_css(".lp-seat--out", text: "Игрок5")
-    find("body").send_keys([ :control, "z" ])
+    press_keys([ :control, "z" ])
     expect(page).to have_no_css(".lp-seat--out")
   end
 
   it "brings the deal back after undoing into it" do
     start_game.call
-    find("body").send_keys([ :control, "z" ])
+    press_keys([ :control, "z" ])
     expect(page).to have_text(I18n.t("live_protocols.screen.deal.title"))
   end
 
@@ -191,9 +190,9 @@ RSpec.describe "Live protocol console" do
 
     it "keeps them after confirm and Ctrl+Z" do
       expect(page).to have_css("[data-role='don']")
-      press.call(:enter)
+      press_keys(:return)
       expect(page).to have_text(I18n.t("live_protocols.screen.deal.title"))
-      find("body").send_keys([ :control, "z" ])
+      press_keys([ :control, "z" ])
       expect(page).to have_css("[data-role='don']")
       expect(page).to have_css("[data-seat='1'] [data-role='don']")
     end

@@ -40,7 +40,7 @@ RSpec.describe "Live protocol focus mode" do
       end
 
       it "keeps the console keys working while the button has focus" do
-        page.driver.browser.action.send_keys("1", "2").perform
+        press_keys("1", "2")
         expect(page).to have_css(".lp-picks", text: "1, 2")
       end
     end
