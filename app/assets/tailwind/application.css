@@ -365,7 +365,7 @@
     height: 1.6em;
   }
 
-  /* The icons are thin outlines drawn over the photo: a tight dark edge plus a wider halo keeps them readable on a
+  /* The icons are outlines drawn over the photo, white or red: a tight dark edge plus a wider halo keeps them readable on a
      light photo as well as on a dark one. The tight shadow is stacked twice to read as a solid edge; in em, so it
      scales with the tile like the icon does. */
   .overlay-status-icon svg {
