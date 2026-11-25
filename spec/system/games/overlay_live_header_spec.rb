@@ -3,10 +3,18 @@ require "rails_helper"
 # The test cable adapter never reaches the browser, so the specs hand a broadcast payload
 # straight to the overlay controller, exactly as GameProtocolChannel would deliver it.
 RSpec.describe "Game overlay live header" do
-  let_it_be(:game) { create(:game, game_number: 3, table_number: 1, judge: "Кузнецов") }
+  let_it_be(:competition) { create(:competition, name: "Кубок Осени") }
+  let_it_be(:game) { create(:game, competition:, game_number: 3, table_number: 1, judge: "Кузнецов") }
 
   let(:header_texts) do
     page.evaluate_script('["overlay-table", "overlay-game-number", "overlay-judge"].map((id) => document.getElementById(id).textContent.trim())')
+  end
+  let(:shown_rows) do
+    page.evaluate_script(<<~JS)
+      [...document.querySelectorAll("#overlay-info .overlay-info-row")]
+        .filter((row) => getComputedStyle(row).display !== "none")
+        .map((row) => [...row.children].map((cell) => cell.textContent.trim()))
+    JS
   end
 
   let(:controller_js) do
@@ -30,8 +38,8 @@ RSpec.describe "Game overlay live header" do
     end
 
     it "updates the header without reload" do
-      expect(page).to have_css("#overlay-judge", text: "Судья Петров")
-      expect(header_texts).to eq([ "Стол 2", "Игра 3", "Судья Петров" ])
+      expect(page).to have_css("#overlay-judge", text: "Петров")
+      expect(shown_rows).to eq([ %w[Стол 2], %w[Игра 3], [ "Турнир", "Кубок Осени" ], %w[Судья Петров] ])
     end
   end
 
@@ -43,9 +51,9 @@ RSpec.describe "Game overlay live header" do
       ]
     end
 
-    it "hides the table and the judge" do
-      expect(page).to have_no_css("#overlay-judge", text: "Судья")
-      expect(header_texts).to eq([ "", "Игра 3", "" ])
+    it "leaves out the table and the judge rows" do
+      expect(page).to have_no_css("#overlay-judge-row")
+      expect(shown_rows).to eq([ %w[Игра 3], [ "Турнир", "Кубок Осени" ] ])
     end
   end
 
@@ -53,7 +61,7 @@ RSpec.describe "Game overlay live header" do
     let(:payloads) { [ { scope: "game", field: "games_total", value: "8" } ] }
 
     it "shows the game number out of the total" do
-      expect(header_texts[1]).to eq("Игра 3/8")
+      expect(header_texts[1]).to eq("3/8")
     end
   end
 
@@ -66,7 +74,7 @@ RSpec.describe "Game overlay live header" do
     end
 
     it "keeps the total" do
-      expect(header_texts[1]).to eq("Игра 4/8")
+      expect(header_texts[1]).to eq("4/8")
     end
   end
 
@@ -79,7 +87,7 @@ RSpec.describe "Game overlay live header" do
     end
 
     it "shows only the game number" do
-      expect(header_texts[1]).to eq("Игра 3")
+      expect(header_texts[1]).to eq("3")
     end
   end
 
@@ -87,7 +95,7 @@ RSpec.describe "Game overlay live header" do
     let(:payloads) { [ { scope: "game", field: "name", value: "Финал" } ] }
 
     it "leaves the header untouched" do
-      expect(header_texts).to eq([ "Стол 1", "Игра 3", "Судья Кузнецов" ])
+      expect(header_texts).to eq(%w[1 3 Кузнецов])
     end
   end
 end

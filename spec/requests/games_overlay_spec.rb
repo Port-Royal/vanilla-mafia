@@ -43,7 +43,7 @@ RSpec.describe "Games#overlay" do
 
     context "with the full-canvas layout" do
       let(:document) { response.parsed_body }
-      let(:header_slots) { document.css(".overlay-header > div").map { |slot| [ slot["id"], slot.text.strip ] } }
+      let(:header_slots) { document.css(".overlay-header > div").map { |slot| slot["id"] } }
       let(:tile_ids) { document.css(".overlay-tiles > .overlay-tile").map { |tile| tile["id"] } }
 
       before { get overlay_game_path(game) }
@@ -56,16 +56,17 @@ RSpec.describe "Games#overlay" do
         expect(document.css("#game-overlay.overlay-canvas").size).to eq(1)
       end
 
-      it "renders header slots for the table with the night block, the game number and the judge" do
-        expect(header_slots.map(&:first)).to eq(%w[overlay-header-start overlay-game-number overlay-header-end])
+      it "renders the left corner and the info block on the right, with nothing in the centre" do
+        expect(header_slots).to eq(%w[overlay-header-start overlay-info])
       end
 
-      it "keeps the judge label first in the right slot" do
-        expect(document.at_css("#overlay-header-end > div")["id"]).to eq("overlay-judge")
+      it "puts the nominees above the night block in the left corner" do
+        expect(document.css("#overlay-header-start > div").map { |block| block["id"] }).to eq(%w[overlay-nominees overlay-night])
       end
 
-      it "keeps the table label first in its slot" do
-        expect(document.at_css("#overlay-header-start > div")["id"]).to eq("overlay-table")
+      it "lists the table, the game, the tournament and the judge in the info block" do
+        expect(document.css("#overlay-info > .overlay-info-row").map { |row| row["id"] })
+          .to eq(%w[overlay-table-row overlay-game-row overlay-tournament-row overlay-judge-row])
       end
 
       it "renders every seat card as a fixed-aspect tile in the bottom row" do
@@ -73,18 +74,26 @@ RSpec.describe "Games#overlay" do
       end
     end
 
-    context "with the header" do
+    context "with the info block" do
+      let_it_be(:info_competition) { create(:competition, name: "Кубок Осени") }
+
       let(:document) { response.parsed_body }
-      let(:header_texts) { %w[overlay-table overlay-game-number overlay-judge].map { |id| document.at_css("##{id}").text.strip } }
+      let(:shown_rows) do
+        document.css("#overlay-info > .overlay-info-row:not([hidden])").map do |row|
+          row.css(".overlay-info-label, .overlay-info-value").map { |cell| cell.text.strip }
+        end
+      end
       let(:overlay) { document.at_css("#game-overlay") }
 
       before { get overlay_game_path(header_game) }
 
       context "when the table number and the judge are set" do
-        let_it_be(:header_game) { create(:game, game_number: 3, games_total: 8, competition: competition, table_number: 2, judge: "Кузнецов") }
+        let_it_be(:header_game) do
+          create(:game, game_number: 3, games_total: 8, competition: info_competition, table_number: 2, judge: "Кузнецов")
+        end
 
-        it "shows the table, the game number out of the total and the judge" do
-          expect(header_texts).to eq([ "Стол 2", "Игра 3/8", "Судья Кузнецов" ])
+        it "shows the table, the game number out of the total, the tournament and the judge" do
+          expect(shown_rows).to eq([ %w[Стол 2], %w[Игра 3/8], [ "Турнир", "Кубок Осени" ], %w[Судья Кузнецов] ])
         end
 
         it "keeps the game number and the total for live updates" do
@@ -95,10 +104,14 @@ RSpec.describe "Games#overlay" do
       end
 
       context "when the table number and the judge are blank" do
-        let_it_be(:header_game) { create(:game, game_number: 4, competition: competition, table_number: nil, judge: "") }
+        let_it_be(:header_game) { create(:game, game_number: 4, competition: info_competition, table_number: nil, judge: "") }
 
-        it "shows only the game number" do
-          expect(header_texts).to eq([ "", "Игра 4", "" ])
+        it "leaves out the table and the judge rows" do
+          expect(shown_rows).to eq([ %w[Игра 4], [ "Турнир", "Кубок Осени" ] ])
+        end
+
+        it "keeps the empty table and judge slots for live updates" do
+          expect(%w[overlay-table overlay-judge].map { |id| document.at_css("##{id}").text }).to eq([ "", "" ])
         end
 
         it "keeps an empty total for live updates" do
@@ -106,19 +119,14 @@ RSpec.describe "Games#overlay" do
         end
       end
 
-      context "with live update templates" do
-        let_it_be(:header_game) { create(:game, game_number: 5, competition: competition) }
+      context "with live update targets" do
+        let_it_be(:header_game) { create(:game, game_number: 5, competition: info_competition) }
 
-        it "exposes the table and judge label templates for the overlay controller" do
-          expect(overlay.to_h).to include(
-            "data-game-overlay-table-template-value" => "Стол %VALUE%",
-            "data-game-overlay-judge-template-value" => "Судья %VALUE%",
-            "data-game-overlay-game-template-value" => "Игра %NUMBER%",
-            "data-game-overlay-game-of-total-template-value" => "Игра %NUMBER%/%TOTAL%"
-          )
+        it "exposes the game number template for the overlay controller" do
+          expect(overlay["data-game-overlay-game-of-total-template-value"]).to eq("%NUMBER%/%TOTAL%")
         end
 
-        it "marks the table and judge slots as controller targets" do
+        it "marks the table and judge values as controller targets" do
           expect(%w[overlay-table overlay-judge].map { |id| document.at_css("##{id}")["data-game-overlay-target"] }).to eq(%w[table judge])
         end
       end
@@ -402,8 +410,8 @@ RSpec.describe "Games#overlay" do
       expect(cells).to eq([ %w[5 black], %w[3 red] ])
     end
 
-    it "sits in the right of the header" do
-      expect(response.parsed_body.at_css(".overlay-header #overlay-nominees")).to be_present
+    it "sits in the left corner of the header" do
+      expect(response.parsed_body.at_css("#overlay-header-start > #overlay-nominees")).to be_present
     end
 
     it "shows the block" do
@@ -448,7 +456,7 @@ RSpec.describe "Games#overlay" do
       let(:hide_roles) { false }
 
       it "sits in the left of the header" do
-        expect(document.at_css(".overlay-header #overlay-night")).to be_present
+        expect(document.at_css("#overlay-header-start > #overlay-night")).to be_present
       end
 
       it "numbers the nights" do

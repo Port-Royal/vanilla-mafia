@@ -13,8 +13,8 @@ RSpec.describe "Game overlay live display settings" do
   let(:shown) do
     page.evaluate_script(<<~JS)
       ["#overlay-table", "#overlay-game-number", "#overlay-judge", "#seat-1 .overlay-role-badge"].map((selector) => {
-        const style = getComputedStyle(document.querySelector(selector))
-        return style.display !== "none" && style.visibility !== "hidden"
+        const element = document.querySelector(selector)
+        return element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden"
       })
     JS
   end

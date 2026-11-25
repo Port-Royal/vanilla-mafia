@@ -29,7 +29,8 @@ RSpec.describe "Table overlays" do
     end
 
     context "with a game in progress today without a table number" do
-      let_it_be(:game) { create(:game, table_number: nil, played_on: today, judge: "Судья Стола") }
+      let_it_be(:competition) { create(:competition, name: "Кубок Стола") }
+      let_it_be(:game) { create(:game, competition:, table_number: nil, played_on: today, judge: "Судья Стола") }
 
       before { get overlay_path }
 
@@ -41,8 +42,13 @@ RSpec.describe "Table overlays" do
         expect(overlay["data-table-overlay-game-id-value"]).to eq(game.id.to_s)
       end
 
-      it "renders the game header" do
-        expect(response.body).to include("Судья Стола")
+      it "renders the game's info block in the top-right corner" do
+        expect(response.parsed_body.css(".overlay-header > #overlay-info .overlay-info-row:not([hidden]) .overlay-info-value").map { |value| value.text.strip })
+          .to eq([ game.game_number.to_s, "Кубок Стола", "Судья Стола" ])
+      end
+
+      it "renders the nominees above the night block in the top-left corner" do
+        expect(response.parsed_body.css("#overlay-header-start > div").map { |block| block["id"] }).to eq(%w[overlay-nominees overlay-night])
       end
     end
 

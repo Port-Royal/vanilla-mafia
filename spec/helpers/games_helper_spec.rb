@@ -144,62 +144,22 @@ RSpec.describe GamesHelper do
     end
   end
 
-  describe "#overlay_table_label" do
-    let(:game) { Game.new(table_number: table_number) }
-
-    context "when the table number is set" do
-      let(:table_number) { 3 }
-
-      it "labels the table" do
-        expect(helper.overlay_table_label(game)).to eq("Стол 3")
-      end
-    end
-
-    context "when the table number is blank" do
-      let(:table_number) { nil }
-
-      it "returns nil" do
-        expect(helper.overlay_table_label(game)).to be_nil
-      end
-    end
-  end
-
-  describe "#overlay_game_label" do
+  describe "#overlay_game_value" do
     let(:game) { Game.new(game_number: 5, games_total: games_total) }
 
     context "when the total is set" do
       let(:games_total) { 8 }
 
-      it "labels the game as a fraction of the total" do
-        expect(helper.overlay_game_label(game)).to eq("Игра 5/8")
+      it "shows the game as a fraction of the total" do
+        expect(helper.overlay_game_value(game)).to eq("5/8")
       end
     end
 
     context "when the total is blank" do
       let(:games_total) { nil }
 
-      it "labels the game by its number" do
-        expect(helper.overlay_game_label(game)).to eq("Игра 5")
-      end
-    end
-  end
-
-  describe "#overlay_judge_label" do
-    let(:game) { Game.new(judge: judge) }
-
-    context "when the judge is set" do
-      let(:judge) { "Кузнецов" }
-
-      it "labels the judge" do
-        expect(helper.overlay_judge_label(game)).to eq("Судья Кузнецов")
-      end
-    end
-
-    context "when the judge is blank" do
-      let(:judge) { " " }
-
-      it "returns nil" do
-        expect(helper.overlay_judge_label(game)).to be_nil
+      it "shows the game number" do
+        expect(helper.overlay_game_value(game)).to eq("5")
       end
     end
   end

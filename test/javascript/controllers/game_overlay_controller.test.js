@@ -518,3 +518,121 @@ describe("GameOverlayController fouls", () => {
     expect(pips(3)).toEqual([])
   })
 })
+
+describe("GameOverlayController info block", () => {
+  let application
+  let controller
+
+  const rows = () => [...document.querySelectorAll(".overlay-info-row")].filter((row) => !row.hidden).map((row) => row.id)
+  const text = (id) => document.getElementById(id).textContent
+  const send = (field, value) => controller.handleUpdate({ scope: "game", field, value })
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="game-overlay" data-controller="game-overlay" data-game-overlay-game-of-total-template-value="%NUMBER%/%TOTAL%">
+        <div id="overlay-info">
+          <div id="overlay-table-row" class="overlay-info-row"><span>Стол</span><span id="overlay-table" data-game-overlay-target="table">1</span></div>
+          <div id="overlay-game-row" class="overlay-info-row"><span>Игра</span><span id="overlay-game-number" data-game-overlay-target="gameNumber" data-number="3" data-total="">3</span></div>
+          <div id="overlay-tournament-row" class="overlay-info-row"><span>Турнир</span><span>Кубок</span></div>
+          <div id="overlay-judge-row" class="overlay-info-row" hidden><span>Судья</span><span id="overlay-judge" data-game-overlay-target="judge"></span></div>
+        </div>
+      </div>
+    `
+    application = Application.start()
+    application.register("game-overlay", GameOverlayController)
+    await Promise.resolve()
+    controller = application.getControllerForElementAndIdentifier(document.getElementById("game-overlay"), "game-overlay")
+  })
+
+  afterEach(() => {
+    application.stop()
+    document.body.innerHTML = ""
+  })
+
+  describe("when the judge is set", () => {
+    beforeEach(() => send("judge", " Петров $& "))
+
+    it("shows the trimmed name as is", () => {
+      expect(text("overlay-judge")).toBe("Петров $&")
+    })
+
+    it("shows the judge row", () => {
+      expect(rows()).toEqual(["overlay-table-row", "overlay-game-row", "overlay-tournament-row", "overlay-judge-row"])
+    })
+  })
+
+  describe("when the table number changes", () => {
+    beforeEach(() => send("table_number", "2"))
+
+    it("shows the new number", () => {
+      expect(text("overlay-table")).toBe("2")
+    })
+
+    it("keeps the table row", () => {
+      expect(rows()).toEqual(["overlay-table-row", "overlay-game-row", "overlay-tournament-row"])
+    })
+  })
+
+  describe("when the table number is cleared", () => {
+    beforeEach(() => send("table_number", "  "))
+
+    it("empties the value", () => {
+      expect(text("overlay-table")).toBe("")
+    })
+
+    it("leaves the table row out", () => {
+      expect(rows()).toEqual(["overlay-game-row", "overlay-tournament-row"])
+    })
+  })
+
+  describe("when the judge is cleared after being set", () => {
+    beforeEach(() => {
+      send("judge", "Петров")
+      send("judge", null)
+    })
+
+    it("leaves the judge row out", () => {
+      expect([text("overlay-judge"), rows()]).toEqual(["", ["overlay-table-row", "overlay-game-row", "overlay-tournament-row"]])
+    })
+  })
+
+  describe("when the total is set", () => {
+    beforeEach(() => send("games_total", " 8 "))
+
+    it("shows the game out of the total", () => {
+      expect(text("overlay-game-number")).toBe("3/8")
+    })
+
+    it("keeps the game number after it changes", () => {
+      send("game_number", "4")
+
+      expect(text("overlay-game-number")).toBe("4/8")
+    })
+
+    it("shows the number alone once the total is cleared", () => {
+      send("games_total", null)
+
+      expect(text("overlay-game-number")).toBe("3")
+    })
+  })
+
+  describe("when the game and table info are hidden", () => {
+    beforeEach(() => {
+      send("hide_game_info", "1")
+      send("hide_table_info", "1")
+    })
+
+    it("marks the canvas so the stylesheet leaves out both rows", () => {
+      expect([...document.getElementById("game-overlay").classList]).toEqual(["overlay-canvas--hide-game-info", "overlay-canvas--hide-table-info"])
+    })
+  })
+
+  describe("when another game field changes", () => {
+    beforeEach(() => send("name", "Финал"))
+
+    it("leaves the info block untouched", () => {
+      expect([text("overlay-table"), text("overlay-game-number"), text("overlay-judge"), rows()])
+        .toEqual(["1", "3", "", ["overlay-table-row", "overlay-game-row", "overlay-tournament-row"]])
+    })
+  })
+})
