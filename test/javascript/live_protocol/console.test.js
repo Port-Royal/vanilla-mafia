@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { decide, replay } from "../../../app/javascript/live_protocol/machine.js"
-import { canDelete, digitOf, emptyUi, handleKey, restorePlayers, rolesShown, stamp, undoGroup } from "../../../app/javascript/live_protocol/console.js"
+import { canDelete, digitOf, emptyUi, handleKey, keyCode, restorePlayers, rolesShown, stamp, undoGroup } from "../../../app/javascript/live_protocol/console.js"
 
 const players = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((seat) => ({ seat, name: `И${seat}`, role_code: null }))
 const key = (code, extra = {}) => ({ code, shift: false, ctrl: false, repeat: false, ...extra })
@@ -566,5 +566,58 @@ describe("the player filter after the game", () => {
 
   it("starts with no filter", () => {
     expect(emptyUi().filter).toBeNull()
+  })
+})
+
+describe("the numpad Enter", () => {
+  const base = [{ type: "assign_roles", seats: [1, 2, 3, 4] }, { type: "finish_deal" }]
+  const toBest = [...base, { type: "start_vote" }, { type: "shoot", seats: [5] }, { type: "don_check" }, { type: "sheriff_check" }]
+  const voting = () => session([...base, { type: "nominate", seats: [5] }, { type: "next_speaker" }, { type: "nominate", seats: [6] }, { type: "start_vote" }])
+  const confirm = (ui, state, ...codes) => handleKey(press(ui, state, ...codes).ui, state, key("NumpadEnter"))
+
+  it.each([["NumpadEnter", "Enter"], ["Enter", "Enter"], ["Numpad1", "Numpad1"], ["KeyA", "KeyA"]])("reads %s as %s", (code, expected) => {
+    expect(keyCode(code)).toBe(expected)
+  })
+
+  it("assigns the roles", () => {
+    expect(confirm(emptyUi(), replay(players, []), "Digit1", "Digit2", "Digit3", "Digit4").action).toEqual({ type: "assign_roles", seats: [1, 2, 3, 4] })
+  })
+
+  it("finishes the deal", () => {
+    expect(confirm(emptyUi(), session([base[0]]), "KeyS").action).toEqual({ type: "finish_deal", mode: "static", seats: [], text: null })
+  })
+
+  it("saves the marked seats of a pending action", () => {
+    expect(confirm(emptyUi(), speech(), "KeyS", "Numpad2", "Numpad0").action).toEqual({ type: "suspect", seats: [2, 10] })
+  })
+
+  it("applies a sanction to the speaker", () => {
+    expect(confirm(emptyUi(), speech(), "KeyF").action).toEqual({ type: "foul", seats: [] })
+  })
+
+  it("casts the vote", () => {
+    expect(confirm(emptyUi(), voting(), "Numpad1", "Numpad2").action).toEqual({ type: "vote_for", seats: [1, 2] })
+  })
+
+  it("skips a night check", () => {
+    expect(confirm(emptyUi(), session([...base, { type: "start_vote" }, { type: "shoot", seats: [5] }])).action).toEqual({ type: "don_check", seats: [] })
+  })
+
+  it("skips the best move", () => {
+    expect(confirm(emptyUi(), session(toBest)).action).toEqual({ type: "best_move", seats: [] })
+  })
+
+  it("saves the will", () => {
+    expect(confirm({ ...emptyUi(), will: "234к" }, session([...toBest, { type: "best_move" }])).action).toEqual({ type: "will", text: "234к" })
+  })
+
+  it("lets the next player leave", () => {
+    expect(confirm(emptyUi(), session([...toBest, { type: "best_move" }])).action).toEqual({ type: "finish_leaving" })
+  })
+
+  it.each([[{ shift: true }], [{ ctrl: true }], [{ repeat: true }]])("acts as Enter with %o", (extra) => {
+    const ui = { ...emptyUi(), marks: [1] }
+
+    expect(handleKey(ui, voting(), key("NumpadEnter", extra))).toEqual(handleKey(ui, voting(), key("Enter", extra)))
   })
 })

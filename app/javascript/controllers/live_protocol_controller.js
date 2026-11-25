@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { decide, replay } from "live_protocol/machine"
-import { canDelete, emptyUi, handleKey, restorePlayers, stamp, undoGroup } from "live_protocol/console"
+import { canDelete, emptyUi, handleKey, keyCode, restorePlayers, stamp, undoGroup } from "live_protocol/console"
 import { renderScreen, willPreview } from "live_protocol/screen"
 import { applyQueued, PermanentError, SendQueue } from "live_protocol/send_queue"
 
@@ -111,7 +111,7 @@ export default class extends Controller {
       else if (id === "lp-will") { this.willBlurred = true; event.target.blur() } else event.target.blur()
       return
     }
-    if (event.code !== "Enter") return
+    if (keyCode(event.code) !== "Enter") return
     event.preventDefault()
     if (id === "lp-pending-text") {
       const text = event.target.value
