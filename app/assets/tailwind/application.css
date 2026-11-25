@@ -365,6 +365,13 @@
     height: 1.6em;
   }
 
+  /* The icons are outlines drawn over the photo, white or red: a tight dark edge plus a wider halo keeps them readable on a
+     light photo as well as on a dark one. The tight shadow is stacked twice to read as a solid edge; in em, so it
+     scales with the tile like the icon does. */
+  .overlay-status-icon svg {
+    filter: drop-shadow(0 0 0.06em rgb(0 0 0 / 0.95)) drop-shadow(0 0 0.06em rgb(0 0 0 / 0.95)) drop-shadow(0 0 0.25em rgb(0 0 0 / 0.85));
+  }
+
   /* Read on stream at a glance: a solid colour per role and a large letter. Anchored to the foot,
      so it sits in the bottom-right corner of the photo right above the best move strip, or above
      the name bar when there is no strip. */
