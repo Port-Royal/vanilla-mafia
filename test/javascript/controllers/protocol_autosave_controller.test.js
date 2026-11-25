@@ -370,6 +370,46 @@ describe("ProtocolAutosaveController", () => {
       })
     })
 
+    // Stimulus disconnects and connects back to back when an element is removed and re-inserted in one batch; the
+    // aborted request's rejection then arrives after the new connection has set up its own state.
+    describe("when the controller reconnects before an aborted request settles", () => {
+      const abortError = new DOMException("Aborted", "AbortError")
+
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        const controller = application.getControllerForElementAndIdentifier(document.querySelector("[data-controller]"), "protocol-autosave")
+        controller.disconnect()
+        controller.connect()
+        toggle().click()
+      })
+
+      it("does not count the aborted save as a failure", async () => {
+        await edit("game[notes]", "Late start")
+        replies[0].reject(abortError)
+        await settle()
+        await answer(1, { ok: true })
+
+        expect(status().textContent).toBe("Saved")
+      })
+
+      it("ignores a failed reply that arrives for the aborted request", async () => {
+        await edit("game[notes]", "Late start")
+        await answer(0, { ok: false })
+        await answer(1, { ok: true })
+
+        expect(status().textContent).toBe("Saved")
+      })
+
+      it("keeps waiting for the new request of the same field", async () => {
+        await edit("game[name]", "Quarterfinal")
+        replies[0].reject(abortError)
+        await settle()
+        await edit("game[name]", "Final")
+
+        expect(sent().map((body) => body.value)).toEqual([ "Semifinal", "Quarterfinal" ])
+      })
+    })
+
     describe("when seats change the same field back to back", () => {
       beforeEach(async () => {
         document.querySelector("form").insertAdjacentHTML("beforeend",

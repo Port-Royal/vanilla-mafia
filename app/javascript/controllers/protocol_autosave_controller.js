@@ -133,13 +133,13 @@ export default class extends Controller {
         signal: controller.signal
       })
 
-      this.recordResult(key, response.ok)
+      if (!controller.signal.aborted) this.recordResult(key, response.ok)
     } catch {
-      this.recordResult(key, false)
-    } finally {
-      this.requests.delete(key)
+      if (!controller.signal.aborted) this.recordResult(key, false)
     }
-    // Aborted on disconnect: nothing to show, and a waiting value is dropped.
+    // Aborted on disconnect: nothing to record or show, and a waiting value is dropped. A reconnect may already have
+    // started a new request for this field, so only this request's own entry is removed.
+    if (this.requests.get(key) === controller) this.requests.delete(key)
     if (controller.signal.aborted) return
 
     this.sendWaitingValue(key)
