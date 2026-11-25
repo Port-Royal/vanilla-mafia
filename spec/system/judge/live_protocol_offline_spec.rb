@@ -7,7 +7,6 @@ RSpec.describe "Live protocol send queue" do
   let(:game) { create(:game) }
   let!(:seats) { (1..10).map { |seat| create(:game_participation, game:, seat:, role_code: nil) } }
 
-  let(:press) { ->(*keys) { keys.each { |key| find("body").send_keys(key) } } }
   let(:saved_text) { I18n.t("live_protocols.screen.connection.saved") }
   let(:cut_connection) { -> { page.execute_script("window.realFetch = window.fetch; window.fetch = () => Promise.reject(new TypeError('offline'))") } }
   let(:restore_connection) { -> { page.execute_script("window.fetch = window.realFetch") } }
@@ -17,9 +16,9 @@ RSpec.describe "Live protocol send queue" do
     sign_in admin
     visit live_judge_protocol_path(game)
     expect(page).to have_css("#lp-work")
-    press.call("1", "2", "3", "4", :enter)
+    press_keys("1", "2", "3", "4", :return)
     expect(page).to have_css("[data-seat='1'] [data-role='don']")
-    press.call(:enter)
+    press_keys(:return)
     expect(page).to have_css(".lp-seat--speaking", text: "1")
     expect(page).to have_css(".lp-status", exact_text: saved_text)
   end
@@ -29,7 +28,7 @@ RSpec.describe "Live protocol send queue" do
   end
 
   it "comes back to the same stage after a reload" do
-    press.call("n", "5")
+    press_keys("n", "5")
     expect(page).to have_css(".lp-chip", text: "5")
     expect(page).to have_css(".lp-status", exact_text: saved_text)
     visit live_judge_protocol_path(game)
@@ -37,7 +36,7 @@ RSpec.describe "Live protocol send queue" do
   end
 
   it "keeps the order of quick actions on the server" do
-    press.call("n", "5", :space, "n", "6", :space, "n", "7")
+    press_keys("n", "5", :space, "n", "6", :space, "n", "7")
     expect(page).to have_css(".lp-chip", count: 3)
     expect(page).to have_css(".lp-status", exact_text: saved_text)
     expect(game.game_protocol_events.order(:position).where(kind: "nominate").map { |event| event.target_seats.first }).to eq([ 5, 6, 7 ])
@@ -45,7 +44,7 @@ RSpec.describe "Live protocol send queue" do
 
   it "shows the loss of connection and catches up" do
     cut_connection.call
-    press.call("n", "5")
+    press_keys("n", "5")
     expect(page).to have_css(".lp-status--bad", text: I18n.t("live_protocols.screen.connection.offline"))
     restore_connection.call
     expect(page).to have_css(".lp-status", exact_text: saved_text, wait: 10)
@@ -54,7 +53,7 @@ RSpec.describe "Live protocol send queue" do
 
   it "keeps unsent events through a reload with no doubles" do
     cut_connection.call
-    press.call("n", "5")
+    press_keys("n", "5")
     expect(page).to have_css(".lp-status--bad")
     visit live_judge_protocol_path(game)
     expect(page).to have_css(".lp-chip", count: 1, text: "5")
@@ -64,9 +63,9 @@ RSpec.describe "Live protocol send queue" do
 
   it "does not ask the server to delete what it never received" do
     cut_connection.call
-    press.call("n", "5", :space)
+    press_keys("n", "5", :space)
     expect(page).to have_css(".lp-seat--speaking", text: "2")
-    find("body").send_keys([ :control, "z" ])
+    press_keys([ :control, "z" ])
     expect(page).to have_css(".lp-seat--speaking", text: "1")
     restore_connection.call
     expect(page).to have_css(".lp-status", exact_text: saved_text, wait: 10)
@@ -74,8 +73,8 @@ RSpec.describe "Live protocol send queue" do
   end
 
   it "undoes on the server and returns the roles" do
-    find("body").send_keys([ :control, "z" ])
-    find("body").send_keys([ :control, "z" ])
+    press_keys([ :control, "z" ])
+    press_keys([ :control, "z" ])
     expect(page).to have_text(I18n.t("live_protocols.screen.roles.title"))
     expect(page).to have_css(".lp-status", exact_text: saved_text)
     expect([ journal_kinds.call, seats.first.reload.role_code ]).to eq([ [], nil ])
@@ -83,7 +82,7 @@ RSpec.describe "Live protocol send queue" do
 
   it "stops and says so when the server refuses" do
     page.execute_script("window.fetch = () => Promise.resolve(new Response('{}', { status: 422 }))")
-    press.call("n", "5")
+    press_keys("n", "5")
     expect(page).to have_css(".lp-status--bad", text: I18n.t("live_protocols.screen.connection.rejected"))
   end
 end
