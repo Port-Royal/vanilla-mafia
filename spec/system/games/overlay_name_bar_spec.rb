@@ -41,6 +41,8 @@ RSpec.describe "Game overlay name bar" do
         return {
           seat: Number(tile.dataset.seat),
           size: parseFloat(style.fontSize) / tileWidth,
+          fit: name.style.getPropertyValue("--overlay-name-fit"),
+          padding: [style.paddingLeft, style.paddingRight].map((padding) => parseFloat(padding) / tileWidth),
           barHeight: height(".overlay-bottom") / tileWidth,
           nameHeight: height(".overlay-name") / tileWidth,
           seatHeight: height(".overlay-seat") / tileWidth,
@@ -58,6 +60,15 @@ RSpec.describe "Game overlay name bar" do
     page.document.synchronize do
       current = bars
       raise Capybara::ExpectationNotMet, "nicknames are not fitted yet" if current.dig(2, "size") >= base_ratio - 0.002
+
+      current
+    end
+  end
+
+  def refitted_bars
+    page.document.synchronize do
+      current = bars
+      raise Capybara::ExpectationNotMet, "nicknames are not refitted yet" if current.values.any? { |bar| bar["fit"] == stale_fit }
 
       current
     end
@@ -95,6 +106,10 @@ RSpec.describe "Game overlay name bar" do
       expect(fitted[5].values_at("overflowing", "ellipsis")).to eq([ true, true ])
     end
 
+    it "keeps the same side padding for every nickname, whatever its size" do
+      expect(fitted.values.map { |bar| bar["padding"] }).to all(match([ be_within(0.0005).of(fitted.dig(1, "padding", 0)) ] * 2))
+    end
+
     it "keeps every name bar at one height, whatever the nickname" do
       expect(fitted.values.map { |bar| bar["barHeight"] }).to all(be_within(0.002).of(0.185))
     end
@@ -124,11 +139,18 @@ RSpec.describe "Game overlay name bar" do
     end
   end
 
+  # Fit factors scale with the tile width, so the ones chosen at 1920×1080 would still pass at 1280×720. Each name gets
+  # a factor the fitting never picks before the resize; only a refit on resize replaces it.
   context "when the browser source is resized" do
     let(:viewport_size) { [ 1920, 1080 ] }
+    let(:stale_fit) { "0.3" }
+    let(:fitted) { refitted_bars }
 
     before do
       settled_bars
+      page.execute_script(<<~JS, stale_fit)
+        document.querySelectorAll(".overlay-name").forEach((name) => name.style.setProperty("--overlay-name-fit", arguments[0]))
+      JS
       resize_to(1280, 720)
     end
 

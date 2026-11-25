@@ -448,10 +448,12 @@
   /* The nickname reads on stream: a size up from the canvas text, still in em off the tile width.
      The game-overlay controller sets --overlay-name-fit to shrink a long name until it fits on one
      line; one too long even at its minimum truncates. The line box fills the bar, so any size sits
-     in its middle, and the seat cell stretches to the bar and centres its number. */
+     in its middle, and the seat cell stretches to the bar and centres its number. The side padding
+     divides the fit back out, so a shrunk name starts at the same place as a full-size one. */
   .overlay-name {
     font-size: calc(1.32em * var(--overlay-name-fit, 1));
     line-height: var(--overlay-bar-height);
+    padding-inline: calc(0.4em / var(--overlay-name-fit, 1));
   }
 
   .overlay-seat {
