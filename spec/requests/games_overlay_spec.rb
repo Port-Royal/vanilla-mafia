@@ -112,6 +112,10 @@ RSpec.describe "Games#overlay" do
             "data-game-overlay-target" => "gameNumber", "data-number" => "3", "data-total" => "8"
           )
         end
+
+        it "keeps the tournament for live updates" do
+          expect(document.at_css("#overlay-tournament")["data-game-overlay-target"]).to eq("tournament")
+        end
       end
 
       context "when the table number and the judge are blank" do

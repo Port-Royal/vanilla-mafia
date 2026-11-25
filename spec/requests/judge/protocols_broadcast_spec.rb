@@ -29,6 +29,18 @@ RSpec.describe "GameProtocol broadcasting" do
       end
     end
 
+    context "when changing the competition" do
+      let_it_be(:other_competition) { create(:competition, :series, name: "Кубок Зимы") }
+
+      it "broadcasts the competition name for the overlay" do
+        expect {
+          patch autosave_judge_protocol_path(game), params: { scope: "game", field: "competition_id", value: other_competition.id.to_s }, as: :json
+        }.to have_broadcasted_to(game).from_channel(GameProtocolChannel).with(
+          { scope: "game", field: "competition", value: "Кубок Зимы" }
+        )
+      end
+    end
+
     context "when switching a display setting" do
       it "broadcasts the update to the game channel" do
         expect {

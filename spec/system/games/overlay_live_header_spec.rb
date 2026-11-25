@@ -57,6 +57,15 @@ RSpec.describe "Game overlay live header" do
     end
   end
 
+  context "when the competition changes" do
+    let(:payloads) { [ { scope: "game", field: "competition", value: "Кубок Зимы" } ] }
+
+    it "shows the new tournament without reload" do
+      expect(page).to have_css("#overlay-tournament", text: "Кубок Зимы")
+      expect(shown_rows).to eq([ %w[Стол 1], %w[Игра 3], [ "Турнир", "Кубок Зимы" ], %w[Судья Кузнецов] ])
+    end
+  end
+
   context "when the total is set" do
     let(:payloads) { [ { scope: "game", field: "games_total", value: "8" } ] }
 
