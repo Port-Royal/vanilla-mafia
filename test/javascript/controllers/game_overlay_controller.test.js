@@ -373,10 +373,16 @@ describe("GameOverlayController fouls", () => {
     document.body.innerHTML = ""
   })
 
-  it("draws a pip per foul and a mark per technical foul", () => {
+  it("draws a foul bar per foul, then a tech bar per technical foul", () => {
     controller.handleUpdate({ scope: "fouls", fouls: { 4: { fouls: 2, tech: 1 } } })
 
     expect(pips(4)).toEqual(["overlay-foul", "overlay-foul", "overlay-tech"])
+  })
+
+  it("draws only tech bars for a seat with technical fouls alone", () => {
+    controller.handleUpdate({ scope: "fouls", fouls: { 3: { fouls: 0, tech: 2 } } })
+
+    expect(pips(3)).toEqual(["overlay-tech", "overlay-tech"])
   })
 
   it("clears a seat that is no longer listed", () => {

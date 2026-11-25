@@ -344,31 +344,35 @@
     display: none;
   }
 
-  /* Fouls as yellow pips, technical fouls as red diamonds, centred on the top edge; the status icon takes the top-right corner. */
+  /* Fouls as red bars, technical fouls as grey bars after them, in the top-left corner; the status icon takes the
+     top-right corner. The extra margin on the first grey bar after a red one keeps the two groups apart. */
   .overlay-fouls {
     position: absolute;
-    top: 0.5em;
-    left: 50%;
+    top: 0.55em;
+    left: 0.5em;
     display: flex;
     gap: 0.2em;
-    translate: -50% 0;
   }
 
   .overlay-foul,
   .overlay-tech {
-    width: 0.55em;
-    height: 0.55em;
-    box-shadow: 0 0 0.15em rgb(0 0 0 / 0.9);
+    width: 0.3em;
+    height: 1.1em;
+    border: 0.05em solid rgb(0 0 0 / 0.85);
+    border-radius: 0.06em;
+    box-shadow: 0 0 0.2em rgb(0 0 0 / 0.9);
   }
 
   .overlay-foul {
-    border-radius: 50%;
-    background: #facc15;
+    background: #dc2626;
   }
 
   .overlay-tech {
-    background: #dc2626;
-    rotate: 45deg;
+    background: #b8b8b8;
+  }
+
+  .overlay-foul + .overlay-tech {
+    margin-left: 0.35em;
   }
 
   .overlay-best-move {

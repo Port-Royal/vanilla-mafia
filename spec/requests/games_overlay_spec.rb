@@ -504,7 +504,7 @@ RSpec.describe "Games#overlay" do
       get overlay_game_path(fouled_game)
     end
 
-    it "shows a pip per foul and a mark per technical foul" do
+    it "shows a red bar per foul, then a grey bar per technical foul" do
       expect(pips.(3)).to eq(%w[overlay-foul overlay-foul overlay-tech])
     end
 

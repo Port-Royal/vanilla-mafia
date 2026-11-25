@@ -207,7 +207,7 @@ export default class extends Controller {
     return TEAMS[this.seatRoles[seat]] || "neutral"
   }
 
-  // Mirrors GamesHelper#overlay_foul_pips. A seat missing from the list has no sanctions left.
+  // Red foul bars, then grey tech bars. Mirrors GamesHelper#overlay_foul_pips. A seat missing from the list has no sanctions left.
   renderFouls(fouls) {
     this.foulsTargets.forEach((target) => {
       const count = fouls[target.dataset.seat] || { fouls: 0, tech: 0 }
