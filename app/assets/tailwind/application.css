@@ -185,6 +185,17 @@
     padding: var(--overlay-pad);
     overflow: hidden;
     font-size: calc(var(--overlay-tile-width) * 0.1);
+
+    /* A semi-transparent dark plate that keeps text readable over light and dark stream backgrounds. */
+    --overlay-backing-colour: rgb(0 0 0 / 0.55);
+    --overlay-backing-padding: 0.3em 0.55em;
+    --overlay-backing-radius: 0.3em;
+  }
+
+  .overlay-backing {
+    background: var(--overlay-backing-colour);
+    padding: var(--overlay-backing-padding);
+    border-radius: var(--overlay-backing-radius);
   }
 
   .overlay-header {
@@ -208,6 +219,15 @@
     column-gap: 0.6em;
     row-gap: 0.15em;
     justify-self: end;
+    font-size: 1.2em;
+  }
+
+  /*
+   * No shown row, no backing. A row is out when it is [hidden] (no value) or a display setting
+   * hides it, so the setting selectors below are repeated here; :has() follows both live.
+   */
+  .overlay-info:not(:has(> .overlay-info-row:not([hidden], .overlay-canvas--hide-game-info #overlay-game-row, .overlay-canvas--hide-table-info #overlay-table-row))) {
+    display: none;
   }
 
   .overlay-info-row {
