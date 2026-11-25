@@ -11,16 +11,17 @@ export default class extends Controller {
 
   connect() {
     this.active = false
-    this.pendingRequest = null
     this.debounceTimers = {}
+    // One request in flight per field; a value changed meanwhile waits and is sent when it finishes.
+    this.requests = new Map()
+    this.waitingValues = new Map()
+    this.failedFields = new Set()
   }
 
   disconnect() {
     Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer))
     clearTimeout(this.savedTimer)
-    if (this.pendingRequest) {
-      this.pendingRequest.abort()
-    }
+    this.requests.forEach(request => request.abort())
   }
 
   toggle() {
@@ -50,9 +51,13 @@ export default class extends Controller {
     const fieldInfo = this.parseFieldInfo(input)
     if (!fieldInfo) return
 
-    const key = `${fieldInfo.scope}-${fieldInfo.seat || ""}-${fieldInfo.field}`
+    const key = this.fieldKey(fieldInfo)
     clearTimeout(this.debounceTimers[key])
     this.debounceTimers[key] = setTimeout(() => this.save(fieldInfo), 500)
+  }
+
+  fieldKey(fieldInfo) {
+    return `${fieldInfo.scope}-${fieldInfo.seat || ""}-${fieldInfo.field}`
   }
 
   parseFieldInfo(input) {
@@ -93,9 +98,18 @@ export default class extends Controller {
       .map((element) => element.value)
   }
 
-  async save(fieldInfo) {
+  save(fieldInfo) {
     this.showStatus("saving")
 
+    const key = this.fieldKey(fieldInfo)
+    if (this.requests.has(key)) {
+      this.waitingValues.set(key, fieldInfo)
+    } else {
+      this.send(key, fieldInfo)
+    }
+  }
+
+  async send(key, fieldInfo) {
     const body = {
       scope: fieldInfo.scope,
       field: fieldInfo.field,
@@ -105,12 +119,8 @@ export default class extends Controller {
       body.seat = fieldInfo.seat
     }
 
-    if (this.pendingRequest) {
-      this.pendingRequest.abort()
-    }
-
     const controller = new AbortController()
-    this.pendingRequest = controller
+    this.requests.set(key, controller)
 
     try {
       const response = await fetch(this.urlValue, {
@@ -123,17 +133,33 @@ export default class extends Controller {
         signal: controller.signal
       })
 
-      if (response.ok) {
-        this.showStatus("saved")
-      } else {
-        this.showStatus("error")
-      }
-    } catch (error) {
-      if (error.name !== "AbortError") {
-        this.showStatus("error")
-      }
+      this.recordResult(key, response.ok)
+    } catch {
+      this.recordResult(key, false)
     } finally {
-      this.pendingRequest = null
+      this.requests.delete(key)
+    }
+    // Aborted on disconnect: nothing to show, and a waiting value is dropped.
+    if (controller.signal.aborted) return
+
+    this.sendWaitingValue(key)
+  }
+
+  recordResult(key, ok) {
+    if (ok) {
+      this.failedFields.delete(key)
+    } else {
+      this.failedFields.add(key)
+    }
+  }
+
+  sendWaitingValue(key) {
+    const waiting = this.waitingValues.get(key)
+    if (waiting) {
+      this.waitingValues.delete(key)
+      this.send(key, waiting)
+    } else if (this.requests.size === 0) {
+      this.showStatus(this.failedFields.size > 0 ? "error" : "saved")
     }
   }
 

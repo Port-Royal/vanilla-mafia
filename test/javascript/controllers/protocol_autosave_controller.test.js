@@ -189,6 +189,204 @@ describe("ProtocolAutosaveController", () => {
     })
   })
 
+  describe("with requests answered by hand", () => {
+    let fetchMock
+    let replies
+
+    const field = (name) => document.querySelector(`[name='${name}']`)
+    const edit = async (name, value) => {
+      field(name).value = value
+      field(name).dispatchEvent(new Event("change", { bubbles: true }))
+      await Promise.resolve()
+    }
+    const sent = () => fetchMock.mock.calls.map(([, options]) => JSON.parse(options.body))
+    const signals = () => fetchMock.mock.calls.map(([, options]) => options.signal)
+    const answer = async (index, reply) => {
+      replies[index].resolve(reply)
+      await settle()
+    }
+
+    beforeEach(() => {
+      replies = []
+      fetchMock = vi.fn(() => new Promise((resolve, reject) => replies.push({ resolve, reject })))
+      vi.stubGlobal("fetch", fetchMock)
+      document.querySelector("form").insertAdjacentHTML("beforeend", '<input name="game[notes]" value="">')
+      toggle().click()
+    })
+
+    describe("when two fields change back to back", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[notes]", "Late start")
+      })
+
+      it("sends both fields", () => {
+        expect(sent()).toEqual([
+          { scope: "game", field: "name", value: "Semifinal" },
+          { scope: "game", field: "notes", value: "Late start" }
+        ])
+      })
+
+      it("does not abort the first request", () => {
+        expect(signals()[0].aborted).toBe(false)
+      })
+
+      it("keeps the saving text while the second request is in flight", async () => {
+        await answer(0, { ok: true })
+
+        expect(status().textContent).toBe("Saving")
+      })
+
+      it("shows the saved text once both are saved", async () => {
+        await answer(1, { ok: true })
+        await answer(0, { ok: true })
+
+        expect(status().textContent).toBe("Saved")
+      })
+
+      it("shows the error text when the first fails after the second is saved", async () => {
+        await answer(1, { ok: true })
+        await answer(0, { ok: false })
+
+        expect(status().textContent).toBe("Failed")
+      })
+
+      it("keeps the error text when the second is saved after the first failed", async () => {
+        await answer(0, { ok: false })
+        await answer(1, { ok: true })
+
+        expect(status().textContent).toBe("Failed")
+      })
+
+      it("shows the error text when the first fails on the network", async () => {
+        replies[0].reject(new TypeError("Failed to fetch"))
+        await settle()
+        await answer(1, { ok: true })
+
+        expect(status().textContent).toBe("Failed")
+      })
+    })
+
+    describe("when a field that failed is saved again", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[notes]", "Late start")
+        await answer(0, { ok: false })
+        await answer(1, { ok: true })
+        await edit("game[name]", "Final")
+        await answer(2, { ok: true })
+      })
+
+      it("shows the saved text", () => {
+        expect(status().textContent).toBe("Saved")
+      })
+    })
+
+    describe("when one field changes again while its save is in flight", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[name]", "Quarterfinal")
+        await edit("game[name]", "Final")
+      })
+
+      it("waits for the request in flight", () => {
+        expect(sent()).toEqual([{ scope: "game", field: "name", value: "Semifinal" }])
+      })
+
+      it("does not abort the request in flight", () => {
+        expect(signals()[0].aborted).toBe(false)
+      })
+
+      it("then sends only the latest value", async () => {
+        await answer(0, { ok: true })
+
+        expect(sent()).toEqual([
+          { scope: "game", field: "name", value: "Semifinal" },
+          { scope: "game", field: "name", value: "Final" }
+        ])
+      })
+
+      it("keeps the saving text until the latest value is saved", async () => {
+        await answer(0, { ok: true })
+
+        expect(status().textContent).toBe("Saving")
+      })
+
+      it("shows the saved text once the latest value is saved", async () => {
+        await answer(0, { ok: true })
+        await answer(1, { ok: true })
+
+        expect(status().textContent).toBe("Saved")
+      })
+
+      it("sends the latest value even if the earlier one failed", async () => {
+        await answer(0, { ok: false })
+
+        expect(sent()[1]).toEqual({ scope: "game", field: "name", value: "Final" })
+      })
+
+      it("sends nothing more after the latest value", async () => {
+        await answer(0, { ok: true })
+        await answer(1, { ok: true })
+
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    describe("when the controller disconnects with saves in flight", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[name]", "Final")
+        await edit("game[notes]", "Late start")
+        document.querySelector("[data-controller]").removeAttribute("data-controller")
+        await settle()
+      })
+
+      it("aborts every request in flight", () => {
+        expect(signals().map((signal) => signal.aborted)).toEqual([true, true])
+      })
+
+      it("does not send the waiting value", async () => {
+        const abortError = new DOMException("Aborted", "AbortError")
+        replies.forEach((reply) => reply.reject(abortError))
+        await settle()
+
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    describe("when the controller disconnects just as a reply arrives", () => {
+      beforeEach(async () => {
+        await edit("game[name]", "Semifinal")
+        await edit("game[name]", "Final")
+        const element = document.querySelector("[data-controller]")
+        replies[0].resolve({ ok: true })
+        application.getControllerForElementAndIdentifier(element, "protocol-autosave").disconnect()
+        await settle()
+      })
+
+      it("does not send the waiting value", () => {
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe("when seats change the same field back to back", () => {
+      beforeEach(async () => {
+        document.querySelector("form").insertAdjacentHTML("beforeend",
+          '<input name="participations[1][plus]" value=""><input name="participations[2][plus]" value="">')
+        await edit("participations[1][plus]", "0.5")
+        await edit("participations[2][plus]", "1")
+      })
+
+      it("sends both seats", () => {
+        expect(sent()).toEqual([
+          { scope: "participation", seat: "1", field: "plus", value: "0.5" },
+          { scope: "participation", seat: "2", field: "plus", value: "1" }
+        ])
+      })
+    })
+  })
+
   describe("on a field kept out of autosave", () => {
     let fetchMock
 
