@@ -19,6 +19,14 @@ RSpec.describe KeyboardHelpers do
     end
   end
 
+  context "with :enter" do
+    before { press_keys(:enter) }
+
+    it "presses the numpad Enter, not the main one" do
+      expect(keydowns).to eq([ [ "NumpadEnter", false, false ] ])
+    end
+  end
+
   context "with a chord" do
     before { press_keys([ :shift, "d" ], [ :control, "z" ]) }
 

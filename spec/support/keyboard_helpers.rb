@@ -11,14 +11,14 @@ module KeyboardHelpers
   def press_keys(*keys)
     keys.each do |key|
       action = page.driver.browser.action
-      key.is_a?(Array) ? chord(action, key) : action.send_keys(key)
+      key.is_a?(Array) ? press_chord(action, key) : action.send_keys(key)
       action.perform
     end
   end
 
   private
 
-  def chord(action, keys)
+  def press_chord(action, keys)
     modifiers, rest = keys.partition { |key| MODIFIERS.include?(key) }
     modifiers.each { |modifier| action.key_down(modifier) }
     action.send_keys(*rest)
