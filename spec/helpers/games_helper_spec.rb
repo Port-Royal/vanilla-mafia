@@ -126,7 +126,7 @@ RSpec.describe GamesHelper do
         it "marks the icon with its status, sizing and accessibility attributes" do
           expect(icon.to_h).to include(
             "data-status" => status_key.to_s,
-            "class" => "h-full w-full drop-shadow",
+            "class" => "h-full w-full",
             "aria-hidden" => "true"
           )
         end

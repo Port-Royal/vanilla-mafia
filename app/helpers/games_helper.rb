@@ -32,7 +32,7 @@ module GamesHelper
   def overlay_status_icon(status)
     return unless overlay_eliminated?(status)
 
-    overlay_inline_svg(OVERLAY_STATUS_ICONS_DIR.join("#{status}.svg"), "class" => "h-full w-full drop-shadow", "data-status" => status)
+    overlay_inline_svg(OVERLAY_STATUS_ICONS_DIR.join("#{status}.svg"), "class" => "h-full w-full", "data-status" => status)
   end
 
   # The icon of a night block row (shots, don, sheriff); the row's title names it.
